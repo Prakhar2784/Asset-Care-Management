@@ -1,43 +1,58 @@
-// backend/controllers/dashboardController.js
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
+const DeviceRequest = require('../models/DeviceRequest');
 
-// @desc    Get dashboard analytics and statistics
 // @route   GET /api/dashboard/stats
-// @access  Private (Admin / HOD)
+// @access  Admin / HOD
 const getDashboardStats = async (req, res) => {
   try {
-    // 1. Get total counts
-    const totalAssets = await Asset.countDocuments();
-    const totalTickets = await Ticket.countDocuments();
+    const now = new Date();
+    const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    // 2. Get ticket breakdowns by status
-    const pendingTickets = await Ticket.countDocuments({ status: 'Pending Approval' });
-    const activeRepairs = await Ticket.countDocuments({ 
-      status: { $in: ['Vendor Assigned', 'Under Repair'] } 
-    });
-    const resolvedTickets = await Ticket.countDocuments({ status: 'Resolved' });
+    const [
+      totalAssets,
+      totalTickets,
+      pendingTickets,
+      activeRepairs,
+      resolvedTickets,
+      warrantyExpiringSoon,
+      pendingRequests,
+      recentTickets,
+      departmentBreakdown
+    ] = await Promise.all([
+      Asset.countDocuments(),
+      Ticket.countDocuments(),
+      Ticket.countDocuments({ status: 'Pending Approval' }),
+      Ticket.countDocuments({ status: { $in: ['Vendor Assigned', 'Under Repair'] } }),
+      Ticket.countDocuments({ status: 'Resolved' }),
+      Asset.countDocuments({ warrantyEnd: { $gte: now, $lte: in30Days } }),
+      DeviceRequest.countDocuments({ status: 'Pending' }),
+      Ticket.find({})
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('asset', 'name department')
+        .populate('raisedBy', 'name'),
+      Asset.aggregate([
+        { $group: { _id: '$department', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 6 }
+      ])
+    ]);
 
-    // 3. Get the 5 most recent tickets for the activity feed
-    const recentTickets = await Ticket.find({})
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .limit(5)
-      .populate('asset', 'name ticketId');
-
-    // 4. Send the aggregated data back to the frontend
     res.status(200).json({
       totalAssets,
       totalTickets,
       pendingTickets,
       activeRepairs,
       resolvedTickets,
-      recentTickets
+      warrantyExpiringSoon,
+      pendingRequests,
+      recentTickets,
+      departmentBreakdown
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = {
-  getDashboardStats
-};
+module.exports = { getDashboardStats };

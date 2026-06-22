@@ -1,9 +1,7 @@
-// backend/controllers/ticketController.js
 const Ticket = require('../models/Ticket');
 
-// @desc    Raise a new breakdown ticket
 // @route   POST /api/tickets
-// @access  Private
+// @access  Private (any logged-in user)
 const createTicket = async (req, res) => {
   try {
     const { issue, priority, assetId } = req.body;
@@ -14,16 +12,16 @@ const createTicket = async (req, res) => {
     let autoApprover = null;
 
     if (req.user.role === 'admin' || req.user.role === 'hod') {
-      initialStatus = 'Vendor Assigned'; 
-      autoApprover = req.user._id;       
+      initialStatus = 'Vendor Assigned';
+      autoApprover = req.user._id;
     }
 
     const ticket = await Ticket.create({
       ticketId,
       issue,
-      priority,
+      priority: priority || 'Medium',
       asset: assetId,
-      raisedBy: req.user._id, 
+      raisedBy: req.user._id,
       status: initialStatus,
       approvedBy: autoApprover
     });
@@ -34,59 +32,85 @@ const createTicket = async (req, res) => {
   }
 };
 
-// @desc    Get all tickets
 // @route   GET /api/tickets
-// @access  Private (Admin / HOD)
+// @access  Admin / HOD
 const getTickets = async (req, res) => {
   try {
     const tickets = await Ticket.find({})
       .populate('asset', 'name serialNumber department')
       .populate('raisedBy', 'name department role')
-      .populate('approvedBy', 'name'); 
-    
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 });
+
     res.status(200).json(tickets);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Update ticket status
+// @route   GET /api/tickets/mytickets
+// @access  Employee (own tickets only)
+const getMyTickets = async (req, res) => {
+  try {
+    const tickets = await Ticket.find({ raisedBy: req.user._id })
+      .populate('asset', 'name serialNumber department')
+      .populate('approvedBy', 'name')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(tickets);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @route   PUT /api/tickets/:id/status
-// @access  Private (Admin / HOD)
+// @access  Admin / HOD
 const updateTicketStatus = async (req, res) => {
   try {
     const { status, estimatedCost } = req.body;
-    
+
     const ticket = await Ticket.findById(req.params.id);
-    if (!ticket) {
-      return res.status(404).json({ message: 'Ticket not found' });
-    }
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
     ticket.status = status;
-    if (estimatedCost) ticket.estimatedCost = estimatedCost;
-    
-    if (status === 'Vendor Assigned' || status === 'Under Repair') {
+    if (estimatedCost !== undefined) ticket.estimatedCost = estimatedCost;
+
+    if (['Vendor Assigned', 'Under Repair'].includes(status)) {
       ticket.approvedBy = req.user._id;
     }
 
-    const updatedTicket = await ticket.save();
-    res.status(200).json(updatedTicket);
+    const updated = await ticket.save();
+    res.status(200).json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 };
 
-// NEW: @desc    Delete a ticket
+// @route   PUT /api/tickets/:id/priority
+// @access  Admin / HOD
+const updateTicketPriority = async (req, res) => {
+  try {
+    const { priority } = req.body;
+
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+    ticket.priority = priority;
+    const updated = await ticket.save();
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 // @route   DELETE /api/tickets/:id
-// @access  Private (Admin only)
+// @access  Admin
 const deleteTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id);
-    if (!ticket) {
-      return res.status(404).json({ message: 'Ticket not found' });
-    }
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
-    await ticket.deleteOne(); // Removes the ticket from MongoDB
+    await ticket.deleteOne();
     res.status(200).json({ message: 'Ticket removed successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -96,6 +120,8 @@ const deleteTicket = async (req, res) => {
 module.exports = {
   createTicket,
   getTickets,
+  getMyTickets,
   updateTicketStatus,
-  deleteTicket // Export the new function
+  updateTicketPriority,
+  deleteTicket
 };
