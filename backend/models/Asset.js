@@ -10,17 +10,25 @@ const assetSchema = new mongoose.Schema({
 
   // Lifecycle Data
   procurementDate: { type: Date },
+  purchaseCost: { type: Number },
   warrantyStart: { type: Date },
   warrantyEnd: { type: Date },
   supportPhone: { type: String },
   supportEmail: { type: String },
+
+  // AMC (Annual Maintenance Contract)
+  amcVendor: { type: String },
+  amcStart: { type: Date },
+  amcEnd: { type: Date },
+  amcCost: { type: Number },
+  amcContact: { type: String },
 
   // Deployment Data
   department: { type: String, required: true },
   location: { type: String },
   status: {
     type: String,
-    enum: ['Active', 'In Transit', 'Under Repair', 'Scrap'],
+    enum: ['Active', 'In Transit', 'Under Repair', 'Decommissioned', 'In Storage', 'Scrap'],
     default: 'Active'
   },
 
@@ -44,7 +52,12 @@ const assetSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
-  }
+  },
+
+  // Warranty alert tracking
+  warrantyAlertSent30: { type: Boolean, default: false },
+  warrantyAlertSent15: { type: Boolean, default: false },
+  warrantyAlertSent7: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Asset', assetSchema);

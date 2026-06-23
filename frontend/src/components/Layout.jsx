@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AppBar, Avatar, Badge, Box, Button, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery } from "@mui/material";
-import { ApartmentRounded, ApprovalRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded } from "@mui/icons-material";
+import { ApartmentRounded, ApprovalRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded, HistoryRounded, AssessmentRounded } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../api/axios";
 
 const drawerWidth = 280;
 
@@ -13,6 +14,8 @@ const adminMenu = [
   { text: "Approvals", path: "/admin/approvals", icon: <ApprovalRounded /> },
   { text: "Vendors", path: "/admin/vendors", icon: <BusinessRounded /> },
   { text: "Departments", path: "/admin/departments", icon: <ApartmentRounded /> },
+  { text: "Reports", path: "/admin/reports", icon: <AssessmentRounded /> },
+  { text: "Audit Logs", path: "/admin/audit", icon: <HistoryRounded /> },
 ];
 
 const employeeMenu = [
@@ -46,7 +49,7 @@ const Sidebar = ({ onClose }) => {
           </Box>
           <Box>
             <Typography fontSize={20} fontWeight={800} letterSpacing="-0.5px">AssetCare</Typography>
-            <Typography fontSize={12} color="#0ea5e9" fontWeight={700} texttransform="uppercase" letterSpacing="0.5px">
+            <Typography fontSize={12} color="#0ea5e9" fontWeight={700} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
               {currentUser?.role === "admin" ? "Admin Access" : "Employee Portal"}
             </Typography>
           </Box>
@@ -69,7 +72,10 @@ const Sidebar = ({ onClose }) => {
               }}
             >
               <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} primarytypographyprops={{ fontWeight: active ? 700 : 600, fontSize: 15 }} />
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{ fontWeight: active ? 700 : 600, fontSize: 15 }}
+              />
             </ListItemButton>
           );
         })}
@@ -87,11 +93,30 @@ const Sidebar = ({ onClose }) => {
 const Layout = () => {
   const isMobile = useMediaQuery("(max-width:900px)");
   const [open, setOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const userName = currentUser?.name || "User";
   const userRole = currentUser?.role === "admin" ? "Root Access" : "Standard User";
   const userInitials = userName.substring(0, 2).toUpperCase();
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const { data } = await api.get('/notifications/unread-count');
+      setUnreadCount(data.count);
+    } catch {
+      // silently ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser, fetchUnreadCount]);
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: "#f8fafc" }}>
@@ -113,8 +138,11 @@ const Layout = () => {
             {isMobile && <IconButton onClick={() => setOpen(true)} sx={{ mr: 2, color: "#0f172a" }}><MenuRounded /></IconButton>}
 
             <Box ml="auto" display="flex" alignItems="center" gap={3}>
-              <IconButton sx={{ color: "#64748b", "&:hover": { color: "#4f46e5", bgcolor: "#eef2ff" } }}>
-                <Badge badgeContent={currentUser?.role === "admin" ? 3 : 1} color="error">
+              <IconButton
+                onClick={() => navigate('/notifications')}
+                sx={{ color: "#64748b", "&:hover": { color: "#4f46e5", bgcolor: "#eef2ff" } }}
+              >
+                <Badge badgeContent={unreadCount || null} color="error">
                   <NotificationsRounded />
                 </Badge>
               </IconButton>
@@ -126,11 +154,10 @@ const Layout = () => {
             </Box>
           </Toolbar>
         </AppBar>
-        
-        {/* Main Content Area with subtle fade-in animation */}
-        <Box 
-          sx={{ 
-            p: { xs: 3, md: 5 }, 
+
+        <Box
+          sx={{
+            p: { xs: 3, md: 5 },
             flex: 1,
             animation: "fadeIn 0.6s ease-out forwards",
             "@keyframes fadeIn": { from: { opacity: 0, transform: "translateY(10px)" }, to: { opacity: 1, transform: "translateY(0)" } }

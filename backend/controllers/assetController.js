@@ -1,10 +1,12 @@
 const Asset = require('../models/Asset');
+const { audit } = require('../services/auditService');
 
 // @route   POST /api/assets
 // @access  Admin
 const createAsset = async (req, res) => {
   try {
     const asset = await Asset.create(req.body);
+    audit({ req, action: 'asset_created', entity: 'asset', entityId: asset._id, entityLabel: asset.name });
     res.status(201).json(asset);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -45,6 +47,7 @@ const updateAsset = async (req, res) => {
       new: true,
       runValidators: true
     });
+    audit({ req, action: 'asset_updated', entity: 'asset', entityId: asset._id, entityLabel: asset.name, changes: req.body });
     res.status(200).json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -58,6 +61,7 @@ const deleteAsset = async (req, res) => {
     const asset = await Asset.findById(req.params.id);
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
 
+    audit({ req, action: 'asset_deleted', entity: 'asset', entityId: asset._id, entityLabel: asset.name });
     await asset.deleteOne();
     res.status(200).json({ message: 'Asset deleted successfully' });
   } catch (error) {

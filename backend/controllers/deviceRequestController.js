@@ -1,4 +1,11 @@
 const DeviceRequest = require('../models/DeviceRequest');
+const User = require('../models/User');
+const {
+  sendApprovalApprovedEmail,
+  sendApprovalRejectedEmail
+} = require('../services/emailService');
+const { createNotification } = require('../services/notificationService');
+const { audit } = require('../services/auditService');
 
 // @route   POST /api/device-requests
 // @access  Employee
@@ -65,7 +72,9 @@ const reviewRequest = async (req, res) => {
       return res.status(400).json({ message: 'Status must be Approved or Rejected' });
     }
 
-    const request = await DeviceRequest.findById(req.params.id);
+    const request = await DeviceRequest.findById(req.params.id)
+      .populate('raisedBy', 'name email department');
+
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
     if (request.status !== 'Pending') {
@@ -78,6 +87,32 @@ const reviewRequest = async (req, res) => {
     request.reviewedAt = new Date();
 
     const updated = await request.save();
+
+    audit({ req, action: `request_${status.toLowerCase()}`, entity: 'device_request', entityId: request._id, entityLabel: request.requestId, changes: { status, adminRemarks: request.adminRemarks } });
+
+    // Email + notification
+    if (request.raisedBy) {
+      if (status === 'Approved') {
+        sendApprovalApprovedEmail(request.raisedBy, request).catch(() => {});
+        createNotification({
+          userId: request.raisedBy._id,
+          type: 'request_approved',
+          title: 'Device Request Approved',
+          message: `Your request for "${request.itemRequested}" (${request.requestId}) has been approved.`,
+          link: '/employee/portal'
+        });
+      } else {
+        sendApprovalRejectedEmail(request.raisedBy, request).catch(() => {});
+        createNotification({
+          userId: request.raisedBy._id,
+          type: 'request_rejected',
+          title: 'Device Request Rejected',
+          message: `Your request for "${request.itemRequested}" (${request.requestId}) was not approved.${request.adminRemarks ? ' Reason: ' + request.adminRemarks : ''}`,
+          link: '/employee/portal'
+        });
+      }
+    }
+
     res.status(200).json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });

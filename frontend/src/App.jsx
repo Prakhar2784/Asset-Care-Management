@@ -17,18 +17,23 @@ import Modules from "./pages/public/Modules";
 import Workflow from "./pages/public/Workflow";
 import Contact from "./pages/public/Contact";
 import AuthPage from "./pages/auth/AuthPage";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // Import Admin Pages
-import AdminDashboard from "./pages/admin/AdminDashboard"; 
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import Assets from "./pages/admin/Assets";
 import AddAsset from "./pages/admin/AddAsset";
 import Approvals from "./pages/admin/Approvals";
 import Vendors from "./pages/admin/Vendors";
 import Departments from "./pages/admin/Departments";
+import AuditLogs from "./pages/admin/AuditLogs";
+import Reports from "./pages/admin/Reports";
 
 // Import Employee & Shared Pages
 import EmployeePortal from "./pages/employee/EmployeePortal";
 import Tickets from "./pages/shared/Tickets";
+import Notifications from "./pages/shared/Notifications";
 
 const WebsiteLayout = ({ children }) => (
   <>
@@ -49,6 +54,8 @@ function App() {
         <Route path="/workflow" element={<WebsiteLayout><Workflow /></WebsiteLayout>} />
         <Route path="/contact" element={<WebsiteLayout><Contact /></WebsiteLayout>} />
         <Route path="/login" element={<WebsiteLayout><AuthPage /></WebsiteLayout>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* SECURE ROUTES - Must be logged in */}
         <Route element={<ProtectedRoute />}>
@@ -59,6 +66,7 @@ function App() {
             
             {/* Shared Route (Both roles use this to see tickets) */}
             <Route path="/tickets" element={<Tickets />} />
+            <Route path="/notifications" element={<Notifications />} />
 
             {/* ADMIN ONLY ROUTES - Role must be "admin" */}
             <Route element={<AdminRoute />}>
@@ -68,6 +76,8 @@ function App() {
               <Route path="/admin/approvals" element={<Approvals />} />
               <Route path="/admin/vendors" element={<Vendors />} />
               <Route path="/admin/departments" element={<Departments />} />
+              <Route path="/admin/audit" element={<AuditLogs />} />
+              <Route path="/admin/reports" element={<Reports />} />
             </Route>
 
           </Route>

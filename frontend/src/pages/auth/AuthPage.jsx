@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../../api/axios";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
@@ -108,7 +109,8 @@ const AuthPage = () => {
         }
       } 
       else if (view === "forgot") {
-        alert("Password reset protocol initiated. Check your email!");
+        await api.post('/auth/forgot-password', { email: formData.email });
+        alert("If that email is registered, a reset link has been sent. Check your inbox.");
         handleViewChange("login");
       }
     } catch (err) {

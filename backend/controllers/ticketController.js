@@ -1,4 +1,12 @@
 const Ticket = require('../models/Ticket');
+const User = require('../models/User');
+const {
+  sendTicketCreatedEmail,
+  sendTicketStatusEmail,
+  sendTicketResolvedEmail
+} = require('../services/emailService');
+const { createNotification } = require('../services/notificationService');
+const { audit } = require('../services/auditService');
 
 // @route   POST /api/tickets
 // @access  Private (any logged-in user)
@@ -26,7 +34,22 @@ const createTicket = async (req, res) => {
       approvedBy: autoApprover
     });
 
-    res.status(201).json(ticket);
+    const populated = await Ticket.findById(ticket._id)
+      .populate('asset', 'name serialNumber department')
+      .populate('raisedBy', 'name email department');
+
+    // Fire-and-forget email + notification + audit
+    sendTicketCreatedEmail(populated.raisedBy, populated, populated.asset).catch(() => {});
+    audit({ req, action: 'ticket_created', entity: 'ticket', entityId: ticket._id, entityLabel: ticketId });
+    createNotification({
+      userId: req.user._id,
+      type: 'ticket_created',
+      title: 'Ticket Raised',
+      message: `Your ticket ${ticketId} has been submitted${initialStatus === 'Vendor Assigned' ? ' and auto-approved' : ' and is pending approval'}.`,
+      link: '/tickets'
+    });
+
+    res.status(201).json(populated);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -69,9 +92,13 @@ const updateTicketStatus = async (req, res) => {
   try {
     const { status, estimatedCost } = req.body;
 
-    const ticket = await Ticket.findById(req.params.id);
+    const ticket = await Ticket.findById(req.params.id)
+      .populate('raisedBy', 'name email department')
+      .populate('asset', 'name serialNumber department');
+
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
+    const oldStatus = ticket.status;
     ticket.status = status;
     if (estimatedCost !== undefined) ticket.estimatedCost = estimatedCost;
 
@@ -80,6 +107,32 @@ const updateTicketStatus = async (req, res) => {
     }
 
     const updated = await ticket.save();
+
+    audit({ req, action: 'ticket_status_changed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId, changes: { from: oldStatus, to: status } });
+
+    // Email + notification to ticket raiser
+    if (ticket.raisedBy) {
+      if (status === 'Resolved') {
+        sendTicketResolvedEmail(ticket.raisedBy, ticket, ticket.asset).catch(() => {});
+        createNotification({
+          userId: ticket.raisedBy._id,
+          type: 'ticket_resolved',
+          title: 'Ticket Resolved',
+          message: `Your ticket ${ticket.ticketId} has been marked as Resolved.`,
+          link: '/tickets'
+        });
+      } else if (status !== oldStatus) {
+        sendTicketStatusEmail(ticket.raisedBy, ticket, ticket.asset, oldStatus).catch(() => {});
+        createNotification({
+          userId: ticket.raisedBy._id,
+          type: 'ticket_status',
+          title: 'Ticket Status Updated',
+          message: `Your ticket ${ticket.ticketId} status changed from ${oldStatus} to ${status}.`,
+          link: '/tickets'
+        });
+      }
+    }
+
     res.status(200).json(updated);
   } catch (error) {
     res.status(400).json({ message: error.message });

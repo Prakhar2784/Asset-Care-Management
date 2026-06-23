@@ -15,17 +15,23 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  role: { 
-    type: String, 
-    enum: ['admin', 'employee', 'hod'], 
-    default: 'employee' 
+  role: {
+    type: String,
+    enum: ['admin', 'employee', 'hod', 'vendor', 'it_support', 'super_admin'],
+    default: 'employee'
   },
-  department: { 
-    type: String, 
-    required: true 
-  }
-}, { 
-  timestamps: true // Automatically creates 'createdAt' and 'updatedAt'
+  department: {
+    type: String,
+    required: true
+  },
+  phone: { type: String },
+  isActive: { type: Boolean, default: true },
+
+  // Password reset
+  passwordResetToken: { type: String, default: null },
+  passwordResetExpiry: { type: Date, default: null }
+}, {
+  timestamps: true
 });
 
 // Pre-save middleware to hash the password before saving to the DB

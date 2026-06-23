@@ -10,6 +10,10 @@ dotenv.config();
 // Connect to Database
 connectDB();
 
+// Start background jobs
+const { startWarrantyScheduler } = require('./jobs/warrantyScheduler');
+startWarrantyScheduler();
+
 const app = express();
 
 // Middleware
@@ -26,6 +30,9 @@ app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/vendors", require("./routes/vendorRoutes"));
 app.use("/api/departments", require("./routes/departmentRoutes"));
 app.use("/api/asset-assignments", require("./routes/assetAssignmentRoutes"));
+app.use("/api/notifications", require("./routes/notificationRoutes"));
+app.use("/api/audit", require("./routes/auditRoutes"));
+app.use("/api/reports", require("./routes/reportRoutes"));
 
 // Basic Health Check
 app.get("/", (req, res) => {
