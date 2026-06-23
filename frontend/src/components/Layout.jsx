@@ -138,6 +138,11 @@ const Layout = () => {
             {isMobile && <IconButton onClick={() => setOpen(true)} sx={{ mr: 2, color: "#0f172a" }}><MenuRounded /></IconButton>}
 
             <Box ml="auto" display="flex" alignItems="center" gap={3}>
+              <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right" }}>
+                <Typography fontWeight={700} fontSize={15} color="#0f172a">{userName}</Typography>
+                <Typography fontSize={13} color="#64748b" fontWeight={500}>{userRole}</Typography>
+              </Box>
+              <Avatar sx={{ bgcolor: "#eef2ff", color: "#4f46e5", fontWeight: 800 }}>{userInitials}</Avatar>
               <IconButton
                 onClick={() => navigate('/notifications')}
                 sx={{ color: "#64748b", "&:hover": { color: "#4f46e5", bgcolor: "#eef2ff" } }}
@@ -146,11 +151,6 @@ const Layout = () => {
                   <NotificationsRounded />
                 </Badge>
               </IconButton>
-              <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right" }}>
-                <Typography fontWeight={700} fontSize={15} color="#0f172a">{userName}</Typography>
-                <Typography fontSize={13} color="#64748b" fontWeight={500}>{userRole}</Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: "#eef2ff", color: "#4f46e5", fontWeight: 800 }}>{userInitials}</Avatar>
             </Box>
           </Toolbar>
         </AppBar>

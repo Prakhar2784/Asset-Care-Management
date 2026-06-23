@@ -23,6 +23,37 @@ const timeStr = (date) => {
     ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 };
 
+const formatChanges = (changes) => {
+  if (!changes || typeof changes !== 'object') return null;
+  const entries = Object.entries(changes);
+  if (entries.length === 0) return null;
+
+  // Status transition: { from: "X", to: "Y" }
+  if ('from' in changes && 'to' in changes) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+        <Typography fontSize={12} fontWeight={600} sx={{ color: '#dc2626', textDecoration: 'line-through' }}>{changes.from}</Typography>
+        <Typography fontSize={12} color="#94a3b8">→</Typography>
+        <Typography fontSize={12} fontWeight={700} color="#16a34a">{changes.to}</Typography>
+      </Box>
+    );
+  }
+
+  // Generic key-value pairs
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
+      {entries.map(([key, val]) => (
+        <Typography key={key} fontSize={12} color="#334155">
+          <span style={{ fontWeight: 700, color: '#64748b', textTransform: 'capitalize' }}>
+            {key.replace(/([A-Z])/g, ' $1').trim()}:
+          </span>{' '}
+          {String(val)}
+        </Typography>
+      ))}
+    </Box>
+  );
+};
+
 export default function AuditLogs() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -156,12 +187,8 @@ export default function AuditLogs() {
                       <Chip label={log.entity} size="small" variant="outlined" sx={{ fontSize: 11, height: 20 }} />
                     </TableCell>
                     <TableCell sx={{ fontSize: 13 }}>{log.entityLabel || log.entityId || '—'}</TableCell>
-                    <TableCell sx={{ fontSize: 12, color: '#64748b', maxWidth: 240 }}>
-                      {log.changes
-                        ? <Typography fontSize={11} sx={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                            {JSON.stringify(log.changes, null, 1)}
-                          </Typography>
-                        : '—'}
+                    <TableCell sx={{ fontSize: 12, maxWidth: 240 }}>
+                      {formatChanges(log.changes) ?? '—'}
                     </TableCell>
                   </TableRow>
                 ))}
