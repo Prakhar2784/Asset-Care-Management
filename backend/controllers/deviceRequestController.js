@@ -62,6 +62,19 @@ const getMyRequests = async (req, res) => {
   }
 };
 
+// @route   GET /api/device-requests/my-approved
+// @access  Employee (own approved requests)
+const getMyApprovedRequests = async (req, res) => {
+  try {
+    const requests = await DeviceRequest.find({ raisedBy: req.user._id, status: 'Approved' })
+      .populate('relatedAsset', 'name serialNumber')
+      .sort({ updatedAt: -1 });
+    res.status(200).json(requests);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @route   PUT /api/device-requests/:id/review
 // @access  Admin
 const reviewRequest = async (req, res) => {
@@ -133,4 +146,4 @@ const deleteRequest = async (req, res) => {
   }
 };
 
-module.exports = { createRequest, getAllRequests, getMyRequests, reviewRequest, deleteRequest };
+module.exports = { createRequest, getAllRequests, getMyRequests, getMyApprovedRequests, reviewRequest, deleteRequest };

@@ -69,6 +69,19 @@ const deleteAsset = async (req, res) => {
   }
 };
 
+// @route   GET /api/assets/all-active
+// @access  Any logged-in user (for ticket raising)
+const getActiveAssets = async (req, res) => {
+  try {
+    const assets = await Asset.find({ status: { $nin: ['Scrap', 'Decommissioned'] } })
+      .select('name serialNumber category department location status')
+      .sort({ name: 1 });
+    res.status(200).json(assets);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @route   GET /api/assets/myassets
 // @access  Employee (logged-in user)
 const getMyAssets = async (req, res) => {
@@ -85,4 +98,4 @@ const getMyAssets = async (req, res) => {
   }
 };
 
-module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, getMyAssets };
+module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, getMyAssets, getActiveAssets };

@@ -64,7 +64,7 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
 </html>`;
 
 // ─── Send Email Utility ────────────────────────────────────────────────────────
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, text }) => {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log(`[EMAIL SKIPPED] No SMTP config. Would send to: ${to} | Subject: ${subject}`);
     return;
@@ -73,9 +73,11 @@ const sendEmail = async ({ to, subject, html }) => {
     const transporter = createTransporter();
     await transporter.sendMail({
       from: `"AssetCare Pro" <${process.env.SMTP_USER}>`,
+      replyTo: process.env.SMTP_USER,
       to,
       subject,
-      html
+      html,
+      text: text || subject
     });
     console.log(`[EMAIL SENT] To: ${to} | Subject: ${subject}`);
   } catch (err) {
@@ -107,7 +109,8 @@ const sendPasswordResetEmail = async (user, resetUrl) => {
     </p>`;
   await sendEmail({
     to: user.email,
-    subject: '🔐 Reset Your AssetCare Pro Password',
+    subject: 'Reset Your AssetCare Pro Password',
+    text: `Hello ${user.name}, click this link to reset your password: ${body.match(/href="([^"]+)"/)?.[1] || ''}. This link expires in 15 minutes.`,
     html: baseTemplate('Password Reset Request', body, 'This link expires in 15 minutes and can only be used once.')
   });
 };
@@ -129,7 +132,8 @@ const sendTicketCreatedEmail = async (user, ticket, asset) => {
     <p style="font-size:13px;color:#64748b;">You will receive updates as your ticket progresses through the service workflow.</p>`;
   await sendEmail({
     to: user.email,
-    subject: `🎫 Ticket Raised — ${ticket.ticketId}`,
+    subject: `Ticket Raised: ${ticket.ticketId}`,
+    text: `Hello ${user.name}, your ticket ${ticket.ticketId} has been submitted and is pending approval. Issue: ${ticket.issue}. Priority: ${ticket.priority}.`,
     html: baseTemplate('Ticket Raised Successfully', body)
   });
 };
@@ -154,7 +158,8 @@ const sendTicketStatusEmail = async (user, ticket, asset, oldStatus) => {
     </div>`;
   await sendEmail({
     to: user.email,
-    subject: `📋 Ticket Update — ${ticket.ticketId} is now ${ticket.status}`,
+    subject: `Ticket Update: ${ticket.ticketId} is now ${ticket.status}`,
+    text: `Hello ${user.name}, your ticket ${ticket.ticketId} status has changed from ${oldStatus} to ${ticket.status}.`,
     html: baseTemplate('Ticket Status Updated', body)
   });
 };
@@ -176,7 +181,8 @@ const sendTicketResolvedEmail = async (user, ticket, asset) => {
     <p style="font-size:13px;color:#64748b;">If you continue to experience issues, please raise a new ticket from your employee portal.</p>`;
   await sendEmail({
     to: user.email,
-    subject: `✅ Ticket Resolved — ${ticket.ticketId}`,
+    subject: `Ticket Resolved: ${ticket.ticketId}`,
+    text: `Hello ${user.name}, your ticket ${ticket.ticketId} has been resolved. Issue: ${ticket.issue}. If you continue to experience issues, please raise a new ticket.`,
     html: baseTemplate('Your Issue Has Been Resolved', body)
   });
 };
@@ -198,7 +204,8 @@ const sendAssetAssignedEmail = async (user, asset) => {
     <p style="font-size:13px;color:#64748b;">You are responsible for the safe use and maintenance of this asset. Report any issues immediately.</p>`;
   await sendEmail({
     to: user.email,
-    subject: `🖥️ Asset Assigned — ${asset.name}`,
+    subject: `Asset Assigned: ${asset.name}`,
+    text: `Hello ${user.name}, a new asset has been assigned to you. Asset: ${asset.name} (${asset.serialNumber}), Department: ${asset.department}.`,
     html: baseTemplate('Asset Assigned to You', body)
   });
 };
@@ -218,7 +225,8 @@ const sendAssetRevokedEmail = async (user, asset) => {
     </div>`;
   await sendEmail({
     to: user.email,
-    subject: `⚠️ Asset Revoked — ${asset.name}`,
+    subject: `Asset Revoked: ${asset.name} - Action Required`,
+    text: `Hello ${user.name}, the asset ${asset.name} (${asset.serialNumber}) has been revoked from your account. Please return it to the IT department at the earliest.`,
     html: baseTemplate('Asset Revoked from Your Account', body)
   });
 };
@@ -240,7 +248,8 @@ const sendApprovalApprovedEmail = async (user, request) => {
     <p style="font-size:13px;color:#64748b;">The procurement process will now begin. You will be notified when the asset is ready for assignment.</p>`;
   await sendEmail({
     to: user.email,
-    subject: `✅ Request Approved — ${request.requestId}`,
+    subject: `Request Approved: ${request.requestId}`,
+    text: `Hello ${user.name}, your device request ${request.requestId} for ${request.itemRequested} has been approved. The procurement process will now begin.`,
     html: baseTemplate('Your Request Has Been Approved', body)
   });
 };
@@ -261,7 +270,8 @@ const sendApprovalRejectedEmail = async (user, request) => {
     <p style="font-size:13px;color:#64748b;">If you believe this is incorrect, please contact your department head or raise a new request with additional justification.</p>`;
   await sendEmail({
     to: user.email,
-    subject: `❌ Request Rejected — ${request.requestId}`,
+    subject: `Request Update: ${request.requestId} was not approved`,
+    text: `Hello ${user.name}, your device request ${request.requestId} for ${request.itemRequested} was not approved. ${request.adminRemarks ? 'Reason: ' + request.adminRemarks : ''}`,
     html: baseTemplate('Your Request Was Rejected', body)
   });
 };
@@ -283,7 +293,8 @@ const sendWarrantyExpiryEmail = async (adminEmail, asset, daysLeft) => {
     <p style="font-size:13px;color:#64748b;">Please take action to renew the AMC or arrange replacement before expiry.</p>`;
   await sendEmail({
     to: adminEmail,
-    subject: `⏰ Warranty Expiring in ${daysLeft} Days — ${asset.name}`,
+    subject: `Warranty Alert: ${asset.name} expires in ${daysLeft} days`,
+    text: `Warranty expiry alert: Asset ${asset.name} (${asset.serialNumber}) in department ${asset.department} has ${daysLeft} days left on warranty. Warranty end date: ${new Date(asset.warrantyEnd).toLocaleDateString()}.`,
     html: baseTemplate(`Warranty Expiry Alert`, body, 'Automated warranty monitoring — AssetCare Pro')
   });
 };
@@ -305,7 +316,8 @@ const sendWelcomeEmail = async (user, tempPassword) => {
     ${tempPassword ? '<p style="font-size:13px;color:#dc2626;font-weight:700;">⚠️ Please change your password after your first login.</p>' : ''}`;
   await sendEmail({
     to: user.email,
-    subject: '👋 Welcome to AssetCare Pro',
+    subject: 'Welcome to AssetCare Pro - Your Account is Ready',
+    text: `Hello ${user.name}, welcome to AssetCare Pro! Your account has been created. Email: ${user.email}, Role: ${user.role}, Department: ${user.department}.${tempPassword ? ' Temporary password: ' + tempPassword + ' - Please change it after your first login.' : ''}`,
     html: baseTemplate('Welcome to AssetCare Pro', body)
   });
 };

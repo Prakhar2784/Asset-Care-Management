@@ -3,35 +3,34 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
 import App from "./App";
-import "./index.css"; // Your custom True Dark CSS
+import "./index.css";
 
-// Define the True Dark Theme for Material-UI components
-const darkTheme = createTheme({
+const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     background: {
-      default: "#000000",
-      paper: "#0a0a0a",
+      default: "#f8fafc",
+      paper: "#ffffff",
     },
     primary: {
-      main: "#d4af37", // Professional Gold Accent
+      main: "#1E3A8A",
     },
     secondary: {
-      main: "#3b82f6", // Blue Accent
+      main: "#0F766E",
     },
     text: {
-      primary: "#ffffff",
-      secondary: "#a1a1aa",
+      primary: "#0f172a",
+      secondary: "#64748b",
     },
-    divider: "#27272a",
+    divider: "#e2e8f0",
     success: {
-      main: "#4ade80",
+      main: "#16a34a",
     },
     warning: {
-      main: "#facc15",
+      main: "#d97706",
     },
     error: {
-      main: "#f87171",
+      main: "#dc2626",
     },
   },
   typography: {
@@ -50,7 +49,29 @@ const darkTheme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundImage: "none", // Removes default MUI dark mode elevation overlay
+          backgroundImage: "none",
+        },
+      },
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#f8fafc",
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          color: "#0f172a",
+          fontWeight: 700,
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600,
         },
       },
     },
@@ -59,8 +80,7 @@ const darkTheme = createTheme({
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ThemeProvider theme={darkTheme}>
-      {/* CssBaseline kicks off an elegant, consistent, and simple baseline to build upon. */}
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <BrowserRouter>
         <App />

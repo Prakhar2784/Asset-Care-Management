@@ -50,6 +50,7 @@ const Tickets = () => {
 
   const [tickets, setTickets] = useState([]);
   const [assets, setAssets] = useState([]);
+  const [approvedRequests, setApprovedRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -57,7 +58,8 @@ const Tickets = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const [formData, setFormData] = useState({ assetId: "", issue: "", priority: "Medium" });
+  // selectedItem: combined value like "asset:ID" or "dreq:ID:label"
+  const [formData, setFormData] = useState({ selectedItem: "", issue: "", priority: "Medium" });
 
   useEffect(() => {
     fetchData();
@@ -67,12 +69,15 @@ const Tickets = () => {
     setLoading(true);
     try {
       const isEmployee = currentUser?.role === 'employee';
-      const [ticketsRes, assetsRes] = await Promise.all([
+      const requests = [
         api.get(isEmployee ? '/tickets/mytickets' : '/tickets'),
-        api.get(isEmployee ? '/assets/myassets' : '/assets')
-      ]);
+        api.get(isEmployee ? '/assets/all-active' : '/assets'),
+      ];
+      if (isEmployee) requests.push(api.get('/device-requests/my-approved'));
+      const [ticketsRes, assetsRes, dreqRes] = await Promise.all(requests);
       setTickets(ticketsRes.data);
       setAssets(assetsRes.data);
+      if (dreqRes) setApprovedRequests(dreqRes.data);
     } catch (err) {
       console.error("Failed to fetch data:", err);
       setError("Failed to load breakdown tickets. Please verify your connection.");
@@ -83,9 +88,10 @@ const Tickets = () => {
 
   const filteredTickets = useMemo(() => {
     return tickets.filter((ticket) => {
+      const itemName = ticket.asset?.name || ticket.itemLabel || ticket.deviceRequestRef?.itemRequested || '';
       const matchesSearch =
         ticket.ticketId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ticket.asset?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+        itemName.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "All" || ticket.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -98,10 +104,19 @@ const Tickets = () => {
     setSubmitting(true);
     setError(null);
     try {
-      await api.post('/tickets', formData);
+      const { selectedItem, issue, priority } = formData;
+      let payload = { issue, priority };
+      if (selectedItem.startsWith('asset:')) {
+        payload.assetId = selectedItem.replace('asset:', '');
+      } else if (selectedItem.startsWith('dreq:')) {
+        const [, id, ...labelParts] = selectedItem.split(':');
+        payload.deviceRequestId = id;
+        payload.itemLabel = labelParts.join(':');
+      }
+      await api.post('/tickets', payload);
       setSnackbarMessage("Ticket raised successfully.");
       setOpen(false);
-      setFormData({ assetId: "", issue: "", priority: "Medium" });
+      setFormData({ selectedItem: "", issue: "", priority: "Medium" });
       fetchData();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to submit ticket.");
@@ -315,7 +330,7 @@ const Tickets = () => {
                     </Box>
                     <Box>
                       <Typography color="black" fontSize={18} fontWeight={900} letterSpacing="-0.5px" sx={{ lineHeight: 1.2 }}>
-                        {ticket.asset?.name || "Unknown Asset"}
+                        {ticket.asset?.name || ticket.itemLabel || ticket.deviceRequestRef?.itemRequested || "Unknown Asset"}
                       </Typography>
                       <Typography color="black" fontSize={13} fontWeight={600}>
                         {ticket.ticketId} • {new Date(ticket.createdAt).toLocaleDateString()}
@@ -400,12 +415,31 @@ const Tickets = () => {
           <form onSubmit={handleSubmitTicket}>
             <Stack spacing={3}>
               <Box>
-                <Typography variant="caption" sx={{ fontWeight: 800, color: "#64748B", mb: 1, display: "block", textTransform: "uppercase" }}>Select Hardware Asset</Typography>
-                <TextField fullWidth select required sx={inputStyles} name="assetId" value={formData.assetId} onChange={handleInputChange}>
-                  {assets.length === 0 && <MenuItem disabled value="">No assets available</MenuItem>}
-                  {assets.map(asset => (
-                    <MenuItem key={asset._id} value={asset._id} sx={{ fontWeight: 600 }}>{asset.name} (SN: {asset.serialNumber})</MenuItem>
-                  ))}
+                <Typography variant="caption" sx={{ fontWeight: 800, color: "#64748B", mb: 1, display: "block", textTransform: "uppercase" }}>Select Asset / Approved Device</Typography>
+                <TextField fullWidth select required sx={inputStyles} name="selectedItem" value={formData.selectedItem} onChange={handleInputChange}>
+                  {assets.length === 0 && approvedRequests.length === 0 && (
+                    <MenuItem disabled value="">No assets available</MenuItem>
+                  )}
+                  {assets.length > 0 && [
+                    <MenuItem key="__assets_header" disabled sx={{ fontSize: "11px", fontWeight: 900, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.6px", pt: 1 }}>
+                      — Registered Assets —
+                    </MenuItem>,
+                    ...assets.map(asset => (
+                      <MenuItem key={asset._id} value={`asset:${asset._id}`} sx={{ fontWeight: 600 }}>
+                        {asset.name} <span style={{ color: "#94A3B8", marginLeft: 6 }}>(SN: {asset.serialNumber})</span>
+                      </MenuItem>
+                    ))
+                  ]}
+                  {approvedRequests.length > 0 && [
+                    <MenuItem key="__dreq_header" disabled sx={{ fontSize: "11px", fontWeight: 900, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.6px", pt: 1 }}>
+                      — Approved Device Requests —
+                    </MenuItem>,
+                    ...approvedRequests.map(req => (
+                      <MenuItem key={req._id} value={`dreq:${req._id}:${req.itemRequested}`} sx={{ fontWeight: 600 }}>
+                        {req.itemRequested} <span style={{ color: "#16A34A", marginLeft: 6, fontSize: "12px" }}>({req.requestId})</span>
+                      </MenuItem>
+                    ))
+                  ]}
                 </TextField>
               </Box>
               <Box>
@@ -464,7 +498,7 @@ const Tickets = () => {
                 <Box sx={{ width: 56, height: 56, borderRadius: "16px", background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}><TimelineRounded /></Box>
                 <Box sx={{ flex: 1 }}>
                   <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "#0F172A" }}>Ticket Timeline</Typography>
-                  <Typography sx={{ color: "#64748B", fontSize: "14px", fontWeight: 700, mt: 0.5 }}>{selectedTicket.ticketId} • {selectedTicket.asset?.name || "Unknown Asset"}</Typography>
+                  <Typography sx={{ color: "#64748B", fontSize: "14px", fontWeight: 700, mt: 0.5 }}>{selectedTicket.ticketId} • {selectedTicket.asset?.name || selectedTicket.itemLabel || selectedTicket.deviceRequestRef?.itemRequested || "Unknown Asset"}</Typography>
                 </Box>
                 <IconButton onClick={handleTimelineClose} sx={{ bgcolor: "#F1F5F9" }}><CloseRounded /></IconButton>
               </Box>
@@ -475,8 +509,8 @@ const Tickets = () => {
                 {[
                   ["Status", selectedTicket.status, getStatusColor(selectedTicket.status).color],
                   ["Priority", selectedTicket.priority, getPriorityColor(selectedTicket.priority).color],
-                  ["Department", selectedTicket.asset?.department || "N/A", "#0F172A"],
-                  ["Raised By", selectedTicket.raisedBy?.name || "System", "#0F172A"],
+                  ["Department", selectedTicket.asset?.department || selectedTicket.raisedBy?.department || "N/A", "#0F172A"],
+                  ["Raised By", selectedTicket.raisedBy?.name || currentUser?.name || "—", "#0F172A"],
                 ].map(([label, value, color]) => (
                   <Grid item xs={6} md={3} key={label}>
                     <Box sx={{ p: 2, borderRadius: "16px", bgcolor: "#F8FAFC", border: "1px solid #E2E8F0" }}>

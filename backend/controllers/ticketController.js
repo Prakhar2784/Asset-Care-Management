@@ -12,7 +12,11 @@ const { audit } = require('../services/auditService');
 // @access  Private (any logged-in user)
 const createTicket = async (req, res) => {
   try {
-    const { issue, priority, assetId } = req.body;
+    const { issue, priority, assetId, deviceRequestId, itemLabel } = req.body;
+
+    if (!assetId && !deviceRequestId) {
+      return res.status(400).json({ message: 'Either an asset or an approved device request must be selected.' });
+    }
 
     const ticketId = `SRV-${Math.floor(10000 + Math.random() * 90000)}`;
 
@@ -28,7 +32,9 @@ const createTicket = async (req, res) => {
       ticketId,
       issue,
       priority: priority || 'Medium',
-      asset: assetId,
+      asset: assetId || null,
+      deviceRequestRef: deviceRequestId || null,
+      itemLabel: itemLabel || null,
       raisedBy: req.user._id,
       status: initialStatus,
       approvedBy: autoApprover
@@ -36,10 +42,12 @@ const createTicket = async (req, res) => {
 
     const populated = await Ticket.findById(ticket._id)
       .populate('asset', 'name serialNumber department')
+      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name email department');
 
     // Fire-and-forget email + notification + audit
-    sendTicketCreatedEmail(populated.raisedBy, populated, populated.asset).catch(() => {});
+    sendTicketCreatedEmail(populated.raisedBy, populated, populated.asset)
+      .catch(err => console.error('[TICKET EMAIL ERROR] Created:', err.message));
     audit({ req, action: 'ticket_created', entity: 'ticket', entityId: ticket._id, entityLabel: ticketId });
     createNotification({
       userId: req.user._id,
@@ -61,6 +69,7 @@ const getTickets = async (req, res) => {
   try {
     const tickets = await Ticket.find({})
       .populate('asset', 'name serialNumber department')
+      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name department role')
       .populate('approvedBy', 'name')
       .sort({ createdAt: -1 });
@@ -77,6 +86,8 @@ const getMyTickets = async (req, res) => {
   try {
     const tickets = await Ticket.find({ raisedBy: req.user._id })
       .populate('asset', 'name serialNumber department')
+      .populate('deviceRequestRef', 'requestId itemRequested requestType')
+      .populate('raisedBy', 'name email department')
       .populate('approvedBy', 'name')
       .sort({ createdAt: -1 });
 
@@ -113,7 +124,8 @@ const updateTicketStatus = async (req, res) => {
     // Email + notification to ticket raiser
     if (ticket.raisedBy) {
       if (status === 'Resolved') {
-        sendTicketResolvedEmail(ticket.raisedBy, ticket, ticket.asset).catch(() => {});
+        sendTicketResolvedEmail(ticket.raisedBy, ticket, ticket.asset)
+          .catch(err => console.error('[TICKET EMAIL ERROR] Resolved:', err.message));
         createNotification({
           userId: ticket.raisedBy._id,
           type: 'ticket_resolved',
@@ -122,7 +134,8 @@ const updateTicketStatus = async (req, res) => {
           link: '/tickets'
         });
       } else if (status !== oldStatus) {
-        sendTicketStatusEmail(ticket.raisedBy, ticket, ticket.asset, oldStatus).catch(() => {});
+        sendTicketStatusEmail(ticket.raisedBy, ticket, ticket.asset, oldStatus)
+          .catch(err => console.error('[TICKET EMAIL ERROR] Status:', err.message));
         createNotification({
           userId: ticket.raisedBy._id,
           type: 'ticket_status',

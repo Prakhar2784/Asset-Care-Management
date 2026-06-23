@@ -26,20 +26,30 @@ const ticketSchema = new mongoose.Schema({
   },
   
   // References to other collections
-  asset: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Asset', 
-    required: true 
+  asset: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Asset',
+    default: null
   },
-  raisedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', 
-    required: true 
+  // Used when ticket is raised for an approved device request (not yet a formal asset)
+  deviceRequestRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DeviceRequest',
+    default: null
   },
-  approvedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  itemLabel: {
+    type: String,
+    default: null
+  },
+  raisedBy: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    default: null 
+    required: true
+  },
+  approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
   }
 }, { 
   timestamps: true 

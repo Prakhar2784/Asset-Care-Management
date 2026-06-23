@@ -4,6 +4,7 @@ const {
   createRequest,
   getAllRequests,
   getMyRequests,
+  getMyApprovedRequests,
   reviewRequest,
   deleteRequest
 } = require('../controllers/deviceRequestController');
@@ -11,6 +12,9 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 
 // Employee: view own requests
 router.get('/mine', protect, getMyRequests);
+
+// Employee: view own approved requests (for ticket raising)
+router.get('/my-approved', protect, getMyApprovedRequests);
 
 // Admin: view all requests
 router.route('/')

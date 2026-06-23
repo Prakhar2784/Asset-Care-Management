@@ -6,12 +6,14 @@ const {
   getAssetById,
   updateAsset,
   deleteAsset,
-  getMyAssets
+  getMyAssets,
+  getActiveAssets
 } = require('../controllers/assetController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // Must be before /:id to avoid route conflict
 router.get('/myassets', protect, getMyAssets);
+router.get('/all-active', protect, getActiveAssets);
 
 router.route('/')
   .get(protect, authorize('admin', 'hod'), getAssets)
