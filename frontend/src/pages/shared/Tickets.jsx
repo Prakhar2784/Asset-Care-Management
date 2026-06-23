@@ -67,17 +67,24 @@ const Tickets = () => {
 
   const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const isEmployee = currentUser?.role === 'employee';
-      const requests = [
+      const [ticketsRes, assetsRes] = await Promise.all([
         api.get(isEmployee ? '/tickets/mytickets' : '/tickets'),
         api.get(isEmployee ? '/assets/all-active' : '/assets'),
-      ];
-      if (isEmployee) requests.push(api.get('/device-requests/my-approved'));
-      const [ticketsRes, assetsRes, dreqRes] = await Promise.all(requests);
+      ]);
       setTickets(ticketsRes.data);
       setAssets(assetsRes.data);
-      if (dreqRes) setApprovedRequests(dreqRes.data);
+
+      if (isEmployee) {
+        try {
+          const dreqRes = await api.get('/device-requests/my-approved');
+          setApprovedRequests(dreqRes.data);
+        } catch {
+          setApprovedRequests([]);
+        }
+      }
     } catch (err) {
       console.error("Failed to fetch data:", err);
       setError("Failed to load breakdown tickets. Please verify your connection.");
