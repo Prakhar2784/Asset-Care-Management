@@ -67,11 +67,6 @@ const startWarrantyScheduler = () => {
   // Run daily at 8:00 AM
   cron.schedule('0 8 * * *', checkWarrantyExpiry, { timezone: 'Asia/Kolkata' });
   console.log('[WarrantyScheduler] Started — runs daily at 8:00 AM IST');
-
-  // Also run once immediately on startup in dev
-  if (process.env.NODE_ENV !== 'production') {
-    checkWarrantyExpiry();
-  }
 };
 
 module.exports = { startWarrantyScheduler, checkWarrantyExpiry };

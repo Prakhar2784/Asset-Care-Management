@@ -73,7 +73,12 @@ const deleteAsset = async (req, res) => {
 // @access  Employee (logged-in user)
 const getMyAssets = async (req, res) => {
   try {
-    const assets = await Asset.find({ assignedTo: req.user._id });
+    const assets = await Asset.find({
+      $or: [
+        { assignedTo: req.user._id },
+        { assignedEmployeeEmail: req.user.email }
+      ]
+    }).populate('assignedTo', 'name email department');
     res.status(200).json(assets);
   } catch (error) {
     res.status(500).json({ message: error.message });

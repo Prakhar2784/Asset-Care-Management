@@ -1,6 +1,7 @@
 const AssetAssignment = require("../models/AssetAssignment");
 const Asset = require("../models/Asset");
 const Department = require("../models/Department");
+const User = require("../models/User");
 
 const getAssignments = async (req, res) => {
   try {
@@ -82,6 +83,8 @@ const assignAsset = async (req, res) => {
       assignedBy: req.user?._id,
     });
 
+    const assignedUser = await User.findOne({ email: employeeEmail });
+
     await Asset.findByIdAndUpdate(asset, {
       assignedStatus: "Assigned",
       assignedDepartment: department,
@@ -89,6 +92,7 @@ const assignAsset = async (req, res) => {
       assignedEmployeeEmail: employeeEmail,
       assignedEmployeePhone: employeePhone,
       assignedDate: assignedDate || new Date(),
+      assignedTo: assignedUser ? assignedUser._id : null,
     });
 
     res.status(201).json(assignment);
@@ -115,6 +119,7 @@ const returnAsset = async (req, res) => {
       assignedEmployeeEmail: "",
       assignedEmployeePhone: "",
       assignedDate: null,
+      assignedTo: null,
     });
 
     res.status(200).json({ message: "Asset returned successfully." });

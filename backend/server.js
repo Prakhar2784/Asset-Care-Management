@@ -7,12 +7,11 @@ const connectDB = require("./config/db");
 // Load environment variables
 dotenv.config();
 
-// Connect to Database
-connectDB();
-
-// Start background jobs
+// Connect to Database, then start background jobs
 const { startWarrantyScheduler } = require('./jobs/warrantyScheduler');
-startWarrantyScheduler();
+connectDB().then(() => {
+  startWarrantyScheduler();
+});
 
 const app = express();
 

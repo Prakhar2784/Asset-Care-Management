@@ -71,9 +71,10 @@ const forgotPassword = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-    user.passwordResetToken = hashedToken;
-    user.passwordResetExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    await user.save({ validateBeforeSave: false });
+    await User.findByIdAndUpdate(user._id, {
+      passwordResetToken: hashedToken,
+      passwordResetExpiry: new Date(Date.now() + 15 * 60 * 1000)
+    });
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
@@ -108,11 +109,16 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'Reset link is invalid or has expired. Please request a new one.' });
     }
 
-    // Set new password — pre-save hook will hash it
-    user.password = password;
-    user.passwordResetToken = null;
-    user.passwordResetExpiry = null;
-    await user.save();
+    // Hash password manually (bypassing pre-save hook since we use findByIdAndUpdate)
+    const bcrypt = require('bcryptjs');
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(password, salt);
+
+    await User.findByIdAndUpdate(user._id, {
+      password: hashed,
+      passwordResetToken: null,
+      passwordResetExpiry: null
+    });
 
     res.status(200).json({ message: 'Password reset successful. You can now log in with your new password.' });
   } catch (error) {
