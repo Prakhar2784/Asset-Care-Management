@@ -31,10 +31,14 @@ const formatChanges = (changes) => {
   // Status transition: { from: "X", to: "Y" }
   if ('from' in changes && 'to' in changes) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-        <Typography fontSize={12} fontWeight={600} sx={{ color: '#dc2626', textDecoration: 'line-through' }}>{changes.from}</Typography>
-        <Typography fontSize={12} color="#94a3b8">→</Typography>
-        <Typography fontSize={12} fontWeight={700} color="#16a34a">{changes.to}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
+        <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
+          <Typography fontSize={11} fontWeight={600} color="#64748b">{changes.from}</Typography>
+        </Box>
+        <Typography fontSize={13} color="#94a3b8" fontWeight={700}>→</Typography>
+        <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: '#dcfce7', border: '1px solid #bbf7d0' }}>
+          <Typography fontSize={11} fontWeight={700} color="#16a34a">{changes.to}</Typography>
+        </Box>
       </Box>
     );
   }

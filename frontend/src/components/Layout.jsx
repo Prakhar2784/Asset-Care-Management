@@ -114,7 +114,14 @@ const Layout = () => {
     if (currentUser) {
       fetchUnreadCount();
       const interval = setInterval(fetchUnreadCount, 30000);
-      return () => clearInterval(interval);
+      // Re-fetch instantly when any notification action happens on the Notifications page
+      window.addEventListener('notifications-changed', fetchUnreadCount);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('notifications-changed', fetchUnreadCount);
+      };
+    } else {
+      setUnreadCount(0);
     }
   }, [currentUser, fetchUnreadCount]);
 
@@ -134,10 +141,12 @@ const Layout = () => {
 
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
         <AppBar position="sticky" elevation={0} sx={{ top: 0, bgcolor: "rgba(255, 255, 255, 0.8)", backdropFilter: "blur(16px)", borderBottom: "1px solid #e2e8f0", color: "#0f172a" }}>
-          <Toolbar sx={{ px: { xs: 2, md: 4 }, py: 1.5 }}>
-            {isMobile && <IconButton onClick={() => setOpen(true)} sx={{ mr: 2, color: "#0f172a" }}><MenuRounded /></IconButton>}
+          <Toolbar sx={{ px: { xs: 2, md: 4 }, py: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Box display="flex" alignItems="center">
+              {isMobile && <IconButton onClick={() => setOpen(true)} sx={{ mr: 2, color: "#0f172a" }}><MenuRounded /></IconButton>}
+            </Box>
 
-            <Box ml="auto" display="flex" alignItems="center" gap={3}>
+            <Box display="flex" alignItems="center" gap={2}>
               <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right" }}>
                 <Typography fontWeight={700} fontSize={15} color="#0f172a">{userName}</Typography>
                 <Typography fontSize={13} color="#64748b" fontWeight={500}>{userRole}</Typography>

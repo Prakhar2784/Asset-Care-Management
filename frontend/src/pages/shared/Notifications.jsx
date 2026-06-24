@@ -56,10 +56,13 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
+  const notifyBadge = () => window.dispatchEvent(new Event('notifications-changed'));
+
   const handleMarkRead = async (id) => {
     try {
       await api.put(`/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      notifyBadge();
     } catch {}
   };
 
@@ -67,6 +70,7 @@ export default function Notifications() {
     try {
       await api.put('/notifications/mark-all-read');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      notifyBadge();
     } catch {}
   };
 
@@ -74,6 +78,7 @@ export default function Notifications() {
     try {
       await api.delete(`/notifications/${id}`);
       setNotifications(prev => prev.filter(n => n._id !== id));
+      notifyBadge();
     } catch {}
   };
 
