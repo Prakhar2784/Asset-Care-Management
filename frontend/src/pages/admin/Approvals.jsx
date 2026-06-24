@@ -218,7 +218,7 @@ const Approvals = () => {
 
       <Tabs
         value={activeTab} onChange={(_, v) => setActiveTab(v)}
-        sx={{ mb: 3, "& .MuiTab-root": { fontWeight: 800, textTransform: "none", fontSize: "15px" }, "& .Mui-selected": { color: "#0F766E" }, "& .MuiTabs-indicator": { bgcolor: "#0F766E" } }}
+        sx={{ mb: 3, "& .MuiTab-root": { fontWeight: 800, textTransform: "none", fontSize: "15px" }, "& .Mui-selected": { color: "text.primary" }, "& .MuiTabs-indicator": { bgcolor: "#111111" } }}
       >
         <Tab icon={<BuildRounded fontSize="small" />} iconPosition="start" label={`Repair Tickets${ticketPendingCount > 0 ? ` (${ticketPendingCount} pending)` : ''}`} />
         <Tab icon={<DevicesRounded fontSize="small" />} iconPosition="start" label={`Device Requests${reqPendingCount > 0 ? ` (${reqPendingCount} pending)` : ''}`} />
@@ -237,8 +237,8 @@ const Approvals = () => {
               <CircularProgress sx={{ color: "#0F766E" }} />
             </Box>
           ) : tickets.length === 0 ? (
-            <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px", bgcolor: "#ffffff", border: "1px dashed #CBD5E1" }}>
-              <Typography color="#64748b" fontWeight={600} fontSize="16px">No repair tickets found in the system.</Typography>
+            <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider" }}>
+              <Typography color="text.secondary" fontWeight={600} fontSize="16px">No repair tickets found in the system.</Typography>
             </Paper>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}>
@@ -249,39 +249,39 @@ const Approvals = () => {
                 return (
                   <Paper key={item._id} sx={cardSx}>
                     <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", width: "100%", flex: 1 }}>
-                      <Avatar sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", width: 64, height: 64, fontWeight: 900, fontSize: "24px", boxShadow: "0 14px 28px rgba(15,118,110,0.22)" }}>
+                      <Avatar sx={{ bgcolor: "#111111", color: "#CBFA57", width: 64, height: 64, fontWeight: 900, fontSize: "24px" }}>
                         {item.raisedBy?.name?.charAt(0) || "S"}
                       </Avatar>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 1, flexWrap: "wrap" }}>
-                          <Typography sx={{ fontFamily: "monospace", fontSize: "14px", color: "#1E3A8A", fontWeight: 900 }}>{item.ticketId}</Typography>
+                          <Typography sx={{ fontFamily: "monospace", fontSize: "14px", color: "text.secondary", fontWeight: 900 }}>{item.ticketId}</Typography>
                           <StatusChip label={item.priority} />
                           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.6, px: 1.4, py: 0.55, borderRadius: "999px", bgcolor: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}`, fontSize: "12px", fontWeight: 900 }}>
                             {React.cloneElement(statusStyle.icon, { sx: { fontSize: 16 } })}
                             {displayStatus}
                           </Box>
                         </Box>
-                        <Typography sx={{ fontWeight: 800, color: "#0F172A", fontSize: { xs: "18px", md: "22px" }, letterSpacing: "-0.6px", lineHeight: 1.3 }}>
+                        <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: { xs: "18px", md: "22px" }, letterSpacing: "-0.6px", lineHeight: 1.3 }}>
                           {item.issue}
                         </Typography>
-                        <Typography sx={{ fontSize: "14px", color: "#64748B", mt: 0.8, fontWeight: 600, lineHeight: 1.6 }}>
+                        <Typography sx={{ fontSize: "14px", color: "text.secondary", mt: 0.8, fontWeight: 600, lineHeight: 1.6 }}>
                           {item.asset?.name || "Unknown Asset"} • {item.asset?.department || "N/A"} • Requested by{" "}
-                          <strong style={{ color: "#0F172A" }}>{item.raisedBy?.name || "System"}</strong>{" "}
+                          <strong>{item.raisedBy?.name || "System"}</strong>{" "}
                           on {new Date(item.createdAt).toLocaleDateString()}
                         </Typography>
                       </Box>
                     </Box>
                     <Box sx={{ display: "flex", gap: 2, alignItems: { xs: "stretch", sm: "center" }, flexWrap: "wrap", width: { xs: "100%", lg: "auto" }, justifyContent: { xs: "space-between", lg: "flex-end" } }}>
                       <Box sx={{ textAlign: { xs: "left", lg: "right" }, minWidth: { xs: "100%", sm: "120px" } }}>
-                        <Typography sx={{ fontSize: "12px", color: "#64748B", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.5px" }}>Est. Cost</Typography>
-                        <Typography sx={{ fontWeight: 900, color: "#0F172A", fontSize: "24px" }}>{item.estimatedCost ? `₹ ${item.estimatedCost.toLocaleString()}` : "—"}</Typography>
+                        <Typography sx={{ fontSize: "12px", color: "text.secondary", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.5px" }}>Est. Cost</Typography>
+                        <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "24px" }}>{item.estimatedCost ? `₹ ${item.estimatedCost.toLocaleString()}` : "—"}</Typography>
                       </Box>
                       <Button variant="outlined" startIcon={<CloseRounded />} disabled={isCompleted} onClick={() => handleTicketActionClick(item, "reject")}
                         sx={{ borderRadius: "14px", fontWeight: 900, textTransform: "none", px: 3, py: 1.15, color: "#DC2626", borderColor: "#FCA5A5", width: { xs: "100%", sm: "auto" }, "&:hover": { bgcolor: "#FEF2F2", borderColor: "#DC2626" } }}>
                         Reject
                       </Button>
                       <Button variant="contained" startIcon={<CheckRounded />} disabled={isCompleted} onClick={() => handleTicketActionClick(item, "authorize")}
-                        sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", borderRadius: "14px", px: 3, py: 1.15, width: { xs: "100%", sm: "auto" }, boxShadow: "0 14px 26px rgba(15,118,110,0.25)", "&:hover": { transform: "translateY(-2px)", background: "linear-gradient(135deg, #1D4ED8, #0D9488)" } }}>
+                        sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "14px", px: 3, py: 1.15, width: { xs: "100%", sm: "auto" }, "&:hover": { bgcolor: "#222222" } }}>
                         Authorize
                       </Button>
                     </Box>
@@ -306,8 +306,8 @@ const Approvals = () => {
               <CircularProgress sx={{ color: "#0F766E" }} />
             </Box>
           ) : deviceRequests.length === 0 ? (
-            <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px", bgcolor: "#ffffff", border: "1px dashed #CBD5E1" }}>
-              <Typography color="#64748b" fontWeight={600} fontSize="16px">No device requests found.</Typography>
+            <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider" }}>
+              <Typography color="text.secondary" fontWeight={600} fontSize="16px">No device requests found.</Typography>
             </Paper>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}>
@@ -317,25 +317,25 @@ const Approvals = () => {
                 return (
                   <Paper key={req._id} sx={cardSx}>
                     <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", width: "100%", flex: 1 }}>
-                      <Avatar sx={{ background: "linear-gradient(135deg, #4f46e5, #0ea5e9)", color: "#FFFFFF", width: 64, height: 64, fontWeight: 900, fontSize: "22px", boxShadow: "0 14px 28px rgba(79,70,229,0.22)" }}>
+                      <Avatar sx={{ bgcolor: "#111111", color: "#CBFA57", width: 64, height: 64, fontWeight: 900, fontSize: "22px" }}>
                         {req.raisedBy?.name?.charAt(0) || "E"}
                       </Avatar>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 1, flexWrap: "wrap" }}>
-                          <Typography sx={{ fontFamily: "monospace", fontSize: "14px", color: "#4f46e5", fontWeight: 900 }}>{req.requestId}</Typography>
-                          <Chip label={req.requestType} size="small" sx={{ bgcolor: "#EEF2FF", color: "#4338CA", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
+                          <Typography sx={{ fontFamily: "monospace", fontSize: "14px", color: "text.secondary", fontWeight: 900 }}>{req.requestId}</Typography>
+                          <Chip label={req.requestType} size="small" sx={{ bgcolor: "action.selected", color: "text.primary", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
                           <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.6, px: 1.4, py: 0.55, borderRadius: "999px", bgcolor: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.border}`, fontSize: "12px", fontWeight: 900 }}>
                             {React.cloneElement(statusStyle.icon, { sx: { fontSize: 16 } })}
                             {req.status}
                           </Box>
                         </Box>
-                        <Typography sx={{ fontWeight: 800, color: "#0F172A", fontSize: { xs: "18px", md: "20px" }, letterSpacing: "-0.4px", lineHeight: 1.3 }}>
+                        <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: { xs: "18px", md: "20px" }, letterSpacing: "-0.4px", lineHeight: 1.3 }}>
                           {req.itemRequested}
                         </Typography>
-                        <Typography sx={{ fontSize: "14px", color: "#64748B", mt: 0.8, fontWeight: 600, lineHeight: 1.6 }}>
+                        <Typography sx={{ fontSize: "14px", color: "text.secondary", mt: 0.8, fontWeight: 600, lineHeight: 1.6 }}>
                           Reason: {req.reason} • Urgency:{" "}
                           <strong style={{ color: urgencyColor(req.urgency) }}>{req.urgency}</strong> • By{" "}
-                          <strong style={{ color: "#0F172A" }}>{req.raisedBy?.name || "Employee"}</strong>{" "}
+                          <strong>{req.raisedBy?.name || "Employee"}</strong>{" "}
                           on {new Date(req.createdAt).toLocaleDateString()}
                         </Typography>
                         {req.adminRemarks && (
@@ -351,7 +351,7 @@ const Approvals = () => {
                         Reject
                       </Button>
                       <Button variant="contained" startIcon={<CheckRounded />} disabled={isCompleted} onClick={() => handleRequestActionClick(req, "approve")}
-                        sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", borderRadius: "14px", px: 3, py: 1.15, width: { xs: "100%", sm: "auto" }, boxShadow: "0 14px 26px rgba(15,118,110,0.25)", "&:hover": { transform: "translateY(-2px)", background: "linear-gradient(135deg, #1D4ED8, #0D9488)" } }}>
+                        sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "14px", px: 3, py: 1.15, width: { xs: "100%", sm: "auto" }, "&:hover": { bgcolor: "#222222" } }}>
                         Approve
                       </Button>
                     </Box>
@@ -365,26 +365,26 @@ const Approvals = () => {
 
       {/* Ticket Action Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid #E2E8F0", boxShadow: "0 28px 70px rgba(15,23,42,0.22)" } }}>
+        PaperProps={{ sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
         {selectedApproval && (
           <>
-            <DialogTitle sx={{ p: 0, background: actionType === "authorize" ? "linear-gradient(135deg, rgba(15,118,110,0.10), #FFFFFF)" : "linear-gradient(135deg, rgba(220,38,38,0.08), #FFFFFF)" }}>
+            <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
               <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <Box sx={{ width: 54, height: 54, borderRadius: "16px", background: actionType === "authorize" ? "linear-gradient(135deg, #1E3A8A, #0F766E)" : "linear-gradient(135deg, #991B1B, #DC2626)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}>
+                <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: actionType === "authorize" ? "#111111" : "#EF4444", color: actionType === "authorize" ? "#CBFA57" : "#FFF", display: "grid", placeItems: "center", flexShrink: 0 }}>
                   {actionType === "authorize" ? <CheckRounded /> : <CloseRounded />}
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "#0F172A" }}>{actionType === "authorize" ? "Authorize Repair" : "Reject Ticket"}</Typography>
-                  <Typography sx={{ mt: 0.5, color: "#64748B", fontWeight: 600 }}>{selectedApproval.ticketId} • {selectedApproval.asset?.name || "Unknown"}</Typography>
+                  <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "text.primary" }}>{actionType === "authorize" ? "Authorize Repair" : "Reject Ticket"}</Typography>
+                  <Typography sx={{ mt: 0.5, color: "text.secondary", fontWeight: 600 }}>{selectedApproval.ticketId} • {selectedApproval.asset?.name || "Unknown"}</Typography>
                 </Box>
                 <IconButton onClick={() => setDialogOpen(false)}><Close /></IconButton>
               </Box>
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ p: 3 }}>
-              <Paper sx={{ p: 2.3, mb: 3, borderRadius: "18px", bgcolor: "#F8FAFC", border: "1px solid #E2E8F0" }}>
-                <Typography sx={{ fontWeight: 900, color: "#0F172A", mb: 0.8 }}>Request Summary</Typography>
-                <Typography sx={{ color: "#64748B", fontWeight: 600, lineHeight: 1.7 }}>
+              <Paper sx={{ p: 2.3, mb: 3, borderRadius: "18px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider" }}>
+                <Typography sx={{ fontWeight: 900, color: "text.primary", mb: 0.8 }}>Request Summary</Typography>
+                <Typography sx={{ color: "text.secondary", fontWeight: 600, lineHeight: 1.7 }}>
                   Asset: {selectedApproval.asset?.name || "N/A"}<br />
                   Department: {selectedApproval.asset?.department || "N/A"}<br />
                   Issue: {selectedApproval.issue}
@@ -394,13 +394,13 @@ const Approvals = () => {
                 label={actionType === "authorize" ? "Estimated Cost (₹)" : "Rejection Reason"}
                 placeholder={actionType === "authorize" ? "Example: 5000" : "Please verify warranty before paid repair."}
                 value={inputVal} onChange={(e) => setInputVal(e.target.value)}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "background.paper", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }}
               />
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4, flexWrap: "wrap" }}>
-                <Button onClick={() => setDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 900, textTransform: "none", px: 3, borderRadius: "12px" }}>Cancel</Button>
+                <Button onClick={() => setDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 900, px: 3, borderRadius: "12px" }}>Cancel</Button>
                 <Button variant="contained" disabled={processing} onClick={handleConfirmTicketAction}
                   startIcon={processing ? <CircularProgress size={20} color="inherit" /> : null}
-                  sx={{ background: actionType === "authorize" ? "linear-gradient(135deg, #1E3A8A, #0F766E)" : "linear-gradient(135deg, #991B1B, #DC2626)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", px: 4, py: 1.2, borderRadius: "12px" }}>
+                  sx={{ bgcolor: actionType === "authorize" ? "#111111" : "#EF4444", color: actionType === "authorize" ? "#CBFA57" : "#FFF", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: actionType === "authorize" ? "#222222" : "#DC2626" } }}>
                   {processing ? "Processing..." : `Confirm ${actionType === "authorize" ? "Authorization" : "Rejection"}`}
                 </Button>
               </Box>
@@ -411,26 +411,26 @@ const Approvals = () => {
 
       {/* Device Request Action Dialog */}
       <Dialog open={requestDialogOpen} onClose={() => setRequestDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid #E2E8F0", boxShadow: "0 28px 70px rgba(15,23,42,0.22)" } }}>
+        PaperProps={{ sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
         {selectedRequest && (
           <>
-            <DialogTitle sx={{ p: 0, background: requestAction === "approve" ? "linear-gradient(135deg, rgba(15,118,110,0.10), #FFFFFF)" : "linear-gradient(135deg, rgba(220,38,38,0.08), #FFFFFF)" }}>
+            <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
               <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <Box sx={{ width: 54, height: 54, borderRadius: "16px", background: requestAction === "approve" ? "linear-gradient(135deg, #1E3A8A, #0F766E)" : "linear-gradient(135deg, #991B1B, #DC2626)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}>
+                <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: requestAction === "approve" ? "#111111" : "#EF4444", color: requestAction === "approve" ? "#CBFA57" : "#FFF", display: "grid", placeItems: "center", flexShrink: 0 }}>
                   {requestAction === "approve" ? <CheckRounded /> : <CloseRounded />}
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "#0F172A" }}>{requestAction === "approve" ? "Approve Request" : "Reject Request"}</Typography>
-                  <Typography sx={{ mt: 0.5, color: "#64748B", fontWeight: 600 }}>{selectedRequest.requestId} • {selectedRequest.itemRequested}</Typography>
+                  <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "text.primary" }}>{requestAction === "approve" ? "Approve Request" : "Reject Request"}</Typography>
+                  <Typography sx={{ mt: 0.5, color: "text.secondary", fontWeight: 600 }}>{selectedRequest.requestId} • {selectedRequest.itemRequested}</Typography>
                 </Box>
                 <IconButton onClick={() => setRequestDialogOpen(false)}><Close /></IconButton>
               </Box>
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ p: 3 }}>
-              <Paper sx={{ p: 2.3, mb: 3, borderRadius: "18px", bgcolor: "#F8FAFC", border: "1px solid #E2E8F0" }}>
-                <Typography sx={{ fontWeight: 900, color: "#0F172A", mb: 0.8 }}>Request Summary</Typography>
-                <Typography sx={{ color: "#64748B", fontWeight: 600, lineHeight: 1.7 }}>
+              <Paper sx={{ p: 2.3, mb: 3, borderRadius: "18px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider" }}>
+                <Typography sx={{ fontWeight: 900, color: "text.primary", mb: 0.8 }}>Request Summary</Typography>
+                <Typography sx={{ color: "text.secondary", fontWeight: 600, lineHeight: 1.7 }}>
                   Type: {selectedRequest.requestType}<br />
                   Item: {selectedRequest.itemRequested}<br />
                   Reason: {selectedRequest.reason}<br />
@@ -482,10 +482,10 @@ const Approvals = () => {
               )}
 
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4, flexWrap: "wrap" }}>
-                <Button onClick={() => setRequestDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 900, textTransform: "none", px: 3, borderRadius: "12px" }}>Cancel</Button>
+                <Button onClick={() => setRequestDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 900, px: 3, borderRadius: "12px" }}>Cancel</Button>
                 <Button variant="contained" disabled={requestProcessing} onClick={handleConfirmRequestAction}
                   startIcon={requestProcessing ? <CircularProgress size={20} color="inherit" /> : null}
-                  sx={{ background: requestAction === "approve" ? "linear-gradient(135deg, #1E3A8A, #0F766E)" : "linear-gradient(135deg, #991B1B, #DC2626)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", px: 4, py: 1.2, borderRadius: "12px" }}>
+                  sx={{ bgcolor: requestAction === "approve" ? "#111111" : "#EF4444", color: requestAction === "approve" ? "#CBFA57" : "#FFF", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: requestAction === "approve" ? "#222222" : "#DC2626" } }}>
                   {requestProcessing ? "Processing..." : `Confirm ${requestAction === "approve" ? "Approval" : "Rejection"}`}
                 </Button>
               </Box>
@@ -502,9 +502,9 @@ const Approvals = () => {
 };
 
 const SummaryCard = ({ title, value }) => (
-  <Paper sx={{ p: 2.5, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", boxShadow: "0 12px 30px rgba(15,23,42,0.05)" }}>
-    <Typography sx={{ color: "text.secondary", fontSize: "13px", fontWeight: 900 }}>{title}</Typography>
-    <Typography sx={{ mt: 0.7, color: "#1E3A8A", fontSize: "30px", fontWeight: 900 }}>{value}</Typography>
+  <Paper sx={{ p: 2.5, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
+    <Typography sx={{ color: "text.secondary", fontSize: "11px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>{title}</Typography>
+    <Typography sx={{ mt: 0.7, color: "text.primary", fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", lineHeight: 1 }}>{value}</Typography>
   </Paper>
 );
 

@@ -95,15 +95,7 @@ const Assets = () => {
   };
 
   const inputStyles = {
-    "& .MuiOutlinedInput-root": {
-      backgroundColor: "#f8fafc", color: "#0f172a", borderRadius: "12px",
-      "& fieldset": { borderColor: "#e2e8f0" },
-      "&:hover fieldset": { borderColor: "#cbd5e1" },
-      "&.Mui-focused fieldset": { borderColor: "#4f46e5", borderWidth: "2px" },
-    },
-    "& .MuiInputLabel-root": { color: "#64748b" },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#4f46e5" },
-    "& .MuiSvgIcon-root": { color: "#64748b" },
+    "& .MuiOutlinedInput-root": { borderRadius: "12px" },
   };
 
   const filteredAssets = useMemo(() => {
@@ -250,13 +242,13 @@ const Assets = () => {
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             <Button
               variant="outlined" startIcon={<DownloadRounded />} onClick={handleExportCSV} disabled={filteredAssets.length === 0}
-              sx={{ borderColor: "#e2e8f0", color: "#0f172a", borderRadius: "10px", fontWeight: 600, textTransform: "none", "&:hover": { bgcolor: "#f8fafc", borderColor: "#cbd5e1" }, "&.Mui-disabled": { borderColor: "#e2e8f0", color: "#94a3b8" } }}
+              sx={{ borderColor: "divider", color: "text.primary", borderRadius: "10px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}
             >
               Export CSV
             </Button>
             <Button
               variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
-              sx={{ background: "linear-gradient(135deg, #4f46e5, #0ea5e9)", color: "#ffffff", fontWeight: 700, textTransform: "none", px: 3, borderRadius: "10px", boxShadow: "0 8px 16px rgba(79, 70, 229, 0.25)", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 12px 20px rgba(79, 70, 229, 0.35)", background: "linear-gradient(135deg, #4338ca, #0284c7)" } }}
+              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 3, borderRadius: "10px", "&:hover": { bgcolor: "#222222" } }}
             >
               Provision Asset
             </Button>
@@ -264,7 +256,7 @@ const Assets = () => {
         }
       />
 
-      <Paper sx={{ p: 3, borderRadius: "16px", mb: 4, bgcolor: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.05)" }}>
+      <Paper sx={{ p: 3, borderRadius: "16px", mb: 4, bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={7}>
             <TextField fullWidth sx={inputStyles} label="Search by asset name, ID or serial number" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -277,18 +269,18 @@ const Assets = () => {
           </Grid>
           <Grid item xs={12} md={2}>
             <Button fullWidth variant="outlined" onClick={() => { setSearch(""); setCategory("All"); }}
-              sx={{ height: "100%", minHeight: "56px", borderColor: "#e2e8f0", color: "#64748b", borderRadius: "12px", fontWeight: 600, textTransform: "none", "&:hover": { bgcolor: "#f8fafc", color: "#0f172a", borderColor: "#cbd5e1" } }}>
+              sx={{ height: "100%", minHeight: "56px", borderColor: "divider", color: "text.secondary", borderRadius: "12px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", color: "text.primary", borderColor: "text.secondary" } }}>
               Clear Filters
             </Button>
           </Grid>
         </Grid>
       </Paper>
 
-      <Paper sx={{ borderRadius: "16px", overflow: "hidden", bgcolor: "#ffffff", border: "1px solid #e2e8f0", boxShadow: "0 10px 30px -10px rgba(15, 23, 42, 0.05)" }}>
+      <Paper sx={{ borderRadius: "16px", overflow: "hidden", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
         <Box sx={{ overflowX: "auto" }}>
           {loading ? (
             <Box display="flex" justifyContent="center" alignItems="center" p={5} minHeight="300px">
-              <CircularProgress sx={{ color: "#4f46e5" }} />
+              <CircularProgress color="inherit" />
             </Box>
           ) : filteredAssets.length === 0 ? (
             <Box p={5} textAlign="center">
@@ -297,9 +289,9 @@ const Assets = () => {
           ) : (
             <Table sx={{ minWidth: 700 }}>
               <TableHead>
-                <TableRow sx={{ bgcolor: "#f8fafc" }}>
+                <TableRow sx={{ bgcolor: "action.hover" }}>
                   {["Asset Identification", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
-                    <TableCell key={head} sx={{ color: "#64748b", fontWeight: 700, borderBottom: "1px solid #e2e8f0", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    <TableCell key={head} sx={{ color: "text.secondary", fontWeight: 700, borderBottom: "1px solid", borderColor: "divider", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                       {head}
                     </TableCell>
                   ))}
@@ -307,33 +299,33 @@ const Assets = () => {
               </TableHead>
               <TableBody>
                 {filteredAssets.map((asset) => (
-                  <TableRow key={asset._id} sx={{ "&:hover": { bgcolor: "#f8fafc" }, "& td": { borderBottom: "1px solid #e2e8f0" }, transition: "background-color 0.2s ease" }}>
+                  <TableRow key={asset._id} sx={{ "&:hover": { bgcolor: "action.hover" }, "& td": { borderBottom: "1px solid", borderColor: "divider" }, transition: "background-color 0.2s ease" }}>
                     <TableCell>
-                      <Typography sx={{ fontWeight: 800, color: "#0f172a", fontSize: "15px" }}>{asset.name}</Typography>
-                      <Typography sx={{ fontSize: "13px", color: "#64748b", fontFamily: "monospace", mt: 0.5 }}>
+                      <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: "15px" }}>{asset.name}</Typography>
+                      <Typography sx={{ fontSize: "13px", color: "text.secondary", fontFamily: "monospace", mt: 0.5 }}>
                         AST-{asset._id.slice(-5).toUpperCase()} • {asset.serialNumber}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{ color: "#0f172a", fontWeight: 500 }}>{asset.category}</TableCell>
-                    <TableCell sx={{ color: "#0f172a", fontWeight: 500 }}>{asset.department}</TableCell>
-                    <TableCell sx={{ color: "#64748b", fontWeight: 500 }}>{asset.location || "Unassigned"}</TableCell>
+                    <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.category}</TableCell>
+                    <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.department}</TableCell>
+                    <TableCell sx={{ color: "text.secondary", fontWeight: 500 }}>{asset.location || "Unassigned"}</TableCell>
                     <TableCell><StatusChip label={getWarrantyStatus(asset.warrantyEnd)} /></TableCell>
                     <TableCell><StatusChip label={asset.status} /></TableCell>
                     <TableCell>
                       <Box display="flex" gap={1}>
                         <Tooltip title="Inspect">
                           <Button size="small" variant="outlined" startIcon={<VisibilityRounded />} onClick={() => setSelected(asset)}
-                            sx={{ borderColor: "#e2e8f0", color: "#0f172a", textTransform: "none", borderRadius: "8px", fontWeight: 600, "&:hover": { borderColor: "#4f46e5", color: "#4f46e5", bgcolor: "#eef2ff" } }}>
+                            sx={{ borderColor: "divider", color: "text.primary", textTransform: "none", borderRadius: "8px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}>
                             View
                           </Button>
                         </Tooltip>
                         <Tooltip title="Edit Asset">
-                          <IconButton size="small" onClick={() => handleEditClick(asset)} sx={{ color: "#64748b", "&:hover": { color: "#4f46e5", bgcolor: "#eef2ff" } }}>
+                          <IconButton size="small" onClick={() => handleEditClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: "action.hover" } }}>
                             <EditRounded fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete Asset">
-                          <IconButton size="small" onClick={() => handleDeleteClick(asset)} sx={{ color: "#64748b", "&:hover": { color: "#DC2626", bgcolor: "#FEF2F2" } }}>
+                          <IconButton size="small" onClick={() => handleDeleteClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#DC2626", bgcolor: "#FEF2F2" } }}>
                             <DeleteOutlineRounded fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -349,18 +341,18 @@ const Assets = () => {
 
       {/* Detail Drawer */}
       <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}
-        PaperProps={{ sx: { bgcolor: "#ffffff", color: "#0f172a", borderLeft: "1px solid #e2e8f0" } }}>
+        PaperProps={{ sx: { bgcolor: "background.paper", color: "text.primary", borderLeft: "1px solid", borderColor: "divider" } }}>
         <Box sx={{ width: { xs: "100vw", sm: 400, md: 450 }, p: { xs: 3, md: 4 } }}>
           {selected && (
             <>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
                 <Box>
-                  <Typography sx={{ fontWeight: 900, letterSpacing: "-0.5px", fontSize: "24px", color: "#0f172a" }}>{selected.name}</Typography>
-                  <Typography sx={{ color: "#4f46e5", fontFamily: "monospace", fontWeight: 600, mt: 1, fontSize: "16px" }}>
+                  <Typography sx={{ fontWeight: 900, letterSpacing: "-0.5px", fontSize: "24px", color: "text.primary" }}>{selected.name}</Typography>
+                  <Typography sx={{ color: "text.secondary", fontFamily: "monospace", fontWeight: 600, mt: 1, fontSize: "16px" }}>
                     AST-{selected._id.slice(-5).toUpperCase()}
                   </Typography>
                 </Box>
-                <IconButton onClick={() => setSelected(null)} sx={{ color: "#64748b", bgcolor: "#f1f5f9", "&:hover": { bgcolor: "#e2e8f0" } }}>
+                <IconButton onClick={() => setSelected(null)} sx={{ color: "text.secondary", bgcolor: "action.hover" }}>
                   <CloseRounded />
                 </IconButton>
               </Box>
@@ -375,9 +367,9 @@ const Assets = () => {
                   ["Warranty Expiry", selected.warrantyEnd ? new Date(selected.warrantyEnd).toLocaleDateString() : "N/A"],
                   ["Status", selected.status],
                 ].map(([label, value]) => (
-                  <Box key={label} sx={{ p: 2, borderRadius: "12px", bgcolor: "#f8fafc", border: "1px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography sx={{ fontSize: "13px", color: "#64748b", fontWeight: 600 }}>{label}</Typography>
-                    <Typography sx={{ fontWeight: 700, color: "#0f172a", textAlign: "right", maxWidth: "60%" }}>{value}</Typography>
+                  <Box key={label} sx={{ p: 2, borderRadius: "12px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography sx={{ fontSize: "13px", color: "text.secondary", fontWeight: 600 }}>{label}</Typography>
+                    <Typography sx={{ fontWeight: 700, color: "text.primary", textAlign: "right", maxWidth: "60%" }}>{value}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -393,17 +385,17 @@ const Assets = () => {
 
               <Box display="flex" gap={1.5} flexWrap="wrap">
                 <Button variant="outlined" onClick={() => { handleEditClick(selected); setSelected(null); }}
-                  sx={{ flex: 1, py: 1.4, borderColor: "#4f46e5", color: "#4f46e5", fontWeight: 700, textTransform: "none", borderRadius: "12px" }}>
+                  sx={{ flex: 1, py: 1.4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "action.hover" } }}>
                   Edit
                 </Button>
                 {selected.assignedStatus !== 'Assigned' ? (
                   <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
-                    sx={{ flex: 1, py: 1.4, bgcolor: "#16a34a", color: "#fff", fontWeight: 700, textTransform: "none", borderRadius: "12px", "&:hover": { bgcolor: "#15803d" } }}>
+                    sx={{ flex: 1, py: 1.4, bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}>
                     Assign
                   </Button>
                 ) : (
                   <Button variant="outlined" startIcon={<PersonRemoveRounded />} onClick={() => handleRevokeAssignment(selected)}
-                    sx={{ flex: 1, py: 1.4, borderColor: "#dc2626", color: "#dc2626", fontWeight: 700, textTransform: "none", borderRadius: "12px", "&:hover": { bgcolor: "#fee2e2" } }}>
+                    sx={{ flex: 1, py: 1.4, borderColor: "#dc2626", color: "#dc2626", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "#fee2e2" } }}>
                     Revoke
                   </Button>
                 )}
@@ -415,15 +407,15 @@ const Assets = () => {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid #E2E8F0", boxShadow: "0 28px 70px rgba(15,23,42,0.22)" } }}>
-        <DialogTitle sx={{ p: 0, background: "linear-gradient(135deg, #F8FAFC, #FFFFFF)" }}>
+        PaperProps={{ sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
           <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 48, height: 48, borderRadius: "14px", background: "linear-gradient(135deg, #4f46e5, #0ea5e9)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>
               <EditRounded />
             </Box>
             <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 900, fontSize: "22px", color: "#0F172A" }}>Edit Asset</Typography>
-              <Typography sx={{ color: "#64748B", fontSize: "13px", fontWeight: 600 }}>{editAsset?.name}</Typography>
+              <Typography sx={{ fontWeight: 900, fontSize: "22px", color: "text.primary" }}>Edit Asset</Typography>
+              <Typography sx={{ color: "text.secondary", fontSize: "13px", fontWeight: 600 }}>{editAsset?.name}</Typography>
             </Box>
             <IconButton onClick={() => setEditDialogOpen(false)}><CloseRounded /></IconButton>
           </Box>
@@ -466,9 +458,9 @@ const Assets = () => {
             <TextField label="Vendor" fullWidth sx={inputStyles} value={editForm.vendor || ""} onChange={(e) => setEditForm({ ...editForm, vendor: e.target.value })} />
           </Stack>
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-            <Button onClick={() => setEditDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 800, textTransform: "none", px: 3 }}>Cancel</Button>
+            <Button onClick={() => setEditDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, px: 3 }}>Cancel</Button>
             <Button variant="contained" disabled={saving} onClick={handleEditSave} startIcon={saving ? <CircularProgress size={18} color="inherit" /> : null}
-              sx={{ background: "linear-gradient(135deg, #4f46e5, #0ea5e9)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", px: 4, py: 1.2, borderRadius: "12px" }}>
+              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </Box>
@@ -477,20 +469,20 @@ const Assets = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: "24px", p: 2, maxWidth: "400px", boxShadow: "0 20px 50px rgba(0,0,0,0.2)" } }}>
-        <DialogTitle sx={{ fontWeight: 900, color: "#0F172A", pb: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
+        PaperProps={{ sx: { borderRadius: "20px", p: 2, maxWidth: "400px", bgcolor: "background.paper" } }}>
+        <DialogTitle sx={{ fontWeight: 900, color: "text.primary", pb: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "#FEE2E2", color: "#DC2626", display: "grid", placeItems: "center" }}><DeleteOutlineRounded /></Box>
           Delete Asset
         </DialogTitle>
         <DialogContent>
-          <Typography color="#475569" fontWeight={600} lineHeight={1.6}>
-            Are you sure you want to permanently delete <strong style={{ color: "#0F172A" }}>{deleteTarget?.name}</strong>? This will also affect linked tickets.
+          <Typography color="text.secondary" fontWeight={600} lineHeight={1.6}>
+            Are you sure you want to permanently delete <strong>{deleteTarget?.name}</strong>? This will also affect linked tickets.
           </Typography>
         </DialogContent>
         <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 800, textTransform: "none", borderRadius: "10px" }}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, borderRadius: "10px" }}>Cancel</Button>
           <Button onClick={confirmDelete} disabled={deleting} variant="contained"
-            sx={{ bgcolor: "#EF4444", color: "#fff", fontWeight: 800, textTransform: "none", borderRadius: "10px", "&:hover": { bgcolor: "#DC2626" } }}>
+            sx={{ bgcolor: "#EF4444", color: "#fff", fontWeight: 800, borderRadius: "10px", "&:hover": { bgcolor: "#DC2626" } }}>
             {deleting ? "Deleting..." : "Delete Asset"}
           </Button>
         </Box>
@@ -498,10 +490,10 @@ const Assets = () => {
 
       {/* Assign Employee Dialog */}
       <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid #E2E8F0" } }}>
+        PaperProps={{ sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: 2, background: "linear-gradient(135deg, #16a34a, #0ea5e9)", color: "#fff", display: "grid", placeItems: "center" }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center" }}>
               <PersonAddRounded />
             </Box>
             <Box>
@@ -530,7 +522,7 @@ const Assets = () => {
             )}
           />
           {selectedEmployee && (
-            <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: "action.hover", border: "1px solid", borderColor: "divider" }}>
               <Typography fontSize={13} fontWeight={700} mb={1}>Assignment Preview</Typography>
               {[['Name', selectedEmployee.name], ['Email', selectedEmployee.email], ['Department', selectedEmployee.department], ['Role', selectedEmployee.role]].map(([k, v]) => (
                 <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
@@ -541,10 +533,10 @@ const Assets = () => {
             </Box>
           )}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
-            <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "#64748b", fontWeight: 700, textTransform: "none" }}>Cancel</Button>
+            <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>Cancel</Button>
             <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
               startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
-              sx={{ bgcolor: "#16a34a", fontWeight: 700, textTransform: "none", borderRadius: "10px", "&:hover": { bgcolor: "#15803d" } }}>
+              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "10px", "&:hover": { bgcolor: "#222222" } }}>
               {assigning ? "Assigning..." : "Confirm Assignment"}
             </Button>
           </Box>

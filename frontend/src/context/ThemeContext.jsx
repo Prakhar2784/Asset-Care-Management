@@ -33,24 +33,29 @@ const ThemeProviderInner = ({ children }) => {
     palette: {
       mode,
       ...(isDark ? {
-        primary: { main: '#6366f1' },
-        background: { default: '#0f172a', paper: '#1e293b' },
-        text: { primary: '#f1f5f9', secondary: '#94a3b8' },
-        divider: '#334155',
+        primary: { main: '#CBFA57' },
+        background: { default: '#0D0D0D', paper: '#161616' },
+        text: { primary: '#F0F0F0', secondary: '#707070' },
+        divider: '#252525',
+        action: { hover: '#1C1C1C', selected: '#1C1C1C' },
       } : {
-        primary: { main: '#4f46e5' },
-        background: { default: '#f8fafc', paper: '#ffffff' },
-        text: { primary: '#0f172a', secondary: '#64748b' },
-        divider: '#e2e8f0',
+        primary: { main: '#141414' },
+        background: { default: '#ECEAE3', paper: '#FFFFFF' },
+        text: { primary: '#0D0D0D', secondary: '#737373' },
+        divider: '#DDD8CE',
+        action: { hover: '#F5F2EB', selected: '#EDE8DF' },
       }),
     },
-    shape: { borderRadius: 10 },
+    shape: { borderRadius: 12 },
     typography: {
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+      fontWeightBold: 700,
     },
     components: {
       MuiPaper: { styleOverrides: { root: { backgroundImage: 'none' } } },
       MuiAppBar: { styleOverrides: { root: { backgroundImage: 'none' } } },
+      MuiButton: { styleOverrides: { root: { textTransform: 'none', fontWeight: 700 } } },
+      MuiChip: { styleOverrides: { root: { fontWeight: 700 } } },
     },
   }), [mode]);
 

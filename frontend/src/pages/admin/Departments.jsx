@@ -197,24 +197,11 @@ const Departments = () => {
 
   const inputStyles = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#FFFFFF",
+      bgcolor: "background.paper",
       borderRadius: "14px",
       fontWeight: 700,
-      color: "#0F172A",
-      "& fieldset": { borderColor: "#CBD5E1" },
-      "&:hover fieldset": { borderColor: "#0F766E" },
-      "&.Mui-focused fieldset": {
-        borderColor: "#0F766E",
-        borderWidth: "2px",
-      },
     },
-    "& .MuiInputLabel-root": {
-      color: "#64748B",
-      fontWeight: 700,
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#0F766E",
-    },
+    "& .MuiInputLabel-root": { fontWeight: 700 },
   };
 
   return (
@@ -227,15 +214,7 @@ const Departments = () => {
             variant="contained"
             startIcon={<AddRounded />}
             onClick={openAddForm}
-            sx={{
-              background: "linear-gradient(135deg, #1E3A8A, #0F766E)",
-              color: "#FFFFFF",
-              fontWeight: 900,
-              textTransform: "none",
-              borderRadius: "14px",
-              px: 3,
-              py: 1.2,
-            }}
+            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "14px", px: 3, py: 1.2, "&:hover": { bgcolor: "#222222" } }}
           >
             Add Department
           </Button>
@@ -288,8 +267,8 @@ const Departments = () => {
                       width: 58,
                       height: 58,
                       borderRadius: "18px",
-                      background: "rgba(15,118,110,0.10)",
-                      color: "#0F766E",
+                      bgcolor: "#111111",
+                      color: "#CBFA57",
                       display: "grid",
                       placeItems: "center",
                     }}
@@ -308,13 +287,13 @@ const Departments = () => {
                   />
                 </Box>
 
-                <Typography sx={{ fontWeight: 950, fontSize: 21, mt: 2, color: "#0F172A" }}>
+                <Typography sx={{ fontWeight: 900, fontSize: 21, mt: 2, color: "text.primary" }}>
                   {dept.name}
                 </Typography>
 
                 <Typography
                   sx={{
-                    color: "#1E3A8A",
+                    color: "text.secondary",
                     fontSize: 13,
                     fontWeight: 900,
                     textTransform: "uppercase",
@@ -332,10 +311,10 @@ const Departments = () => {
 
                 <Divider sx={{ my: 2 }} />
 
-                <Typography sx={{ fontWeight: 800, color: "#64748B", fontSize: 13 }}>
+                <Typography sx={{ fontWeight: 800, color: "text.secondary", fontSize: 13 }}>
                   Approval Flow
                 </Typography>
-                <Typography sx={{ fontWeight: 950, color: "#0F172A", mt: 0.3 }}>
+                <Typography sx={{ fontWeight: 900, color: "text.primary", mt: 0.3 }}>
                   {dept.approvalRequired ? dept.approvalLevel : "Approval not required"}
                 </Typography>
 
@@ -355,7 +334,7 @@ const Departments = () => {
 
                   <IconButton
                     onClick={() => openEditForm(dept)}
-                    sx={{ border: "1px solid #CBD5E1", borderRadius: "12px", color: "#0F766E" }}
+                    sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px", color: "text.secondary", "&:hover": { color: "text.primary" } }}
                   >
                     <EditRounded />
                   </IconButton>
@@ -562,7 +541,7 @@ const Departments = () => {
         <DialogActions sx={{ p: 2, bgcolor: "background.paper", borderTop: "1px solid", borderTopColor: "divider" }}>
           <Button
             onClick={() => setFormOpen(false)}
-            sx={{ fontWeight: 900, textTransform: "none", color: "#475569" }}
+            sx={{ fontWeight: 900, color: "text.secondary" }}
           >
             Cancel
           </Button>
@@ -572,13 +551,7 @@ const Departments = () => {
             startIcon={<SaveRounded />}
             onClick={handleSaveDepartment}
             disabled={saving}
-            sx={{
-              background: "linear-gradient(135deg, #1E3A8A, #0F766E)",
-              fontWeight: 900,
-              textTransform: "none",
-              borderRadius: "12px",
-              px: 3,
-            }}
+            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", px: 3, "&:hover": { bgcolor: "#222222" } }}
           >
             {saving ? "Saving..." : mode === "add" ? "Save Department" : "Update Department"}
           </Button>
@@ -625,7 +598,7 @@ const Departments = () => {
         <DialogTitle sx={{ fontWeight: 950 }}>Delete Department</DialogTitle>
 
         <DialogContent>
-          <Typography sx={{ color: "#475569", fontWeight: 700 }}>
+          <Typography sx={{ color: "text.secondary", fontWeight: 700 }}>
             Are you sure you want to delete{" "}
             <strong>{selectedDept?.name}</strong>?
           </Typography>
@@ -671,17 +644,10 @@ const SummaryCard = ({ title, value, warning = false }) => (
       boxShadow: "0 12px 30px rgba(15,23,42,0.05)",
     }}
   >
-    <Typography sx={{ color: "#64748B", fontSize: 13, fontWeight: 900 }}>
+    <Typography sx={{ color: "text.secondary", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>
       {title}
     </Typography>
-    <Typography
-      sx={{
-        mt: 0.6,
-        color: warning ? "#D97706" : "#1E3A8A",
-        fontSize: 30,
-        fontWeight: 950,
-      }}
-    >
+    <Typography sx={{ mt: 0.6, color: warning ? "#D97706" : "text.primary", fontSize: 36, fontWeight: 900, letterSpacing: "-1px", lineHeight: 1 }}>
       {value}
     </Typography>
   </Paper>
@@ -698,7 +664,7 @@ const FormBlock = ({ title, children }) => (
       border: "1px solid", borderColor: "divider",
     }}
   >
-    <Typography sx={{ fontWeight: 950, fontSize: 17, mb: 2, color: "#1E3A8A" }}>
+    <Typography sx={{ fontWeight: 900, fontSize: 16, mb: 2, color: "text.primary" }}>
       {title}
     </Typography>
     {children}
@@ -706,7 +672,7 @@ const FormBlock = ({ title, children }) => (
 );
 
 const InfoRow = ({ icon, text }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 1.3, color: "#475569" }}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 1.3, color: "text.secondary" }}>
     {icon}
     <Typography sx={{ fontWeight: 700 }}>{text || "-"}</Typography>
   </Box>
@@ -719,27 +685,23 @@ const DetailRow = ({ label, value }) => (
       justifyContent: "space-between",
       gap: 2,
       py: 1.1,
-      borderBottom: "1px solid #F1F5F9",
+      borderBottom: "1px solid",
+      borderColor: "divider",
     }}
   >
-    <Typography sx={{ fontWeight: 900, color: "#475569" }}>{label}</Typography>
-    <Typography sx={{ fontWeight: 700, textAlign: "right", color: "#0F172A" }}>
+    <Typography sx={{ fontWeight: 900, color: "text.secondary" }}>{label}</Typography>
+    <Typography sx={{ fontWeight: 700, textAlign: "right", color: "text.primary" }}>
       {value || "-"}
     </Typography>
   </Box>
 );
 
 const smallBtn = {
-  borderColor: "#CBD5E1",
-  color: "#1E3A8A",
+  borderColor: "divider",
+  color: "text.primary",
   fontWeight: 900,
-  textTransform: "none",
   borderRadius: "12px",
-  "&:hover": {
-    borderColor: "#0F766E",
-    color: "#0F766E",
-    bgcolor: "rgba(15,118,110,0.08)",
-  },
+  "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" },
 };
 
 export default Departments;

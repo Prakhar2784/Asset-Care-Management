@@ -94,8 +94,8 @@ const AdminDashboard = () => {
   ];
 
   const stats = [
-    { title: "Total Assets", value: dashboardData?.totalAssets ?? "—", subtitle: "Registered in system", icon: <Inventory2Rounded sx={{ fontSize: 40 }} />, color: "#1E3A8A", route: "/admin/assets" },
-    { title: "Total Tickets", value: dashboardData?.totalTickets ?? "—", subtitle: "All-time service requests", icon: <ConfirmationNumberRounded sx={{ fontSize: 40 }} />, color: "#0F766E", route: "/tickets" },
+    { title: "Total Assets", value: dashboardData?.totalAssets ?? "—", subtitle: "Registered in system", icon: <Inventory2Rounded sx={{ fontSize: 40 }} />, color: "#CBFA57", route: "/admin/assets" },
+    { title: "Total Tickets", value: dashboardData?.totalTickets ?? "—", subtitle: "All-time service requests", icon: <ConfirmationNumberRounded sx={{ fontSize: 40 }} />, color: "#CBFA57", route: "/tickets" },
     { title: "Active Repairs", value: dashboardData?.activeRepairs ?? "—", subtitle: "Currently with vendors", icon: <BuildRounded sx={{ fontSize: 40 }} />, color: "#DC2626", route: "/tickets" },
     { title: "Pending Approvals", value: dashboardData?.pendingTickets ?? "—", subtitle: "Requires HOD authorization", icon: <ApprovalRounded sx={{ fontSize: 40 }} />, color: "#D97706", route: "/admin/approvals" },
     { title: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon ?? "—", subtitle: "Within next 30 days", icon: <WarningAmberRounded sx={{ fontSize: 40 }} />, color: "#EA580C", route: "/admin/assets" },
@@ -128,9 +128,9 @@ const AdminDashboard = () => {
         action={
           <Button
             variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
-            sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", fontSize: "15px", px: 3, py: 1.2, borderRadius: "14px", boxShadow: "0 14px 28px rgba(15,118,110,0.26)", "&:hover": { transform: "translateY(-2px)", boxShadow: "0 20px 36px rgba(15,118,110,0.36)", background: "linear-gradient(135deg, #1D4ED8, #0D9488)" } }}
+            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 800, fontSize: "14px", px: 3, py: 1.1, borderRadius: "10px", boxShadow: "none", "&:hover": { bgcolor: "#1E1E1E", boxShadow: "none" } }}
           >
-            Provision New Asset
+            New Asset
           </Button>
         }
       />
@@ -139,7 +139,7 @@ const AdminDashboard = () => {
 
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-          <CircularProgress sx={{ color: "#0F766E" }} />
+          <CircularProgress color="inherit" />
         </Box>
       ) : (
         <>
@@ -162,7 +162,7 @@ const AdminDashboard = () => {
                     <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "22px", letterSpacing: "-0.7px" }}>Active Service Tickets</Typography>
                     <Typography sx={{ color: "text.secondary", fontSize: "14px", fontWeight: 600, mt: 0.5 }}>Click any ticket to view service details and timeline.</Typography>
                   </Box>
-                  <Button endIcon={<ArrowForwardRounded />} onClick={() => navigate("/tickets")} sx={{ color: "#1E3A8A", fontWeight: 900, textTransform: "none", borderRadius: "12px", "&:hover": { bgcolor: "rgba(15,118,110,0.08)", color: "#0F766E" } }}>
+                  <Button endIcon={<ArrowForwardRounded />} onClick={() => navigate("/tickets")} sx={{ color: "text.secondary", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
                     View All
                   </Button>
                 </Box>
@@ -179,12 +179,12 @@ const AdminDashboard = () => {
                         sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, flexDirection: { xs: "column", md: "row" }, gap: 2, transition: "all 0.3s ease", cursor: "pointer", "&:hover": { borderColor: "rgba(15,118,110,0.35)", bgcolor: "background.paper", transform: "translateY(-3px)", boxShadow: "0 14px 30px rgba(15,23,42,0.08)" } }}
                       >
                         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                          <Avatar sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, width: 52, height: 52 }}>
+                          <Avatar sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, width: 44, height: 44, fontSize: 16 }}>
                             {ticket.asset.charAt(0)}
                           </Avatar>
                           <Box>
                             <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 0.7, flexWrap: "wrap" }}>
-                              <Typography sx={{ fontFamily: "monospace", fontSize: "13px", color: "#1E3A8A", fontWeight: 900 }}>{ticket.id}</Typography>
+                              <Typography sx={{ fontFamily: "monospace", fontSize: "12px", color: "text.secondary", fontWeight: 700, bgcolor: "action.selected", px: 1, py: 0.3, borderRadius: 1 }}>{ticket.id}</Typography>
                               <StatusChip label={ticket.priority} />
                             </Box>
                             <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "16px", lineHeight: 1.4 }}>{ticket.issue}</Typography>
@@ -209,7 +209,7 @@ const AdminDashboard = () => {
 
                   {alerts.length === 0 ? (
                     <Paper sx={{ p: 3, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", textAlign: "center", mb: 3 }}>
-                      <TaskAltRounded sx={{ color: "#0F766E", fontSize: 38, mb: 1 }} />
+                      <TaskAltRounded sx={{ color: "#CBFA57", fontSize: 38, mb: 1 }} />
                       <Typography sx={{ color: "text.primary", fontWeight: 900 }}>No Active Alerts</Typography>
                       <Typography sx={{ color: "text.secondary", fontSize: "14px", mt: 0.5 }}>Everything looks good right now.</Typography>
                     </Paper>
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                     {quickLinks.map((link) => (
                       <Button key={link.label} variant="outlined" fullWidth startIcon={link.icon} endIcon={<ArrowForwardRounded />} onClick={() => navigate(link.route)}
-                        sx={{ borderColor: "divider", color: "text.primary", justifyContent: "space-between", textTransform: "none", py: 1.4, px: 2, borderRadius: "14px", fontWeight: 800, "& .MuiButton-startIcon": { color: "#0F766E" }, "&:hover": { bgcolor: "rgba(15,118,110,0.08)", borderColor: "rgba(15,118,110,0.35)", color: "#0F766E" } }}>
+                        sx={{ borderColor: "divider", color: "text.primary", justifyContent: "space-between", py: 1.3, px: 2, borderRadius: "10px", fontWeight: 700, "& .MuiButton-startIcon": { color: "text.secondary" }, "&:hover": { bgcolor: "action.hover", borderColor: "text.disabled" } }}>
                         <Box sx={{ flex: 1, textAlign: "left" }}>{link.label}</Box>
                       </Button>
                     ))}
@@ -238,12 +238,12 @@ const AdminDashboard = () => {
                         <Box key={dept._id || "Unknown"}>
                           <Box display="flex" justifyContent="space-between" mb={0.5}>
                             <Typography fontSize={13} fontWeight={700} color="text.primary">{dept._id || "Unassigned"}</Typography>
-                            <Typography fontSize={13} fontWeight={800} color="#0F766E">{dept.count}</Typography>
+                            <Typography fontSize={13} fontWeight={800} color="text.primary">{dept.count}</Typography>
                           </Box>
                           <LinearProgress
                             variant="determinate"
                             value={Math.round((dept.count / deptTotal) * 100)}
-                            sx={{ height: 8, borderRadius: 4, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: "#0F766E", borderRadius: 4 } }}
+                            sx={{ height: 8, borderRadius: 4, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: "#CBFA57", borderRadius: 4 } }}
                           />
                         </Box>
                       ))}
@@ -277,13 +277,13 @@ const AdminDashboard = () => {
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
                 {selectedTicket.timeline.map((step, index) => (
                   <Box key={index} sx={{ p: 2, borderRadius: "16px", bgcolor: "background.paper", border: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <Box sx={{ width: 32, height: 32, borderRadius: "50%", display: "grid", placeItems: "center", background: "rgba(15,118,110,0.10)", color: "#0F766E", fontWeight: 900 }}>{index + 1}</Box>
+                    <Box sx={{ width: 32, height: 32, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: "#111111", color: "#CBFA57", fontWeight: 900 }}>{index + 1}</Box>
                     <Typography sx={{ color: "text.secondary", fontWeight: 700 }}>{step}</Typography>
                   </Box>
                 ))}
               </Box>
               <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-                <Button variant="contained" onClick={() => navigate("/tickets")} sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", borderRadius: "14px", px: 3 }}>
+                <Button variant="contained" onClick={() => navigate("/tickets")} sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, textTransform: "none", borderRadius: "10px", px: 3 }}>
                   Open Tickets Page
                 </Button>
               </Box>
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
               <Typography sx={{ color: "text.secondary", fontWeight: 700, lineHeight: 1.7, mb: 3 }}>{selectedAlert.message}</Typography>
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
                 <Button onClick={() => setAlertDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 900, textTransform: "none" }}>Cancel</Button>
-                <Button variant="contained" onClick={handleAlertAction} sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", borderRadius: "12px", px: 3 }}>
+                <Button variant="contained" onClick={handleAlertAction} sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", px: 3, "&:hover": { bgcolor: "#222222" } }}>
                   {selectedAlert.actionText}
                 </Button>
               </Box>
@@ -339,7 +339,7 @@ const AlertBox = ({ alert, onOpen, onDismiss }) => {
 
 const DialogHeader = ({ icon, title, subtitle, onClose, danger = false }) => (
   <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
-    <Box sx={{ width: 54, height: 54, borderRadius: "16px", background: danger ? "linear-gradient(135deg, #991B1B, #DC2626)" : "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}>{icon}</Box>
+    <Box sx={{ width: 48, height: 48, borderRadius: "12px", bgcolor: danger ? "#EF4444" : "#111111", color: danger ? "#FFF" : "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>{icon}</Box>
     <Box sx={{ flex: 1 }}>
       <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "text.primary" }}>{title}</Typography>
       <Typography sx={{ mt: 0.5, color: "text.secondary", fontWeight: 700, lineHeight: 1.5 }}>{subtitle}</Typography>

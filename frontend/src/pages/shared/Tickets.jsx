@@ -205,14 +205,8 @@ const Tickets = () => {
   };
 
   const inputStyles = {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: "12px", fontWeight: 600,
-      "& fieldset": { borderColor: "divider" },
-      "&:hover fieldset": { borderColor: "text.disabled" },
-      "&.Mui-focused fieldset": { borderColor: "#0F766E", borderWidth: "2px" },
-    },
+    "& .MuiOutlinedInput-root": { borderRadius: "12px", fontWeight: 600 },
     "& .MuiInputLabel-root": { fontWeight: 700 },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#0F766E" },
   };
 
   const selectSx = {
@@ -244,12 +238,7 @@ const Tickets = () => {
               variant="contained"
               startIcon={<AddRounded />}
               onClick={() => setOpen(true)}
-              sx={{
-                background: "linear-gradient(135deg, #1E3A8A, #0F766E)",
-                color: "#ffffff", fontWeight: 800, textTransform: "none", px: 3, py: 1.2, borderRadius: "12px",
-                boxShadow: "0 10px 22px rgba(15,118,110,0.28)",
-                "&:hover": { transform: "translateY(-2px)", boxShadow: "0 16px 28px rgba(15,118,110,0.36)", background: "linear-gradient(135deg, #1D4ED8, #0D9488)" },
-              }}
+              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 3, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}
             >
               Raise Ticket
             </Button>
@@ -290,7 +279,7 @@ const Tickets = () => {
 
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="40vh">
-          <CircularProgress sx={{ color: "#0F766E" }} />
+          <CircularProgress color="inherit" />
         </Box>
       ) : filteredTickets.length === 0 ? (
         <Paper sx={{ p: 6, textAlign: "center", borderRadius: "24px", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider" }}>
@@ -382,7 +371,7 @@ const Tickets = () => {
                     <Button
                       variant="text" endIcon={<TimelineRounded />}
                       onClick={() => handleTimelineOpen(ticket)}
-                      sx={{ color: "#0F766E", fontWeight: 800, textTransform: "none", p: 0, "&:hover": { background: "none", color: "#0D9488", textDecoration: "underline" } }}
+                      sx={{ color: "text.secondary", fontWeight: 800, p: 0, "&:hover": { background: "none", color: "text.primary", textDecoration: "underline" } }}
                     >
                       Timeline
                     </Button>
@@ -402,7 +391,7 @@ const Tickets = () => {
       >
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3.5, display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 54, height: 54, borderRadius: "16px", background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>
               <AssignmentRounded />
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -463,7 +452,7 @@ const Tickets = () => {
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 5, pt: 3, borderTop: 1, borderColor: "divider" }}>
               <Button onClick={() => setOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, textTransform: "none", px: 3 }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting} startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : null}
-                sx={{ background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", fontWeight: 900, textTransform: "none", px: 4, py: 1.2, borderRadius: "12px", boxShadow: "0 8px 20px rgba(15,118,110,0.25)" }}>
+                sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}>
                 {submitting ? "Submitting..." : "Submit Ticket"}
               </Button>
             </Box>
@@ -499,7 +488,7 @@ const Tickets = () => {
           <>
             <DialogTitle sx={{ p: 0 }}>
               <Box sx={{ p: 3.5, display: "flex", alignItems: "flex-start", gap: 2 }}>
-                <Box sx={{ width: 56, height: 56, borderRadius: "16px", background: "linear-gradient(135deg, #1E3A8A, #0F766E)", color: "#FFFFFF", display: "grid", placeItems: "center", flexShrink: 0 }}><TimelineRounded /></Box>
+                <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}><TimelineRounded /></Box>
                 <Box sx={{ flex: 1 }}>
                   <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "text.primary" }}>Ticket Timeline</Typography>
                   <Typography sx={{ color: "text.secondary", fontSize: "14px", fontWeight: 700, mt: 0.5 }}>{selectedTicket.ticketId} • {selectedTicket.asset?.name || selectedTicket.itemLabel || selectedTicket.deviceRequestRef?.itemRequested || "Unknown Asset"}</Typography>
@@ -547,7 +536,7 @@ const Tickets = () => {
       </Dialog>
 
       <Snackbar open={!!snackbarMessage} autoHideDuration={4000} onClose={() => setSnackbarMessage("")} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
-        <Alert severity="success" variant="filled" sx={{ bgcolor: "#0F766E", color: "#FFFFFF", borderRadius: "14px", fontWeight: 800 }}>{snackbarMessage}</Alert>
+        <Alert severity="success" variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>{snackbarMessage}</Alert>
       </Snackbar>
     </Box>
   );

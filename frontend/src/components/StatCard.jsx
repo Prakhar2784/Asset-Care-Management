@@ -1,94 +1,48 @@
 import { Box, Paper, Typography } from "@mui/material";
 
-const StatCard = ({ title, value, subtitle, icon, color = "#4f46e5" }) => {
-  return (
-    <Paper
-      sx={{
-        p: { xs: 3, md: 3.5 },
-        borderRadius: 4,
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
-        bgcolor: "background.paper",
-        border: 1,
-        borderColor: "divider",
-        boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.05)",
-        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        display: "flex",
-        flexDirection: "column",
-        "&:hover": {
-          transform: "translateY(-6px)",
-          boxShadow: "0 20px 40px -10px rgba(15, 23, 42, 0.1)",
-          borderColor: color
-        }
-      }}
-    >
-      <Box
-        sx={{
-          position: "absolute",
-          right: -30,
-          top: -30,
-          width: 140,
-          height: 140,
-          borderRadius: "50%",
-          background: `radial-gradient(circle, ${color}15 0%, transparent 70%)`,
-          pointerEvents: "none"
-        }}
-      />
+const StatCard = ({ title, value, subtitle, icon, color = "#737373" }) => (
+  <Paper sx={{
+    p: 3,
+    borderRadius: "20px",
+    height: "100%",
+    bgcolor: "background.paper",
+    border: "1px solid",
+    borderColor: "divider",
+    display: "flex",
+    flexDirection: "column",
+    transition: "all 0.2s ease",
+    position: "relative",
+    overflow: "hidden",
+    "&:hover": { transform: "translateY(-4px)", boxShadow: "0 20px 48px rgba(0,0,0,0.08)", borderColor: color },
+  }}>
+    {/* Faint accent circle */}
+    <Box sx={{
+      position: "absolute",
+      right: -24,
+      top: -24,
+      width: 100,
+      height: 100,
+      borderRadius: "50%",
+      bgcolor: color,
+      opacity: 0.06,
+      pointerEvents: "none",
+    }} />
 
-      <Box
-        sx={{
-          width: 56,
-          height: 56,
-          borderRadius: 3,
-          display: "grid",
-          placeItems: "center",
-          color: "#ffffff",
-          background: `linear-gradient(135deg, ${color}, #0ea5e9)`,
-          mb: 3,
-          boxShadow: `0 8px 16px ${color}30`
-        }}
-      >
-        {icon}
-      </Box>
-
-      <Typography
-        sx={{
-          color: "text.secondary",
-          fontWeight: 700,
-          fontSize: 13,
-          textTransform: "uppercase",
-          letterSpacing: "0.5px"
-        }}
-      >
+    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
+      <Typography sx={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", color: "text.secondary" }}>
         {title}
       </Typography>
+      <Box sx={{ color, opacity: 0.55, "& svg": { fontSize: 22 } }}>{icon}</Box>
+    </Box>
 
-      <Typography
-        sx={{
-          fontSize: "32px",
-          fontWeight: 900,
-          color: "text.primary",
-          mt: 1,
-          mb: 0.5,
-          letterSpacing: "-1px",
-          lineHeight: 1
-        }}
-      >
-        {value}
-      </Typography>
+    <Typography sx={{ fontSize: "40px", fontWeight: 950, color: "text.primary", lineHeight: 1, letterSpacing: "-2px", mb: 0.5 }}>
+      {value}
+    </Typography>
 
-      <Typography
-        sx={{
-          color: "text.secondary",
-          fontSize: 14,
-          fontWeight: 500
-        }}
-      >
-        {subtitle}
-      </Typography>
-    </Paper>
-  );
-};
+    <Typography sx={{ fontSize: 12.5, color: "text.secondary", fontWeight: 500, mt: "auto", pt: 1.5, borderTop: "1px solid", borderColor: "divider" }}>
+      {subtitle}
+    </Typography>
+  </Paper>
+);
 
 export default StatCard;

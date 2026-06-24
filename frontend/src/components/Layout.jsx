@@ -1,120 +1,171 @@
 import { useState, useEffect, useCallback } from "react";
-import { AppBar, Avatar, Badge, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery } from "@mui/material";
-import { ApartmentRounded, ApprovalRounded, AssignmentIndRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded, HistoryRounded, AssessmentRounded, SettingsRounded } from "@mui/icons-material";
+import {
+  AppBar, Avatar, Badge, Box, Button, Dialog, DialogActions,
+  DialogContent, DialogTitle, Drawer, IconButton, List,
+  ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography,
+  useMediaQuery,
+} from "@mui/material";
+import {
+  ApartmentRounded, ApprovalRounded, AssignmentIndRounded, BusinessRounded,
+  ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded,
+  NotificationsRounded, LogoutRounded, HistoryRounded, AssessmentRounded,
+  SettingsRounded, AutoAwesomeRounded, ChevronRightRounded,
+} from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAppTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import GlobalSearch from "./GlobalSearch";
 
-const drawerWidth = 280;
+const DRAWER_W = 256;
+const ACCENT = "#CBFA57";
 
 const adminMenu = [
-  { text: "System Dashboard", path: "/admin/dashboard", icon: <DashboardRounded /> },
-  { text: "Asset Registry", path: "/admin/assets", icon: <Inventory2Rounded /> },
-  { text: "Assigned Devices", path: "/admin/assignments", icon: <AssignmentIndRounded /> },
-  { text: "All Tickets", path: "/tickets", icon: <ConfirmationNumberRounded /> },
-  { text: "Approvals", path: "/admin/approvals", icon: <ApprovalRounded /> },
-  { text: "Vendors", path: "/admin/vendors", icon: <BusinessRounded /> },
-  { text: "Departments", path: "/admin/departments", icon: <ApartmentRounded /> },
-  { text: "Reports", path: "/admin/reports", icon: <AssessmentRounded /> },
-  { text: "Audit Logs", path: "/admin/audit", icon: <HistoryRounded /> },
-  { text: "Settings", path: "/settings", icon: <SettingsRounded /> },
+  { text: "Dashboard",       path: "/admin/dashboard",    icon: <DashboardRounded /> },
+  { text: "Asset Registry",  path: "/admin/assets",       icon: <Inventory2Rounded /> },
+  { text: "Assigned Devices",path: "/admin/assignments",  icon: <AssignmentIndRounded /> },
+  { text: "All Tickets",     path: "/tickets",            icon: <ConfirmationNumberRounded /> },
+  { text: "Approvals",       path: "/admin/approvals",    icon: <ApprovalRounded /> },
+  { text: "Vendors",         path: "/admin/vendors",      icon: <BusinessRounded /> },
+  { text: "Departments",     path: "/admin/departments",  icon: <ApartmentRounded /> },
+  { text: "Reports",         path: "/admin/reports",      icon: <AssessmentRounded /> },
+  { text: "Audit Logs",      path: "/admin/audit",        icon: <HistoryRounded /> },
+  { text: "Settings",        path: "/settings",           icon: <SettingsRounded /> },
 ];
 
 const employeeMenu = [
-  { text: "My Portal", path: "/employee/portal", icon: <DashboardRounded /> },
-  { text: "My Tickets", path: "/tickets", icon: <ConfirmationNumberRounded /> },
-  { text: "Settings", path: "/settings", icon: <SettingsRounded /> },
+  { text: "My Portal",  path: "/employee/portal", icon: <DashboardRounded /> },
+  { text: "My Tickets", path: "/tickets",          icon: <ConfirmationNumberRounded /> },
+  { text: "Settings",   path: "/settings",         icon: <SettingsRounded /> },
 ];
 
 const Sidebar = ({ onClose }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate   = useNavigate();
+  const location   = useLocation();
   const { logout, currentUser } = useAuth();
-  const { isDark } = useAppTheme();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  const handleNav = (path) => {
-    navigate(path);
-    if (onClose) onClose();
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const menu = currentUser?.role === "admin" ? adminMenu : employeeMenu;
+  const userName    = currentUser?.name || "User";
+  const userInitials = userName.substring(0, 2).toUpperCase();
+  const isAdmin     = currentUser?.role === "admin";
 
-  const bg = isDark ? '#0f172a' : '#ffffff';
-  const border = isDark ? '#1e293b' : '#e2e8f0';
-  const textPrimary = isDark ? '#f1f5f9' : '#0f172a';
-  const textMuted = isDark ? '#94a3b8' : '#64748b';
-  const hoverBg = isDark ? '#1e293b' : '#f1f5f9';
-  const activeBg = isDark ? '#1e3a5f' : '#eef2ff';
-  const activeColor = isDark ? '#818cf8' : '#4f46e5';
+  const handleNav = (path) => { navigate(path); if (onClose) onClose(); };
+  const isActive  = (path) =>
+    location.pathname === path || (path !== "/" && location.pathname.startsWith(path));
 
   return (
-    <Box sx={{ height: "100%", color: textPrimary, bgcolor: bg, borderRight: `1px solid ${border}`, display: "flex", flexDirection: "column", transition: "background 0.2s" }}>
-      <Box sx={{ p: 3, mb: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box sx={{ width: 48, height: 48, borderRadius: 3, background: "linear-gradient(135deg, #4f46e5, #0ea5e9)", color: "#ffffff", display: "grid", placeItems: "center", boxShadow: "0 8px 16px rgba(79, 70, 229, 0.2)" }}>
-            {currentUser?.role === "admin" ? <ShieldRounded fontSize="medium" /> : <PersonRounded fontSize="medium" />}
+    <Box sx={{ height: "100%", bgcolor: "#111111", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+      {/* Brand */}
+      <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid #1E1E1E" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ width: 36, height: 36, borderRadius: "10px", bgcolor: ACCENT, display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Inventory2Rounded sx={{ fontSize: 19, color: "#111111" }} />
           </Box>
           <Box>
-            <Typography fontSize={20} fontWeight={800} letterSpacing="-0.5px" color={textPrimary}>AssetCare</Typography>
-            <Typography fontSize={12} color="#0ea5e9" fontWeight={700} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              {currentUser?.role === "admin" ? "Admin Access" : "Employee Portal"}
+            <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#FFFFFF", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
+              AssetCare Pro
+            </Typography>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#444444", textTransform: "uppercase", letterSpacing: "0.9px" }}>
+              {isAdmin ? "Admin Panel" : "Employee Portal"}
             </Typography>
           </Box>
         </Box>
       </Box>
 
-      <List sx={{ px: 2, flex: 1 }}>
-        {menu.map((item) => {
-          const active = location.pathname.includes(item.path);
-          return (
-            <ListItemButton
-              key={item.text}
-              onClick={() => handleNav(item.path)}
-              sx={{
-                borderRadius: 3, mb: 1, py: 1.5,
-                color: active ? activeColor : textMuted,
-                bgcolor: active ? activeBg : "transparent",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": { bgcolor: active ? activeBg : hoverBg, color: active ? activeColor : textPrimary, transform: "translateX(4px)" },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>{item.icon}</ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                primaryTypographyProps={{ fontWeight: active ? 700 : 600, fontSize: 15 }}
-              />
-            </ListItemButton>
-          );
-        })}
-      </List>
+      {/* Nav */}
+      <Box sx={{ flex: 1, overflowY: "auto", py: 2, px: 1.5, "&::-webkit-scrollbar": { width: 0 } }}>
+        <Typography sx={{ fontSize: 10, fontWeight: 800, color: "#333333", letterSpacing: "1.4px", textTransform: "uppercase", px: 1.5, mb: 1.5 }}>
+          Menu
+        </Typography>
 
-      <Box sx={{ p: 3 }}>
-        <Button fullWidth startIcon={<LogoutRounded />} onClick={() => setLogoutOpen(true)}
-          sx={{ py: 1.5, color: textMuted, borderRadius: 3, border: `1px solid ${border}`, fontWeight: 700, "&:hover": { bgcolor: "#fee2e2", borderColor: "#fca5a5", color: "#ef4444" } }}>
-          Secure Logout
-        </Button>
+        <List disablePadding>
+          {menu.map((item) => {
+            const active = isActive(item.path);
+            return (
+              <ListItemButton
+                key={item.text}
+                onClick={() => handleNav(item.path)}
+                sx={{
+                  borderRadius: "10px",
+                  mb: 0.5,
+                  py: 1,
+                  px: 1.5,
+                  color: active ? "#FFFFFF" : "#5A5A5A",
+                  bgcolor: active ? "#1A1A1A" : "transparent",
+                  borderLeft: `2px solid ${active ? ACCENT : "transparent"}`,
+                  transition: "all 0.15s ease",
+                  "&:hover": { bgcolor: "#181818", color: "#BBBBBB" },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 34, color: active ? ACCENT : "#3A3A3A", "& svg": { fontSize: 18 } }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 700 : 500, color: "inherit" }}
+                />
+                {active && <ChevronRightRounded sx={{ fontSize: 16, color: ACCENT, opacity: 0.7 }} />}
+              </ListItemButton>
+            );
+          })}
+        </List>
       </Box>
 
-      <Dialog open={logoutOpen} onClose={() => setLogoutOpen(false)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: "20px", bgcolor: bg, color: textPrimary } }}>
-        <DialogTitle sx={{ fontWeight: 900, fontSize: 18, color: textPrimary }}>Sign Out</DialogTitle>
-        <DialogContent>
-          <Typography color={textMuted} fontWeight={600}>
-            Are you sure you want to sign out of AssetCare?
+      {/* AI Promo Card */}
+      <Box sx={{ mx: 1.5, mb: 2 }}>
+        <Box sx={{ borderRadius: "14px", background: "linear-gradient(135deg, #1A1A1A, #212121)", border: "1px solid #2A2A2A", p: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+            <Box sx={{ width: 24, height: 24, borderRadius: "6px", bgcolor: ACCENT, display: "grid", placeItems: "center" }}>
+              <AutoAwesomeRounded sx={{ fontSize: 13, color: "#111111" }} />
+            </Box>
+            <Typography sx={{ fontSize: 11, fontWeight: 900, color: "#FFFFFF", letterSpacing: "0.5px" }}>AI Analytics</Typography>
+          </Box>
+          <Typography sx={{ fontSize: 11.5, color: "#555555", lineHeight: 1.55, mb: 1.5 }}>
+            Predictive insights on asset lifecycle and warranty expiry.
           </Typography>
+          <Button
+            fullWidth size="small"
+            sx={{ bgcolor: ACCENT, color: "#111111", fontWeight: 900, fontSize: 11, borderRadius: "8px", py: 0.7, "&:hover": { bgcolor: "#B8E84E" } }}
+          >
+            Explore Now →
+          </Button>
+        </Box>
+      </Box>
+
+      {/* User Row + Logout */}
+      <Box sx={{ borderTop: "1px solid #1A1A1A", px: 2, py: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Avatar sx={{ width: 34, height: 34, bgcolor: "#1E1E1E", color: ACCENT, fontWeight: 900, fontSize: 12 }}>
+            {userInitials}
+          </Avatar>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#E0E0E0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {userName}
+            </Typography>
+            <Typography sx={{ fontSize: 11, color: "#444444", textTransform: "capitalize" }}>
+              {currentUser?.role || "user"}
+            </Typography>
+          </Box>
+          <IconButton size="small" onClick={() => setLogoutOpen(true)}
+            sx={{ color: "#3A3A3A", "&:hover": { color: "#EF4444", bgcolor: "#1C1C1C" } }}>
+            <LogoutRounded sx={{ fontSize: 17 }} />
+          </IconButton>
+        </Box>
+      </Box>
+
+      {/* Logout Confirm */}
+      <Dialog open={logoutOpen} onClose={() => setLogoutOpen(false)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: "16px", bgcolor: "background.paper" } }}>
+        <DialogTitle sx={{ fontWeight: 900, fontSize: 18, color: "text.primary" }}>Sign Out</DialogTitle>
+        <DialogContent>
+          <Typography color="text.secondary" fontWeight={500}>Are you sure you want to sign out?</Typography>
         </DialogContent>
         <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button onClick={() => setLogoutOpen(false)} sx={{ fontWeight: 700, textTransform: "none", color: textMuted }}>Cancel</Button>
-          <Button variant="contained" onClick={handleLogout}
-            sx={{ bgcolor: "#ef4444", "&:hover": { bgcolor: "#dc2626" }, fontWeight: 900, textTransform: "none", borderRadius: "10px", px: 3 }}>
+          <Button onClick={() => setLogoutOpen(false)} sx={{ fontWeight: 700, color: "text.secondary" }}>Cancel</Button>
+          <Button variant="contained" onClick={() => { logout(); navigate("/login"); }}
+            sx={{ bgcolor: "#EF4444", "&:hover": { bgcolor: "#DC2626" }, fontWeight: 900, borderRadius: "8px", px: 3 }}>
             Sign Out
           </Button>
         </DialogActions>
@@ -123,98 +174,119 @@ const Sidebar = ({ onClose }) => {
   );
 };
 
+/* ─── Page-title map ──────────────────────────── */
+const PAGE_TITLES = {
+  "/admin/dashboard": "Dashboard",
+  "/admin/assets/add": "Register Asset",
+  "/admin/assets": "Asset Registry",
+  "/admin/assignments": "Assigned Devices",
+  "/admin/approvals": "Approvals",
+  "/admin/vendors": "Vendors",
+  "/admin/departments": "Departments",
+  "/admin/reports": "Reports",
+  "/admin/audit": "Audit Logs",
+  "/tickets": "Tickets",
+  "/notifications": "Notifications",
+  "/settings": "Settings",
+  "/employee/portal": "My Portal",
+};
+
 const Layout = () => {
   const isMobile = useMediaQuery("(max-width:900px)");
-  const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const { currentUser } = useAuth();
   const { isDark } = useAppTheme();
   const navigate = useNavigate();
-
-  const userName = currentUser?.name || "User";
-  const userRole = currentUser?.role === "admin" ? "Root Access" : "Standard User";
-  const userInitials = userName.substring(0, 2).toUpperCase();
-
-  const appBarBg = isDark
-    ? 'rgba(15, 23, 42, 0.92)'
-    : 'rgba(255, 255, 255, 0.8)';
-  const appBarBorder = isDark ? '#1e293b' : '#e2e8f0';
-  const textPrimary = isDark ? '#f1f5f9' : '#0f172a';
-  const textMuted = isDark ? '#94a3b8' : '#64748b';
+  const location = useLocation();
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const { data } = await api.get('/notifications/unread-count');
+      const { data } = await api.get("/notifications/unread-count");
       setUnreadCount(data.count);
-    } catch {
-      // silently ignore
-    }
+    } catch { /* silent */ }
   }, []);
 
   useEffect(() => {
     if (currentUser) {
       fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 10000);
-      // Re-fetch instantly when any notification action happens on the Notifications page
-      window.addEventListener('notifications-changed', fetchUnreadCount);
-      return () => {
-        clearInterval(interval);
-        window.removeEventListener('notifications-changed', fetchUnreadCount);
-      };
+      const iv = setInterval(fetchUnreadCount, 10000);
+      window.addEventListener("notifications-changed", fetchUnreadCount);
+      return () => { clearInterval(iv); window.removeEventListener("notifications-changed", fetchUnreadCount); };
     } else {
       setUnreadCount(0);
     }
   }, [currentUser, fetchUnreadCount]);
 
+  const userInitials = (currentUser?.name || "U").substring(0, 2).toUpperCase();
+
+  const pageTitle = Object.entries(PAGE_TITLES).find(([k]) =>
+    location.pathname === k || (k !== "/" && location.pathname.startsWith(k))
+  )?.[1] ?? "AssetCare Pro";
+
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: isDark ? '#0f172a' : '#f8fafc' }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: "background.default" }}>
+
+      {/* Desktop sidebar */}
       {!isMobile && (
-        <Drawer variant="permanent" sx={{ width: drawerWidth, "& .MuiDrawer-paper": { width: drawerWidth, border: 0, bgcolor: "transparent" } }}>
+        <Drawer variant="permanent"
+          sx={{ width: DRAWER_W, flexShrink: 0, "& .MuiDrawer-paper": { width: DRAWER_W, border: 0, bgcolor: "transparent" } }}>
           <Sidebar />
         </Drawer>
       )}
 
+      {/* Mobile drawer */}
       {isMobile && (
-        <Drawer open={open} onClose={() => setOpen(false)}>
-          <Box sx={{ width: 280, height: "100%" }}><Sidebar onClose={() => setOpen(false)} /></Box>
+        <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}
+          PaperProps={{ sx: { width: DRAWER_W, bgcolor: "transparent", border: 0 } }}>
+          <Sidebar onClose={() => setDrawerOpen(false)} />
         </Drawer>
       )}
 
+      {/* Right side */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <AppBar position="sticky" elevation={0} sx={{ top: 0, bgcolor: appBarBg, backdropFilter: "blur(16px)", borderBottom: `1px solid ${appBarBorder}`, color: textPrimary, transition: "background 0.2s" }}>
-          <Toolbar sx={{ px: { xs: 2, md: 4 }, py: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Box display="flex" alignItems="center">
-              {isMobile && <IconButton onClick={() => setOpen(true)} sx={{ mr: 2, color: textPrimary }}><MenuRounded /></IconButton>}
+
+        {/* AppBar */}
+        <AppBar position="sticky" elevation={0} sx={{
+          bgcolor: isDark ? "rgba(13,13,13,0.94)" : "rgba(236,234,227,0.90)",
+          backdropFilter: "blur(20px)",
+          borderBottom: "1px solid",
+          borderColor: isDark ? "#1E1E1E" : "#D8D3C8",
+          color: "text.primary",
+        }}>
+          <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: "60px !important", display: "flex", justifyContent: "space-between" }}>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              {isMobile && (
+                <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "text.secondary", mr: 0.5 }}>
+                  <MenuRounded />
+                </IconButton>
+              )}
+              <Typography sx={{ fontWeight: 800, fontSize: 17, color: "text.primary", letterSpacing: "-0.4px" }}>
+                {pageTitle}
+              </Typography>
             </Box>
 
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <GlobalSearch />
-              <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right", mx: 1 }}>
-                <Typography fontWeight={700} fontSize={15} color={textPrimary}>{userName}</Typography>
-                <Typography fontSize={13} color={textMuted} fontWeight={500}>{userRole}</Typography>
-              </Box>
-              <Avatar sx={{ bgcolor: isDark ? '#1e3a5f' : '#eef2ff', color: isDark ? '#818cf8' : '#4f46e5', fontWeight: 800 }}>{userInitials}</Avatar>
-              <IconButton
-                onClick={() => navigate('/notifications')}
-                sx={{ color: textMuted, "&:hover": { color: "#4f46e5", bgcolor: isDark ? '#1e293b' : '#eef2ff' } }}
-              >
-                <Badge badgeContent={unreadCount || null} color="error">
+              <IconButton onClick={() => navigate("/notifications")}
+                sx={{ color: "text.secondary", "&:hover": { bgcolor: isDark ? "#1C1C1C" : "#E4DFD5", color: "text.primary" } }}>
+                <Badge badgeContent={unreadCount || null} color="error"
+                  sx={{ "& .MuiBadge-badge": { fontSize: 10, minWidth: 16, height: 16 } }}>
                   <NotificationsRounded />
                 </Badge>
               </IconButton>
+              <Avatar
+                onClick={() => navigate("/settings")}
+                sx={{ width: 34, height: 34, ml: 0.5, bgcolor: isDark ? "#222222" : "#141414", color: ACCENT, fontWeight: 900, fontSize: 12, cursor: "pointer", "&:hover": { opacity: 0.85 } }}>
+                {userInitials}
+              </Avatar>
             </Box>
           </Toolbar>
         </AppBar>
 
-        <Box
-          sx={{
-            p: { xs: 3, md: 5 },
-            flex: 1,
-            color: 'text.primary',
-            animation: "fadeIn 0.6s ease-out forwards",
-            "@keyframes fadeIn": { from: { opacity: 0, transform: "translateY(10px)" }, to: { opacity: 1, transform: "translateY(0)" } }
-          }}
-        >
+        {/* Page content */}
+        <Box sx={{ flex: 1, p: { xs: 3, md: 4 }, color: "text.primary" }}>
           <Outlet />
         </Box>
       </Box>

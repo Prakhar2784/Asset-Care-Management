@@ -233,11 +233,8 @@ const Vendors = () => {
       fontWeight: 700,
       color: "text.primary",
       "& fieldset": { borderColor: "divider" },
-      "&:hover fieldset": { borderColor: "#0F766E" },
-      "&.Mui-focused fieldset": { borderColor: "#0F766E", borderWidth: "2px" },
     },
     "& .MuiInputLabel-root": { color: "text.secondary", fontWeight: 700 },
-    "& .MuiInputLabel-root.Mui-focused": { color: "#0F766E" },
   };
 
   return (
@@ -249,16 +246,7 @@ const Vendors = () => {
             variant="contained"
             startIcon={<AddRounded />}
             onClick={openAddForm}
-            sx={{
-              background: "linear-gradient(135deg, #1E3A8A, #0F766E)",
-              color: "#fff",
-              fontWeight: 900,
-              borderRadius: "14px",
-              px: 3,
-              py: 1.2,
-              textTransform: "none",
-              boxShadow: "0 10px 22px rgba(15,118,110,0.25)",
-            }}
+            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "14px", px: 3, py: 1.2, "&:hover": { bgcolor: "#222222" } }}
           >
             Add Vendor
           </Button>
@@ -372,8 +360,8 @@ const Vendors = () => {
                       borderRadius: "12px",
                       fontWeight: 900,
                       textTransform: "none",
-                      borderColor: "#CBD5E1",
-                      color: "#1E3A8A",
+                      borderColor: "divider",
+                      color: "text.primary",
                     }}
                   >
                     View
@@ -381,7 +369,7 @@ const Vendors = () => {
 
                   <IconButton
                     onClick={() => openEditForm(vendor)}
-                    sx={{ border: "1px solid #CBD5E1", borderRadius: "12px", color: "#0F766E" }}
+                    sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px", color: "text.secondary" }}
                   >
                     <EditRounded />
                   </IconButton>
@@ -587,13 +575,7 @@ const Vendors = () => {
             variant="contained"
             onClick={handleSaveVendor}
             disabled={saving}
-            sx={{
-              borderRadius: "12px",
-              background: "linear-gradient(135deg, #1E3A8A, #0F766E)",
-              fontWeight: 900,
-              textTransform: "none",
-              px: 3,
-            }}
+            sx={{ borderRadius: "12px", bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 3, "&:hover": { bgcolor: "#222222" } }}
           >
             {saving ? "Saving..." : editingVendorId ? "Update Vendor" : "Save Vendor"}
           </Button>
@@ -704,7 +686,7 @@ const SummaryCard = ({ title, value }) => (
     <Typography sx={{ color: "text.secondary", fontSize: 13, fontWeight: 900 }}>
       {title}
     </Typography>
-    <Typography sx={{ mt: 0.6, color: "#1E3A8A", fontSize: 30, fontWeight: 950 }}>
+    <Typography sx={{ mt: 0.6, color: "text.primary", fontSize: 30, fontWeight: 950, letterSpacing: "-1px", lineHeight: 1 }}>
       {value}
     </Typography>
   </Paper>
@@ -722,7 +704,7 @@ const FormBlock = ({ title, children }) => (
       borderColor: "divider",
     }}
   >
-    <Typography sx={{ fontWeight: 950, fontSize: 17, mb: 2, color: "#1E3A8A" }}>
+    <Typography sx={{ fontWeight: 900, fontSize: 16, mb: 2, color: "text.primary" }}>
       {title}
     </Typography>
     {children}
