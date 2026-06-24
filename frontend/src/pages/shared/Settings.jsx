@@ -18,7 +18,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
 
 function TabPanel({ value, index, children }) {
-  return value === index ? <Box sx={{ pt: 3 }}>{children}</Box> : null;
+  return value === index ? <Box sx={{ pt: 4 }}>{children}</Box> : null;
 }
 
 // ─── Profile Tab ───────────────────────────────────────────────────────────────
@@ -62,45 +62,45 @@ function ProfileTab({ currentUser }) {
   };
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={4}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={700} fontSize={16} mb={2.5}>Personal Information</Typography>
-          <TextField label="Full Name" value={name} onChange={e => setName(e.target.value)} fullWidth sx={{ mb: 2 }} />
-          <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} fullWidth sx={{ mb: 2 }} placeholder="+91 98765 43210" />
-          <TextField label="Email Address" value={currentUser?.email || ''} fullWidth sx={{ mb: 2 }} disabled helperText="Email cannot be changed" />
-          <TextField label="Role" value={currentUser?.role || ''} fullWidth sx={{ mb: 3 }} disabled />
-          {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ mb: 2 }}>{msg}</Alert>}
+        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={800} fontSize={17} mb={3} color="text.primary">Personal Information</Typography>
+          <TextField label="Full Name" value={name} onChange={e => setName(e.target.value)} fullWidth sx={{ mb: 3 }} />
+          <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} fullWidth sx={{ mb: 3 }} placeholder="+91 98765 43210" />
+          <TextField label="Email Address" value={currentUser?.email || ''} fullWidth sx={{ mb: 3 }} disabled helperText="Email cannot be changed" />
+          <TextField label="Role" value={currentUser?.role || ''} fullWidth sx={{ mb: 4 }} disabled />
+          {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ mb: 3 }}>{msg}</Alert>}
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
-            onClick={handleSave} disabled={saving} sx={{ fontWeight: 700, borderRadius: 2 }}>
+            onClick={handleSave} disabled={saving} sx={{ fontWeight: 700, borderRadius: 2, px: 3, py: 1.2 }}>
             Save Changes
           </Button>
         </Paper>
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={700} fontSize={16} mb={2.5}>Change Password</Typography>
+        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={800} fontSize={17} mb={3} color="text.primary">Change Password</Typography>
           <TextField
             label="Current Password" type={showCurr ? 'text' : 'password'}
-            value={current} onChange={e => setCurrent(e.target.value)} fullWidth sx={{ mb: 2 }}
+            value={current} onChange={e => setCurrent(e.target.value)} fullWidth sx={{ mb: 3 }}
             InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowCurr(v => !v)}>{showCurr ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }}
           />
           <TextField
             label="New Password" type={showNew ? 'text' : 'password'}
-            value={newPass} onChange={e => setNewPass(e.target.value)} fullWidth sx={{ mb: 2 }}
+            value={newPass} onChange={e => setNewPass(e.target.value)} fullWidth sx={{ mb: 3 }}
             InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowNew(v => !v)}>{showNew ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }}
           />
           <TextField
             label="Confirm New Password" type="password"
-            value={confirm} onChange={e => setConfirm(e.target.value)} fullWidth sx={{ mb: 2 }}
+            value={confirm} onChange={e => setConfirm(e.target.value)} fullWidth sx={{ mb: 4 }}
             error={confirm.length > 0 && newPass !== confirm}
             helperText={confirm.length > 0 && newPass !== confirm ? 'Passwords do not match' : ''}
           />
-          {passMsg && <Alert severity={passMsg.startsWith('✓') ? 'success' : 'error'} sx={{ mb: 2 }}>{passMsg}</Alert>}
+          {passMsg && <Alert severity={passMsg.startsWith('✓') ? 'success' : 'error'} sx={{ mb: 3 }}>{passMsg}</Alert>}
           <Button variant="outlined" startIcon={passLoading ? <CircularProgress size={16} /> : <LockRounded />}
             onClick={handleChangePass} disabled={passLoading || !current || !newPass || !confirm}
-            sx={{ fontWeight: 700, borderRadius: 2 }}>
+            sx={{ fontWeight: 700, borderRadius: 2, px: 3, py: 1.2 }}>
             Change Password
           </Button>
         </Paper>
@@ -113,11 +113,11 @@ function ProfileTab({ currentUser }) {
 function AppearanceTab() {
   const { mode, toggleMode, isDark } = useAppTheme();
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={4}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={700} fontSize={16} mb={1} color="text.primary">Theme</Typography>
-          <Typography fontSize={13} color="text.secondary" mb={3}>
+        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Theme</Typography>
+          <Typography fontSize={14} color="text.secondary" mb={3}>
             Choose between light and dark mode for the application interface.
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
@@ -260,9 +260,9 @@ function ReportsTab() {
 
   return (
     <Box>
-      <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider', mb: 3 }}>
-        <Typography fontWeight={700} fontSize={16} mb={0.5}>Ticket Lifecycle Report</Typography>
-        <Typography fontSize={13} color="text.secondary" mb={3}>
+      <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider', mb: 4 }}>
+        <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Ticket Lifecycle Report</Typography>
+        <Typography fontSize={14} color="text.secondary" mb={3}>
           Full report of every ticket — from creation to resolution, including asset details, cost, resolution time, and personnel.
         </Typography>
 
@@ -316,9 +316,9 @@ function ReportsTab() {
         </Box>
       </Paper>
 
-      <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-        <Typography fontWeight={700} fontSize={16} mb={0.5}>Asset Registry Report</Typography>
-        <Typography fontSize={13} color="text.secondary" mb={2}>
+      <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+        <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Asset Registry Report</Typography>
+        <Typography fontSize={14} color="text.secondary" mb={3}>
           Complete snapshot of all active assets with assignment, warranty, and AMC details.
         </Typography>
         <Button
@@ -447,11 +447,11 @@ function DataTab({ currentUser }) {
   };
 
   return (
-    <Grid container spacing={3}>
+    <Grid container spacing={4}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={700} fontSize={16} mb={0.5}>Export My Data</Typography>
-          <Typography fontSize={13} color="text.secondary" mb={3}>
+        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Export My Data</Typography>
+          <Typography fontSize={14} color="text.secondary" mb={3}>
             Download a complete copy of all your data — profile, tickets, device requests, notifications, and assigned assets — as a JSON file.
           </Typography>
           <Button
@@ -467,9 +467,9 @@ function DataTab({ currentUser }) {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={700} fontSize={16} mb={0.5}>Data Retention Policy</Typography>
-          <Typography fontSize={13} color="text.secondary" mb={2}>
+        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Data Retention Policy</Typography>
+          <Typography fontSize={14} color="text.secondary" mb={2.5}>
             Your data is managed according to these retention rules:
           </Typography>
           {[
@@ -487,8 +487,8 @@ function DataTab({ currentUser }) {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={700} fontSize={16} mb={0.5}>Account Information</Typography>
+        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={800} fontSize={17} mb={2.5} color="text.primary">Account Information</Typography>
           {[
             ['Name', currentUser?.name],
             ['Email', currentUser?.email],
@@ -524,13 +524,13 @@ export default function Settings() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-        <Box sx={{ width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #1E3A8A, #0F766E)' }}>
-          <PersonRounded sx={{ color: 'white' }} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+        <Box sx={{ width: 52, height: 52, borderRadius: 2.5, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #1E3A8A, #0F766E)', flexShrink: 0 }}>
+          <PersonRounded sx={{ color: 'white', fontSize: 26 }} />
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px" sx={{ color: 'text.primary' }}>Settings</Typography>
-          <Typography variant="body2" color="text.secondary">Manage your profile, preferences, and data</Typography>
+          <Typography variant="h4" fontWeight={900} letterSpacing="-0.5px" sx={{ color: 'text.primary', lineHeight: 1.2 }}>Settings</Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>Manage your profile, preferences, and data</Typography>
         </Box>
       </Box>
 
@@ -540,14 +540,14 @@ export default function Settings() {
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default', '& .MuiTab-root': { fontWeight: 700, textTransform: 'none', minHeight: 52 } }}
+          sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default', '& .MuiTab-root': { fontWeight: 700, textTransform: 'none', minHeight: 56, fontSize: 14 } }}
         >
           {tabs.map((t, i) => (
             <Tab key={t.label} label={t.label} icon={t.icon} iconPosition="start" value={i} />
           ))}
         </Tabs>
 
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: { xs: 2.5, md: 4 } }}>
           <TabPanel value={tab} index={0}><ProfileTab currentUser={currentUser} /></TabPanel>
           <TabPanel value={tab} index={1}><AppearanceTab /></TabPanel>
           {isAdmin && <TabPanel value={tab} index={2}><ReportsTab /></TabPanel>}
