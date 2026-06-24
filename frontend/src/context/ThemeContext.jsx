@@ -1,24 +1,38 @@
-import { createContext, useContext, useState, useMemo } from 'react';
+import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { useAuth } from './AuthContext';
 
 const ThemeContext = createContext();
 
 export const useAppTheme = () => useContext(ThemeContext);
 
-export const ThemeProvider = ({ children }) => {
-  const [mode, setMode] = useState(() => localStorage.getItem('theme') || 'light');
+// Inner provider — lives inside AuthProvider so it can read currentUser
+const ThemeProviderInner = ({ children }) => {
+  const { currentUser } = useAuth();
+  // Key is per-user: each account has its own preference
+  const storageKey = currentUser?._id ? `theme_${currentUser._id}` : 'theme_guest';
+
+  const [mode, setMode] = useState(() => localStorage.getItem(storageKey) || 'light');
+
+  // When user changes (login / logout / switch account), load that user's preference
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey) || 'light';
+    setMode(saved);
+  }, [storageKey]);
 
   const toggleMode = () => {
     const next = mode === 'light' ? 'dark' : 'light';
     setMode(next);
-    localStorage.setItem('theme', next);
+    localStorage.setItem(storageKey, next);
   };
+
+  const isDark = mode === 'dark';
 
   const theme = useMemo(() => createTheme({
     palette: {
       mode,
-      ...(mode === 'dark' ? {
+      ...(isDark ? {
         primary: { main: '#6366f1' },
         background: { default: '#0f172a', paper: '#1e293b' },
         text: { primary: '#f1f5f9', secondary: '#94a3b8' },
@@ -35,21 +49,13 @@ export const ThemeProvider = ({ children }) => {
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
     },
     components: {
-      MuiPaper: {
-        styleOverrides: {
-          root: { backgroundImage: 'none' },
-        },
-      },
-      MuiAppBar: {
-        styleOverrides: {
-          root: { backgroundImage: 'none' },
-        },
-      },
+      MuiPaper: { styleOverrides: { root: { backgroundImage: 'none' } } },
+      MuiAppBar: { styleOverrides: { root: { backgroundImage: 'none' } } },
     },
   }), [mode]);
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleMode, isDark: mode === 'dark' }}>
+    <ThemeContext.Provider value={{ mode, toggleMode, isDark }}>
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         {children}
@@ -57,3 +63,6 @@ export const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
+
+// Outer wrapper — exported. Must be placed INSIDE AuthProvider.
+export const ThemeProvider = ({ children }) => <ThemeProviderInner>{children}</ThemeProviderInner>;

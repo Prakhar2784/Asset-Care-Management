@@ -7,12 +7,12 @@ import {
 import {
   PersonRounded, PaletteRounded, AssessmentRounded, SecurityRounded,
   DownloadRounded, Visibility, VisibilityOff, DarkModeRounded, LightModeRounded,
-  SaveRounded, LockRounded, DataObjectRounded, RefreshRounded
+  SaveRounded, LockRounded, PictureAsPdfRounded, RefreshRounded
 } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { saveAs } from 'file-saver';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -354,10 +354,86 @@ function DataTab({ currentUser }) {
     setExporting(true);
     try {
       const { data } = await api.get('/settings/export-data');
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      saveAs(blob, `assetcare-my-data-${Date.now()}.json`);
-      setToast('Data exported successfully.');
-    } catch {
+      const doc = new jsPDF();
+
+      // Header
+      doc.setFillColor(30, 58, 138);
+      doc.rect(0, 0, 210, 30, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+      doc.text('AssetCare Pro — My Data Export', 14, 14);
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal');
+      doc.text(`Exported: ${new Date().toLocaleString('en-IN')}`, 14, 23);
+      doc.setTextColor(0, 0, 0);
+
+      let y = 38;
+
+      // Profile section
+      doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(30, 58, 138);
+      doc.text('Profile Information', 14, y); y += 7;
+      doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      const profile = data.profile || {};
+      [['Name', profile.name], ['Email', profile.email], ['Role', profile.role], ['Department', profile.department], ['Phone', profile.phone || 'Not set']].forEach(([k, v]) => {
+        doc.setFont('helvetica', 'bold'); doc.text(k + ':', 14, y);
+        doc.setFont('helvetica', 'normal'); doc.text(String(v || '—'), 50, y);
+        y += 6;
+      });
+
+      y += 4;
+
+      // Assigned Assets
+      if (data.assignedAssets?.length) {
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
+        doc.text('Assigned Assets', 14, y); y += 4;
+        doc.setTextColor(0, 0, 0);
+        doc.autoTable({
+          startY: y,
+          head: [['Asset Name', 'Serial No.', 'Category', 'Status', 'Department']],
+          body: data.assignedAssets.map(a => [a.name, a.serialNumber, a.category, a.status, a.department]),
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [30, 58, 138] },
+          margin: { left: 14, right: 14 },
+        });
+        y = doc.lastAutoTable.finalY + 6;
+      }
+
+      // Tickets
+      if (data.tickets?.length) {
+        if (y > 230) { doc.addPage(); y = 20; }
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
+        doc.text('My Tickets', 14, y); y += 4;
+        doc.setTextColor(0, 0, 0);
+        doc.autoTable({
+          startY: y,
+          head: [['Ticket ID', 'Issue', 'Status', 'Priority', 'Asset', 'Raised At']],
+          body: data.tickets.map(t => [t.ticketId, t.issue.substring(0, 35), t.status, t.priority, t.asset, new Date(t.raisedAt).toLocaleDateString('en-IN')]),
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [30, 58, 138] },
+          margin: { left: 14, right: 14 },
+        });
+        y = doc.lastAutoTable.finalY + 6;
+      }
+
+      // Device Requests
+      if (data.deviceRequests?.length) {
+        if (y > 230) { doc.addPage(); y = 20; }
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
+        doc.text('Device Requests', 14, y); y += 4;
+        doc.setTextColor(0, 0, 0);
+        doc.autoTable({
+          startY: y,
+          head: [['Request ID', 'Item Requested', 'Type', 'Status', 'Urgency', 'Date']],
+          body: data.deviceRequests.map(r => [r.requestId, r.itemRequested, r.requestType, r.status, r.urgency, new Date(r.raisedAt).toLocaleDateString('en-IN')]),
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [30, 58, 138] },
+          margin: { left: 14, right: 14 },
+        });
+      }
+
+      doc.save(`assetcare-my-data-${Date.now()}.pdf`);
+      setToast('Data exported as PDF successfully.');
+    } catch (e) {
       setToast('Export failed. Please try again.');
     } finally { setExporting(false); }
   };
@@ -372,12 +448,12 @@ function DataTab({ currentUser }) {
           </Typography>
           <Button
             variant="outlined"
-            startIcon={exporting ? <CircularProgress size={16} /> : <DataObjectRounded />}
+            startIcon={exporting ? <CircularProgress size={16} /> : <PictureAsPdfRounded />}
             onClick={handleExport}
             disabled={exporting}
-            sx={{ fontWeight: 700, borderRadius: 2 }}
+            sx={{ fontWeight: 700, borderRadius: 2, borderColor: '#dc2626', color: '#dc2626', '&:hover': { bgcolor: '#fee2e2', borderColor: '#dc2626' } }}
           >
-            {exporting ? 'Exporting...' : 'Export My Data (JSON)'}
+            {exporting ? 'Generating PDF...' : 'Export My Data (PDF)'}
           </Button>
         </Paper>
       </Grid>

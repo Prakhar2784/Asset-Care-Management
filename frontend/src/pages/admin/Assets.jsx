@@ -22,9 +22,10 @@ import {
   IconButton,
   CircularProgress,
   Divider,
-  Tooltip
+  Tooltip,
+  Autocomplete
 } from "@mui/material";
-import { AddRounded, DownloadRounded, VisibilityRounded, CloseRounded, EditRounded, DeleteOutlineRounded } from "@mui/icons-material";
+import { AddRounded, DownloadRounded, VisibilityRounded, CloseRounded, EditRounded, DeleteOutlineRounded, PersonAddRounded, PersonRemoveRounded } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 import PageHeader from "../../components/PageHeader";
@@ -55,11 +56,26 @@ const Assets = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Assign employee state
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [assignAssetTarget, setAssignAssetTarget] = useState(null);
+  const [employees, setEmployees] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [assigning, setAssigning] = useState(false);
+
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   useEffect(() => {
     fetchAssets();
+    fetchEmployees();
   }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data } = await api.get('/users/employees');
+      setEmployees(data);
+    } catch {}
+  };
 
   const fetchAssets = async () => {
     setLoading(true);
@@ -178,6 +194,50 @@ const Assets = () => {
       setSnackbar({ open: true, message: err.response?.data?.message || "Failed to delete asset.", severity: "error" });
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleOpenAssign = (asset) => {
+    setAssignAssetTarget(asset);
+    setSelectedEmployee(null);
+    setAssignDialogOpen(true);
+  };
+
+  const handleAssignSubmit = async () => {
+    if (!selectedEmployee) return;
+    setAssigning(true);
+    try {
+      // Use existing assignment endpoint
+      await api.post('/asset-assignments', {
+        department: selectedEmployee.department,
+        asset: assignAssetTarget._id,
+        employeeName: selectedEmployee.name,
+        employeeEmail: selectedEmployee.email,
+        employeePhone: selectedEmployee.phone || '',
+        assignedDate: new Date().toISOString(),
+      });
+      setSnackbar({ open: true, message: `Asset assigned to ${selectedEmployee.name} successfully.`, severity: "success" });
+      setAssignDialogOpen(false);
+      setSelected(null);
+      fetchAssets();
+    } catch (err) {
+      setSnackbar({ open: true, message: err.response?.data?.message || "Failed to assign asset.", severity: "error" });
+    } finally { setAssigning(false); }
+  };
+
+  const handleRevokeAssignment = async (asset) => {
+    try {
+      // Find the active assignment and return it
+      const { data } = await api.get('/asset-assignments');
+      const active = data.find(a => a.asset?._id === asset._id && a.status === 'Assigned');
+      if (active) {
+        await api.put(`/asset-assignments/return/${active._id}`);
+        setSnackbar({ open: true, message: "Assignment revoked successfully.", severity: "success" });
+        setSelected(null);
+        fetchAssets();
+      }
+    } catch (err) {
+      setSnackbar({ open: true, message: "Failed to revoke assignment.", severity: "error" });
     }
   };
 
@@ -321,15 +381,32 @@ const Assets = () => {
                   </Box>
                 ))}
               </Box>
-              <Box display="flex" gap={2}>
-                <Button fullWidth variant="outlined" onClick={() => { handleEditClick(selected); setSelected(null); }}
-                  sx={{ py: 1.5, borderColor: "#4f46e5", color: "#4f46e5", fontWeight: 700, textTransform: "none", fontSize: "16px", borderRadius: "12px" }}>
-                  Edit Asset
+              {/* Assigned to info */}
+              {selected.assignedStatus === 'Assigned' && (
+                <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#dcfce7', border: '1px solid #bbf7d0' }}>
+                  <Typography fontSize={12} fontWeight={700} color="#16a34a" mb={0.5}>Assigned To</Typography>
+                  <Typography fontSize={14} fontWeight={700} color="#0f172a">{selected.assignedEmployeeName || '—'}</Typography>
+                  <Typography fontSize={12} color="#64748b">{selected.assignedEmployeeEmail}</Typography>
+                  <Typography fontSize={12} color="#64748b">{selected.assignedTo?.department || ''}</Typography>
+                </Box>
+              )}
+
+              <Box display="flex" gap={1.5} flexWrap="wrap">
+                <Button variant="outlined" onClick={() => { handleEditClick(selected); setSelected(null); }}
+                  sx={{ flex: 1, py: 1.4, borderColor: "#4f46e5", color: "#4f46e5", fontWeight: 700, textTransform: "none", borderRadius: "12px" }}>
+                  Edit
                 </Button>
-                <Button fullWidth variant="contained" onClick={() => navigate("/tickets")}
-                  sx={{ py: 1.5, bgcolor: "#0f172a", color: "#ffffff", fontWeight: 700, textTransform: "none", fontSize: "16px", borderRadius: "12px", "&:hover": { bgcolor: "#1e293b" } }}>
-                  Log Ticket
-                </Button>
+                {selected.assignedStatus !== 'Assigned' ? (
+                  <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
+                    sx={{ flex: 1, py: 1.4, bgcolor: "#16a34a", color: "#fff", fontWeight: 700, textTransform: "none", borderRadius: "12px", "&:hover": { bgcolor: "#15803d" } }}>
+                    Assign
+                  </Button>
+                ) : (
+                  <Button variant="outlined" startIcon={<PersonRemoveRounded />} onClick={() => handleRevokeAssignment(selected)}
+                    sx={{ flex: 1, py: 1.4, borderColor: "#dc2626", color: "#dc2626", fontWeight: 700, textTransform: "none", borderRadius: "12px", "&:hover": { bgcolor: "#fee2e2" } }}>
+                    Revoke
+                  </Button>
+                )}
               </Box>
             </>
           )}
@@ -417,6 +494,61 @@ const Assets = () => {
             {deleting ? "Deleting..." : "Delete Asset"}
           </Button>
         </Box>
+      </Dialog>
+
+      {/* Assign Employee Dialog */}
+      <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid #E2E8F0" } }}>
+        <DialogTitle sx={{ p: 0 }}>
+          <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: 2, background: "linear-gradient(135deg, #16a34a, #0ea5e9)", color: "#fff", display: "grid", placeItems: "center" }}>
+              <PersonAddRounded />
+            </Box>
+            <Box>
+              <Typography fontWeight={900} fontSize={20}>Assign to Employee</Typography>
+              <Typography fontSize={13} color="text.secondary">{assignAssetTarget?.name}</Typography>
+            </Box>
+            <IconButton sx={{ ml: 'auto' }} onClick={() => setAssignDialogOpen(false)}><CloseRounded /></IconButton>
+          </Box>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ p: 3 }}>
+          <Typography fontSize={14} color="text.secondary" mb={2}>
+            Select a registered employee to assign this asset. Only active employees are shown.
+          </Typography>
+          <Autocomplete
+            options={employees}
+            getOptionLabel={(e) => `${e.name} — ${e.email} (${e.department})`}
+            value={selectedEmployee}
+            onChange={(_, val) => setSelectedEmployee(val)}
+            renderInput={(params) => <TextField {...params} label="Select Employee" fullWidth />}
+            renderOption={(props, e) => (
+              <Box component="li" {...props} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start !important', py: 1.5 }}>
+                <Typography fontWeight={700} fontSize={14}>{e.name}</Typography>
+                <Typography fontSize={12} color="text.secondary">{e.email} · {e.department} · {e.role}</Typography>
+              </Box>
+            )}
+          />
+          {selectedEmployee && (
+            <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <Typography fontSize={13} fontWeight={700} mb={1}>Assignment Preview</Typography>
+              {[['Name', selectedEmployee.name], ['Email', selectedEmployee.email], ['Department', selectedEmployee.department], ['Role', selectedEmployee.role]].map(([k, v]) => (
+                <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
+                  <Typography fontSize={13} color="text.secondary">{k}</Typography>
+                  <Typography fontSize={13} fontWeight={600}>{v}</Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+            <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "#64748b", fontWeight: 700, textTransform: "none" }}>Cancel</Button>
+            <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
+              startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
+              sx={{ bgcolor: "#16a34a", fontWeight: 700, textTransform: "none", borderRadius: "10px", "&:hover": { bgcolor: "#15803d" } }}>
+              {assigning ? "Assigning..." : "Confirm Assignment"}
+            </Button>
+          </Box>
+        </DialogContent>
       </Dialog>
 
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>

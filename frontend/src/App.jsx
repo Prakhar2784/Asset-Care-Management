@@ -47,8 +47,8 @@ const WebsiteLayout = ({ children }) => (
 
 function App() {
   return (
-    <ThemeProvider>
     <AuthProvider>
+    <ThemeProvider>
       <Routes>
         {/* PUBLIC ROUTES - Anyone can access */}
         <Route path="/" element={<WebsiteLayout><Home /></WebsiteLayout>} />
@@ -90,8 +90,8 @@ function App() {
         {/* Catch-all: Redirect unknown URLs to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </AuthProvider>
     </ThemeProvider>
+    </AuthProvider>
   );
 }
 
