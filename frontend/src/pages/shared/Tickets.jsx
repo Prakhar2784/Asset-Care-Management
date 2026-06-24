@@ -186,11 +186,17 @@ const Tickets = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending Approval': return { bg: '#FEF3C7', color: '#D97706' };
-      case 'Vendor Assigned': return { bg: '#E0F2FE', color: '#0284C7' };
-      case 'Under Repair': return { bg: '#F3E8FF', color: '#9333EA' };
-      case 'Resolved': return { bg: '#DCFCE7', color: '#16A34A' };
-      case 'Rejected': return { bg: '#FEE2E2', color: '#DC2626' };
-      default: return { bg: '#F1F5F9', color: '#475569' };
+      case 'Open':             return { bg: '#EFF6FF', color: '#2563EB' };
+      case 'Assigned':         return { bg: '#E0F2FE', color: '#0284C7' };
+      case 'In Progress':      return { bg: '#F3E8FF', color: '#7C3AED' };
+      case 'Vendor Assigned':  return { bg: '#DBEAFE', color: '#1D4ED8' };
+      case 'Waiting Vendor':   return { bg: '#FEF9C3', color: '#CA8A04' };
+      case 'Waiting Parts':    return { bg: '#FEF3C7', color: '#B45309' };
+      case 'Under Repair':     return { bg: '#F3E8FF', color: '#9333EA' };
+      case 'Resolved':         return { bg: '#DCFCE7', color: '#16A34A' };
+      case 'Closed':           return { bg: '#F1F5F9', color: '#475569' };
+      case 'Rejected':         return { bg: '#FEE2E2', color: '#DC2626' };
+      default:                 return { bg: '#F1F5F9', color: '#475569' };
     }
   };
 
@@ -262,9 +268,15 @@ const Tickets = () => {
             <TextField fullWidth select sx={inputStyles} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <MenuItem value="All">All Statuses</MenuItem>
               <MenuItem value="Pending Approval">Pending Approval</MenuItem>
+              <MenuItem value="Open">Open</MenuItem>
+              <MenuItem value="Assigned">Assigned</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
               <MenuItem value="Vendor Assigned">Vendor Assigned</MenuItem>
+              <MenuItem value="Waiting Vendor">Waiting Vendor</MenuItem>
+              <MenuItem value="Waiting Parts">Waiting Parts</MenuItem>
               <MenuItem value="Under Repair">Under Repair</MenuItem>
               <MenuItem value="Resolved">Resolved</MenuItem>
+              <MenuItem value="Closed">Closed</MenuItem>
               <MenuItem value="Rejected">Rejected</MenuItem>
             </TextField>
           </Grid>
@@ -348,9 +360,15 @@ const Tickets = () => {
                     <Box sx={{ display: 'flex', gap: 1, mb: 2, p: 1.5, bgcolor: 'background.default', borderRadius: '12px', border: 1, borderColor: 'divider' }}>
                       <Select size="small" value={ticket.status} onChange={(e) => handleStatusUpdate(ticket._id, e.target.value)} sx={{ ...selectSx, flex: 1 }}>
                         <MenuItem value="Pending Approval" sx={{ fontSize: '12px', fontWeight: 700 }}>Pending Approval</MenuItem>
+                        <MenuItem value="Open" sx={{ fontSize: '12px', fontWeight: 700 }}>Open</MenuItem>
+                        <MenuItem value="Assigned" sx={{ fontSize: '12px', fontWeight: 700 }}>Assigned</MenuItem>
+                        <MenuItem value="In Progress" sx={{ fontSize: '12px', fontWeight: 700 }}>In Progress</MenuItem>
                         <MenuItem value="Vendor Assigned" sx={{ fontSize: '12px', fontWeight: 700 }}>Vendor Assigned</MenuItem>
+                        <MenuItem value="Waiting Vendor" sx={{ fontSize: '12px', fontWeight: 700 }}>Waiting Vendor</MenuItem>
+                        <MenuItem value="Waiting Parts" sx={{ fontSize: '12px', fontWeight: 700 }}>Waiting Parts</MenuItem>
                         <MenuItem value="Under Repair" sx={{ fontSize: '12px', fontWeight: 700 }}>Under Repair</MenuItem>
                         <MenuItem value="Resolved" sx={{ fontSize: '12px', fontWeight: 700 }}>Resolved</MenuItem>
+                        <MenuItem value="Closed" sx={{ fontSize: '12px', fontWeight: 700 }}>Closed</MenuItem>
                         <MenuItem value="Rejected" sx={{ fontSize: '12px', fontWeight: 700 }}>Rejected</MenuItem>
                       </Select>
                       <Select size="small" value={ticket.priority} onChange={(e) => handlePriorityUpdate(ticket._id, e.target.value)} sx={{ ...selectSx, flex: 1 }}>
@@ -361,6 +379,30 @@ const Tickets = () => {
                       </Select>
                     </Box>
                   )}
+
+                  {/* SLA indicator */}
+                  {ticket.status !== 'Resolved' && ticket.status !== 'Closed' && ticket.status !== 'Rejected' && (() => {
+                    const slaHours = { Critical: 4, High: 8, Medium: 24, Low: 72 }[ticket.priority] || 24;
+                    const elapsed = Math.floor((Date.now() - new Date(ticket.createdAt)) / 3600000);
+                    const pct = Math.min(100, Math.round((elapsed / slaHours) * 100));
+                    const breached = pct >= 100;
+                    const warning = pct >= 75;
+                    return (
+                      <Box sx={{ mb: 2, p: 1.5, borderRadius: "10px", bgcolor: breached ? "#FEF2F2" : "background.default", border: "1px solid", borderColor: breached ? "#FCA5A5" : "divider" }}>
+                        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.8 }}>
+                          <Typography sx={{ fontSize: 11, fontWeight: 700, color: breached ? "#DC2626" : "text.secondary", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                            SLA {breached ? "BREACHED" : warning ? "AT RISK" : "On Track"}
+                          </Typography>
+                          <Typography sx={{ fontSize: 11, fontWeight: 800, color: breached ? "#DC2626" : "text.secondary" }}>
+                            {elapsed}h / {slaHours}h
+                          </Typography>
+                        </Box>
+                        <Box sx={{ height: 4, bgcolor: "divider", borderRadius: 2, overflow: "hidden" }}>
+                          <Box sx={{ height: "100%", width: `${pct}%`, bgcolor: breached ? "#EF4444" : warning ? "#F59E0B" : "#CBFA57", borderRadius: 2, transition: "width 0.3s" }} />
+                        </Box>
+                      </Box>
+                    );
+                  })()}
 
                   <Divider sx={{ mb: 2, borderColor: "divider" }} />
 

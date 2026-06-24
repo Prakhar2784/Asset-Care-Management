@@ -143,7 +143,7 @@ const AdminDashboard = () => {
         </Box>
       ) : (
         <>
-          <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid container spacing={3} sx={{ mb: 3 }}>
             {stats.map((stat, index) => (
               <Grid item xs={12} sm={6} lg={4} key={index}>
                 <Box onClick={() => navigate(stat.route)} sx={{ cursor: "pointer", height: "100%", transition: "0.3s ease", "&:hover": { transform: "translateY(-5px)" } }}>
@@ -152,6 +152,57 @@ const AdminDashboard = () => {
               </Grid>
             ))}
           </Grid>
+
+          {/* Warranty Management Row */}
+          <Paper sx={{ p: { xs: 2.5, md: 3 }, borderRadius: "24px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", mb: 3 }}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5, flexWrap: "wrap", gap: 1 }}>
+              <Box>
+                <Typography sx={{ fontWeight: 900, fontSize: 18, color: "text.primary", letterSpacing: "-0.4px" }}>Warranty Management</Typography>
+                <Typography sx={{ fontSize: 13, color: "text.secondary", fontWeight: 500 }}>Real-time warranty health across your asset fleet.</Typography>
+              </Box>
+              <Button endIcon={<ArrowForwardRounded />} onClick={() => navigate("/admin/assets")}
+                sx={{ color: "text.secondary", fontWeight: 700, fontSize: 13, "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
+                View Assets
+              </Button>
+            </Box>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
+              {[
+                {
+                  label: "In Warranty",
+                  value: dashboardData?.totalAssets && dashboardData?.warrantyExpiringSoon != null
+                    ? (dashboardData.totalAssets - (dashboardData.warrantyExpiringSoon || 0))
+                    : "—",
+                  color: "#16A34A", bg: "#DCFCE7", bar: "#16A34A",
+                  desc: "Assets under active warranty",
+                },
+                {
+                  label: "Expiring Soon",
+                  value: dashboardData?.warrantyExpiringSoon ?? "—",
+                  color: "#D97706", bg: "#FEF3C7", bar: "#F59E0B",
+                  desc: "Expiring within next 30 days",
+                },
+                {
+                  label: "Expired / Unknown",
+                  value: "—",
+                  color: "#DC2626", bg: "#FEE2E2", bar: "#EF4444",
+                  desc: "Warranty expired or not set",
+                },
+              ].map((w) => (
+                <Box key={w.label} sx={{ p: 2.5, borderRadius: "16px", bgcolor: "background.default", border: "1px solid", borderColor: "divider", cursor: "pointer", transition: "all 0.2s", "&:hover": { borderColor: w.color, bgcolor: w.bg + "55" }, }} onClick={() => navigate("/admin/assets")}>
+                  <Typography sx={{ fontSize: 11, fontWeight: 800, color: w.color, textTransform: "uppercase", letterSpacing: "1px", mb: 1 }}>
+                    {w.label}
+                  </Typography>
+                  <Typography sx={{ fontSize: 34, fontWeight: 950, color: "text.primary", lineHeight: 1, letterSpacing: "-1.5px", mb: 0.5 }}>
+                    {w.value}
+                  </Typography>
+                  <Typography sx={{ fontSize: 12, color: "text.secondary", fontWeight: 500, mb: 1.5 }}>{w.desc}</Typography>
+                  <Box sx={{ height: 4, bgcolor: "action.selected", borderRadius: 2, overflow: "hidden" }}>
+                    <Box sx={{ height: "100%", width: "60%", bgcolor: w.bar, borderRadius: 2 }} />
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Paper>
 
           <Grid container spacing={3}>
             {/* Active Service Tickets */}
