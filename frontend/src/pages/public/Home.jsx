@@ -1,69 +1,35 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import AddTaskIcon from "@mui/icons-material/AddTask";
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import BuildIcon from "@mui/icons-material/Build";
 import BusinessIcon from "@mui/icons-material/Business";
 import ApprovalIcon from "@mui/icons-material/Approval";
 import InsightsIcon from "@mui/icons-material/Insights";
+import AddTaskIcon from "@mui/icons-material/AddTask";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import SpeedRoundedIcon from "@mui/icons-material/SpeedRounded";
-import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 import AutoGraphRoundedIcon from "@mui/icons-material/AutoGraphRounded";
-import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
-import { Typography } from "@mui/material";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 35 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.75, ease: [0.16, 1, 0.3, 1] },
-  },
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
 };
 
-const staggerContainer = {
+const stagger = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.14 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
 };
 
 const Home = () => {
   const features = [
-    {
-      icon: <VerifiedIcon fontSize="large" />,
-      title: "Warranty Tracking",
-      text: "Track warranty, AMC, expiry dates, service coverage and renewal status for every asset.",
-    },
-    {
-      icon: <BuildIcon fontSize="large" />,
-      title: "Breakdown Management",
-      text: "Create service tickets, assign responsibility and monitor the complete repair lifecycle.",
-    },
-    {
-      icon: <BusinessIcon fontSize="large" />,
-      title: "Vendor Complaints",
-      text: "Manage OEM details, complaint numbers, technician visits and vendor-wise service history.",
-    },
-    {
-      icon: <ApprovalIcon fontSize="large" />,
-      title: "Department Approval",
-      text: "Control repair approvals department-wise before escalation or paid service activity.",
-    },
-    {
-      icon: <InsightsIcon fontSize="large" />,
-      title: "Smart Dashboard",
-      text: "View active tickets, warranty expiry, pending approvals and department-wise reports.",
-    },
-    {
-      icon: <AddTaskIcon fontSize="large" />,
-      title: "Service History",
-      text: "Maintain complete service, complaint, repair and closure records for every asset.",
-    },
+    { icon: <VerifiedIcon />, title: "Warranty Tracking", text: "Track warranty, AMC, expiry dates, service coverage and renewal status for every asset." },
+    { icon: <BuildIcon />, title: "Breakdown Management", text: "Create service tickets, assign responsibility and monitor the complete repair lifecycle." },
+    { icon: <BusinessIcon />, title: "Vendor Complaints", text: "Manage OEM details, complaint numbers, technician visits and vendor-wise service history." },
+    { icon: <ApprovalIcon />, title: "Department Approval", text: "Control repair approvals department-wise before escalation or paid service activity." },
+    { icon: <InsightsIcon />, title: "Smart Dashboard", text: "View active tickets, warranty expiry, pending approvals and department-wise reports." },
+    { icon: <AddTaskIcon />, title: "Service History", text: "Maintain complete service, complaint, repair and closure records for every asset." },
   ];
 
   const stats = [
@@ -74,721 +40,280 @@ const Home = () => {
   ];
 
   return (
-    <div style={{ backgroundColor: "#F8FAFC", overflowX: "hidden" }}>
+    <div style={{ backgroundColor: "#ECEAE3", overflowX: "hidden" }}>
       <style>{`
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
+        .h-container { max-width: 1200px; margin: 0 auto; }
+
+        .h-badge {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 8px 16px; border-radius: 999px;
+          background: #111111; color: #CBFA57;
+          font-weight: 800; font-size: 13px; margin-bottom: 22px;
+          letter-spacing: 0.2px;
         }
 
-        .gradient-text {
-          background: linear-gradient(135deg, #1E3A8A, #0F766E);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .hero-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 9px 18px;
-          border-radius: 999px;
-          background: rgba(15, 118, 110, 0.09);
-          color: #0F766E;
-          font-weight: 800;
-          font-size: 14px;
-          margin-bottom: 24px;
-          border: 1px solid rgba(15, 118, 110, 0.18);
-        }
-
-        .btn-gradient {
-          background: linear-gradient(135deg, #1E3A8A, #0F766E);
-          color: white;
-          padding: 16px 32px;
-          border-radius: 999px;
-          font-weight: 800;
-          font-size: 16px;
+        .h-btn-primary {
+          background: #111111; color: #CBFA57;
+          padding: 15px 30px; border-radius: 999px;
+          font-weight: 800; font-size: 15px;
           text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          box-shadow: 0 14px 28px rgba(15, 118, 110, 0.28);
-          transition: all 0.3s ease;
+          display: inline-flex; align-items: center; gap: 8px;
+          transition: all 0.22s ease;
+          letter-spacing: -0.2px;
         }
+        .h-btn-primary:hover { background: #222222; transform: translateY(-3px); box-shadow: 0 14px 28px rgba(17,17,17,0.22); }
 
-        .btn-gradient:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 22px 42px rgba(15, 118, 110, 0.38);
-        }
-
-        .btn-outline {
-          padding: 16px 32px;
-          border-radius: 999px;
-          font-weight: 800;
-          font-size: 16px;
-          color: #0F172A;
-          border: 1px solid #CBD5E1;
+        .h-btn-outline {
+          padding: 15px 30px; border-radius: 999px;
+          font-weight: 800; font-size: 15px;
+          color: #111111; border: 1.5px solid rgba(17,17,17,0.25);
           text-decoration: none;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          transition: all 0.3s ease;
-          background: #FFFFFF;
+          display: inline-flex; align-items: center; gap: 8px;
+          transition: all 0.22s ease;
+          background: rgba(255,255,255,0.5);
         }
+        .h-btn-outline:hover { border-color: #111111; background: rgba(255,255,255,0.8); transform: translateY(-3px); }
 
-        .btn-outline:hover {
-          border-color: #1E3A8A;
-          color: #1E3A8A;
-          transform: translateY(-4px);
-          box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
-        }
-
-        .hero-card {
+        .h-hero-visual {
+          background: #111111;
+          border-radius: 28px;
+          padding: 28px;
           position: relative;
-          width: 100%;
-          min-height: 520px;
-          background:
-            radial-gradient(circle at 20% 20%, rgba(15, 118, 110, 0.16), transparent 35%),
-            radial-gradient(circle at 80% 0%, rgba(30, 58, 138, 0.18), transparent 36%),
-            linear-gradient(135deg, #FFFFFF, #EFF6FF);
-          border-radius: 36px;
-          border: 1px solid rgba(148, 163, 184, 0.24);
           overflow: hidden;
-          box-shadow: 0 30px 70px rgba(15, 23, 42, 0.10);
+          box-shadow: 0 40px 80px rgba(17,17,17,0.3);
         }
 
-        .hero-card::before {
+        .h-hero-visual::before {
           content: "";
           position: absolute;
-          inset: 20px;
-          border: 1px dashed rgba(30, 58, 138, 0.20);
-          border-radius: 28px;
+          top: -60px; right: -60px;
+          width: 220px; height: 220px;
+          background: radial-gradient(circle, rgba(203,250,87,0.18), transparent 70%);
+          border-radius: 50%;
+          pointer-events: none;
         }
 
-        .floating-glass-card {
-          position: absolute;
-          background: rgba(255, 255, 255, 0.86);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255,255,255,0.85);
-          padding: 24px;
-          border-radius: 22px;
-          box-shadow: 0 24px 48px rgba(15, 23, 42, 0.10);
-        }
-
-        .dashboard-main-card {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          transform: translate(-50%, -50%);
-          width: 78%;
-          background: #FFFFFF;
-          border-radius: 28px;
-          padding: 26px;
-          border: 1px solid #E2E8F0;
-          box-shadow: 0 30px 60px rgba(15, 23, 42, 0.12);
-          z-index: 2;
-        }
-
-        .mini-stat {
-          background: #F8FAFC;
-          border: 1px solid #E2E8F0;
-          border-radius: 18px;
+        .h-mini-stat {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.10);
+          border-radius: 16px;
           padding: 18px;
         }
 
-        .feature-card {
-          background: #FFFFFF;
-          border: 1px solid #E2E8F0;
-          padding: 34px 30px;
-          border-radius: 28px;
-          transition: all 0.35s ease;
-          box-shadow: 0 8px 18px rgba(15, 23, 42, 0.03);
-          position: relative;
+        .h-bar-track {
+          height: 8px;
+          background: rgba(255,255,255,0.08);
+          border-radius: 999px;
           overflow: hidden;
         }
 
-        .feature-card::before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 4px;
-          background: linear-gradient(135deg, #1E3A8A, #0F766E);
-          opacity: 0;
-          transition: 0.3s ease;
-        }
-
-        .feature-card:hover {
-          transform: translateY(-10px);
-          border-color: rgba(15, 118, 110, 0.28);
-          box-shadow: 0 24px 50px rgba(15, 23, 42, 0.09);
-        }
-
-        .feature-card:hover::before {
-          opacity: 1;
-        }
-
-        .feature-icon {
-          width: 66px;
-          height: 66px;
-          background: linear-gradient(135deg, #1E3A8A, #0F766E);
-          color: white;
-          border-radius: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 24px;
-          box-shadow: 0 12px 24px rgba(15, 118, 110, 0.24);
-        }
-
-        .section-label {
-          color: #0F766E;
-          font-weight: 900;
-          text-transform: uppercase;
-          letter-spacing: 1.6px;
-          font-size: 13px;
-        }
-
-        .info-panel {
-          background:
-            radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 35%),
-            #FFFFFF;
-          border: 1px solid #E2E8F0;
-          border-radius: 34px;
-          padding: 36px;
-          box-shadow: 0 24px 54px rgba(15, 23, 42, 0.07);
-        }
-
-        .check-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 16px;
-          font-weight: 700;
-          color: #0F172A;
-        }
-
-        .check-circle {
-          width: 26px;
-          height: 26px;
-          border-radius: 50%;
-          background: rgba(15, 118, 110, 0.12);
-          color: #0F766E;
-          display: grid;
-          place-items: center;
-          font-weight: 900;
-          flex-shrink: 0;
-        }
-
-        .workflow-card {
+        .h-feature-card {
           background: #FFFFFF;
-          border: 1px solid #E2E8F0;
-          border-radius: 26px;
-          padding: 28px;
-          box-shadow: 0 16px 34px rgba(15, 23, 42, 0.05);
+          border: 1px solid rgba(17,17,17,0.08);
+          padding: 30px 28px;
+          border-radius: 24px;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+        .h-feature-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 24px 48px rgba(17,17,17,0.10);
+          border-color: rgba(17,17,17,0.16);
+        }
+
+        .h-feature-icon {
+          width: 54px; height: 54px;
+          background: #111111; color: #CBFA57;
+          border-radius: 15px;
+          display: grid; place-items: center;
+          margin-bottom: 20px;
+        }
+
+        .h-check-circle {
+          width: 24px; height: 24px; border-radius: "50%";
+          background: rgba(17,17,17,0.08);
+          color: #111111;
+          display: grid; place-items: center;
+          font-weight: 900; font-size: 12px;
+          flex-shrink: 0; border-radius: 50%;
+        }
+
+        .h-check-item {
+          display: flex; align-items: center; gap: 12px;
+          font-size: 15px; font-weight: 700; color: #111111;
+        }
+
+        .h-info-panel {
+          background: #FFFFFF;
+          border: 1px solid rgba(17,17,17,0.08);
+          border-radius: 28px;
+          padding: 32px;
+          box-shadow: 0 20px 48px rgba(17,17,17,0.06);
+        }
+
+        .h-asset-row {
+          padding: 16px; border-radius: 16px;
+          background: #F9F8F5; border: 1px solid rgba(17,17,17,0.07);
+          margin-bottom: 12px;
+          display: flex; justify-content: space-between; gap: 12px; align-items: center;
+        }
+
+        .h-workflow-card {
+          background: #FFFFFF;
+          border: 1px solid rgba(17,17,17,0.08);
+          border-radius: 20px; padding: 22px;
+          margin-bottom: 12px;
+          box-shadow: 0 4px 16px rgba(17,17,17,0.04);
+        }
+
+        .h-section-label {
+          color: #111111; font-weight: 900;
+          text-transform: uppercase; letter-spacing: 1.8px; font-size: 12px;
         }
 
         @media (max-width: 1024px) {
-          .hero-grid,
-          .split-grid {
-            grid-template-columns: 1fr !important;
-            gap: 56px !important;
-          }
-
-          .hero-title {
-            font-size: 44px !important;
-          }
-
-          .hero-card {
-            min-height: 460px;
-          }
-
-          .dashboard-main-card {
-            width: 86%;
-          }
+          .h-hero-grid, .h-split-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
+          .h-hero-title { font-size: 44px !important; }
         }
-
         @media (max-width: 640px) {
-          .hero-title {
-            font-size: 36px !important;
-          }
-
-          .section-title {
-            font-size: 34px !important;
-          }
-
-          .dashboard-main-card {
-            width: 90%;
-            padding: 20px;
-          }
-
-          .floating-glass-card {
-            display: none;
-          }
+          .h-hero-title { font-size: 36px !important; }
+          .h-section-title { font-size: 32px !important; }
         }
       `}</style>
 
-      {/* HERO SECTION */}
-      <section
-        style={{
-          paddingTop: "165px",
-          paddingBottom: "90px",
-          paddingLeft: "24px",
-          paddingRight: "24px",
-        }}
-      >
-        <div
-          className="container hero-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "70px",
-            alignItems: "center",
-          }}
-        >
-          <motion.div initial="hidden" animate="visible" variants={staggerContainer}>
-            <motion.div variants={fadeUp} className="hero-badge">
-              <Inventory2RoundedIcon fontSize="small" />
+      {/* HERO */}
+      <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: 24, paddingRight: 24 }}>
+        <div className="h-container h-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+          <motion.div initial="hidden" animate="visible" variants={stagger}>
+            <motion.div variants={fadeUp} className="h-badge">
+              <Inventory2RoundedIcon sx={{ fontSize: 16 }} />
               Enterprise Asset Service Platform
             </motion.div>
 
-            <motion.h1
-              variants={fadeUp}
-              className="hero-title"
-              style={{
-                fontSize: "64px",
-                fontWeight: 950,
-                color: "#0F172A",
-                lineHeight: 1.05,
-                marginBottom: "24px",
-                letterSpacing: "-2.4px",
-              }}
-            >
-              Manage Assets, Warranty & Service{" "}
-              <span className="gradient-text">in One System.</span>
+            <motion.h1 variants={fadeUp} className="h-hero-title" style={{ fontSize: 62, fontWeight: 950, color: "#111111", lineHeight: 1.06, marginBottom: 22, letterSpacing: "-2.2px" }}>
+              Manage Assets, Warranty &amp; Service{" "}
+              <span style={{ color: "#111111", position: "relative" }}>
+                in One System.
+                <span style={{ position: "absolute", bottom: -6, left: 0, right: 0, height: 6, background: "#CBFA57", borderRadius: 4 }} />
+              </span>
             </motion.h1>
 
-            <motion.p
-              variants={fadeUp}
-              style={{
-                fontSize: "20px",
-                color: "#64748B",
-                lineHeight: 1.7,
-                marginBottom: "38px",
-                maxWidth: "560px",
-              }}
-            >
-              A smart platform to track company assets, warranty status,
-              breakdown tickets, vendor complaints, approvals and complete
-              service history.
+            <motion.p variants={fadeUp} style={{ fontSize: 18, color: "#6B6B65", lineHeight: 1.72, marginBottom: 34, maxWidth: 520, fontWeight: 500 }}>
+              A smart platform to track company assets, warranty status, breakdown tickets, vendor complaints, approvals and complete service history.
             </motion.p>
 
-            <motion.div
-              variants={fadeUp}
-              style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}
-            >
-              <Link to="/login" className="btn-gradient">
+            <motion.div variants={fadeUp} style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+              <Link to="/login" className="h-btn-primary">
                 Access Dashboard <ArrowForwardRoundedIcon fontSize="small" />
               </Link>
-
-              <Link to="/modules" className="btn-outline">
-                View Modules
-              </Link>
+              <Link to="/modules" className="h-btn-outline">View Modules</Link>
             </motion.div>
 
-            <motion.div
-              variants={fadeUp}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(4, minmax(100px, 1fr))",
-                gap: "14px",
-                marginTop: "42px",
-                maxWidth: "560px",
-              }}
-            >
+            <motion.div variants={fadeUp} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginTop: 40, maxWidth: 520 }}>
               {stats.map((item) => (
-                <div
-                  key={item.label}
-                  style={{
-                    background: "#FFFFFF",
-                    border: "1px solid #E2E8F0",
-                    borderRadius: "18px",
-                    padding: "16px",
-                    boxShadow: "0 10px 24px rgba(15,23,42,0.04)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "24px",
-                      fontWeight: 950,
-                      color: "#1E3A8A",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {item.value}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#64748B",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {item.label}
-                  </div>
+                <div key={item.label} style={{ background: "#FFFFFF", border: "1px solid rgba(17,17,17,0.08)", borderRadius: 16, padding: "14px 12px", boxShadow: "0 4px 16px rgba(17,17,17,0.05)" }}>
+                  <div style={{ fontSize: 22, fontWeight: 950, color: "#111111", marginBottom: 3, letterSpacing: "-0.8px" }}>{item.value}</div>
+                  <div style={{ fontSize: 11, color: "#8A8A84", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px" }}>{item.label}</div>
                 </div>
               ))}
             </motion.div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
-            className="hero-card"
-          >
-            <motion.div
-              animate={{ y: [0, -14, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="floating-glass-card"
-              style={{ top: "34px", left: "34px", width: "220px", zIndex: 3 }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "12px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "14px",
-                    background: "rgba(15,118,110,0.12)",
-                    color: "#0F766E",
-                    display: "grid",
-                    placeItems: "center",
-                  }}
-                >
-                  <FactCheckRoundedIcon />
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="h-hero-visual">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
+              <div>
+                <div style={{ fontWeight: 900, color: "#FFFFFF", fontSize: 17, letterSpacing: "-0.4px" }}>AssetCare Dashboard</div>
+                <div style={{ fontSize: 12, color: "#7A7A74", fontWeight: 600, marginTop: 2 }}>Live asset health overview</div>
+              </div>
+              <div style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(203,250,87,0.12)", color: "#CBFA57", fontWeight: 900, fontSize: 11, border: "1px solid rgba(203,250,87,0.22)", letterSpacing: "1px" }}>LIVE</div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
+              <div className="h-mini-stat">
+                <Inventory2RoundedIcon sx={{ color: "#CBFA57", fontSize: 20, mb: 0.8 }} />
+                <div style={{ fontSize: 28, fontWeight: 950, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1 }}>1,248</div>
+                <div style={{ fontSize: 12, color: "#6B6B65", marginTop: 4, fontWeight: 600 }}>Total Assets</div>
+              </div>
+              <div className="h-mini-stat">
+                <BuildIcon sx={{ color: "#CBFA57", fontSize: 20, mb: 0.8 }} />
+                <div style={{ fontSize: 28, fontWeight: 950, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1 }}>24</div>
+                <div style={{ fontSize: 12, color: "#6B6B65", marginTop: 4, fontWeight: 600 }}>Active Tickets</div>
+              </div>
+            </div>
+
+            {[
+              { name: "IT Assets", val: "82%", width: "82%", color: "#CBFA57" },
+              { name: "Electrical", val: "58%", width: "58%", color: "#A8E03A" },
+              { name: "Under Service", val: "34%", width: "34%", color: "#F59E0B" },
+            ].map((bar) => (
+              <div key={bar.name} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 800, marginBottom: 7, color: "#CBFA57" }}>
+                  <span style={{ color: "#A0A09A" }}>{bar.name}</span>
+                  <span>{bar.val}</span>
                 </div>
-                <div>
-                  <div style={{ fontWeight: 900, color: "#0F172A" }}>96%</div>
-                  <div style={{ fontSize: "12px", color: "#64748B" }}>
-                    Assets Verified
-                  </div>
+                <div className="h-bar-track">
+                  <motion.div initial={{ width: 0 }} animate={{ width: bar.width }} transition={{ duration: 1.1, delay: 0.8 }} style={{ height: "100%", background: bar.color, borderRadius: 999 }} />
                 </div>
               </div>
-            </motion.div>
+            ))}
 
-            <motion.div
-              animate={{ y: [0, 16, 0] }}
-              transition={{
-                duration: 4.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.7,
-              }}
-              className="floating-glass-card"
-              style={{
-                bottom: "34px",
-                right: "34px",
-                width: "245px",
-                zIndex: 3,
-              }}
-            >
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <WarningAmberRoundedIcon sx={{ color: "#F59E0B" }} />
-                <div>
-                  <div style={{ fontWeight: 900, color: "#0F172A" }}>
-                    Warranty Alert
-                  </div>
-                  <div style={{ fontSize: "13px", color: "#64748B" }}>
-                    18 assets expiring soon
-                  </div>
-                </div>
+            <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(203,250,87,0.08)", borderRadius: 14, border: "1px solid rgba(203,250,87,0.16)", display: "flex", gap: 12, alignItems: "center" }}>
+              <WarningAmberRoundedIcon sx={{ color: "#F59E0B", fontSize: 20, flexShrink: 0 }} />
+              <div>
+                <div style={{ fontWeight: 800, color: "#FFFFFF", fontSize: 13 }}>Warranty Alert</div>
+                <div style={{ fontSize: 12, color: "#7A7A74", fontWeight: 600 }}>18 assets expiring within 30 days</div>
               </div>
-            </motion.div>
-
-            <div className="dashboard-main-card">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "24px",
-                }}
-              >
-                <div>
-                  <Typography fontWeight={900} fontSize={20} color="#0F172A">
-                    AssetCare Dashboard
-                  </Typography>
-                  <Typography fontSize={13} color="#64748B" fontWeight={600}>
-                    Live asset health overview
-                  </Typography>
-                </div>
-
-                <div
-                  style={{
-                    padding: "8px 12px",
-                    borderRadius: "999px",
-                    background: "rgba(15,118,110,0.10)",
-                    color: "#0F766E",
-                    fontWeight: 900,
-                    fontSize: "12px",
-                  }}
-                >
-                  LIVE
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "14px",
-                  marginBottom: "22px",
-                }}
-              >
-                <div className="mini-stat">
-                  <Inventory2RoundedIcon sx={{ color: "#1E3A8A", mb: 1 }} />
-                  <div style={{ fontSize: "26px", fontWeight: 950 }}>1,248</div>
-                  <div style={{ fontSize: "13px", color: "#64748B" }}>
-                    Total Assets
-                  </div>
-                </div>
-
-                <div className="mini-stat">
-                  <BuildIcon sx={{ color: "#0F766E", mb: 1 }} />
-                  <div style={{ fontSize: "26px", fontWeight: 950 }}>24</div>
-                  <div style={{ fontSize: "13px", color: "#64748B" }}>
-                    Active Tickets
-                  </div>
-                </div>
-              </div>
-
-              {[
-                { name: "IT Assets", val: "82%", color: "#1E3A8A" },
-                { name: "Electrical Assets", val: "58%", color: "#0F766E" },
-                { name: "Under Service", val: "34%", color: "#F59E0B" },
-              ].map((bar) => (
-                <div key={bar.name} style={{ marginBottom: "15px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "13px",
-                      fontWeight: 800,
-                      marginBottom: "8px",
-                      color: "#0F172A",
-                    }}
-                  >
-                    <span>{bar.name}</span>
-                    <span>{bar.val}</span>
-                  </div>
-                  <div
-                    style={{
-                      height: "9px",
-                      background: "#E2E8F0",
-                      borderRadius: "999px",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: bar.val }}
-                      transition={{ duration: 1.1, delay: 0.8 }}
-                      style={{
-                        height: "100%",
-                        background: bar.color,
-                        borderRadius: "999px",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* TRUST STRIP */}
-      <section
-        style={{
-          padding: "34px 24px",
-          background: "#FFFFFF",
-          borderTop: "1px solid #E2E8F0",
-          borderBottom: "1px solid #E2E8F0",
-        }}
-      >
-        <div
-          className="container"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "22px",
-          }}
-        >
-          {[
-            "Centralized Asset Register",
-            "Warranty & AMC Alerts",
-            "Ticket Lifecycle Tracking",
-            "Vendor Service Records",
-          ].map((item) => (
-            <div
-              key={item}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                fontWeight: 800,
-                color: "#0F172A",
-              }}
-            >
-              <span className="check-circle">✓</span>
+      <section style={{ background: "#111111", padding: "28px 24px" }}>
+        <div className="h-container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 18 }}>
+          {["Centralized Asset Register", "Warranty & AMC Alerts", "Ticket Lifecycle Tracking", "Vendor Service Records"].map((item) => (
+            <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 800, color: "#FFFFFF", fontSize: 14 }}>
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#CBFA57", color: "#111111", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 11, flexShrink: 0 }}>✓</span>
               {item}
             </div>
           ))}
         </div>
       </section>
 
-      {/* SECTION 1 */}
-      <section style={{ padding: "110px 24px" }}>
-        <div
-          className="container split-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "0.95fr 1.05fr",
-            gap: "70px",
-            alignItems: "center",
-          }}
-        >
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-          >
-            <span className="section-label">Asset Control</span>
-
-            <h2
-              className="section-title"
-              style={{
-                fontSize: "46px",
-                fontWeight: 950,
-                color: "#0F172A",
-                lineHeight: 1.15,
-                letterSpacing: "-1.4px",
-                margin: "16px 0 22px",
-              }}
-            >
+      {/* SECTION 1 — Asset Control */}
+      <section style={{ padding: "100px 24px" }}>
+        <div className="h-container h-split-grid" style={{ display: "grid", gridTemplateColumns: "0.95fr 1.05fr", gap: 64, alignItems: "center" }}>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={fadeUp}>
+            <span className="h-section-label">Asset Control</span>
+            <h2 className="h-section-title" style={{ fontSize: 44, fontWeight: 950, color: "#111111", lineHeight: 1.14, letterSpacing: "-1.4px", margin: "14px 0 20px" }}>
               Stop managing company assets in spreadsheets.
             </h2>
-
-            <p
-              style={{
-                fontSize: "18px",
-                color: "#64748B",
-                lineHeight: 1.75,
-                marginBottom: "28px",
-              }}
-            >
-              AssetCare Pro gives your company a complete digital record of
-              IT, electrical, electronic, furniture and other movable or
-              immovable assets.
+            <p style={{ fontSize: 17, color: "#6B6B65", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
+              AssetCare Pro gives your company a complete digital record of IT, electrical, electronic, furniture and other movable or immovable assets.
             </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {[
-                "Department-wise asset allocation",
-                "Location and ownership tracking",
-                "Warranty, AMC and purchase details",
-                "Asset-wise complete service history",
-              ].map((text) => (
-                <div className="check-item" key={text}>
-                  <span className="check-circle">✓</span>
-                  {text}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {["Department-wise asset allocation", "Location and ownership tracking", "Warranty, AMC and purchase details", "Asset-wise complete service history"].map((text) => (
+                <div className="h-check-item" key={text}>
+                  <span className="h-check-circle">✓</span>{text}
                 </div>
               ))}
             </div>
           </motion.div>
 
-          <motion.div
-            className="info-panel"
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <Typography fontWeight={950} fontSize={24} color="#0F172A" mb={3}>
-              Asset Register Preview
-            </Typography>
-
+          <motion.div className="h-info-panel" initial={{ opacity: 0, x: 36 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.75 }}>
+            <div style={{ fontWeight: 950, fontSize: 20, color: "#111111", marginBottom: 22, letterSpacing: "-0.4px" }}>Asset Register Preview</div>
             {[
-              {
-                title: "Dell Latitude Laptop",
-                meta: "IT Department · Jaipur Office",
-                status: "Warranty Active",
-                color: "#0F766E",
-              },
-              {
-                title: "Canon Printer",
-                meta: "Admin Department · Floor 2",
-                status: "Service Due",
-                color: "#F59E0B",
-              },
-              {
-                title: "UPS Power Backup",
-                meta: "Electrical Room · Basement",
-                status: "Complaint Open",
-                color: "#DC2626",
-              },
+              { title: "Dell Latitude Laptop", meta: "IT Department · Jaipur Office", status: "Warranty Active", color: "#16A34A", bg: "#DCFCE7" },
+              { title: "Canon Printer", meta: "Admin Department · Floor 2", status: "Service Due", color: "#D97706", bg: "#FEF3C7" },
+              { title: "UPS Power Backup", meta: "Electrical Room · Basement", status: "Complaint Open", color: "#DC2626", bg: "#FEE2E2" },
             ].map((asset) => (
-              <div
-                key={asset.title}
-                style={{
-                  padding: "18px",
-                  borderRadius: "18px",
-                  background: "#F8FAFC",
-                  border: "1px solid #E2E8F0",
-                  marginBottom: "14px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "16px",
-                  alignItems: "center",
-                }}
-              >
+              <div key={asset.title} className="h-asset-row">
                 <div>
-                  <div style={{ fontWeight: 900, color: "#0F172A" }}>
-                    {asset.title}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      color: "#64748B",
-                      fontWeight: 600,
-                      marginTop: "4px",
-                    }}
-                  >
-                    {asset.meta}
-                  </div>
+                  <div style={{ fontWeight: 800, color: "#111111", fontSize: 14 }}>{asset.title}</div>
+                  <div style={{ fontSize: 12.5, color: "#8A8A84", fontWeight: 600, marginTop: 3 }}>{asset.meta}</div>
                 </div>
-
-                <div
-                  style={{
-                    padding: "7px 11px",
-                    borderRadius: "999px",
-                    background: `${asset.color}18`,
-                    color: asset.color,
-                    fontWeight: 900,
-                    fontSize: "12px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
+                <div style={{ padding: "6px 12px", borderRadius: 999, background: asset.bg, color: asset.color, fontWeight: 800, fontSize: 11.5, whiteSpace: "nowrap" }}>
                   {asset.status}
                 </div>
               </div>
@@ -797,142 +322,43 @@ const Home = () => {
         </div>
       </section>
 
-      {/* SECTION 2 */}
-      <section style={{ padding: "0 24px 110px" }}>
-        <div
-          className="container split-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.05fr 0.95fr",
-            gap: "70px",
-            alignItems: "center",
-          }}
-        >
-          <motion.div
-            className="info-panel"
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <Typography fontWeight={950} fontSize={24} color="#0F172A" mb={3}>
-              Ticket Workflow
-            </Typography>
-
+      {/* SECTION 2 — Service Management */}
+      <section style={{ padding: "0 24px 100px" }}>
+        <div className="h-container h-split-grid" style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 64, alignItems: "center" }}>
+          <motion.div className="h-info-panel" initial={{ opacity: 0, x: -36 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.75 }}>
+            <div style={{ fontWeight: 950, fontSize: 20, color: "#111111", marginBottom: 22, letterSpacing: "-0.4px" }}>Ticket Workflow</div>
             {[
-              {
-                step: "01",
-                title: "Asset Breakdown Reported",
-                text: "User creates a complaint ticket with issue details.",
-              },
-              {
-                step: "02",
-                title: "Department Approval",
-                text: "HOD/Admin verifies warranty and approval requirement.",
-              },
-              {
-                step: "03",
-                title: "Vendor Complaint Raised",
-                text: "OEM/vendor complaint number and technician details are recorded.",
-              },
-              {
-                step: "04",
-                title: "Service Closed",
-                text: "Repair proof, cost and closure remarks are saved.",
-              },
+              { step: "01", title: "Asset Breakdown Reported", text: "User creates a complaint ticket with issue details." },
+              { step: "02", title: "Department Approval", text: "HOD/Admin verifies warranty and approval requirement." },
+              { step: "03", title: "Vendor Complaint Raised", text: "OEM/vendor complaint number and technician details are recorded." },
+              { step: "04", title: "Service Closed", text: "Repair proof, cost and closure remarks are saved." },
             ].map((item) => (
-              <div
-                key={item.step}
-                className="workflow-card"
-                style={{ marginBottom: "14px" }}
-              >
-                <div style={{ display: "flex", gap: "16px" }}>
-                  <div
-                    style={{
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "14px",
-                      background: "linear-gradient(135deg, #1E3A8A, #0F766E)",
-                      color: "#FFFFFF",
-                      display: "grid",
-                      placeItems: "center",
-                      fontWeight: 950,
-                      flexShrink: 0,
-                    }}
-                  >
+              <div key={item.step} className="h-workflow-card">
+                <div style={{ display: "flex", gap: 14 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", fontWeight: 950, fontSize: 13, flexShrink: 0 }}>
                     {item.step}
                   </div>
-
                   <div>
-                    <div
-                      style={{
-                        fontWeight: 950,
-                        color: "#0F172A",
-                        marginBottom: "5px",
-                      }}
-                    >
-                      {item.title}
-                    </div>
-                    <div
-                      style={{
-                        color: "#64748B",
-                        lineHeight: 1.5,
-                        fontWeight: 600,
-                        fontSize: "14px",
-                      }}
-                    >
-                      {item.text}
-                    </div>
+                    <div style={{ fontWeight: 900, color: "#111111", marginBottom: 4, fontSize: 14 }}>{item.title}</div>
+                    <div style={{ color: "#8A8A84", lineHeight: 1.55, fontWeight: 600, fontSize: 13 }}>{item.text}</div>
                   </div>
                 </div>
               </div>
             ))}
           </motion.div>
 
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUp}
-          >
-            <span className="section-label">Service Management</span>
-
-            <h2
-              className="section-title"
-              style={{
-                fontSize: "46px",
-                fontWeight: 950,
-                color: "#0F172A",
-                lineHeight: 1.15,
-                letterSpacing: "-1.4px",
-                margin: "16px 0 22px",
-              }}
-            >
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={fadeUp}>
+            <span className="h-section-label">Service Management</span>
+            <h2 className="h-section-title" style={{ fontSize: 44, fontWeight: 950, color: "#111111", lineHeight: 1.14, letterSpacing: "-1.4px", margin: "14px 0 20px" }}>
               Track every complaint from breakdown to closure.
             </h2>
-
-            <p
-              style={{
-                fontSize: "18px",
-                color: "#64748B",
-                lineHeight: 1.75,
-                marginBottom: "28px",
-              }}
-            >
-              No more missing complaint numbers, technician details, pending
-              approvals or service history. Every action is tracked clearly.
+            <p style={{ fontSize: 17, color: "#6B6B65", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
+              No more missing complaint numbers, technician details, pending approvals or service history. Every action is tracked clearly.
             </p>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              {[
-                "Breakdown ticket creation",
-                "Complaint and escalation tracking",
-                "Vendor technician visit details",
-                "Closure remarks and service cost records",
-              ].map((text) => (
-                <div className="check-item" key={text}>
-                  <span className="check-circle">✓</span>
-                  {text}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {["Breakdown ticket creation", "Complaint and escalation tracking", "Vendor technician visit details", "Closure remarks and service cost records"].map((text) => (
+                <div className="h-check-item" key={text}>
+                  <span className="h-check-circle">✓</span>{text}
                 </div>
               ))}
             </div>
@@ -940,90 +366,32 @@ const Home = () => {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section
-        style={{
-          padding: "110px 24px",
-          backgroundColor: "#FFFFFF",
-          borderTop: "1px solid #E2E8F0",
-        }}
-      >
-        <div className="container">
-          <div
-            style={{
-              textAlign: "center",
-              maxWidth: "820px",
-              margin: "0 auto 70px",
-            }}
-          >
-            <span className="section-label">Core Modules</span>
-
-            <h2
-              className="section-title"
-              style={{
-                fontSize: "48px",
-                fontWeight: 950,
-                color: "#0F172A",
-                margin: "16px 0",
-                letterSpacing: "-1.6px",
-              }}
-            >
+      {/* FEATURES GRID */}
+      <section style={{ padding: "100px 24px", background: "#111111" }}>
+        <div className="h-container">
+          <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 60px" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 999, background: "rgba(203,250,87,0.10)", border: "1px solid rgba(203,250,87,0.20)", color: "#CBFA57", fontWeight: 800, fontSize: 12, marginBottom: 18, letterSpacing: "1.2px", textTransform: "uppercase" }}>
+              Core Modules
+            </div>
+            <h2 style={{ fontSize: 46, fontWeight: 950, color: "#FFFFFF", margin: "0 0 16px", letterSpacing: "-1.6px", lineHeight: 1.1 }}>
               Everything your asset team needs.
             </h2>
-
-            <p
-              style={{
-                fontSize: "19px",
-                color: "#64748B",
-                lineHeight: 1.7,
-              }}
-            >
-              From asset entry to warranty alerts, approvals, vendor complaint
-              tracking and service closure — all modules work together.
+            <p style={{ fontSize: 17, color: "#7A7A74", lineHeight: 1.7, fontWeight: 500 }}>
+              From asset entry to warranty alerts, approvals, vendor complaint tracking and service closure — all modules work together.
             </p>
           </div>
 
-          <motion.div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "28px",
-            }}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerContainer}
-          >
+          <motion.div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}
+            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={stagger}>
             {features.map((item) => (
-              <motion.div
-                key={item.title}
-                variants={fadeUp}
-                className="feature-card"
-              >
-                <div className="feature-icon">{item.icon}</div>
-
-                <h3
-                  style={{
-                    fontSize: "22px",
-                    fontWeight: 950,
-                    color: "#0F172A",
-                    marginBottom: "12px",
-                    letterSpacing: "-0.4px",
-                  }}
-                >
-                  {item.title}
-                </h3>
-
-                <p
-                  style={{
-                    color: "#64748B",
-                    lineHeight: 1.65,
-                    fontSize: "16px",
-                    fontWeight: 600,
-                  }}
-                >
-                  {item.text}
-                </p>
+              <motion.div key={item.title} variants={fadeUp} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, padding: "28px 24px", transition: "all 0.3s ease", cursor: "default" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(203,250,87,0.06)"; e.currentTarget.style.borderColor = "rgba(203,250,87,0.20)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
+                <div style={{ width: 50, height: 50, background: "#CBFA57", color: "#111111", borderRadius: 14, display: "grid", placeItems: "center", marginBottom: 18 }}>
+                  {item.icon}
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 900, color: "#FFFFFF", marginBottom: 10, letterSpacing: "-0.3px" }}>{item.title}</h3>
+                <p style={{ color: "#7A7A74", lineHeight: 1.65, fontSize: 14.5, fontWeight: 500, margin: 0 }}>{item.text}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -1031,69 +399,22 @@ const Home = () => {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "110px 24px", backgroundColor: "#F8FAFC" }}>
-        <motion.div
-          initial={{ opacity: 0, y: 35 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.75 }}
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            background:
-              "radial-gradient(circle at 85% 10%, rgba(20,184,166,0.28), transparent 32%), linear-gradient(135deg, #0F172A, #1E3A8A)",
-            borderRadius: "36px",
-            padding: "78px 64px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "38px",
-            boxShadow: "0 28px 60px rgba(15, 23, 42, 0.26)",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          <div style={{ maxWidth: "650px", position: "relative", zIndex: 1 }}>
-            <h2
-              style={{
-                fontSize: "42px",
-                fontWeight: 950,
-                color: "#FFFFFF",
-                marginBottom: "16px",
-                letterSpacing: "-1.2px",
-                lineHeight: 1.18,
-              }}
-            >
+      <section style={{ padding: "100px 24px", background: "#ECEAE3" }}>
+        <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
+          style={{ maxWidth: 1200, margin: "0 auto", background: "#111111", borderRadius: 32, padding: "68px 56px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 36, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -80, right: -80, width: 280, height: 280, background: "radial-gradient(circle, rgba(203,250,87,0.14), transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 600, position: "relative", zIndex: 1 }}>
+            <h2 style={{ fontSize: 40, fontWeight: 950, color: "#FFFFFF", marginBottom: 14, letterSpacing: "-1.2px", lineHeight: 1.18 }}>
               Ready to digitize your company asset management?
             </h2>
-
-            <p
-              style={{
-                fontSize: "18px",
-                color: "#CBD5E1",
-                lineHeight: 1.7,
-              }}
-            >
-              Start managing assets, warranty, breakdown tickets, vendor
-              complaints and approval workflow from one clean dashboard.
+            <p style={{ fontSize: 17, color: "#7A7A74", lineHeight: 1.7, margin: 0, fontWeight: 500 }}>
+              Start managing assets, warranty, breakdown tickets, vendor complaints and approval workflow from one clean dashboard.
             </p>
           </div>
-
-          <Link
-            to="/contact"
-            className="btn-gradient"
-            style={{
-              padding: "20px 38px",
-              fontSize: "18px",
-              position: "relative",
-              zIndex: 1,
-              background: "#FFFFFF",
-              color: "#1E3A8A",
-              boxShadow: "0 18px 34px rgba(0,0,0,0.18)",
-            }}
-          >
-            Request Demo <AutoGraphRoundedIcon />
+          <Link to="/contact" style={{ background: "#CBFA57", color: "#111111", padding: "18px 34px", borderRadius: 999, fontWeight: 900, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, transition: "all 0.22s ease", letterSpacing: "-0.3px" }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 28px rgba(203,250,87,0.3)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
+            Request Demo <AutoGraphRoundedIcon fontSize="small" />
           </Link>
         </motion.div>
       </section>
