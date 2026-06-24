@@ -51,8 +51,14 @@ const ticketSchema = new mongoose.Schema({
     ref: 'User',
     default: null
   }
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
+
+// Indexes for performance
+ticketSchema.index({ status: 1 });
+ticketSchema.index({ priority: 1 });
+ticketSchema.index({ raisedBy: 1 });
+ticketSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Ticket', ticketSchema);

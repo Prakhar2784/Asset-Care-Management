@@ -17,7 +17,8 @@ const createAsset = async (req, res) => {
 // @access  Admin / HOD
 const getAssets = async (req, res) => {
   try {
-    const assets = await Asset.find({}).populate('assignedTo', 'name email department');
+    const assets = await Asset.find({ isDeleted: { $ne: true } })
+      .populate('assignedTo', 'name email department');
     res.status(200).json(assets);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -54,16 +55,50 @@ const updateAsset = async (req, res) => {
   }
 };
 
-// @route   DELETE /api/assets/:id
+// @route   DELETE /api/assets/:id  — soft delete
 // @access  Admin
 const deleteAsset = async (req, res) => {
   try {
     const asset = await Asset.findById(req.params.id);
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
 
+    asset.isDeleted = true;
+    asset.deletedAt = new Date();
+    await asset.save({ validateBeforeSave: false });
+
     audit({ req, action: 'asset_deleted', entity: 'asset', entityId: asset._id, entityLabel: asset.name });
-    await asset.deleteOne();
-    res.status(200).json({ message: 'Asset deleted successfully' });
+    res.status(200).json({ message: 'Asset moved to trash successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @route   PUT /api/assets/:id/restore
+// @access  Admin
+const restoreAsset = async (req, res) => {
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) return res.status(404).json({ message: 'Asset not found' });
+
+    asset.isDeleted = false;
+    asset.deletedAt = null;
+    await asset.save({ validateBeforeSave: false });
+
+    audit({ req, action: 'asset_restored', entity: 'asset', entityId: asset._id, entityLabel: asset.name });
+    res.status(200).json({ message: 'Asset restored successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @route   GET /api/assets/trash
+// @access  Admin
+const getDeletedAssets = async (req, res) => {
+  try {
+    const assets = await Asset.find({ isDeleted: true })
+      .populate('assignedTo', 'name email')
+      .sort({ deletedAt: -1 });
+    res.status(200).json(assets);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -73,7 +108,7 @@ const deleteAsset = async (req, res) => {
 // @access  Any logged-in user (for ticket raising)
 const getActiveAssets = async (req, res) => {
   try {
-    const assets = await Asset.find({ status: { $nin: ['Scrap', 'Decommissioned'] } })
+    const assets = await Asset.find({ status: { $nin: ['Scrap', 'Decommissioned'] }, isDeleted: { $ne: true } })
       .select('name serialNumber category department location status')
       .sort({ name: 1 });
     res.status(200).json(assets);
@@ -98,4 +133,4 @@ const getMyAssets = async (req, res) => {
   }
 };
 
-module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, getMyAssets, getActiveAssets };
+module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets };

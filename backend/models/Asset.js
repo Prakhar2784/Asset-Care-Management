@@ -58,6 +58,18 @@ const assetSchema = new mongoose.Schema({
   warrantyAlertSent30: { type: Boolean, default: false },
   warrantyAlertSent15: { type: Boolean, default: false },
   warrantyAlertSent7: { type: Boolean, default: false },
+
+  // Soft delete
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null },
 }, { timestamps: true });
+
+// Indexes for performance
+assetSchema.index({ status: 1 });
+assetSchema.index({ department: 1 });
+assetSchema.index({ assignedTo: 1 });
+assetSchema.index({ isDeleted: 1 });
+assetSchema.index({ createdAt: -1 });
+assetSchema.index({ warrantyEnd: 1 });
 
 module.exports = mongoose.model('Asset', assetSchema);

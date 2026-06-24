@@ -32,8 +32,14 @@ app.use("/api/asset-assignments", require("./routes/assetAssignmentRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/audit", require("./routes/auditRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
+app.use("/api/search", require("./routes/searchRoutes"));
+app.use("/api/settings", require("./routes/settingsRoutes"));
 
-// Basic Health Check
+// Health Check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", uptime: process.uptime(), timestamp: new Date().toISOString() });
+});
+
 app.get("/", (req, res) => {
   res.send("AssetCare API is running...");
 });

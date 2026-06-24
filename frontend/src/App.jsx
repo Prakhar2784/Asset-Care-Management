@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 // Import Route Guards
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -34,6 +35,7 @@ import Reports from "./pages/admin/Reports";
 import EmployeePortal from "./pages/employee/EmployeePortal";
 import Tickets from "./pages/shared/Tickets";
 import Notifications from "./pages/shared/Notifications";
+import Settings from "./pages/shared/Settings";
 
 const WebsiteLayout = ({ children }) => (
   <>
@@ -45,6 +47,7 @@ const WebsiteLayout = ({ children }) => (
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <Routes>
         {/* PUBLIC ROUTES - Anyone can access */}
@@ -67,6 +70,7 @@ function App() {
             {/* Shared Route (Both roles use this to see tickets) */}
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/settings" element={<Settings />} />
 
             {/* ADMIN ONLY ROUTES - Role must be "admin" */}
             <Route element={<AdminRoute />}>
@@ -87,6 +91,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

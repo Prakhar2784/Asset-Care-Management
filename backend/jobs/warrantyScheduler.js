@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const Asset = require('../models/Asset');
 const User = require('../models/User');
+const AuditLog = require('../models/AuditLog');
 const { sendWarrantyExpiryEmail } = require('../services/emailService');
 const { createNotification } = require('../services/notificationService');
 const { audit } = require('../services/auditService');
@@ -63,10 +64,23 @@ const checkWarrantyExpiry = async () => {
   }
 };
 
+// Purge audit logs older than 365 days — runs on the 1st of every month
+const purgeOldAuditLogs = async () => {
+  try {
+    const cutoff = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+    const result = await AuditLog.deleteMany({ createdAt: { $lt: cutoff } });
+    console.log(`[AuditRetention] Purged ${result.deletedCount} audit log(s) older than 1 year.`);
+  } catch (err) {
+    console.error('[AuditRetention] Error:', err.message);
+  }
+};
+
 const startWarrantyScheduler = () => {
-  // Run daily at 8:00 AM
+  // Run daily at 8:00 AM IST
   cron.schedule('0 8 * * *', checkWarrantyExpiry, { timezone: 'Asia/Kolkata' });
-  console.log('[WarrantyScheduler] Started — runs daily at 8:00 AM IST');
+  // Purge old audit logs on the 1st of every month at 2:00 AM IST
+  cron.schedule('0 2 1 * *', purgeOldAuditLogs, { timezone: 'Asia/Kolkata' });
+  console.log('[Scheduler] Warranty checker (daily 8AM) + Audit retention (monthly 1st) started.');
 };
 
 module.exports = { startWarrantyScheduler, checkWarrantyExpiry };

@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { AppBar, Avatar, Badge, Box, Button, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery } from "@mui/material";
-import { ApartmentRounded, ApprovalRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded, HistoryRounded, AssessmentRounded } from "@mui/icons-material";
+import { ApartmentRounded, ApprovalRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded, HistoryRounded, AssessmentRounded, SettingsRounded } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
+import GlobalSearch from "./GlobalSearch";
 
 const drawerWidth = 280;
 
@@ -16,11 +17,13 @@ const adminMenu = [
   { text: "Departments", path: "/admin/departments", icon: <ApartmentRounded /> },
   { text: "Reports", path: "/admin/reports", icon: <AssessmentRounded /> },
   { text: "Audit Logs", path: "/admin/audit", icon: <HistoryRounded /> },
+  { text: "Settings", path: "/settings", icon: <SettingsRounded /> },
 ];
 
 const employeeMenu = [
   { text: "My Portal", path: "/employee/portal", icon: <DashboardRounded /> },
   { text: "My Tickets", path: "/tickets", icon: <ConfirmationNumberRounded /> },
+  { text: "Settings", path: "/settings", icon: <SettingsRounded /> },
 ];
 
 const Sidebar = ({ onClose }) => {
@@ -146,8 +149,9 @@ const Layout = () => {
               {isMobile && <IconButton onClick={() => setOpen(true)} sx={{ mr: 2, color: "#0f172a" }}><MenuRounded /></IconButton>}
             </Box>
 
-            <Box display="flex" alignItems="center" gap={2}>
-              <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right" }}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <GlobalSearch />
+              <Box sx={{ display: { xs: "none", sm: "block" }, textAlign: "right", mx: 1 }}>
                 <Typography fontWeight={700} fontSize={15} color="#0f172a">{userName}</Typography>
                 <Typography fontSize={13} color="#64748b" fontWeight={500}>{userRole}</Typography>
               </Box>
