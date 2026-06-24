@@ -25,6 +25,19 @@ const createRequest = async (req, res) => {
       raisedBy: req.user._id
     });
 
+    // Notify all admins about the new device request
+    User.find({ role: 'admin' }).then(admins => {
+      admins.forEach(admin => {
+        createNotification({
+          userId: admin._id,
+          type: 'system',
+          title: 'New Device Request',
+          message: `${req.user.name || 'An employee'} submitted device request ${requestId} for "${itemRequested}".`,
+          link: '/admin/approvals'
+        });
+      });
+    }).catch(() => {});
+
     res.status(201).json(request);
   } catch (error) {
     res.status(400).json({ message: error.message });

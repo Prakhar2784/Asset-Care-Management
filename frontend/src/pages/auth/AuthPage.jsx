@@ -603,7 +603,7 @@ const AuthPage = () => {
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontSize: "14px", cursor: "pointer", fontWeight: "600" }}>
                     <input type="checkbox" style={{ accentColor: "var(--auth-secondary)", width: "16px", height: "16px" }} /> Remember me
                   </label>
-                  <button type="button" className="auth-link" onClick={() => handleViewChange("forgot")}>Forgot Password?</button>
+                  <button type="button" className="auth-link" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
                 </div>
               )}
 

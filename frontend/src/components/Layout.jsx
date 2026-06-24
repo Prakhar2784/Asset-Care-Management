@@ -113,7 +113,7 @@ const Layout = () => {
   useEffect(() => {
     if (currentUser) {
       fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 30000);
+      const interval = setInterval(fetchUnreadCount, 10000);
       // Re-fetch instantly when any notification action happens on the Notifications page
       window.addEventListener('notifications-changed', fetchUnreadCount);
       return () => {

@@ -49,6 +49,8 @@ const createTicket = async (req, res) => {
     sendTicketCreatedEmail(populated.raisedBy, populated, populated.asset)
       .catch(err => console.error('[TICKET EMAIL ERROR] Created:', err.message));
     audit({ req, action: 'ticket_created', entity: 'ticket', entityId: ticket._id, entityLabel: ticketId });
+
+    // Notify the employee who raised the ticket
     createNotification({
       userId: req.user._id,
       type: 'ticket_created',
@@ -56,6 +58,22 @@ const createTicket = async (req, res) => {
       message: `Your ticket ${ticketId} has been submitted${initialStatus === 'Vendor Assigned' ? ' and auto-approved' : ' and is pending approval'}.`,
       link: '/tickets'
     });
+
+    // Notify all admins about the new ticket
+    if (req.user.role !== 'admin') {
+      User.find({ role: 'admin' }).then(admins => {
+        const itemName = populated.asset?.name || populated.itemLabel || ticketId;
+        admins.forEach(admin => {
+          createNotification({
+            userId: admin._id,
+            type: 'ticket_created',
+            title: 'New Ticket Raised',
+            message: `${populated.raisedBy?.name || 'An employee'} raised ticket ${ticketId} for "${itemName}".`,
+            link: '/tickets'
+          });
+        });
+      }).catch(() => {});
+    }
 
     res.status(201).json(populated);
   } catch (error) {

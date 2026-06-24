@@ -27,9 +27,13 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   isActive: { type: Boolean, default: true },
 
-  // Password reset
+  // Password reset (token-based, used after OTP verification)
   passwordResetToken: { type: String, default: null },
-  passwordResetExpiry: { type: Date, default: null }
+  passwordResetExpiry: { type: Date, default: null },
+
+  // OTP-based reset (step 1)
+  otpHash: { type: String, default: null },
+  otpExpiry: { type: Date, default: null }
 }, {
   timestamps: true
 });

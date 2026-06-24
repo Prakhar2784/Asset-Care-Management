@@ -322,8 +322,39 @@ const sendWelcomeEmail = async (user, tempPassword) => {
   });
 };
 
+// OTP Password Reset Email
+const sendOtpEmail = async (user, otp) => {
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      Hello <strong>${user.name}</strong>,<br><br>
+      We received a request to reset the password for your AssetCare Pro account.
+      Use the OTP below to verify your identity. This code expires in <strong>10 minutes</strong>.
+    </p>
+    <div style="text-align:center;margin:32px 0;">
+      <div style="display:inline-block;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;padding:24px 48px;">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:8px;">Your OTP Code</div>
+        <div style="font-size:42px;font-weight:900;letter-spacing:12px;color:#1E3A8A;font-family:monospace;">${otp}</div>
+      </div>
+    </div>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Account</span><span class="info-val">${user.email}</span></div>
+      <div class="info-row"><span class="info-key">Expires In</span><span class="info-val">10 minutes</span></div>
+    </div>
+    <p style="font-size:13px;color:#94a3b8;margin-top:16px;">
+      If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
+      Never share this OTP with anyone.
+    </p>`;
+  await sendEmail({
+    to: user.email,
+    subject: 'AssetCare Pro Password Reset OTP',
+    text: `Hello ${user.name}, your OTP to reset your AssetCare Pro password is: ${otp}. This code expires in 10 minutes. Do not share this with anyone.`,
+    html: baseTemplate('Password Reset OTP', body, 'This OTP expires in 10 minutes and can only be used once.')
+  });
+};
+
 module.exports = {
   sendPasswordResetEmail,
+  sendOtpEmail,
   sendTicketCreatedEmail,
   sendTicketStatusEmail,
   sendTicketResolvedEmail,
