@@ -5,7 +5,7 @@ const assetAssignmentSchema = new mongoose.Schema(
     department: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
-      required: true,
+      default: null,
     },
     asset: {
       type: mongoose.Schema.Types.ObjectId,

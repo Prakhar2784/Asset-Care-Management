@@ -1,4 +1,7 @@
+const mongoose = require('mongoose');
 const DeviceRequest = require('../models/DeviceRequest');
+const Asset = require('../models/Asset');
+const AssetAssignment = require('../models/AssetAssignment');
 const User = require('../models/User');
 const {
   sendApprovalApprovedEmail,
@@ -92,14 +95,14 @@ const getMyApprovedRequests = async (req, res) => {
 // @access  Admin
 const reviewRequest = async (req, res) => {
   try {
-    const { status, adminRemarks } = req.body;
+    const { status, adminRemarks, assetId } = req.body;
 
     if (!['Approved', 'Rejected'].includes(status)) {
       return res.status(400).json({ message: 'Status must be Approved or Rejected' });
     }
 
     const request = await DeviceRequest.findById(req.params.id)
-      .populate('raisedBy', 'name email department');
+      .populate('raisedBy', 'name email department phone');
 
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
@@ -111,6 +114,37 @@ const reviewRequest = async (req, res) => {
     request.adminRemarks = adminRemarks || '';
     request.reviewedBy = req.user._id;
     request.reviewedAt = new Date();
+
+    // If approving and admin selected an asset, create the assignment immediately
+    if (status === 'Approved' && assetId && mongoose.Types.ObjectId.isValid(assetId)) {
+      const asset = await Asset.findById(assetId);
+      if (asset && asset.assignedStatus !== 'Assigned') {
+        const employee = request.raisedBy;
+
+        await AssetAssignment.create({
+          asset: asset._id,
+          department: null,
+          employeeName: employee.name,
+          employeeEmail: employee.email,
+          employeePhone: employee.phone || '',
+          assignedDate: new Date(),
+          assignedBy: req.user._id,
+          status: 'Assigned'
+        });
+
+        const assignedUser = await User.findOne({ email: employee.email });
+        await Asset.findByIdAndUpdate(asset._id, {
+          assignedStatus: 'Assigned',
+          assignedEmployeeName: employee.name,
+          assignedEmployeeEmail: employee.email,
+          assignedEmployeePhone: employee.phone || '',
+          assignedDate: new Date(),
+          assignedTo: assignedUser ? assignedUser._id : null,
+        });
+
+        request.assignedAsset = asset._id;
+      }
+    }
 
     const updated = await request.save();
 
@@ -127,6 +161,21 @@ const reviewRequest = async (req, res) => {
           message: `Your request for "${request.itemRequested}" (${request.requestId}) has been approved.`,
           link: '/employee/portal'
         });
+
+        // If no asset was assigned from inventory, alert all admins to add it to the registry
+        if (!assetId) {
+          User.find({ role: { $in: ['admin', 'super_admin'] } }).then(admins => {
+            admins.forEach(admin => {
+              createNotification({
+                userId: admin._id,
+                type: 'system',
+                title: 'Asset Not In Registry',
+                message: `Device request ${request.requestId} for "${request.itemRequested}" by ${request.raisedBy.name} was approved, but no inventory asset was assigned. Add the item to the Asset Registry and assign it.`,
+                link: '/admin/assets'
+              });
+            });
+          }).catch(() => {});
+        }
       } else {
         sendApprovalRejectedEmail(request.raisedBy, request).catch(() => {});
         createNotification({

@@ -84,8 +84,7 @@ const Tickets = () => {
           setApprovedRequests([]);
         }
       }
-    } catch (err) {
-      console.error("Failed to fetch data:", err);
+    } catch {
       setError("Failed to load breakdown tickets. Please verify your connection.");
     } finally {
       setLoading(false);

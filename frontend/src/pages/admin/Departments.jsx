@@ -276,8 +276,8 @@ const Departments = () => {
                 sx={{
                   p: 3,
                   borderRadius: "26px",
-                  bgcolor: "#FFFFFF",
-                  border: "1px solid #E2E8F0",
+                  bgcolor: "background.paper",
+                  border: "1px solid", borderColor: "divider",
                   height: "100%",
                   boxShadow: "0 14px 34px rgba(15,23,42,0.06)",
                 }}
@@ -384,7 +384,7 @@ const Departments = () => {
         PaperProps={{
           sx: {
             borderRadius: "26px",
-            bgcolor: "#FFFFFF",
+            bgcolor: "background.paper",
             overflow: "hidden",
           },
         }}
@@ -497,7 +497,7 @@ const Departments = () => {
                     minHeight: 56,
                     px: 2,
                     borderRadius: "14px",
-                    bgcolor: "#FFFFFF",
+                    bgcolor: "background.paper",
                     border: "1px solid #CBD5E1",
                     display: "flex",
                     alignItems: "center",
@@ -559,7 +559,7 @@ const Departments = () => {
           </FormBlock>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, bgcolor: "#FFFFFF", borderTop: "1px solid #E2E8F0" }}>
+        <DialogActions sx={{ p: 2, bgcolor: "background.paper", borderTop: "1px solid", borderTopColor: "divider" }}>
           <Button
             onClick={() => setFormOpen(false)}
             sx={{ fontWeight: 900, textTransform: "none", color: "#475569" }}
@@ -666,8 +666,8 @@ const SummaryCard = ({ title, value, warning = false }) => (
     sx={{
       p: 2.5,
       borderRadius: "22px",
-      bgcolor: "#FFFFFF",
-      border: "1px solid #E2E8F0",
+      bgcolor: "background.paper",
+      border: "1px solid", borderColor: "divider",
       boxShadow: "0 12px 30px rgba(15,23,42,0.05)",
     }}
   >
@@ -694,8 +694,8 @@ const FormBlock = ({ title, children }) => (
       p: 2.5,
       mb: 2.5,
       borderRadius: "20px",
-      bgcolor: "#FFFFFF",
-      border: "1px solid #E2E8F0",
+      bgcolor: "background.paper",
+      border: "1px solid", borderColor: "divider",
     }}
   >
     <Typography sx={{ fontWeight: 950, fontSize: 17, mb: 2, color: "#1E3A8A" }}>

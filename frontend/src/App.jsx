@@ -4,12 +4,13 @@ import { ThemeProvider } from "./context/ThemeContext";
 
 // Import Route Guards
 import ProtectedRoute from "./routes/ProtectedRoute";
-import AdminRoute from "./routes/AdminRoute"; 
+import AdminRoute from "./routes/AdminRoute";
 
 // Import Layouts
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Layout from "./components/Layout";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Import Public Pages
 import Home from "./pages/public/Home";
@@ -17,6 +18,7 @@ import Features from "./pages/public/Features";
 import Modules from "./pages/public/Modules";
 import Workflow from "./pages/public/Workflow";
 import Contact from "./pages/public/Contact";
+import TermsAndConditions from "./pages/public/TermsAndConditions";
 import AuthPage from "./pages/auth/AuthPage";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
@@ -30,6 +32,7 @@ import Vendors from "./pages/admin/Vendors";
 import Departments from "./pages/admin/Departments";
 import AuditLogs from "./pages/admin/AuditLogs";
 import Reports from "./pages/admin/Reports";
+import AssignedDevices from "./pages/admin/AssignedDevices";
 
 // Import Employee & Shared Pages
 import EmployeePortal from "./pages/employee/EmployeePortal";
@@ -49,6 +52,7 @@ function App() {
   return (
     <AuthProvider>
     <ThemeProvider>
+      <ScrollToTop />
       <Routes>
         {/* PUBLIC ROUTES - Anyone can access */}
         <Route path="/" element={<WebsiteLayout><Home /></WebsiteLayout>} />
@@ -56,6 +60,7 @@ function App() {
         <Route path="/modules" element={<WebsiteLayout><Modules /></WebsiteLayout>} />
         <Route path="/workflow" element={<WebsiteLayout><Workflow /></WebsiteLayout>} />
         <Route path="/contact" element={<WebsiteLayout><Contact /></WebsiteLayout>} />
+        <Route path="/terms" element={<WebsiteLayout><TermsAndConditions /></WebsiteLayout>} />
         <Route path="/login" element={<WebsiteLayout><AuthPage /></WebsiteLayout>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -82,6 +87,7 @@ function App() {
               <Route path="/admin/departments" element={<Departments />} />
               <Route path="/admin/audit" element={<AuditLogs />} />
               <Route path="/admin/reports" element={<Reports />} />
+              <Route path="/admin/assignments" element={<AssignedDevices />} />
             </Route>
 
           </Route>

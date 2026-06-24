@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const AssetAssignment = require("../models/AssetAssignment");
 const Asset = require("../models/Asset");
 const Department = require("../models/Department");
@@ -47,15 +48,23 @@ const assignAsset = async (req, res) => {
       remarks,
     } = req.body;
 
-    if (!department || !asset || !employeeName || !employeeEmail) {
+    if (!asset || !employeeName || !employeeEmail) {
       return res.status(400).json({
-        message: "Department, asset, employee name and employee email are required.",
+        message: "Asset, employee name and employee email are required.",
       });
     }
 
-    const departmentExists = await Department.findById(department);
-    if (!departmentExists) {
-      return res.status(404).json({ message: "Department not found." });
+    // Resolve department — accepts an ObjectId string or a plain department name
+    let departmentId = null;
+    if (department) {
+      if (mongoose.Types.ObjectId.isValid(department)) {
+        const doc = await Department.findById(department);
+        if (doc) departmentId = doc._id;
+      }
+      if (!departmentId) {
+        const doc = await Department.findOne({ name: { $regex: new RegExp(`^${department}$`, 'i') } });
+        if (doc) departmentId = doc._id;
+      }
     }
 
     const assetExists = await Asset.findById(asset);
@@ -70,7 +79,7 @@ const assignAsset = async (req, res) => {
     }
 
     const assignment = await AssetAssignment.create({
-      department,
+      department: departmentId,
       asset,
       employeeName,
       employeeEmail,
@@ -87,7 +96,7 @@ const assignAsset = async (req, res) => {
 
     await Asset.findByIdAndUpdate(asset, {
       assignedStatus: "Assigned",
-      assignedDepartment: department,
+      assignedDepartment: departmentId,
       assignedEmployeeName: employeeName,
       assignedEmployeeEmail: employeeEmail,
       assignedEmployeePhone: employeePhone,

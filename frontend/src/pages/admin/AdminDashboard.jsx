@@ -55,8 +55,7 @@ const AdminDashboard = () => {
       try {
         const response = await api.get('/dashboard/stats');
         setDashboardData(response.data);
-      } catch (err) {
-        console.error("Failed to load dashboard metrics:", err);
+      } catch {
         setError("Failed to sync live data. Please verify your connection.");
       } finally {
         setLoading(false);

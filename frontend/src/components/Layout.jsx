@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { AppBar, Avatar, Badge, Box, Button, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery } from "@mui/material";
-import { ApartmentRounded, ApprovalRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded, HistoryRounded, AssessmentRounded, SettingsRounded } from "@mui/icons-material";
+import { AppBar, Avatar, Badge, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, useMediaQuery } from "@mui/material";
+import { ApartmentRounded, ApprovalRounded, AssignmentIndRounded, BusinessRounded, ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded, NotificationsRounded, ShieldRounded, LogoutRounded, PersonRounded, HistoryRounded, AssessmentRounded, SettingsRounded } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useAppTheme } from "../context/ThemeContext";
@@ -12,6 +12,7 @@ const drawerWidth = 280;
 const adminMenu = [
   { text: "System Dashboard", path: "/admin/dashboard", icon: <DashboardRounded /> },
   { text: "Asset Registry", path: "/admin/assets", icon: <Inventory2Rounded /> },
+  { text: "Assigned Devices", path: "/admin/assignments", icon: <AssignmentIndRounded /> },
   { text: "All Tickets", path: "/tickets", icon: <ConfirmationNumberRounded /> },
   { text: "Approvals", path: "/admin/approvals", icon: <ApprovalRounded /> },
   { text: "Vendors", path: "/admin/vendors", icon: <BusinessRounded /> },
@@ -32,6 +33,7 @@ const Sidebar = ({ onClose }) => {
   const location = useLocation();
   const { logout, currentUser } = useAuth();
   const { isDark } = useAppTheme();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const handleNav = (path) => {
     navigate(path);
@@ -95,11 +97,28 @@ const Sidebar = ({ onClose }) => {
       </List>
 
       <Box sx={{ p: 3 }}>
-        <Button fullWidth startIcon={<LogoutRounded />} onClick={handleLogout}
+        <Button fullWidth startIcon={<LogoutRounded />} onClick={() => setLogoutOpen(true)}
           sx={{ py: 1.5, color: textMuted, borderRadius: 3, border: `1px solid ${border}`, fontWeight: 700, "&:hover": { bgcolor: "#fee2e2", borderColor: "#fca5a5", color: "#ef4444" } }}>
           Secure Logout
         </Button>
       </Box>
+
+      <Dialog open={logoutOpen} onClose={() => setLogoutOpen(false)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: "20px", bgcolor: bg, color: textPrimary } }}>
+        <DialogTitle sx={{ fontWeight: 900, fontSize: 18, color: textPrimary }}>Sign Out</DialogTitle>
+        <DialogContent>
+          <Typography color={textMuted} fontWeight={600}>
+            Are you sure you want to sign out of AssetCare?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => setLogoutOpen(false)} sx={{ fontWeight: 700, textTransform: "none", color: textMuted }}>Cancel</Button>
+          <Button variant="contained" onClick={handleLogout}
+            sx={{ bgcolor: "#ef4444", "&:hover": { bgcolor: "#dc2626" }, fontWeight: 900, textTransform: "none", borderRadius: "10px", px: 3 }}>
+            Sign Out
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

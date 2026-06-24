@@ -56,8 +56,8 @@ const EmployeePortal = () => {
     try {
       const res = await api.get('/assets/myassets');
       setAssets(res.data);
-    } catch (err) {
-      console.error("Failed to fetch assets:", err);
+    } catch {
+      setSnackbar({ open: true, message: "Failed to load your assigned assets. Please refresh.", severity: "error" });
     } finally {
       setAssetsLoading(false);
     }
@@ -68,8 +68,8 @@ const EmployeePortal = () => {
     try {
       const res = await api.get('/device-requests/mine');
       setMyRequests(res.data);
-    } catch (err) {
-      console.error("Failed to fetch requests:", err);
+    } catch {
+      setSnackbar({ open: true, message: "Failed to load your device requests. Please refresh.", severity: "error" });
     } finally {
       setRequestsLoading(false);
     }
@@ -137,9 +137,14 @@ const EmployeePortal = () => {
         }
       />
 
-      <Typography variant="h6" fontWeight={800} color="text.primary" mb={3} mt={2} letterSpacing="-0.5px">
-        My Assigned Equipment
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3, mt: 2 }}>
+        <Typography variant="h6" fontWeight={800} color="text.primary" letterSpacing="-0.5px">
+          My Assigned Equipment
+        </Typography>
+        {!assetsLoading && assets.length > 0 && (
+          <Chip label={assets.length} size="small" sx={{ bgcolor: '#eef2ff', color: '#4f46e5', fontWeight: 800, fontSize: 11, height: 22 }} />
+        )}
+      </Box>
 
       {assetsLoading ? (
         <Box display="flex" justifyContent="center" py={5}><CircularProgress sx={{ color: "#4f46e5" }} /></Box>
@@ -181,11 +186,38 @@ const EmployeePortal = () => {
                       Department: <strong>{asset.department}</strong>
                     </Typography>
                   )}
-                  {asset.assignedDate && (
+                  {asset.modelNumber && (
                     <Typography color="text.secondary" fontSize={13} fontWeight={500} mt={0.5}>
-                      Assigned: <strong>{new Date(asset.assignedDate).toLocaleDateString()}</strong>
+                      Model: <strong>{asset.modelNumber}</strong>
                     </Typography>
                   )}
+                  {asset.location && (
+                    <Typography color="text.secondary" fontSize={13} fontWeight={500} mt={0.5}>
+                      Location: <strong>{asset.location}</strong>
+                    </Typography>
+                  )}
+                  {asset.vendor && (
+                    <Typography color="text.secondary" fontSize={13} fontWeight={500} mt={0.5}>
+                      Vendor: <strong>{asset.vendor}</strong>
+                    </Typography>
+                  )}
+                  {asset.assignedDate && (
+                    <Typography color="text.secondary" fontSize={13} fontWeight={500} mt={0.5}>
+                      Assigned: <strong>{new Date(asset.assignedDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</strong>
+                    </Typography>
+                  )}
+                  {asset.warrantyEnd && (() => {
+                    const daysLeft = Math.ceil((new Date(asset.warrantyEnd) - new Date()) / 86400000);
+                    const expired = daysLeft < 0;
+                    const soon = !expired && daysLeft <= 90;
+                    return (
+                      <Box sx={{ mt: 1.5, display: 'inline-flex', alignItems: 'center', px: 1.2, py: 0.4, borderRadius: 1, bgcolor: expired ? '#fee2e2' : soon ? '#fef3c7' : '#dcfce7', color: expired ? '#dc2626' : soon ? '#d97706' : '#16a34a' }}>
+                        <Typography fontSize={12} fontWeight={700}>
+                          {expired ? 'Warranty Expired' : soon ? `Warranty: ${daysLeft}d left` : 'Warranty Valid'}
+                        </Typography>
+                      </Box>
+                    );
+                  })()}
                 </Box>
                 <Button
                   fullWidth variant="outlined" startIcon={<SupportAgentRounded />}

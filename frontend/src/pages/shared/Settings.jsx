@@ -10,8 +10,8 @@ import {
   SaveRounded, LockRounded, PictureAsPdfRounded, RefreshRounded
 } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
@@ -239,7 +239,7 @@ function ReportsTab() {
       ];
       summaryLines.forEach((l, i) => doc.text(l, 14, 40 + i * 6));
 
-      doc.autoTable({
+      autoTable(doc, {
         startY: 56,
         head: [['Ticket ID', 'Status', 'Priority', 'Issue', 'Asset', 'Dept', 'Raised By', 'Approved By', 'Raised At', 'Res.(hrs)', 'Cost(₹)']],
         body: tickets.map(t => [
@@ -267,30 +267,22 @@ function ReportsTab() {
         </Typography>
 
         {/* Filters */}
-        <Grid container spacing={2} alignItems="center" mb={3}>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl size="small" fullWidth>
-              <InputLabel>Status</InputLabel>
-              <Select value={status} label="Status" onChange={e => setStatus(e.target.value)}>
-                {['All', 'Pending Approval', 'Vendor Assigned', 'Under Repair', 'Resolved', 'Rejected'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl size="small" fullWidth>
-              <InputLabel>Priority</InputLabel>
-              <Select value={priority} label="Priority" onChange={e => setPriority(e.target.value)}>
-                {['All', 'Low', 'Medium', 'High', 'Critical'].map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField size="small" type="date" label="From Date" value={from} onChange={e => setFrom(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField size="small" type="date" label="To Date" value={to} onChange={e => setTo(e.target.value)} fullWidth InputLabelProps={{ shrink: true }} />
-          </Grid>
-        </Grid>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 3 }}>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={status} label="Status" onChange={e => setStatus(e.target.value)}>
+              {['All', 'Pending Approval', 'Vendor Assigned', 'Under Repair', 'Resolved', 'Rejected'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Priority</InputLabel>
+            <Select value={priority} label="Priority" onChange={e => setPriority(e.target.value)}>
+              {['All', 'Low', 'Medium', 'High', 'Critical'].map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+            </Select>
+          </FormControl>
+          <TextField size="small" type="date" label="From Date" value={from} onChange={e => setFrom(e.target.value)} sx={{ minWidth: 160 }} InputLabelProps={{ shrink: true }} />
+          <TextField size="small" type="date" label="To Date" value={to} onChange={e => setTo(e.target.value)} sx={{ minWidth: 160 }} InputLabelProps={{ shrink: true }} />
+        </Box>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
@@ -395,7 +387,7 @@ function DataTab({ currentUser }) {
         doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
         doc.text('Assigned Assets', 14, y); y += 4;
         doc.setTextColor(0, 0, 0);
-        doc.autoTable({
+        const t1 = autoTable(doc, {
           startY: y,
           head: [['Asset Name', 'Serial No.', 'Category', 'Status', 'Department']],
           body: data.assignedAssets.map(a => [a.name, a.serialNumber, a.category, a.status, a.department]),
@@ -403,7 +395,7 @@ function DataTab({ currentUser }) {
           headStyles: { fillColor: [30, 58, 138] },
           margin: { left: 14, right: 14 },
         });
-        y = doc.lastAutoTable.finalY + 6;
+        y = (t1?.finalY ?? doc.lastAutoTable?.finalY ?? y + 20) + 6;
       }
 
       // Tickets
@@ -412,7 +404,7 @@ function DataTab({ currentUser }) {
         doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
         doc.text('My Tickets', 14, y); y += 4;
         doc.setTextColor(0, 0, 0);
-        doc.autoTable({
+        const t2 = autoTable(doc, {
           startY: y,
           head: [['Ticket ID', 'Issue', 'Status', 'Priority', 'Asset', 'Raised At']],
           body: data.tickets.map(t => [t.ticketId, t.issue.substring(0, 35), t.status, t.priority, t.asset, new Date(t.raisedAt).toLocaleDateString('en-IN')]),
@@ -420,7 +412,7 @@ function DataTab({ currentUser }) {
           headStyles: { fillColor: [30, 58, 138] },
           margin: { left: 14, right: 14 },
         });
-        y = doc.lastAutoTable.finalY + 6;
+        y = (t2?.finalY ?? doc.lastAutoTable?.finalY ?? y + 20) + 6;
       }
 
       // Device Requests
@@ -429,7 +421,7 @@ function DataTab({ currentUser }) {
         doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
         doc.text('Device Requests', 14, y); y += 4;
         doc.setTextColor(0, 0, 0);
-        doc.autoTable({
+        autoTable(doc, {
           startY: y,
           head: [['Request ID', 'Item Requested', 'Type', 'Status', 'Urgency', 'Date']],
           body: data.deviceRequests.map(r => [r.requestId, r.itemRequested, r.requestType, r.status, r.urgency, new Date(r.raisedAt).toLocaleDateString('en-IN')]),

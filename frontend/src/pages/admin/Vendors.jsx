@@ -92,6 +92,9 @@ const Vendors = () => {
 
   const [vendorForm, setVendorForm] = useState(initialVendorForm);
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [vendorToDelete, setVendorToDelete] = useState(null);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -209,51 +212,32 @@ const Vendors = () => {
     }
   };
 
-  const handleDeleteVendor = async (vendorId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this vendor?");
-    if (!confirmDelete) return;
-
+  const handleDeleteVendor = async () => {
+    if (!vendorToDelete) return;
     try {
-      await api.delete(`/vendors/${vendorId}`);
-      setSnackbar({
-        open: true,
-        message: "Vendor deleted successfully.",
-        severity: "success",
-      });
+      await api.delete(`/vendors/${vendorToDelete._id}`);
+      setSnackbar({ open: true, message: "Vendor deleted successfully.", severity: "success" });
       fetchVendors();
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error?.response?.data?.message || "Failed to delete vendor.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: error?.response?.data?.message || "Failed to delete vendor.", severity: "error" });
+    } finally {
+      setDeleteDialogOpen(false);
+      setVendorToDelete(null);
     }
   };
 
   const inputStyles = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#FFFFFF",
+      bgcolor: "background.paper",
       borderRadius: "14px",
       fontWeight: 700,
-      color: "#0F172A",
-      "& fieldset": {
-        borderColor: "#CBD5E1",
-      },
-      "&:hover fieldset": {
-        borderColor: "#0F766E",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#0F766E",
-        borderWidth: "2px",
-      },
+      color: "text.primary",
+      "& fieldset": { borderColor: "divider" },
+      "&:hover fieldset": { borderColor: "#0F766E" },
+      "&.Mui-focused fieldset": { borderColor: "#0F766E", borderWidth: "2px" },
     },
-    "& .MuiInputLabel-root": {
-      color: "#64748B",
-      fontWeight: 700,
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: "#0F766E",
-    },
+    "& .MuiInputLabel-root": { color: "text.secondary", fontWeight: 700 },
+    "& .MuiInputLabel-root.Mui-focused": { color: "#0F766E" },
   };
 
   return (
@@ -306,8 +290,9 @@ const Vendors = () => {
             p: 5,
             textAlign: "center",
             borderRadius: "24px",
-            bgcolor: "#FFFFFF",
-            border: "1px solid #E2E8F0",
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
           }}
         >
           <BusinessRounded sx={{ fontSize: 54, color: "#94A3B8", mb: 1 }} />
@@ -326,18 +311,19 @@ const Vendors = () => {
                 sx={{
                   p: 3,
                   borderRadius: "26px",
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid",
+                  borderColor: "divider",
                   height: "100%",
-                  bgcolor: "#FFFFFF",
+                  bgcolor: "background.paper",
                   boxShadow: "0 14px 35px rgba(15,23,42,0.07)",
                 }}
               >
                 <Box display="flex" justifyContent="space-between" gap={2}>
                   <Box>
-                    <Typography sx={{ fontWeight: 950, fontSize: 21, color: "#0F172A" }}>
+                    <Typography sx={{ fontWeight: 950, fontSize: 21, color: "text.primary" }}>
                       {vendor.name}
                     </Typography>
-                    <Typography sx={{ color: "#64748B", fontWeight: 800, mt: 0.5 }}>
+                    <Typography sx={{ color: "text.secondary", fontWeight: 800, mt: 0.5 }}>
                       {vendor.vendorType} • {vendor.serviceCategory}
                     </Typography>
                   </Box>
@@ -401,7 +387,7 @@ const Vendors = () => {
                   </IconButton>
 
                   <IconButton
-                    onClick={() => handleDeleteVendor(vendor._id)}
+                    onClick={() => { setVendorToDelete(vendor); setDeleteDialogOpen(true); }}
                     sx={{ border: "1px solid #FCA5A5", borderRadius: "12px", color: "#DC2626" }}
                   >
                     <DeleteRounded />
@@ -421,8 +407,8 @@ const Vendors = () => {
         PaperProps={{
           sx: {
             borderRadius: "26px",
-            bgcolor: "#FFFFFF",
-            color: "#0F172A",
+            bgcolor: "background.paper",
+            color: "text.primary",
             overflow: "hidden",
           },
         }}
@@ -431,14 +417,15 @@ const Vendors = () => {
           sx={{
             fontWeight: 950,
             fontSize: 24,
-            color: "#0F172A",
-            bgcolor: "#F8FAFC",
-            borderBottom: "1px solid #E2E8F0",
+            color: "text.primary",
+            bgcolor: "background.default",
+            borderBottom: "1px solid",
+            borderColor: "divider",
             py: 2.2,
           }}
         >
           {editingVendorId ? "Update Vendor" : "Add New Vendor"}
-          <Typography sx={{ color: "#64748B", fontWeight: 700, fontSize: 14, mt: 0.5 }}>
+          <Typography sx={{ color: "text.secondary", fontWeight: 700, fontSize: 14, mt: 0.5 }}>
             Add vendor contact, service, warranty, AMC and escalation details.
           </Typography>
 
@@ -448,10 +435,11 @@ const Vendors = () => {
               position: "absolute",
               right: 14,
               top: 14,
-              color: "#334155",
-              bgcolor: "#FFFFFF",
-              border: "1px solid #E2E8F0",
-              "&:hover": { bgcolor: "#F1F5F9" },
+              color: "text.secondary",
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
+              "&:hover": { bgcolor: "action.hover" },
             }}
           >
             <CloseRounded />
@@ -462,8 +450,8 @@ const Vendors = () => {
           dividers
           sx={{
             pt: 3,
-            bgcolor: "#F8FAFC",
-            borderColor: "#E2E8F0",
+            bgcolor: "background.default",
+            borderColor: "divider",
             maxHeight: "70vh",
           }}
         >
@@ -586,8 +574,9 @@ const Vendors = () => {
         <DialogActions
           sx={{
             p: 2,
-            bgcolor: "#FFFFFF",
-            borderTop: "1px solid #E2E8F0",
+            bgcolor: "background.paper",
+            borderTop: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Button onClick={() => setFormOpen(false)} sx={{ fontWeight: 900, textTransform: "none", color: "#475569" }}>
@@ -619,26 +608,26 @@ const Vendors = () => {
         PaperProps={{
           sx: {
             borderRadius: "24px",
-            bgcolor: "#FFFFFF",
-            color: "#0F172A",
+            bgcolor: "background.paper",
+            color: "text.primary",
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 950, bgcolor: "black", borderBottom: "1px solid #E2E8F0" }}>
+        <DialogTitle sx={{ fontWeight: 950, bgcolor: "background.default", borderBottom: "1px solid", borderColor: "divider", color: "text.primary" }}>
           Vendor Details
-          <IconButton onClick={() => setDetailOpen(false)} sx={{ position: "absolute", right: 12, top: 10 }}>
+          <IconButton onClick={() => setDetailOpen(false)} sx={{ position: "absolute", right: 12, top: 10, color: "text.secondary" }}>
             <CloseRounded />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers sx={{ bgcolor: "#FFFFFF" }}>
+        <DialogContent dividers sx={{ bgcolor: "background.paper" }}>
           {selectedVendor && (
             <Box>
-              <Typography fontWeight={950} fontSize={24} sx={{color:"black"}}>
+              <Typography fontWeight={950} fontSize={24} color="text.primary">
                 {selectedVendor.name}
               </Typography>
 
-              <Typography color="text.secondary" fontWeight={800} sx={{ mb: 2, color:"black" }}>
+              <Typography color="text.secondary" fontWeight={800} sx={{ mb: 2 }}>
                 {selectedVendor.vendorType} • {selectedVendor.serviceCategory}
               </Typography>
 
@@ -665,6 +654,31 @@ const Vendors = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => { setDeleteDialogOpen(false); setVendorToDelete(null); }}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper" } }}
+      >
+        <DialogTitle sx={{ fontWeight: 900, color: "text.primary", pb: 1 }}>Delete Vendor</DialogTitle>
+        <DialogContent>
+          <Typography color="text.secondary" fontWeight={600}>
+            Are you sure you want to delete <strong style={{ color: "inherit" }}>{vendorToDelete?.name}</strong>? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button onClick={() => { setDeleteDialogOpen(false); setVendorToDelete(null); }} sx={{ fontWeight: 900, textTransform: "none", color: "text.secondary" }}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleDeleteVendor}
+            sx={{ bgcolor: "#DC2626", "&:hover": { bgcolor: "#B91C1C" }, fontWeight: 900, textTransform: "none", borderRadius: "10px", px: 3 }}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -681,12 +695,13 @@ const SummaryCard = ({ title, value }) => (
     sx={{
       p: 2.5,
       borderRadius: "22px",
-      bgcolor: "#FFFFFF",
-      border: "1px solid #E2E8F0",
+      bgcolor: "background.paper",
+      border: "1px solid",
+      borderColor: "divider",
       boxShadow: "0 10px 28px rgba(15,23,42,0.06)",
     }}
   >
-    <Typography sx={{ color: "#64748B", fontSize: 13, fontWeight: 900 }}>
+    <Typography sx={{ color: "text.secondary", fontSize: 13, fontWeight: 900 }}>
       {title}
     </Typography>
     <Typography sx={{ mt: 0.6, color: "#1E3A8A", fontSize: 30, fontWeight: 950 }}>
@@ -702,8 +717,9 @@ const FormBlock = ({ title, children }) => (
       p: 2.5,
       mb: 2.5,
       borderRadius: "20px",
-      bgcolor: "#FFFFFF",
-      border: "1px solid #E2E8F0",
+      bgcolor: "background.paper",
+      border: "1px solid",
+      borderColor: "divider",
     }}
   >
     <Typography sx={{ fontWeight: 950, fontSize: 17, mb: 2, color: "#1E3A8A" }}>
@@ -714,7 +730,7 @@ const FormBlock = ({ title, children }) => (
 );
 
 const InfoRow = ({ icon, text }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 1.3, color: "#475569" }}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 1.3, color: "text.secondary" }}>
     {icon}
     <Typography sx={{ fontWeight: 700 }}>{text || "-"}</Typography>
   </Box>
@@ -727,11 +743,12 @@ const DetailRow = ({ label, value }) => (
       justifyContent: "space-between",
       gap: 2,
       py: 1.1,
-      borderBottom: "1px solid #F1F5F9",
+      borderBottom: "1px solid",
+      borderColor: "divider",
     }}
   >
-    <Typography sx={{ fontWeight: 900, color: "#475569" }}>{label}</Typography>
-    <Typography sx={{ fontWeight: 700, textAlign: "right", color: "#0F172A" }}>
+    <Typography sx={{ fontWeight: 900, color: "text.secondary" }}>{label}</Typography>
+    <Typography sx={{ fontWeight: 700, textAlign: "right", color: "text.primary" }}>
       {value || "-"}
     </Typography>
   </Box>

@@ -67,8 +67,19 @@ const AddAsset = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    if (!formData.name.trim() || !formData.serialNumber.trim()) {
+      setError("Asset Name and Serial Number are required.");
+      return;
+    }
+
+    if (formData.warrantyStart && formData.warrantyEnd && formData.warrantyEnd < formData.warrantyStart) {
+      setError("Warranty expiry date cannot be before the warranty start date.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       // Note: If you want to actually upload these files to your Node.js backend, 
@@ -91,18 +102,18 @@ const AddAsset = () => {
 
   const inputStyles = {
     "& .MuiOutlinedInput-root": {
-      backgroundColor: "#FFFFFF",
-      color: "#0F172A",
+      bgcolor: "background.paper",
+      color: "text.primary",
       borderRadius: "16px",
       fontWeight: 600,
       minHeight: "58px",
-      "& fieldset": { borderColor: "#CBD5E1" },
-      "&:hover fieldset": { borderColor: "#94A3B8" },
+      "& fieldset": { borderColor: "divider" },
+      "&:hover fieldset": { borderColor: "text.disabled" },
       "&.Mui-focused fieldset": { borderColor: "#0F766E", borderWidth: "2px" },
     },
-    "& .MuiInputLabel-root": { color: "#64748B", fontWeight: 700, backgroundColor: "#FFFFFF", px: 0.7 },
+    "& .MuiInputLabel-root": { color: "text.secondary", fontWeight: 700 },
     "& .MuiInputLabel-root.Mui-focused": { color: "#0F766E" },
-    "& input": { color: "#0F172A", fontWeight: 700, paddingTop: "17px", paddingBottom: "17px" },
+    "& input": { fontWeight: 700, paddingTop: "17px", paddingBottom: "17px" },
     "& .MuiSelect-select": { fontWeight: 700, paddingTop: "17px", paddingBottom: "17px" },
   };
 
@@ -112,10 +123,10 @@ const AddAsset = () => {
         {icon}
       </Box>
       <Box>
-        <Typography sx={{ fontSize: { xs: "20px", md: "26px" }, fontWeight: 950, color: "#0F172A", letterSpacing: "-0.8px" }}>
+        <Typography sx={{ fontSize: { xs: "20px", md: "26px" }, fontWeight: 950, color: "text.primary", letterSpacing: "-0.8px" }}>
           {title}
         </Typography>
-        <Typography sx={{ color: "#64748B", fontSize: { xs: "14px", md: "16px" }, fontWeight: 700, mt: 0.5 }}>
+        <Typography sx={{ color: "text.secondary", fontSize: { xs: "14px", md: "16px" }, fontWeight: 700, mt: 0.5 }}>
           {subtitle}
         </Typography>
       </Box>
@@ -139,13 +150,13 @@ const AddAsset = () => {
         <Paper
           component="form"
           onSubmit={handleSubmit}
-          sx={{ p: { xs: 2.5, md: 5 }, borderRadius: "30px", bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", boxShadow: "0 24px 60px rgba(15,23,42,0.08)", overflow: "hidden", position: "relative" }}
+          sx={{ p: { xs: 2.5, md: 5 }, borderRadius: "30px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", boxShadow: "0 24px 60px rgba(15,23,42,0.08)", overflow: "hidden", position: "relative" }}
         >
-          <Box sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "24px", background: "linear-gradient(135deg, rgba(30,58,138,0.07), rgba(15,118,110,0.07))", border: "1px solid #E2E8F0", mb: 5 }}>
-            <Typography sx={{ fontSize: { xs: "24px", md: "30px" }, fontWeight: 950, color: "#0F172A" }}>
+          <Box sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "24px", background: "linear-gradient(135deg, rgba(30,58,138,0.07), rgba(15,118,110,0.07))", border: "1px solid", borderColor: "divider", mb: 5 }}>
+            <Typography sx={{ fontSize: { xs: "24px", md: "30px" }, fontWeight: 950, color: "text.primary" }}>
               Asset Information
             </Typography>
-            <Typography sx={{ mt: 1, color: "#64748B", fontWeight: 600, lineHeight: 1.7 }}>
+            <Typography sx={{ mt: 1, color: "text.secondary", fontWeight: 600, lineHeight: 1.7 }}>
               Fill the asset details carefully. This data will be used for warranty alerts, breakdown tickets and vendor service records.
             </Typography>
           </Box>
@@ -179,7 +190,7 @@ const AddAsset = () => {
             <Grid item xs={12} md={4}><TextField required fullWidth name="serialNumber" value={formData.serialNumber} onChange={handleChange} sx={inputStyles} label="Serial Number / Service Tag" placeholder="8JZ91A" /></Grid>
           </Grid>
 
-          <Divider sx={{ my: 5, borderColor: "#E2E8F0" }} />
+          <Divider sx={{ my: 5 }} />
 
           <SectionTitle icon={<EngineeringRounded />} title="Lifecycle & Vendor Data" subtitle="Warranty, procurement and service partner information." />
 
@@ -192,7 +203,7 @@ const AddAsset = () => {
             <Grid item xs={12} sm={6} md={4}><TextField fullWidth type="email" name="supportEmail" value={formData.supportEmail} onChange={handleChange} sx={inputStyles} label="Support Contact Email" placeholder="support@vendor.com" /></Grid>
           </Grid>
 
-          <Divider sx={{ my: 5, borderColor: "#E2E8F0" }} />
+          <Divider sx={{ my: 5 }} />
 
           <SectionTitle icon={<BusinessRounded />} title="Deployment Allocation" subtitle="Department, location and current asset status." />
 
@@ -218,7 +229,7 @@ const AddAsset = () => {
             </Grid>
           </Grid>
 
-          <Divider sx={{ my: 5, borderColor: "#E2E8F0" }} />
+          <Divider sx={{ my: 5 }} />
 
           <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "space-between", alignItems: "center" }}>
             <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", width: { xs: "100%", md: "auto" } }}>

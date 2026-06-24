@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   Avatar,
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -27,6 +28,7 @@ import {
   AccessTimeRounded,
   DevicesRounded,
   BuildRounded,
+  InventoryRounded,
 } from "@mui/icons-material";
 import PageHeader from "../../components/PageHeader";
 import StatusChip from "../../components/StatusChip";
@@ -54,12 +56,15 @@ const Approvals = () => {
   const [requestRemarks, setRequestRemarks] = useState("");
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
   const [requestProcessing, setRequestProcessing] = useState(false);
+  const [availableAssets, setAvailableAssets] = useState([]);
+  const [selectedAssetForApproval, setSelectedAssetForApproval] = useState(null);
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   useEffect(() => {
     fetchTickets();
     fetchDeviceRequests();
+    fetchAvailableAssets();
   }, []);
 
   const fetchTickets = async () => {
@@ -67,8 +72,7 @@ const Approvals = () => {
     try {
       const response = await api.get('/tickets');
       setTickets(response.data);
-    } catch (err) {
-      console.error("Failed to fetch tickets:", err);
+    } catch {
       setError("Failed to load repair authorizations.");
     } finally {
       setTicketsLoading(false);
@@ -80,11 +84,18 @@ const Approvals = () => {
     try {
       const response = await api.get('/device-requests');
       setDeviceRequests(response.data);
-    } catch (err) {
-      console.error("Failed to fetch device requests:", err);
+    } catch {
+      setSnackbar({ open: true, severity: "error", message: "Failed to load device requests." });
     } finally {
       setRequestsLoading(false);
     }
+  };
+
+  const fetchAvailableAssets = async () => {
+    try {
+      const { data } = await api.get('/assets');
+      setAvailableAssets(data.filter(a => a.assignedStatus !== 'Assigned'));
+    } catch {}
   };
 
   const handleTicketActionClick = (item, type) => {
@@ -124,6 +135,7 @@ const Approvals = () => {
     setSelectedRequest(item);
     setRequestAction(type);
     setRequestRemarks("");
+    setSelectedAssetForApproval(null);
     setRequestDialogOpen(true);
   };
 
@@ -132,19 +144,25 @@ const Approvals = () => {
     try {
       await api.put(`/device-requests/${selectedRequest._id}/review`, {
         status: requestAction === "approve" ? "Approved" : "Rejected",
-        adminRemarks: requestRemarks
+        adminRemarks: requestRemarks,
+        assetId: requestAction === "approve" && selectedAssetForApproval ? selectedAssetForApproval._id : undefined,
       });
+      const assetMsg = requestAction === "approve" && selectedAssetForApproval
+        ? ` ${selectedAssetForApproval.name} assigned to ${selectedRequest.raisedBy?.name}.`
+        : '';
       setSnackbar({
         open: true,
         severity: requestAction === "approve" ? "success" : "error",
         message: requestAction === "approve"
-          ? `Request ${selectedRequest.requestId} approved.`
+          ? `Request ${selectedRequest.requestId} approved.${assetMsg}`
           : `Request ${selectedRequest.requestId} rejected.`,
       });
       setRequestDialogOpen(false);
       setSelectedRequest(null);
       setRequestRemarks("");
+      setSelectedAssetForApproval(null);
       fetchDeviceRequests();
+      if (requestAction === "approve" && selectedAssetForApproval) fetchAvailableAssets();
     } catch (err) {
       setSnackbar({ open: true, severity: "error", message: err.response?.data?.message || "Failed to process request." });
     } finally {
@@ -183,7 +201,7 @@ const Approvals = () => {
   const reqRejectedCount = deviceRequests.filter(r => r.status === "Rejected").length;
 
   const cardSx = {
-    p: { xs: 2.5, md: 4 }, borderRadius: "24px", bgcolor: "#FFFFFF", border: "1px solid #E2E8F0",
+    p: { xs: 2.5, md: 4 }, borderRadius: "24px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider",
     boxShadow: "0 14px 34px rgba(15,23,42,0.06)", display: "flex", alignItems: { xs: "flex-start", md: "center" },
     justifyContent: "space-between", gap: 3, flexDirection: { xs: "column", lg: "row" }, transition: "all 0.3s ease",
     "&:hover": { borderColor: "rgba(15,118,110,0.35)", transform: "translateY(-3px)", boxShadow: "0 24px 48px rgba(15,23,42,0.10)" },
@@ -376,7 +394,7 @@ const Approvals = () => {
                 label={actionType === "authorize" ? "Estimated Cost (₹)" : "Rejection Reason"}
                 placeholder={actionType === "authorize" ? "Example: 5000" : "Please verify warranty before paid repair."}
                 value={inputVal} onChange={(e) => setInputVal(e.target.value)}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "#FFFFFF", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "background.paper", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }}
               />
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4, flexWrap: "wrap" }}>
                 <Button onClick={() => setDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 900, textTransform: "none", px: 3, borderRadius: "12px" }}>Cancel</Button>
@@ -423,8 +441,46 @@ const Approvals = () => {
                 label={requestAction === "approve" ? "Approval Remarks (optional)" : "Rejection Reason"}
                 placeholder={requestAction === "approve" ? "e.g. Approved as per budget allocation." : "e.g. Does not meet procurement policy."}
                 value={requestRemarks} onChange={(e) => setRequestRemarks(e.target.value)}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "#FFFFFF", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: "16px", bgcolor: "background.paper", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }}
               />
+
+              {requestAction === "approve" && (
+                <Box sx={{ mt: 3 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+                    <InventoryRounded sx={{ fontSize: 18, color: "#0F766E" }} />
+                    <Typography fontWeight={800} fontSize={14} color="text.primary">Assign from Inventory</Typography>
+                    <Chip label="Optional" size="small" sx={{ fontSize: 11, height: 20, bgcolor: "#f1f5f9", color: "#64748b", fontWeight: 700 }} />
+                  </Box>
+                  <Typography fontSize={13} color="text.secondary" mb={1.5}>
+                    If this item is already in stock, select it here to assign it to the employee immediately.
+                  </Typography>
+                  <Autocomplete
+                    options={availableAssets}
+                    getOptionLabel={(a) => `${a.name} — ${a.serialNumber} (${a.category})`}
+                    value={selectedAssetForApproval}
+                    onChange={(_, val) => setSelectedAssetForApproval(val)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Select Asset (optional)" placeholder="Search by asset name or serial…"
+                        sx={{ "& .MuiOutlinedInput-root": { borderRadius: "14px", fontWeight: 600 }, "& .MuiInputLabel-root": { fontWeight: 700 } }} />
+                    )}
+                    renderOption={(props, a) => (
+                      <Box component="li" {...props} sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start !important", py: 1.5 }}>
+                        <Typography fontWeight={700} fontSize={14}>{a.name}</Typography>
+                        <Typography fontSize={12} color="text.secondary">{a.serialNumber} · {a.category} · {a.department || "No Dept"}</Typography>
+                      </Box>
+                    )}
+                    noOptionsText="No unassigned assets found"
+                  />
+                  {selectedAssetForApproval && (
+                    <Paper sx={{ mt: 1.5, p: 2, borderRadius: 2, bgcolor: "#dcfce7", border: "1px solid #bbf7d0" }}>
+                      <Typography fontSize={13} fontWeight={700} color="#16a34a">
+                        ✓ {selectedAssetForApproval.name} will be assigned to {selectedRequest?.raisedBy?.name} on approval
+                      </Typography>
+                    </Paper>
+                  )}
+                </Box>
+              )}
+
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4, flexWrap: "wrap" }}>
                 <Button onClick={() => setRequestDialogOpen(false)} sx={{ color: "#64748B", fontWeight: 900, textTransform: "none", px: 3, borderRadius: "12px" }}>Cancel</Button>
                 <Button variant="contained" disabled={requestProcessing} onClick={handleConfirmRequestAction}
@@ -446,8 +502,8 @@ const Approvals = () => {
 };
 
 const SummaryCard = ({ title, value }) => (
-  <Paper sx={{ p: 2.5, borderRadius: "20px", bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", boxShadow: "0 12px 30px rgba(15,23,42,0.05)" }}>
-    <Typography sx={{ color: "#64748B", fontSize: "13px", fontWeight: 900 }}>{title}</Typography>
+  <Paper sx={{ p: 2.5, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", boxShadow: "0 12px 30px rgba(15,23,42,0.05)" }}>
+    <Typography sx={{ color: "text.secondary", fontSize: "13px", fontWeight: 900 }}>{title}</Typography>
     <Typography sx={{ mt: 0.7, color: "#1E3A8A", fontSize: "30px", fontWeight: 900 }}>{value}</Typography>
   </Paper>
 );

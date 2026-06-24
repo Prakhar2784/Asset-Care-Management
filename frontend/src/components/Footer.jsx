@@ -283,6 +283,7 @@ const Footer = () => {
 
           <div className="footer-bottom-links">
             <Link to="/contact">Support</Link>
+            <Link to="/terms">Terms &amp; Conditions</Link>
             <Link to="/login">Login</Link>
           </div>
         </div>

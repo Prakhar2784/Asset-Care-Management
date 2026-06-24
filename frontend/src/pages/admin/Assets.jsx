@@ -82,8 +82,8 @@ const Assets = () => {
     try {
       const response = await api.get('/assets');
       setAssets(response.data);
-    } catch (error) {
-      console.error("Failed to fetch assets:", error);
+    } catch {
+      setSnackbar({ open: true, message: "Failed to load assets. Please refresh.", severity: "error" });
     } finally {
       setLoading(false);
     }

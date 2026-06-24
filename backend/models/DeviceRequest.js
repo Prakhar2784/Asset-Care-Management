@@ -48,7 +48,13 @@ const deviceRequestSchema = new mongoose.Schema({
     default: null
   },
   reviewedAt: { type: Date },
-  adminRemarks: { type: String }
+  adminRemarks: { type: String },
+  // Asset assigned to the employee when this request was approved
+  assignedAsset: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Asset',
+    default: null
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('DeviceRequest', deviceRequestSchema);

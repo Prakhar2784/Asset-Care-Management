@@ -175,19 +175,21 @@ const Contact = () => {
           margin-left: 4px;
         }
 
-        .contact-input { 
-          width: 100%; 
-          padding: 16px 18px; 
-          font-size: 15px; 
-          font-weight: 600; 
-          background-color: #F8FAFC; 
-          border: 1px solid #CBD5E1; 
-          border-radius: 16px; 
-          color: #0F172A; 
-          outline: none; 
-          transition: all 0.3s ease; 
+        .contact-input {
+          width: 100%;
+          padding: 16px 18px;
+          font-size: 15px;
+          font-weight: 600;
+          background-color: #F8FAFC;
+          border: 1px solid #CBD5E1;
+          border-radius: 16px;
+          color: #0F172A;
+          outline: none;
+          transition: all 0.3s ease;
           font-family: 'Inter', sans-serif;
           box-sizing: border-box;
+          appearance: none;
+          -webkit-appearance: none;
         }
 
         .contact-input::placeholder {
@@ -200,10 +202,18 @@ const Contact = () => {
           background: #FFFFFF;
         }
 
-        .contact-input:focus { 
-          background-color: #FFFFFF; 
-          border-color: #0F766E; 
-          box-shadow: 0 0 0 4px rgba(15,118,110,0.12); 
+        .contact-input:focus {
+          background-color: #FFFFFF;
+          border-color: #0F766E;
+          box-shadow: 0 0 0 4px rgba(15,118,110,0.12);
+        }
+
+        select.contact-input {
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%2364748B' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 14px center;
+          padding-right: 42px;
+          cursor: pointer;
         }
 
         .contact-btn { 
@@ -456,10 +466,9 @@ const Contact = () => {
             <motion.div variants={fadeUp} className="contact-form-wrapper">
               <form className="contact-form" onSubmit={handleSubmit}>
                 <div className="form-title">
-                  <h3>Tell us about your requirement</h3>
+                  <h3>Get in touch with us</h3>
                   <p>
-                    Fill the details below and submit your request for an asset
-                    service and warranty management system demo.
+                    Fill in your details and we'll get back to you within one business day to schedule a personalised demo.
                   </p>
                 </div>
 
@@ -525,16 +534,49 @@ const Contact = () => {
                   </div>
                 </div>
 
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gap: "24px",
+                  }}
+                >
+                  <div className="input-group">
+                    <label className="input-label">
+                      Organisation Size
+                      <span className="required-mark">*</span>
+                    </label>
+                    <select name="orgSize" className="contact-input" required defaultValue="">
+                      <option value="" disabled>Select team size</option>
+                      <option>1 – 50 employees</option>
+                      <option>51 – 200 employees</option>
+                      <option>201 – 500 employees</option>
+                      <option>500+ employees</option>
+                    </select>
+                  </div>
+
+                  <div className="input-group">
+                    <label className="input-label">Inquiry Type</label>
+                    <select name="inquiryType" className="contact-input" defaultValue="Request a Demo">
+                      <option>Request a Demo</option>
+                      <option>General Inquiry</option>
+                      <option>Pricing Information</option>
+                      <option>Technical Support</option>
+                      <option>Partnership</option>
+                    </select>
+                  </div>
+                </div>
+
                 <div className="input-group">
                   <label className="input-label">
-                    System Requirements
+                    Your Message
                     <span className="required-mark">*</span>
                   </label>
                   <textarea
                     name="message"
-                    placeholder="Describe your asset categories, user count, departments, approval process and service tracking needs..."
+                    placeholder="Tell us about your organisation, the assets you manage, and what you'd like to achieve with AssetCare Pro..."
                     className="contact-input"
-                    style={{ minHeight: "160px", resize: "vertical" }}
+                    style={{ minHeight: "140px", resize: "vertical" }}
                     required
                   />
                 </div>
@@ -620,9 +662,7 @@ const Contact = () => {
               </motion.div>
 
               <motion.div variants={fadeUp} className="support-note">
-                <strong>Note:</strong> You can connect this form with your
-                backend API later to store demo requests, send email alerts and
-                create leads in the admin dashboard.
+                <strong>Response Time:</strong> Our team typically responds within <strong>1 business day</strong>. For urgent support, call our hotline directly at <strong>+91 800-456-7890</strong>.
               </motion.div>
             </motion.div>
           </motion.div>
