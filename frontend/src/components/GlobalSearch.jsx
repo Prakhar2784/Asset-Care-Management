@@ -88,11 +88,11 @@ export default function GlobalSearch() {
             elevation={24}
             sx={{
               width: '100%', maxWidth: 600, mx: 2, borderRadius: 3,
-              overflow: 'hidden', border: '1px solid #e2e8f0'
+              overflow: 'hidden', border: 1, borderColor: 'divider'
             }}
           >
             {/* Search input */}
-            <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.5, borderBottom: '1px solid #e2e8f0' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
               <SearchRounded sx={{ color: '#94a3b8', mr: 1.5 }} />
               <InputBase
                 ref={inputRef}
@@ -126,9 +126,9 @@ export default function GlobalSearch() {
                       <Box
                         key={a._id}
                         onClick={() => goTo('/admin/assets')}
-                        sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, gap: 1.5 }}
+                        sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}
                       >
-                        <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: 'action.selected', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Inventory2Rounded sx={{ fontSize: 17, color: '#4f46e5' }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
@@ -151,9 +151,9 @@ export default function GlobalSearch() {
                       <Box
                         key={t._id}
                         onClick={() => goTo('/tickets')}
-                        sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, cursor: 'pointer', '&:hover': { bgcolor: '#f8fafc' }, gap: 1.5 }}
+                        sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}
                       >
-                        <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: 'action.selected', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ConfirmationNumberRounded sx={{ fontSize: 17, color: '#0ea5e9' }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
@@ -177,14 +177,14 @@ export default function GlobalSearch() {
                         key={u._id}
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, gap: 1.5 }}
                       >
-                        <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: 'action.selected', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <PersonRounded sx={{ fontSize: 17, color: '#d97706' }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
                           <Typography fontSize={14} fontWeight={600}>{u.name}</Typography>
                           <Typography fontSize={12} color="text.secondary">{u.email} · {u.department}</Typography>
                         </Box>
-                        <Chip label={u.role} size="small" sx={{ height: 20, fontSize: 10, fontWeight: 700, bgcolor: '#f1f5f9', color: '#64748b' }} />
+                        <Chip label={u.role} size="small" sx={{ height: 20, fontSize: 10, fontWeight: 700 }} />
                       </Box>
                     ))}
                   </Box>

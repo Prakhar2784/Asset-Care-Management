@@ -32,8 +32,8 @@ const formatChanges = (changes) => {
   if ('from' in changes && 'to' in changes) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-        <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: '#f1f5f9', border: '1px solid #e2e8f0' }}>
-          <Typography fontSize={11} fontWeight={600} color="#64748b">{changes.from}</Typography>
+        <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: 'action.selected', border: 1, borderColor: 'divider' }}>
+          <Typography fontSize={11} fontWeight={600} color="text.secondary">{changes.from}</Typography>
         </Box>
         <Typography fontSize={13} color="#94a3b8" fontWeight={700}>→</Typography>
         <Box sx={{ px: 1, py: 0.25, borderRadius: 1, bgcolor: '#dcfce7', border: '1px solid #bbf7d0' }}>
@@ -47,8 +47,8 @@ const formatChanges = (changes) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
       {entries.map(([key, val]) => (
-        <Typography key={key} fontSize={12} color="#334155">
-          <span style={{ fontWeight: 700, color: '#64748b', textTransform: 'capitalize' }}>
+        <Typography key={key} fontSize={12} color="text.secondary">
+          <span style={{ fontWeight: 700, textTransform: 'capitalize' }}>
             {key.replace(/([A-Z])/g, ' $1').trim()}:
           </span>{' '}
           {String(val)}
@@ -111,8 +111,8 @@ export default function AuditLogs() {
       </Box>
 
       {/* Filters */}
-      <Paper sx={{ p: 2.5, mb: 3, borderRadius: 3, border: '1px solid #e2e8f0', display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-        <FilterListRounded sx={{ color: '#64748b' }} />
+      <Paper sx={{ p: 2.5, mb: 3, borderRadius: 3, border: 1, borderColor: 'divider', display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+        <FilterListRounded sx={{ color: 'text.secondary' }} />
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel>Entity</InputLabel>
           <Select value={filterEntity} label="Entity" onChange={(e) => setFilterEntity(e.target.value)}>
@@ -154,9 +154,9 @@ export default function AuditLogs() {
         </Paper>
       ) : (
         <>
-          <TableContainer component={Paper} sx={{ borderRadius: 3, border: '1px solid #e2e8f0', mb: 3 }}>
+          <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider', mb: 3 }}>
             <Table size="small">
-              <TableHead sx={{ bgcolor: '#f8fafc' }}>
+              <TableHead sx={{ bgcolor: 'background.default' }}>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 700, fontSize: 13 }}>Timestamp</TableCell>
                   <TableCell sx={{ fontWeight: 700, fontSize: 13 }}>Actor</TableCell>
@@ -169,7 +169,7 @@ export default function AuditLogs() {
               <TableBody>
                 {logs.map((log) => (
                   <TableRow key={log._id} hover>
-                    <TableCell sx={{ fontSize: 12, color: '#64748b', whiteSpace: 'nowrap' }}>
+                    <TableCell sx={{ fontSize: 12, color: 'text.secondary', whiteSpace: 'nowrap' }}>
                       {timeStr(log.createdAt)}
                     </TableCell>
                     <TableCell>

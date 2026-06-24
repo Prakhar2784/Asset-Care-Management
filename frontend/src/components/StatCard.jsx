@@ -9,8 +9,9 @@ const StatCard = ({ title, value, subtitle, icon, color = "#4f46e5" }) => {
         height: "100%",
         position: "relative",
         overflow: "hidden",
-        bgcolor: "#ffffff",
-        border: "1px solid #e2e8f0",
+        bgcolor: "background.paper",
+        border: 1,
+        borderColor: "divider",
         boxShadow: "0 4px 6px -1px rgba(15, 23, 42, 0.05)",
         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         display: "flex",
@@ -22,7 +23,6 @@ const StatCard = ({ title, value, subtitle, icon, color = "#4f46e5" }) => {
         }
       }}
     >
-      {/* Decorative Background Glow */}
       <Box
         sx={{
           position: "absolute",
@@ -36,7 +36,6 @@ const StatCard = ({ title, value, subtitle, icon, color = "#4f46e5" }) => {
         }}
       />
 
-      {/* Icon Container */}
       <Box
         sx={{
           width: 56,
@@ -53,25 +52,24 @@ const StatCard = ({ title, value, subtitle, icon, color = "#4f46e5" }) => {
         {icon}
       </Box>
 
-      {/* Explicit Hex Colors to fix the invisible text issue */}
-      <Typography 
-        sx={{ 
-          color: "#64748b", 
-          fontWeight: 700, 
-          fontSize: 13, 
-          textTransform: "uppercase", 
-          letterSpacing: "0.5px" 
+      <Typography
+        sx={{
+          color: "text.secondary",
+          fontWeight: 700,
+          fontSize: 13,
+          textTransform: "uppercase",
+          letterSpacing: "0.5px"
         }}
       >
         {title}
       </Typography>
 
-      <Typography 
-        sx={{ 
-          fontSize: "32px", 
-          fontWeight: 900, 
-          color: "#0f172a", 
-          mt: 1, 
+      <Typography
+        sx={{
+          fontSize: "32px",
+          fontWeight: 900,
+          color: "text.primary",
+          mt: 1,
           mb: 0.5,
           letterSpacing: "-1px",
           lineHeight: 1
@@ -80,11 +78,11 @@ const StatCard = ({ title, value, subtitle, icon, color = "#4f46e5" }) => {
         {value}
       </Typography>
 
-      <Typography 
-        sx={{ 
-          color: "#64748b", 
-          fontSize: 14, 
-          fontWeight: 500 
+      <Typography
+        sx={{
+          color: "text.secondary",
+          fontSize: 14,
+          fontWeight: 500
         }}
       >
         {subtitle}

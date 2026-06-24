@@ -134,7 +134,7 @@ export default function Notifications() {
           </Typography>
         </Paper>
       ) : (
-        <Paper sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+        <Paper sx={{ borderRadius: 3, overflow: 'hidden', border: 1, borderColor: 'divider' }}>
           <List disablePadding>
             {notifications.map((n, idx) => {
               const config = TYPE_CONFIG[n.type] || TYPE_CONFIG.system;
@@ -144,11 +144,11 @@ export default function Notifications() {
                     alignItems="flex-start"
                     sx={{
                       px: 3, py: 2,
-                      bgcolor: n.isRead ? 'transparent' : '#fafbff',
+                      bgcolor: n.isRead ? 'transparent' : 'action.selected',
                       borderLeft: n.isRead ? '3px solid transparent' : `3px solid ${config.color}`,
                       cursor: n.link ? 'pointer' : 'default',
                       transition: 'background 0.15s',
-                      '&:hover': { bgcolor: '#f8fafc' }
+                      '&:hover': { bgcolor: 'action.hover' }
                     }}
                     onClick={() => handleClick(n)}
                     secondaryAction={
