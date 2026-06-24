@@ -529,7 +529,7 @@ export default function Settings() {
           <PersonRounded sx={{ color: 'white' }} />
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px" color="text.primary">Settings</Typography>
+          <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px" sx={{ color: 'text.primary' }}>Settings</Typography>
           <Typography variant="body2" color="text.secondary">Manage your profile, preferences, and data</Typography>
         </Box>
       </Box>

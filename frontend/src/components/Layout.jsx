@@ -191,6 +191,7 @@ const Layout = () => {
           sx={{
             p: { xs: 3, md: 5 },
             flex: 1,
+            color: 'text.primary',
             animation: "fadeIn 0.6s ease-out forwards",
             "@keyframes fadeIn": { from: { opacity: 0, transform: "translateY(10px)" }, to: { opacity: 1, transform: "translateY(0)" } }
           }}
