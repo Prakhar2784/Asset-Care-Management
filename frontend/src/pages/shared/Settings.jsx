@@ -64,7 +64,7 @@ function ProfileTab({ currentUser }) {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={700} fontSize={16} mb={2.5}>Personal Information</Typography>
           <TextField label="Full Name" value={name} onChange={e => setName(e.target.value)} fullWidth sx={{ mb: 2 }} />
           <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} fullWidth sx={{ mb: 2 }} placeholder="+91 98765 43210" />
@@ -79,7 +79,7 @@ function ProfileTab({ currentUser }) {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={700} fontSize={16} mb={2.5}>Change Password</Typography>
           <TextField
             label="Current Password" type={showCurr ? 'text' : 'password'}
@@ -115,31 +115,39 @@ function AppearanceTab() {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
-          <Typography fontWeight={700} fontSize={16} mb={1}>Theme</Typography>
+        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
+          <Typography fontWeight={700} fontSize={16} mb={1} color="text.primary">Theme</Typography>
           <Typography fontSize={13} color="text.secondary" mb={3}>
             Choose between light and dark mode for the application interface.
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
-            {['light', 'dark'].map(m => (
-              <Box
-                key={m}
-                onClick={mode !== m ? toggleMode : undefined}
-                sx={{
-                  flex: 1, border: '2px solid', borderRadius: 3, p: 2.5, cursor: mode !== m ? 'pointer' : 'default',
-                  borderColor: mode === m ? '#4f46e5' : '#e2e8f0',
-                  bgcolor: mode === m ? '#eef2ff' : 'transparent',
-                  textAlign: 'center', transition: 'all 0.2s',
-                  '&:hover': mode !== m ? { borderColor: '#c7d2fe' } : {}
-                }}
-              >
-                {m === 'light' ? <LightModeRounded sx={{ fontSize: 32, color: mode === m ? '#4f46e5' : '#94a3b8' }} /> : <DarkModeRounded sx={{ fontSize: 32, color: mode === m ? '#4f46e5' : '#94a3b8' }} />}
-                <Typography fontWeight={700} fontSize={14} color={mode === m ? '#4f46e5' : 'text.secondary'} mt={1}>
-                  {m.charAt(0).toUpperCase() + m.slice(1)} Mode
-                </Typography>
-                {mode === m && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: '#4f46e5', color: 'white', fontWeight: 700, height: 20, fontSize: 11 }} />}
-              </Box>
-            ))}
+            {['light', 'dark'].map(m => {
+              const isActive = mode === m;
+              return (
+                <Box
+                  key={m}
+                  onClick={!isActive ? toggleMode : undefined}
+                  sx={{
+                    flex: 1, border: '2px solid', borderRadius: 3, p: 2.5,
+                    cursor: !isActive ? 'pointer' : 'default',
+                    borderColor: isActive ? '#4f46e5' : 'divider',
+                    bgcolor: isActive
+                      ? (isDark ? 'rgba(99,102,241,0.15)' : '#eef2ff')
+                      : 'transparent',
+                    textAlign: 'center', transition: 'all 0.2s',
+                    '&:hover': !isActive ? { borderColor: '#818cf8' } : {}
+                  }}
+                >
+                  {m === 'light'
+                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#4f46e5' : 'text.disabled' }} />
+                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#4f46e5' : 'text.disabled' }} />}
+                  <Typography fontWeight={700} fontSize={14} color={isActive ? '#4f46e5' : 'text.secondary'} mt={1}>
+                    {m === 'light' ? 'Light Mode' : 'Dark Mode'}
+                  </Typography>
+                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: '#4f46e5', color: 'white', fontWeight: 700, height: 20, fontSize: 11 }} />}
+                </Box>
+              );
+            })}
           </Box>
         </Paper>
       </Grid>
@@ -252,7 +260,7 @@ function ReportsTab() {
 
   return (
     <Box>
-      <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0', mb: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider', mb: 3 }}>
         <Typography fontWeight={700} fontSize={16} mb={0.5}>Ticket Lifecycle Report</Typography>
         <Typography fontSize={13} color="text.secondary" mb={3}>
           Full report of every ticket — from creation to resolution, including asset details, cost, resolution time, and personnel.
@@ -308,7 +316,7 @@ function ReportsTab() {
         </Box>
       </Paper>
 
-      <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+      <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
         <Typography fontWeight={700} fontSize={16} mb={0.5}>Asset Registry Report</Typography>
         <Typography fontSize={13} color="text.secondary" mb={2}>
           Complete snapshot of all active assets with assignment, warranty, and AMC details.
@@ -441,7 +449,7 @@ function DataTab({ currentUser }) {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={700} fontSize={16} mb={0.5}>Export My Data</Typography>
           <Typography fontSize={13} color="text.secondary" mb={3}>
             Download a complete copy of all your data — profile, tickets, device requests, notifications, and assigned assets — as a JSON file.
@@ -459,7 +467,7 @@ function DataTab({ currentUser }) {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={700} fontSize={16} mb={0.5}>Data Retention Policy</Typography>
           <Typography fontSize={13} color="text.secondary" mb={2}>
             Your data is managed according to these retention rules:
@@ -470,7 +478,7 @@ function DataTab({ currentUser }) {
             ['Tickets', 'Retained indefinitely'],
             ['Assets', 'Soft-deleted (recoverable from trash)'],
           ].map(([label, desc]) => (
-            <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: '1px solid #f1f5f9' }}>
+            <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: 1, borderColor: 'divider' }}>
               <Typography fontSize={13} fontWeight={600} color="text.secondary">{label}</Typography>
               <Typography fontSize={13} color="text.primary" textAlign="right" maxWidth={220}>{desc}</Typography>
             </Box>
@@ -479,7 +487,7 @@ function DataTab({ currentUser }) {
       </Grid>
 
       <Grid item xs={12} md={6}>
-        <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={700} fontSize={16} mb={0.5}>Account Information</Typography>
           {[
             ['Name', currentUser?.name],
@@ -488,7 +496,7 @@ function DataTab({ currentUser }) {
             ['Department', currentUser?.department],
             ['Account Status', currentUser?.isActive ? 'Active' : 'Inactive'],
           ].map(([label, val]) => (
-            <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: '1px solid #f1f5f9' }}>
+            <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: 1, borderColor: 'divider' }}>
               <Typography fontSize={13} fontWeight={600} color="text.secondary">{label}</Typography>
               <Typography fontSize={13} fontWeight={700}>{val || '—'}</Typography>
             </Box>
@@ -521,18 +529,18 @@ export default function Settings() {
           <PersonRounded sx={{ color: 'white' }} />
         </Box>
         <Box>
-          <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Settings</Typography>
+          <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px" color="text.primary">Settings</Typography>
           <Typography variant="body2" color="text.secondary">Manage your profile, preferences, and data</Typography>
         </Box>
       </Box>
 
-      <Paper sx={{ borderRadius: 3, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+      <Paper sx={{ borderRadius: 3, border: 1, borderColor: 'divider', overflow: 'hidden' }}>
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: '1px solid #e2e8f0', bgcolor: '#f8fafc', '& .MuiTab-root': { fontWeight: 700, textTransform: 'none', minHeight: 52 } }}
+          sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.default', '& .MuiTab-root': { fontWeight: 700, textTransform: 'none', minHeight: 52 } }}
         >
           {tabs.map((t, i) => (
             <Tab key={t.label} label={t.label} icon={t.icon} iconPosition="start" value={i} />
