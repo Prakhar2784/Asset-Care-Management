@@ -9,7 +9,7 @@ import {
   ApartmentRounded, ApprovalRounded, AssignmentIndRounded, BusinessRounded,
   ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded,
   NotificationsRounded, LogoutRounded, HistoryRounded, AssessmentRounded,
-  SettingsRounded, AutoAwesomeRounded, ChevronRightRounded,
+  SettingsRounded, ChevronRightRounded,
 } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -111,27 +111,6 @@ const Sidebar = ({ onClose }) => {
             );
           })}
         </List>
-      </Box>
-
-      {/* AI Promo Card */}
-      <Box sx={{ mx: 1.5, mb: 2 }}>
-        <Box sx={{ borderRadius: "14px", background: "linear-gradient(135deg, #1A1A1A, #212121)", border: "1px solid #2A2A2A", p: 2 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-            <Box sx={{ width: 24, height: 24, borderRadius: "6px", bgcolor: ACCENT, display: "grid", placeItems: "center" }}>
-              <AutoAwesomeRounded sx={{ fontSize: 13, color: "#111111" }} />
-            </Box>
-            <Typography sx={{ fontSize: 11, fontWeight: 900, color: "#FFFFFF", letterSpacing: "0.5px" }}>AI Analytics</Typography>
-          </Box>
-          <Typography sx={{ fontSize: 11.5, color: "#555555", lineHeight: 1.55, mb: 1.5 }}>
-            Predictive insights on asset lifecycle and warranty expiry.
-          </Typography>
-          <Button
-            fullWidth size="small"
-            sx={{ bgcolor: ACCENT, color: "#111111", fontWeight: 900, fontSize: 11, borderRadius: "8px", py: 0.7, "&:hover": { bgcolor: "#B8E84E" } }}
-          >
-            Explore Now →
-          </Button>
-        </Box>
       </Box>
 
       {/* User Row + Logout */}
