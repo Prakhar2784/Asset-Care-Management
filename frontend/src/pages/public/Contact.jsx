@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import api from "../../api/axios";
 import PageHeader from "../../components/PageHeader";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -23,16 +24,32 @@ const stagger = {
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setSubmitError('');
+    const form = e.target;
+    const payload = {
+      company: form.company.value,
+      name: form.name.value,
+      email: form.email.value,
+      phone: form.phone.value,
+      orgSize: form.orgSize.value,
+      inquiryType: form.inquiryType.value,
+      message: form.message.value,
+    };
+    try {
+      await api.post('/contact', payload);
       setIsSuccess(true);
-      setTimeout(() => setIsSuccess(false), 5000);
-      e.target.reset();
-    }, 1500);
+      form.reset();
+      setTimeout(() => setIsSuccess(false), 6000);
+    } catch {
+      setSubmitError('Failed to send message. Please try again or email us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -290,9 +307,14 @@ const Contact = () => {
                   <textarea name="message" placeholder="Tell us about your organisation, the assets you manage, and what you'd like to achieve with AssetCare Pro..." className="contact-input" style={{ minHeight: 130, resize: "vertical" }} required />
                 </div>
 
+                {submitError && (
+                  <div style={{ background: '#FEF2F2', border: '1.5px solid #FCA5A5', borderRadius: '12px', padding: '12px 16px', color: '#DC2626', fontSize: '14px', fontWeight: 600 }}>
+                    {submitError}
+                  </div>
+                )}
                 <button type="submit" className={`contact-btn ${isSuccess ? "success" : ""}`} disabled={isSubmitting}>
                   {isSubmitting ? "Processing Request..." : isSuccess ? (
-                    <><CheckCircleRoundedIcon fontSize="small" />Request Submitted</>
+                    <><CheckCircleRoundedIcon fontSize="small" />Request Submitted — We'll be in touch!</>
                   ) : (
                     <><SendRoundedIcon fontSize="small" />Submit Demo Request</>
                   )}

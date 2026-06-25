@@ -225,7 +225,7 @@ function ReportsTab() {
       const doc = new jsPDF({ orientation: 'landscape' });
 
       doc.setFontSize(18); doc.setFont('helvetica', 'bold');
-      doc.text('AssetCare Pro — Ticket Lifecycle Report', 14, 16);
+      doc.text('AssetCare Pro - Ticket Lifecycle Report', 14, 16);
       doc.setFontSize(10); doc.setFont('helvetica', 'normal');
       doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 14, 23);
 
@@ -235,13 +235,13 @@ function ReportsTab() {
       doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
       const summaryLines = [
         `Total: ${summary.total}  |  Resolved: ${summary.resolved}  |  Pending: ${summary.pending}  |  In Progress: ${summary.inProgress}  |  Rejected: ${summary.rejected}`,
-        `Avg. Resolution: ${summary.avgResolutionHours ?? 'N/A'} hrs  |  Total Cost: ₹${summary.totalCost.toLocaleString('en-IN')}`,
+        `Avg. Resolution: ${summary.avgResolutionHours ?? 'N/A'} hrs  |  Total Cost: Rs. ${summary.totalCost.toLocaleString('en-IN')}`,
       ];
       summaryLines.forEach((l, i) => doc.text(l, 14, 40 + i * 6));
 
       autoTable(doc, {
         startY: 56,
-        head: [['Ticket ID', 'Status', 'Priority', 'Issue', 'Asset', 'Dept', 'Raised By', 'Approved By', 'Raised At', 'Res.(hrs)', 'Cost(₹)']],
+        head: [['Ticket ID', 'Status', 'Priority', 'Issue', 'Asset', 'Dept', 'Raised By', 'Approved By', 'Raised At', 'Res.(hrs)', 'Cost(Rs.)']],
         body: tickets.map(t => [
           t.ticketId, t.status, t.priority, t.issue.substring(0, 40), t.assetName.substring(0, 20),
           t.assetDepartment, t.raisedByName, t.approvedByName,

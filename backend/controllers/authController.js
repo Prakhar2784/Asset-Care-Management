@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const { sendPasswordResetEmail, sendOtpEmail } = require('../services/emailService');
+const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail } = require('../services/emailService');
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
@@ -151,6 +151,8 @@ const resetPassword = async (req, res) => {
       passwordResetToken: null,
       passwordResetExpiry: null
     });
+
+    sendPasswordChangedEmail(user).catch(() => {});
 
     res.status(200).json({ message: 'Password reset successful. You can now log in with your new password.' });
   } catch (error) {

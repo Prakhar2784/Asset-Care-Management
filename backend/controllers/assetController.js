@@ -18,7 +18,8 @@ const createAsset = async (req, res) => {
 const getAssets = async (req, res) => {
   try {
     const assets = await Asset.find({ isDeleted: { $ne: true } })
-      .populate('assignedTo', 'name email department');
+      .populate('assignedTo', 'name email department')
+      .sort({ createdAt: -1 });
     res.status(200).json(assets);
   } catch (error) {
     res.status(500).json({ message: error.message });

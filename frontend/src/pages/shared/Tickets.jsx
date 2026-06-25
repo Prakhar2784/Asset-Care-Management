@@ -18,7 +18,8 @@ import {
   Snackbar,
   Tooltip,
   Stack,
-  Chip
+  Chip,
+  Skeleton
 } from "@mui/material";
 import {
   AddRounded,
@@ -290,9 +291,29 @@ const Tickets = () => {
       </Paper>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "", alignItems: "", minHeight: "" }}>
-          <CircularProgress color="inherit" />
-        </Box>
+        <Grid container spacing={3}>
+          {[...Array(6)].map((_, i) => (
+            <Grid size={{ xs: 12, md: 6, lg: 4 }} key={i}>
+              <Paper sx={{ p: 3.5, borderRadius: "24px", border: 1, borderColor: "divider", opacity: 1 - i * 0.1 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3 }}>
+                  <Skeleton variant="rounded" width={44} height={44} sx={{ borderRadius: "12px", flexShrink: 0 }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Skeleton variant="text" width="60%" height={24} />
+                    <Skeleton variant="text" width="40%" height={18} />
+                  </Box>
+                </Box>
+                <Skeleton variant="text" width="90%" height={18} />
+                <Skeleton variant="text" width="75%" height={18} sx={{ mb: 2 }} />
+                <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                  <Skeleton variant="rounded" width={90} height={26} sx={{ borderRadius: "8px" }} />
+                  <Skeleton variant="rounded" width={110} height={26} sx={{ borderRadius: "8px" }} />
+                </Box>
+                <Skeleton variant="rounded" height={36} sx={{ borderRadius: "10px", mb: 2 }} />
+                <Skeleton variant="text" width="50%" height={16} />
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
       ) : filteredTickets.length === 0 ? (
         <Paper sx={{ p: 6, textAlign: "center", borderRadius: "24px", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider" }}>
           <AssignmentRounded sx={{ fontSize: 60, color: "text.disabled", mb: 2 }} />

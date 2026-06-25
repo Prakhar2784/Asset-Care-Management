@@ -25,14 +25,22 @@ const AuthPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Form State - ADDED department here
+  // Form State
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    department: "" 
+    department: ""
   });
+
+  const pwRules = [
+    { label: '8+ chars',  pass: formData.password.length >= 8 },
+    { label: 'Uppercase', pass: /[A-Z]/.test(formData.password) },
+    { label: 'Lowercase', pass: /[a-z]/.test(formData.password) },
+    { label: 'Number',    pass: /[0-9]/.test(formData.password) },
+    { label: 'Symbol',    pass: /[^A-Za-z0-9]/.test(formData.password) },
+  ];
 
   // Dynamic Content based on selected role
   const pageContent = {
@@ -97,8 +105,8 @@ const AuthPage = () => {
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Passwords do not match.");
         }
-        if (formData.password.length < 6) {
-          throw new Error("Password must be at least 6 characters.");
+        if (!pwRules.every(r => r.pass)) {
+          throw new Error("Password must be 8+ chars with uppercase, lowercase, number, and symbol.");
         }
         // ADDED: Passing formData.department to the register function
         const session = await register(formData.name, formData.email, formData.password, role, formData.department);
@@ -398,6 +406,35 @@ const AuthPage = () => {
           color: #333333;
         }
 
+        .pw-rules {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px 14px;
+          background: #F9F8F5;
+          border: 1.5px solid #E2DDD5;
+          border-radius: 14px;
+          padding: 12px 16px;
+          margin-bottom: 16px;
+        }
+
+        .pw-rule {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .pw-rule.pass { color: #16A34A; }
+        .pw-rule.fail { color: #DC2626; }
+
+        .pw-dot {
+          width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+
+        .pw-rule.pass .pw-dot { background: #16A34A; }
+        .pw-rule.fail .pw-dot { background: #DC2626; }
+
         .error-message { 
           background: #FEE2E2; 
           border: 1px solid #FCA5A5; 
@@ -584,6 +621,17 @@ const AuthPage = () => {
                   <button type="button" className="input-icon-right" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
                   </button>
+                </div>
+              )}
+
+              {view === "register" && formData.password.length > 0 && (
+                <div className="pw-rules">
+                  {pwRules.map(r => (
+                    <div key={r.label} className={`pw-rule ${r.pass ? 'pass' : 'fail'}`}>
+                      <span className="pw-dot" />
+                      {r.label}
+                    </div>
+                  ))}
                 </div>
               )}
 

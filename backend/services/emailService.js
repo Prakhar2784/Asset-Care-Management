@@ -322,6 +322,56 @@ const sendWelcomeEmail = async (user, tempPassword) => {
   });
 };
 
+// 11. Password Changed Notification
+const sendPasswordChangedEmail = async (user) => {
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      Hello <strong>${user.name}</strong>,<br><br>
+      Your AssetCare Pro account password was successfully changed.
+      If you made this change, no action is required.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Account</span><span class="info-val">${user.email}</span></div>
+      <div class="info-row"><span class="info-key">Changed At</span><span class="info-val">${new Date().toLocaleString('en-IN')}</span></div>
+    </div>
+    <p style="font-size:13px;color:#dc2626;font-weight:700;margin-top:16px;">
+      If you did NOT make this change, please contact your system administrator immediately or use Forgot Password to secure your account.
+    </p>`;
+  await sendEmail({
+    to: user.email,
+    subject: 'Your AssetCare Pro Password Has Been Changed',
+    text: `Hello ${user.name}, your AssetCare Pro password was changed on ${new Date().toLocaleString('en-IN')}. If you did not make this change, contact your administrator immediately.`,
+    html: baseTemplate('Password Changed Successfully', body, 'If you did not initiate this change, contact your admin immediately.')
+  });
+};
+
+// 12. Contact Form Inquiry
+const sendContactEmail = async ({ company, name, email, phone, orgSize, inquiryType, message }) => {
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      A new contact/demo request has been submitted via the AssetCare Pro website.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Company</span><span class="info-val">${company}</span></div>
+      <div class="info-row"><span class="info-key">Contact Name</span><span class="info-val">${name}</span></div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val">${email}</span></div>
+      <div class="info-row"><span class="info-key">Phone</span><span class="info-val">${phone}</span></div>
+      <div class="info-row"><span class="info-key">Organisation Size</span><span class="info-val">${orgSize}</span></div>
+      <div class="info-row"><span class="info-key">Inquiry Type</span><span class="info-val">${inquiryType}</span></div>
+    </div>
+    <div style="margin-top:16px;padding:16px 20px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:#64748b;margin-bottom:8px;">Message</div>
+      <p style="font-size:14px;color:#0f172a;font-weight:500;margin:0;line-height:1.6;">${message}</p>
+    </div>`;
+  await sendEmail({
+    to: adminEmail,
+    subject: `New Contact Request: ${inquiryType} from ${company}`,
+    text: `New contact request from ${name} (${company}). Email: ${email}, Phone: ${phone}, Type: ${inquiryType}. Message: ${message}`,
+    html: baseTemplate('New Demo / Contact Request', body, 'Sent from the AssetCare Pro public contact form.')
+  });
+};
+
 // OTP Password Reset Email
 const sendOtpEmail = async (user, otp) => {
   const body = `
@@ -354,6 +404,8 @@ const sendOtpEmail = async (user, otp) => {
 
 module.exports = {
   sendPasswordResetEmail,
+  sendPasswordChangedEmail,
+  sendContactEmail,
   sendOtpEmail,
   sendTicketCreatedEmail,
   sendTicketStatusEmail,

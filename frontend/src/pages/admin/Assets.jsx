@@ -90,7 +90,8 @@ const Assets = () => {
     setLoading(true);
     try {
       const response = await api.get('/assets');
-      setAssets(response.data);
+      const sorted = [...response.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setAssets(sorted);
     } catch {
       setSnackbar({ open: true, message: "Failed to load assets. Please refresh.", severity: "error" });
     } finally {

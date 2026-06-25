@@ -33,6 +33,7 @@ import Departments from "./pages/admin/Departments";
 import AuditLogs from "./pages/admin/AuditLogs";
 import Reports from "./pages/admin/Reports";
 import AssignedDevices from "./pages/admin/AssignedDevices";
+import UserManagement from "./pages/admin/UserManagement";
 
 // Import Employee & Shared Pages
 import EmployeePortal from "./pages/employee/EmployeePortal";
@@ -88,6 +89,7 @@ function App() {
               <Route path="/admin/audit" element={<AuditLogs />} />
               <Route path="/admin/reports" element={<Reports />} />
               <Route path="/admin/assignments" element={<AssignedDevices />} />
+              <Route path="/admin/users" element={<UserManagement />} />
             </Route>
 
           </Route>

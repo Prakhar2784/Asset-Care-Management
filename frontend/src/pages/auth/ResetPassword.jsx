@@ -2,16 +2,27 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   Box, Paper, Typography, TextField, Button, Alert,
-  CircularProgress, InputAdornment, IconButton
+  CircularProgress, InputAdornment, IconButton, Grid
 } from '@mui/material';
-import { LockResetRounded, Visibility, VisibilityOff, CheckCircleOutlined, ErrorOutlined } from '@mui/icons-material';
+import {
+  LockResetRounded, Visibility, VisibilityOff,
+  CheckCircleOutlined, ErrorOutlined, CheckCircleRounded, CancelRounded
+} from '@mui/icons-material';
 import api from '../../api/axios';
+
+const rules = [
+  { key: 'length',    label: '8+ chars',   test: (p) => p.length >= 8 },
+  { key: 'upper',     label: 'Uppercase',  test: (p) => /[A-Z]/.test(p) },
+  { key: 'lower',     label: 'Lowercase',  test: (p) => /[a-z]/.test(p) },
+  { key: 'number',    label: 'Number',     test: (p) => /[0-9]/.test(p) },
+  { key: 'symbol',    label: 'Symbol',     test: (p) => /[^A-Za-z0-9]/.test(p) },
+];
 
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
 
-  const [tokenValid, setTokenValid] = useState(null); // null=checking, true, false
+  const [tokenValid, setTokenValid] = useState(null);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -19,6 +30,9 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  const ruleResults = rules.map(r => ({ ...r, passed: r.test(password) }));
+  const allRulesPassed = ruleResults.every(r => r.passed);
 
   useEffect(() => {
     const verify = async () => {
@@ -36,8 +50,8 @@ export default function ResetPassword() {
     e.preventDefault();
     setError('');
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (!allRulesPassed) {
+      setError('Please meet all password requirements.');
       return;
     }
     if (password !== confirm) {
@@ -93,7 +107,7 @@ export default function ResetPassword() {
 
   return (
     <Box sx={containerSx}>
-      <Paper elevation={8} sx={{ p: 4, maxWidth: 440, width: '100%', borderRadius: 3 }}>
+      <Paper elevation={8} sx={{ p: 4, maxWidth: 460, width: '100%', borderRadius: 3 }}>
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box sx={{
             width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
@@ -113,21 +127,44 @@ export default function ResetPassword() {
             <CheckCircleOutlined sx={{ fontSize: 56, color: '#16a34a', mb: 2 }} />
             <Typography variant="h6" fontWeight={600} gutterBottom>Password Reset!</Typography>
             <Typography variant="body2" color="text.secondary">
-              Your password has been updated. Redirecting to login...
+              Your password has been updated. A confirmation email has been sent. Redirecting to login...
             </Typography>
           </Box>
         ) : (
           <Box component="form" onSubmit={handleSubmit}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
             <TextField
               label="New Password"
               type={showPass ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               fullWidth required autoFocus
-              sx={{ mb: 2 }}
+              sx={{ mb: 1.5 }}
               slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPass(!showPass)} edge="end">{showPass ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
             />
+
+            {/* Password rules */}
+            {password.length > 0 && (
+              <Box sx={{ mb: 2, p: 1.5, borderRadius: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' }}>
+                <Grid container spacing={0.5}>
+                  {ruleResults.map(r => (
+                    <Grid size={{ xs: 6 }} key={r.key}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                        {r.passed
+                          ? <CheckCircleRounded sx={{ fontSize: 14, color: '#16a34a' }} />
+                          : <CancelRounded sx={{ fontSize: 14, color: '#dc2626' }} />
+                        }
+                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: r.passed ? '#16a34a' : '#dc2626' }}>
+                          {r.label}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            )}
+
             <TextField
               label="Confirm Password"
               type={showConfirm ? 'text' : 'password'}
@@ -139,6 +176,7 @@ export default function ResetPassword() {
               helperText={confirm.length > 0 && password !== confirm ? 'Passwords do not match' : ''}
               slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowConfirm(!showConfirm)} edge="end">{showConfirm ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
             />
+
             <Button
               type="submit"
               variant="contained"

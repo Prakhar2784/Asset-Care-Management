@@ -9,7 +9,7 @@ import {
   ApartmentRounded, ApprovalRounded, AssignmentIndRounded, BusinessRounded,
   ConfirmationNumberRounded, DashboardRounded, Inventory2Rounded, MenuRounded,
   NotificationsRounded, LogoutRounded, HistoryRounded, AssessmentRounded,
-  SettingsRounded, ChevronRightRounded,
+  SettingsRounded, ChevronRightRounded, PeopleRounded,
 } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -30,6 +30,7 @@ const adminMenu = [
   { text: "Departments",     path: "/admin/departments",  icon: <ApartmentRounded /> },
   { text: "Reports",         path: "/admin/reports",      icon: <AssessmentRounded /> },
   { text: "Audit Logs",      path: "/admin/audit",        icon: <HistoryRounded /> },
+  { text: "Users",           path: "/admin/users",        icon: <PeopleRounded /> },
   { text: "Settings",        path: "/settings",           icon: <SettingsRounded /> },
 ];
 
