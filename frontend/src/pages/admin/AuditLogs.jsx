@@ -44,26 +44,32 @@ const formatChanges = (changes) => {
 
   if ('from' in changes && 'to' in changes) {
     return (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
-        <Typography sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.3, borderRadius: 1, bgcolor: 'action.selected', color: 'text.secondary' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+        <Typography sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.25, borderRadius: '6px', bgcolor: 'action.selected', color: 'text.secondary', maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {changes.from}
         </Typography>
-        <Typography fontSize={12} color="text.disabled" fontWeight={700}>→</Typography>
-        <Typography sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.3, borderRadius: 1, bgcolor: '#dcfce7', color: '#16a34a' }}>
+        <Typography fontSize={11} color="text.disabled" fontWeight={700}>→</Typography>
+        <Typography sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.25, borderRadius: '6px', bgcolor: '#dcfce7', color: '#16a34a', maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {changes.to}
         </Typography>
       </Box>
     );
   }
 
+  const visible = entries.slice(0, 3);
+  const hidden = entries.length - 3;
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.2 }}>
-      {entries.map(([key, val]) => (
-        <Typography key={key} fontSize={11} color="text.secondary" fontWeight={500}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.3 }}>
+      {visible.map(([key, val]) => (
+        <Typography key={key} fontSize={11} color="text.secondary" fontWeight={500}
+          sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220 }}>
           <span style={{ fontWeight: 700, textTransform: 'capitalize' }}>{key.replace(/([A-Z])/g, ' $1').trim()}:</span>{' '}
           {String(val)}
         </Typography>
       ))}
+      {hidden > 0 && (
+        <Typography fontSize={10} color="text.disabled" fontWeight={700}>+{hidden} more fields</Typography>
+      )}
     </Box>
   );
 };
@@ -204,47 +210,48 @@ export default function AuditLogs() {
                   const meta = ACTION_META[log.action];
                   const entityMeta = ENTITY_COLORS[log.entity];
                   return (
-                    <TableRow key={log._id} hover sx={{ '&:last-child td': { borderBottom: 0 }, transition: 'background 0.15s' }}>
-                      <TableCell sx={{ py: 1.5, minWidth: 100 }}>
-                        <Typography fontSize={12} fontWeight={700} color="text.primary">{ts.date}</Typography>
-                        <Typography fontSize={11} color="text.disabled" fontWeight={600}>{ts.time}</Typography>
+                    <TableRow key={log._id} hover sx={{
+                      '&:last-child td': { borderBottom: 0 },
+                      bgcolor: idx % 2 === 0 ? 'transparent' : 'action.hover',
+                      transition: 'background 0.15s',
+                    }}>
+                      <TableCell sx={{ py: 1, minWidth: 95 }}>
+                        <Typography fontSize={11} fontWeight={700} color="text.primary" sx={{ whiteSpace: 'nowrap' }}>{ts.date}</Typography>
+                        <Typography fontSize={10} color="text.disabled" fontWeight={600}>{ts.time}</Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        <Typography fontSize={13} fontWeight={700} color="text.primary">{log.actorName}</Typography>
-                        <Typography fontSize={11} fontWeight={600}
-                          sx={{ color: ROLE_COLORS[log.actorRole] || 'text.disabled', textTransform: 'capitalize' }}>
+                      <TableCell sx={{ py: 1 }}>
+                        <Typography fontSize={12} fontWeight={700} color="text.primary" sx={{ whiteSpace: 'nowrap' }}>{log.actorName}</Typography>
+                        <Typography fontSize={10} fontWeight={700} sx={{ color: ROLE_COLORS[log.actorRole] || 'text.disabled', textTransform: 'capitalize' }}>
                           {log.actorRole?.replace(/_/g, ' ')}
                         </Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
+                      <TableCell sx={{ py: 1 }}>
                         <Box sx={{
-                          display: 'inline-flex', alignItems: 'center',
-                          px: 1.2, py: 0.4, borderRadius: '20px',
-                          bgcolor: meta?.bg || '#F1F5F9',
-                          color: meta?.color || '#64748b',
+                          display: 'inline-flex', px: 1.2, py: 0.3, borderRadius: '20px',
+                          bgcolor: meta?.bg || '#F1F5F9', color: meta?.color || '#64748b',
                           fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap'
                         }}>
                           {meta?.label || log.action.replace(/_/g, ' ')}
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
+                      <TableCell sx={{ py: 1 }}>
                         <Box sx={{
-                          display: 'inline-flex', px: 1.2, py: 0.3, borderRadius: '20px', border: '1px solid',
+                          display: 'inline-flex', px: 1.2, py: 0.25, borderRadius: '20px', border: '1px solid',
                           borderColor: entityMeta?.color || 'divider',
                           color: entityMeta?.color || 'text.secondary',
                           bgcolor: entityMeta?.bg || 'transparent',
-                          fontSize: 11, fontWeight: 700, textTransform: 'capitalize'
+                          fontSize: 11, fontWeight: 700, textTransform: 'capitalize', whiteSpace: 'nowrap'
                         }}>
                           {log.entity?.replace(/_/g, ' ')}
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1.5, maxWidth: 160 }}>
+                      <TableCell sx={{ py: 1, maxWidth: 140 }}>
                         <Typography fontSize={12} fontWeight={600} color="text.primary"
                           sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {log.entityLabel || log.entityId || '—'}
                         </Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1.5, maxWidth: 220 }}>
+                      <TableCell sx={{ py: 1, maxWidth: 200 }}>
                         {formatChanges(log.changes) ?? <Typography fontSize={11} color="text.disabled">—</Typography>}
                       </TableCell>
                     </TableRow>
