@@ -12,11 +12,13 @@ import {
   Snackbar,
   Alert,
   Stack,
+  Skeleton,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  TablePagination,
   TextField,
   Typography,
   IconButton,
@@ -45,6 +47,10 @@ const Assets = () => {
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Pagination
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   // Edit state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editAsset, setEditAsset] = useState(null);
@@ -69,6 +75,9 @@ const Assets = () => {
     fetchAssets();
     fetchEmployees();
   }, []);
+
+  // Reset page when filters change
+  useEffect(() => { setPage(0); }, [search, category]);
 
   const fetchEmployees = async () => {
     try {
@@ -109,6 +118,11 @@ const Assets = () => {
       return matchesSearch && matchesCategory;
     });
   }, [search, category, assets]);
+
+  const paginatedAssets = useMemo(
+    () => filteredAssets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [filteredAssets, page, rowsPerPage]
+  );
 
   const handleExportCSV = () => {
     if (filteredAssets.length === 0) return;
@@ -199,7 +213,6 @@ const Assets = () => {
     if (!selectedEmployee) return;
     setAssigning(true);
     try {
-      // Use existing assignment endpoint
       await api.post('/asset-assignments', {
         department: selectedEmployee.department,
         asset: assignAssetTarget._id,
@@ -219,7 +232,6 @@ const Assets = () => {
 
   const handleRevokeAssignment = async (asset) => {
     try {
-      // Find the active assignment and return it
       const { data } = await api.get('/asset-assignments');
       const active = data.find(a => a.asset?._id === asset._id && a.status === 'Assigned');
       if (active) {
@@ -228,7 +240,7 @@ const Assets = () => {
         setSelected(null);
         fetchAssets();
       }
-    } catch (err) {
+    } catch {
       setSnackbar({ open: true, message: "Failed to revoke assignment.", severity: "error" });
     }
   };
@@ -258,16 +270,16 @@ const Assets = () => {
 
       <Paper sx={{ p: 3, borderRadius: "16px", mb: 4, bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={7}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <TextField fullWidth sx={inputStyles} label="Search by asset name, ID or serial number" value={search} onChange={(e) => setSearch(e.target.value)} />
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <TextField fullWidth select sx={inputStyles} label="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
               <MenuItem value="All">All Categories</MenuItem>
               {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
             </TextField>
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <Button fullWidth variant="outlined" onClick={() => { setSearch(""); setCategory("All"); }}
               sx={{ height: "100%", minHeight: "56px", borderColor: "divider", color: "text.secondary", borderRadius: "12px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", color: "text.primary", borderColor: "text.secondary" } }}>
               Clear Filters
@@ -279,69 +291,83 @@ const Assets = () => {
       <Paper sx={{ borderRadius: "16px", overflow: "hidden", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
         <Box sx={{ overflowX: "auto" }}>
           {loading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" p={5} minHeight="300px">
-              <CircularProgress color="inherit" />
+            <Box sx={{ p: 3 }}>
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} variant="rectangular" height={52} sx={{ mb: 1.5, borderRadius: "10px", opacity: 1 - i * 0.12 }} />
+              ))}
             </Box>
           ) : filteredAssets.length === 0 ? (
-            <Box p={5} textAlign="center">
-              <Typography color="#64748b" fontWeight={600} fontSize="16px">No assets found. Click "Provision Asset" to add one.</Typography>
+            <Box sx={{ p: 5, textAlign: "center" }}>
+              <Typography color="text.secondary" fontWeight={600} fontSize="16px">No assets found. Click "Provision Asset" to add one.</Typography>
             </Box>
           ) : (
-            <Table sx={{ minWidth: 700 }}>
-              <TableHead>
-                <TableRow sx={{ bgcolor: "action.hover" }}>
-                  {["Asset Identification", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
-                    <TableCell key={head} sx={{ color: "text.secondary", fontWeight: 700, borderBottom: "1px solid", borderColor: "divider", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                      {head}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredAssets.map((asset) => (
-                  <TableRow key={asset._id} sx={{ "&:hover": { bgcolor: "action.hover" }, "& td": { borderBottom: "1px solid", borderColor: "divider" }, transition: "background-color 0.2s ease" }}>
-                    <TableCell>
-                      <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: "15px" }}>{asset.name}</Typography>
-                      <Typography sx={{ fontSize: "13px", color: "text.secondary", fontFamily: "monospace", mt: 0.5 }}>
-                        AST-{asset._id.slice(-5).toUpperCase()} • {asset.serialNumber}
-                      </Typography>
-                    </TableCell>
-                    <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.category}</TableCell>
-                    <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.department}</TableCell>
-                    <TableCell sx={{ color: "text.secondary", fontWeight: 500 }}>{asset.location || "Unassigned"}</TableCell>
-                    <TableCell><StatusChip label={getWarrantyStatus(asset.warrantyEnd)} /></TableCell>
-                    <TableCell><StatusChip label={asset.status} /></TableCell>
-                    <TableCell>
-                      <Box display="flex" gap={1}>
-                        <Tooltip title="Inspect">
-                          <Button size="small" variant="outlined" startIcon={<VisibilityRounded />} onClick={() => setSelected(asset)}
-                            sx={{ borderColor: "divider", color: "text.primary", textTransform: "none", borderRadius: "8px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}>
-                            View
-                          </Button>
-                        </Tooltip>
-                        <Tooltip title="Edit Asset">
-                          <IconButton size="small" onClick={() => handleEditClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: "action.hover" } }}>
-                            <EditRounded fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete Asset">
-                          <IconButton size="small" onClick={() => handleDeleteClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#DC2626", bgcolor: "#FEF2F2" } }}>
-                            <DeleteOutlineRounded fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </TableCell>
+            <>
+              <Table sx={{ minWidth: 700 }}>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: "action.hover" }}>
+                    {["Asset Identification", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
+                      <TableCell key={head} sx={{ color: "text.secondary", fontWeight: 700, borderBottom: "1px solid", borderColor: "divider", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        {head}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {paginatedAssets.map((asset) => (
+                    <TableRow key={asset._id} sx={{ "&:hover": { bgcolor: "action.hover" }, "& td": { borderBottom: "1px solid", borderColor: "divider" }, transition: "background-color 0.2s ease" }}>
+                      <TableCell>
+                        <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: "15px" }}>{asset.name}</Typography>
+                        <Typography sx={{ fontSize: "13px", color: "text.secondary", fontFamily: "monospace", mt: 0.5 }}>
+                          AST-{asset._id.slice(-5).toUpperCase()} • {asset.serialNumber}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.category}</TableCell>
+                      <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.department}</TableCell>
+                      <TableCell sx={{ color: "text.secondary", fontWeight: 500 }}>{asset.location || "Unassigned"}</TableCell>
+                      <TableCell><StatusChip label={getWarrantyStatus(asset.warrantyEnd)} /></TableCell>
+                      <TableCell><StatusChip label={asset.status} /></TableCell>
+                      <TableCell>
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Tooltip title="Inspect">
+                            <Button size="small" variant="outlined" startIcon={<VisibilityRounded />} onClick={() => setSelected(asset)}
+                              sx={{ borderColor: "divider", color: "text.primary", textTransform: "none", borderRadius: "8px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}>
+                              View
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title="Edit Asset">
+                            <IconButton size="small" onClick={() => handleEditClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: "action.hover" } }}>
+                              <EditRounded fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete Asset">
+                            <IconButton size="small" onClick={() => handleDeleteClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#DC2626", bgcolor: "#FEF2F2" } }}>
+                              <DeleteOutlineRounded fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <TablePagination
+                component="div"
+                count={filteredAssets.length}
+                page={page}
+                onPageChange={(_, newPage) => setPage(newPage)}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+              />
+            </>
           )}
         </Box>
       </Paper>
 
       {/* Detail Drawer */}
       <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}
-        PaperProps={{ sx: { bgcolor: "background.paper", color: "text.primary", borderLeft: "1px solid", borderColor: "divider" } }}>
+        slotProps={{ paper: { sx: { bgcolor: "background.paper", color: "text.primary", borderLeft: "1px solid", borderColor: "divider" } } }}>
         <Box sx={{ width: { xs: "100vw", sm: 400, md: 450 }, p: { xs: 3, md: 4 } }}>
           {selected && (
             <>
@@ -373,7 +399,6 @@ const Assets = () => {
                   </Box>
                 ))}
               </Box>
-              {/* Assigned to info */}
               {selected.assignedStatus === 'Assigned' && (
                 <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#dcfce7', border: '1px solid #bbf7d0' }}>
                   <Typography fontSize={12} fontWeight={700} color="#16a34a" mb={0.5}>Assigned To</Typography>
@@ -383,7 +408,7 @@ const Assets = () => {
                 </Box>
               )}
 
-              <Box display="flex" gap={1.5} flexWrap="wrap">
+              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                 <Button variant="outlined" onClick={() => { handleEditClick(selected); setSelected(null); }}
                   sx={{ flex: 1, py: 1.4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "action.hover" } }}>
                   Edit
@@ -407,7 +432,7 @@ const Assets = () => {
 
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
           <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
             <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>
@@ -426,33 +451,33 @@ const Assets = () => {
             <TextField label="Asset Name" fullWidth required sx={inputStyles} value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
             <TextField label="Serial Number" fullWidth required sx={inputStyles} value={editForm.serialNumber || ""} onChange={(e) => setEditForm({ ...editForm, serialNumber: e.target.value })} />
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField label="Category" fullWidth select sx={inputStyles} value={editForm.category || ""} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
                   {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
                 </TextField>
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField label="Form Factor" fullWidth select sx={inputStyles} value={editForm.formFactor || "Movable"} onChange={(e) => setEditForm({ ...editForm, formFactor: e.target.value })}>
                   {FORM_FACTORS.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
                 </TextField>
               </Grid>
             </Grid>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField label="Department" fullWidth sx={inputStyles} value={editForm.department || ""} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })} />
               </Grid>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField label="Location" fullWidth sx={inputStyles} value={editForm.location || ""} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
               </Grid>
             </Grid>
             <Grid container spacing={2}>
-              <Grid item xs={6}>
+              <Grid size={6}>
                 <TextField label="Status" fullWidth select sx={inputStyles} value={editForm.status || "Active"} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
                   {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
                 </TextField>
               </Grid>
-              <Grid item xs={6}>
-                <TextField label="Warranty End" type="date" fullWidth sx={inputStyles} value={editForm.warrantyEnd || ""} onChange={(e) => setEditForm({ ...editForm, warrantyEnd: e.target.value })} InputLabelProps={{ shrink: true }} />
+              <Grid size={6}>
+                <TextField label="Warranty End" type="date" fullWidth sx={inputStyles} value={editForm.warrantyEnd || ""} onChange={(e) => setEditForm({ ...editForm, warrantyEnd: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
               </Grid>
             </Grid>
             <TextField label="Vendor" fullWidth sx={inputStyles} value={editForm.vendor || ""} onChange={(e) => setEditForm({ ...editForm, vendor: e.target.value })} />
@@ -469,13 +494,13 @@ const Assets = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}
-        PaperProps={{ sx: { borderRadius: "20px", p: 2, maxWidth: "400px", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "20px", p: 2, maxWidth: "400px", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ fontWeight: 900, color: "text.primary", pb: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "#FEE2E2", color: "#DC2626", display: "grid", placeItems: "center" }}><DeleteOutlineRounded /></Box>
           Delete Asset
         </DialogTitle>
         <DialogContent>
-          <Typography color="text.secondary" fontWeight={600} lineHeight={1.6}>
+          <Typography color="text.secondary" fontWeight={600} sx={{ lineHeight: 1.6 }}>
             Are you sure you want to permanently delete <strong>{deleteTarget?.name}</strong>? This will also affect linked tickets.
           </Typography>
         </DialogContent>
@@ -490,7 +515,7 @@ const Assets = () => {
 
       {/* Assign Employee Dialog */}
       <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center" }}>

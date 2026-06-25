@@ -104,7 +104,7 @@ const Sidebar = ({ onClose }) => {
                 </ListItemIcon>
                 <ListItemText
                   primary={item.text}
-                  primaryTypographyProps={{ fontSize: 13, fontWeight: active ? 700 : 500, color: "inherit" }}
+                  slotProps={{ primary: { fontSize: 13, fontWeight: active ? 700 : 500, color: "inherit" } }}
                 />
                 {active && <ChevronRightRounded sx={{ fontSize: 16, color: ACCENT, opacity: 0.7 }} />}
               </ListItemButton>
@@ -136,7 +136,7 @@ const Sidebar = ({ onClose }) => {
 
       {/* Logout Confirm */}
       <Dialog open={logoutOpen} onClose={() => setLogoutOpen(false)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: "16px", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "16px", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ fontWeight: 900, fontSize: 18, color: "text.primary" }}>Sign Out</DialogTitle>
         <DialogContent>
           <Typography color="text.secondary" fontWeight={500}>Are you sure you want to sign out?</Typography>
@@ -217,7 +217,7 @@ const Layout = () => {
       {/* Mobile drawer */}
       {isMobile && (
         <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}
-          PaperProps={{ sx: { width: DRAWER_W, bgcolor: "transparent", border: 0 } }}>
+          slotProps={{ paper: { sx: { width: DRAWER_W, bgcolor: "transparent", border: 0 } } }}>
           <Sidebar onClose={() => setDrawerOpen(false)} />
         </Drawer>
       )}

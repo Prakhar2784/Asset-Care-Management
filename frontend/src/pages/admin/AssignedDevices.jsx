@@ -101,8 +101,8 @@ export default function AssignedDevices() {
       {/* Summary stats */}
       <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
         {[
-          { label: 'Devices Assigned', value: assignments.length, icon: <DevicesRounded />,      color: '#4f46e5', bg: '#eef2ff' },
-          { label: 'Employees',        value: uniqueEmployees,    icon: <GroupRounded />,         color: '#0ea5e9', bg: '#e0f2fe' },
+          { label: 'Devices Assigned', value: assignments.length, icon: <DevicesRounded />,      color: '#111111', bg: '#F5F5F4' },
+          { label: 'Employees',        value: uniqueEmployees,    icon: <GroupRounded />,         color: '#2563EB', bg: '#EFF6FF' },
           { label: 'Departments',      value: uniqueDepts,        icon: <ApartmentRounded />,     color: '#16a34a', bg: '#dcfce7' },
         ].map(s => (
           <Paper key={s.label} sx={{ flex: '1 1 160px', p: 3, borderRadius: 3, border: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -110,7 +110,7 @@ export default function AssignedDevices() {
               {s.icon}
             </Box>
             <Box>
-              <Typography fontWeight={900} fontSize={28} color="text.primary" lineHeight={1}>{s.value}</Typography>
+              <Typography fontWeight={900} fontSize={28} color="text.primary" sx={{ lineHeight: 1 }}>{s.value}</Typography>
               <Typography fontSize={13} color="text.secondary" fontWeight={600}>{s.label}</Typography>
             </Box>
           </Paper>
@@ -124,7 +124,7 @@ export default function AssignedDevices() {
           placeholder="Search by employee, asset name or serial number…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 18 }} /></InputAdornment> }}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 18 }} /></InputAdornment> } }}
           sx={{ flex: 1, minWidth: 260 }}
         />
         <FormControl size="small" sx={{ minWidth: 180 }}>

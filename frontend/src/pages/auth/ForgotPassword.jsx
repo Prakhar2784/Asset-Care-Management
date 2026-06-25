@@ -12,14 +12,14 @@ import api from '../../api/axios';
 
 const containerSx = {
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #1E3A8A 0%, #0F766E 100%)',
+  background: '#111111',
   display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2
 };
 
 const gradientBtn = {
   py: 1.4, fontWeight: 700,
-  background: 'linear-gradient(135deg, #1E3A8A, #0F766E)',
-  '&:hover': { background: 'linear-gradient(135deg, #1a3278, #0d6b64)' }
+  background: '#111111', color: '#CBFA57',
+  '&:hover': { background: '#222222' }
 };
 
 // ─── OTP Box: 6 individual digit inputs ────────────────────────────────────────
@@ -68,13 +68,13 @@ function OtpInput({ value, onChange }) {
             textAlign: 'center', fontSize: 24, fontWeight: 800,
             fontFamily: 'monospace', letterSpacing: 0,
             border: '2px solid',
-            borderColor: value[idx] ? '#1E3A8A' : '#cbd5e1',
+            borderColor: value[idx] ? '#111111' : '#D4CFC6',
             borderRadius: 2, outline: 'none',
-            bgcolor: value[idx] ? '#eef2ff' : '#f8fafc',
-            color: '#0f172a',
+            bgcolor: value[idx] ? '#FFFFFF' : '#F9F8F5',
+            color: '#111111',
             transition: 'all 0.15s',
             cursor: 'text',
-            '&:focus': { borderColor: '#4f46e5', bgcolor: '#eef2ff', boxShadow: '0 0 0 3px rgba(79,70,229,0.15)' }
+            '&:focus': { borderColor: '#111111', bgcolor: '#FFFFFF', boxShadow: '0 0 0 3px rgba(17,17,17,0.08)' }
           }}
         />
       ))}
@@ -140,12 +140,12 @@ export default function ForgotPassword() {
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box sx={{
             width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
-            background: 'linear-gradient(135deg, #1E3A8A, #0F766E)',
+            background: '#111111',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             {step === 1
-              ? <EmailOutlined sx={{ color: 'white', fontSize: 28 }} />
-              : <ShieldOutlined sx={{ color: 'white', fontSize: 28 }} />}
+              ? <EmailOutlined sx={{ color: '#CBFA57', fontSize: 28 }} />
+              : <ShieldOutlined sx={{ color: '#CBFA57', fontSize: 28 }} />}
           </Box>
           <Typography variant="h5" fontWeight={700} color="text.primary">
             {step === 1 ? 'Forgot Password' : 'Enter OTP'}
@@ -165,7 +165,7 @@ export default function ForgotPassword() {
                 width: 28, height: 28, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 12, fontWeight: 800,
-                bgcolor: step > s ? '#16a34a' : step === s ? '#1E3A8A' : '#e2e8f0',
+                bgcolor: step > s ? '#16a34a' : step === s ? '#111111' : '#E5E3DC',
                 color: step >= s ? 'white' : '#94a3b8',
                 transition: 'all 0.2s'
               }}>
@@ -178,7 +178,7 @@ export default function ForgotPassword() {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2, px: 0.5 }}>
           {['Email', 'OTP', 'Password'].map((label, i) => (
             <Typography key={label} fontSize={11} fontWeight={700}
-              color={step === i + 1 ? '#1E3A8A' : step > i + 1 ? '#16a34a' : '#94a3b8'}
+              color={step === i + 1 ? '#111111' : step > i + 1 ? '#16a34a' : '#A0A09A'}
               sx={{ width: 60, textAlign: i === 1 ? 'center' : i === 2 ? 'right' : 'left' }}
             >
               {label}
@@ -198,19 +198,13 @@ export default function ForgotPassword() {
               onChange={(e) => setEmail(e.target.value)}
               fullWidth required autoFocus
               sx={{ mb: 3 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <EmailOutlined sx={{ color: '#94a3b8', fontSize: 20 }} />
-                  </InputAdornment>
-                )
-              }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><EmailOutlined sx={{ color: 'text.disabled', fontSize: 20 }} /></InputAdornment> } }}
             />
             <Button type="submit" variant="contained" fullWidth disabled={loading} sx={gradientBtn}>
               {loading ? <CircularProgress size={22} color="inherit" /> : 'Send OTP'}
             </Button>
             <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Link to="/login" style={{ color: '#1E3A8A', textDecoration: 'none', fontSize: 14 }}>
+              <Link to="/login" style={{ color: '#111111', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
                 ← Back to Login
               </Link>
             </Box>
@@ -245,7 +239,7 @@ export default function ForgotPassword() {
                 size="small"
                 disabled={resendCooldown > 0 || loading}
                 onClick={handleSendOtp}
-                sx={{ color: '#1E3A8A', fontWeight: 700 }}
+                sx={{ color: '#111111', fontWeight: 700 }}
               >
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
               </Button>

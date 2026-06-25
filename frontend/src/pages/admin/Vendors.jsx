@@ -254,22 +254,22 @@ const Vendors = () => {
       />
 
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <SummaryCard title="Total Vendors" value={summary.total} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <SummaryCard title="Active Vendors" value={summary.active} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <SummaryCard title="AMC Vendors" value={summary.amc} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <SummaryCard title="OEM Vendors" value={summary.oem} />
         </Grid>
       </Grid>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" pt={5}>
+        <Box sx={{ display: "flex", justifyContent: "center", pt: 5 }}>
           <CircularProgress />
         </Box>
       ) : vendors.length === 0 ? (
@@ -294,7 +294,7 @@ const Vendors = () => {
       ) : (
         <Grid container spacing={3}>
           {vendors.map((vendor) => (
-            <Grid item xs={12} sm={6} lg={4} key={vendor._id}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={vendor._id}>
               <Paper
                 sx={{
                   p: 3,
@@ -306,7 +306,7 @@ const Vendors = () => {
                   boxShadow: "0 14px 35px rgba(15,23,42,0.07)",
                 }}
               >
-                <Box display="flex" justifyContent="space-between" gap={2}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
                   <Box>
                     <Typography sx={{ fontWeight: 950, fontSize: 21, color: "text.primary" }}>
                       {vendor.name}
@@ -347,7 +347,7 @@ const Vendors = () => {
                   text={`${vendor.city || ""}${vendor.city && vendor.state ? ", " : ""}${vendor.state || ""}`}
                 />
 
-                <Box display="flex" gap={1.2} mt={2.5}>
+                <Box sx={{ display: "flex", gap: 1.2, mt: 2.5 }}>
                   <Button
                     variant="outlined"
                     fullWidth
@@ -392,14 +392,14 @@ const Vendors = () => {
         onClose={() => setFormOpen(false)}
         fullWidth
         maxWidth="md"
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             borderRadius: "26px",
             bgcolor: "background.paper",
             color: "text.primary",
             overflow: "hidden",
           },
-        }}
+        } }}
       >
         <DialogTitle
           sx={{
@@ -445,23 +445,23 @@ const Vendors = () => {
         >
           <FormBlock title="Basic Vendor Details">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth required label="Vendor / Company Name" value={vendorForm.name} onChange={(e) => handleInputChange("name", e.target.value)} sx={inputStyles} />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField select fullWidth required label="Vendor Type" value={vendorForm.vendorType} onChange={(e) => handleInputChange("vendorType", e.target.value)} sx={inputStyles}>
                   {vendorTypes.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField select fullWidth required label="Service Category" value={vendorForm.serviceCategory} onChange={(e) => handleInputChange("serviceCategory", e.target.value)} sx={inputStyles}>
                   {serviceCategories.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField select fullWidth label="Status" value={vendorForm.status} onChange={(e) => handleInputChange("status", e.target.value)} sx={inputStyles}>
                   {statusOptions.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
@@ -471,22 +471,22 @@ const Vendors = () => {
 
           <FormBlock title="Contact Details">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth required label="Primary Contact Person" value={vendorForm.contactPerson} onChange={(e) => handleInputChange("contactPerson", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth required label="Primary Phone" value={vendorForm.phone} onChange={(e) => handleInputChange("phone", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth label="Alternate Phone" value={vendorForm.alternatePhone} onChange={(e) => handleInputChange("alternatePhone", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth required label="Primary Email" value={vendorForm.email} onChange={(e) => handleInputChange("email", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth label="Support Email" value={vendorForm.supportEmail} onChange={(e) => handleInputChange("supportEmail", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth label="Support Phone" value={vendorForm.supportPhone} onChange={(e) => handleInputChange("supportPhone", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
@@ -494,22 +494,22 @@ const Vendors = () => {
 
           <FormBlock title="Address & Legal Details">
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <TextField fullWidth required multiline minRows={2} label="Address" value={vendorForm.address} onChange={(e) => handleInputChange("address", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField fullWidth label="City" value={vendorForm.city} onChange={(e) => handleInputChange("city", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField fullWidth label="State" value={vendorForm.state} onChange={(e) => handleInputChange("state", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField fullWidth label="Pincode" value={vendorForm.pincode} onChange={(e) => handleInputChange("pincode", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth label="GST Number" value={vendorForm.gstNumber} onChange={(e) => handleInputChange("gstNumber", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth label="PAN Number" value={vendorForm.panNumber} onChange={(e) => handleInputChange("panNumber", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
@@ -517,42 +517,42 @@ const Vendors = () => {
 
           <FormBlock title="Service, Warranty & AMC Details">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField select fullWidth label="Service Coverage" value={vendorForm.serviceCoverage} onChange={(e) => handleInputChange("serviceCoverage", e.target.value)} sx={inputStyles}>
                   {coverageOptions.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField select fullWidth label="SLA Response Time" value={vendorForm.slaResponseTime} onChange={(e) => handleInputChange("slaResponseTime", e.target.value)} sx={inputStyles}>
                   {slaOptions.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField select fullWidth label="Payment Terms" value={vendorForm.paymentTerms} onChange={(e) => handleInputChange("paymentTerms", e.target.value)} sx={inputStyles}>
                   {paymentOptions.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth type="date" label="Contract / AMC Start Date" InputLabelProps={{ shrink: true }} value={vendorForm.contractStartDate} onChange={(e) => handleInputChange("contractStartDate", e.target.value)} sx={inputStyles} />
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField fullWidth type="date" label="Contract / AMC Start Date" slotProps={{ inputLabel: { shrink: true } }} value={vendorForm.contractStartDate} onChange={(e) => handleInputChange("contractStartDate", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField fullWidth type="date" label="Contract / AMC End Date" InputLabelProps={{ shrink: true }} value={vendorForm.contractEndDate} onChange={(e) => handleInputChange("contractEndDate", e.target.value)} sx={inputStyles} />
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField fullWidth type="date" label="Contract / AMC End Date" slotProps={{ inputLabel: { shrink: true } }} value={vendorForm.contractEndDate} onChange={(e) => handleInputChange("contractEndDate", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
           </FormBlock>
 
           <FormBlock title="Escalation Details">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField fullWidth label="Escalation Person" value={vendorForm.escalationName} onChange={(e) => handleInputChange("escalationName", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField fullWidth label="Escalation Phone" value={vendorForm.escalationPhone} onChange={(e) => handleInputChange("escalationPhone", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField fullWidth label="Escalation Email" value={vendorForm.escalationEmail} onChange={(e) => handleInputChange("escalationEmail", e.target.value)} sx={inputStyles} />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <TextField fullWidth multiline minRows={3} label="Remarks / Notes" value={vendorForm.remarks} onChange={(e) => handleInputChange("remarks", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
@@ -587,13 +587,13 @@ const Vendors = () => {
         onClose={() => setDetailOpen(false)}
         fullWidth
         maxWidth="sm"
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             borderRadius: "24px",
             bgcolor: "background.paper",
             color: "text.primary",
           },
-        }}
+        } }}
       >
         <DialogTitle sx={{ fontWeight: 950, bgcolor: "background.default", borderBottom: "1px solid", borderColor: "divider", color: "text.primary" }}>
           Vendor Details
@@ -642,7 +642,7 @@ const Vendors = () => {
         onClose={() => { setDeleteDialogOpen(false); setVendorToDelete(null); }}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper" } }}
+        slotProps={{ paper: { sx: { borderRadius: "20px", bgcolor: "background.paper" } } }}
       >
         <DialogTitle sx={{ fontWeight: 900, color: "text.primary", pb: 1 }}>Delete Vendor</DialogTitle>
         <DialogContent>

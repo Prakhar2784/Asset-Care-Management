@@ -112,7 +112,7 @@ const EmployeePortal = () => {
         title={`Welcome, ${currentUser?.name?.split(' ')[0] || 'User'}`}
         subtitle="Manage your assigned equipment and track your active service requests."
         action={
-          <Box display="flex" gap={2} flexWrap="wrap">
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
             <Button
               variant="outlined" startIcon={<DevicesRounded />}
               onClick={() => setRequestDialogOpen(true)}
@@ -141,7 +141,7 @@ const EmployeePortal = () => {
       </Box>
 
       {assetsLoading ? (
-        <Box display="flex" justifyContent="center" py={5}><CircularProgress color="inherit" /></Box>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}><CircularProgress color="inherit" /></Box>
       ) : assets.length === 0 ? (
         <Paper sx={{ p: 5, textAlign: "center", borderRadius: "20px", border: "1px dashed", borderColor: "divider", mb: 4 }}>
           <Typography color="text.secondary" fontWeight={600}>No assets assigned to you yet. Contact your admin.</Typography>
@@ -149,7 +149,7 @@ const EmployeePortal = () => {
       ) : (
         <Grid container spacing={4} sx={{ mb: 5 }}>
           {assets.map((asset) => (
-            <Grid item xs={12} sm={6} md={4} key={asset._id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={asset._id}>
               <Paper
                 sx={{
                   p: { xs: 3, md: 4 }, borderRadius: 4, bgcolor: "background.paper",
@@ -158,7 +158,7 @@ const EmployeePortal = () => {
                   "&:hover": { borderColor: "text.secondary", transform: "translateY(-6px)", boxShadow: "0 20px 40px -10px rgba(0,0,0,0.08)" }
                 }}
               >
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
                   <Box sx={{ width: 56, height: 56, borderRadius: 3, bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center" }}>
                     {iconForCategory(asset.category)}
                   </Box>
@@ -231,7 +231,7 @@ const EmployeePortal = () => {
       </Typography>
 
       {requestsLoading ? (
-        <Box display="flex" justifyContent="center" py={4}><CircularProgress color="inherit" /></Box>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}><CircularProgress color="inherit" /></Box>
       ) : myRequests.length === 0 ? (
         <Paper sx={{ p: 5, textAlign: "center", borderRadius: "20px", border: "1px dashed", borderColor: "divider" }}>
           <DevicesRounded sx={{ fontSize: 48, color: "text.disabled", mb: 1.5 }} />
@@ -245,9 +245,9 @@ const EmployeePortal = () => {
           {myRequests.map((req) => {
             const style = requestStatusStyle(req.status);
             return (
-              <Grid item xs={12} md={6} key={req._id}>
+              <Grid size={{ xs: 12, md: 6 }} key={req._id}>
                 <Paper sx={{ p: 3, borderRadius: "20px", border: 1, borderColor: "divider", bgcolor: "background.paper" }}>
-                  <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
                     <Box>
                       <Typography fontFamily="monospace" fontSize={13} color="text.secondary" fontWeight={900}>{req.requestId}</Typography>
                       <Typography fontWeight={800} fontSize={18} color="text.primary" mt={0.3}>{req.itemRequested}</Typography>
@@ -257,7 +257,7 @@ const EmployeePortal = () => {
                       {req.status}
                     </Box>
                   </Box>
-                  <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
+                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
                     <Chip label={req.requestType} size="small" sx={{ bgcolor: "action.selected", color: "text.primary", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
                     <Chip label={req.urgency} size="small" sx={{ bgcolor: req.urgency === "High" ? "#FEF2F2" : req.urgency === "Medium" ? "#FFFBEB" : "#F0FDF4", color: req.urgency === "High" ? "#DC2626" : req.urgency === "Medium" ? "#D97706" : "#16A34A", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
                   </Box>
@@ -278,8 +278,7 @@ const EmployeePortal = () => {
 
       {/* Request Device Dialog */}
       <Dialog open={requestDialogOpen} onClose={() => setRequestDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } }}
-        BackdropProps={{ sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } }, backdrop: { sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } } }}>
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3.5, display: "flex", alignItems: "flex-start", gap: 2 }}>
             <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>

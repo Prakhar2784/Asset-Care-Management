@@ -151,11 +151,11 @@ const AddAsset = () => {
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
           <SectionLabel number="1" title="Hardware Specifications" subtitle="Basic technical and identity details of the asset." />
           <Grid container spacing={2.5}>
-            <Grid item xs={12} md={5}>
+            <Grid size={{ xs: 12, md: 5 }}>
               <TextField required fullWidth name="name" value={formData.name} onChange={handleChange}
                 sx={inputSx} label="Asset Name *" placeholder="e.g. Dell Latitude 5420" />
             </Grid>
-            <Grid item xs={6} md={3}>
+            <Grid size={{ xs: 6, md: 3 }}>
               <TextField required fullWidth select name="category" value={formData.category} onChange={handleChange} sx={inputSx} label="Category *">
                 <MenuItem value="IT Asset">IT Asset</MenuItem>
                 <MenuItem value="Electrical">Electrical</MenuItem>
@@ -165,28 +165,28 @@ const AddAsset = () => {
                 <MenuItem value="Other">Other</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={6} md={4}>
+            <Grid size={{ xs: 6, md: 4 }}>
               <TextField required fullWidth select name="formFactor" value={formData.formFactor} onChange={handleChange} sx={inputSx} label="Form Factor *">
                 <MenuItem value="Movable">Movable</MenuItem>
                 <MenuItem value="Fixed">Fixed / Immovable</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
                 sx={inputSx} label="OEM / Brand" placeholder="e.g. Dell" />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="modelNumber" value={formData.modelNumber} onChange={handleChange}
                 sx={inputSx} label="Model Number" placeholder="e.g. LAT-5420-X" />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth name="serialNumber" value={formData.serialNumber} onChange={handleChange}
                 sx={inputSx} label="Serial Number / Service Tag *" placeholder="e.g. 8JZ91A" />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="purchaseCost" value={formData.purchaseCost} onChange={handleChange}
                 sx={inputSx} label="Purchase Cost (₹)" placeholder="e.g. 85000"
-                type="number" inputProps={{ min: 0 }} />
+                type="number" slotProps={{ htmlInput: { min: 0 } }} />
             </Grid>
           </Grid>
         </Paper>
@@ -195,27 +195,27 @@ const AddAsset = () => {
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
           <SectionLabel number="2" title="Lifecycle & Vendor Data" subtitle="Warranty period, procurement date and service partner." />
           <Grid container spacing={2.5}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="date" name="procurementDate" value={formData.procurementDate}
-                onChange={handleChange} sx={inputSx} label="Procurement Date" InputLabelProps={{ shrink: true }} />
+                onChange={handleChange} sx={inputSx} label="Procurement Date" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="date" name="warrantyStart" value={formData.warrantyStart}
-                onChange={handleChange} sx={inputSx} label="Warranty Start" InputLabelProps={{ shrink: true }} />
+                onChange={handleChange} sx={inputSx} label="Warranty Start" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="date" name="warrantyEnd" value={formData.warrantyEnd}
-                onChange={handleChange} sx={inputSx} label="Warranty Expiry" InputLabelProps={{ shrink: true }} />
+                onChange={handleChange} sx={inputSx} label="Warranty Expiry" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
                 sx={inputSx} label="Authorized Service Partner" placeholder="e.g. Dell ProSupport" />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="supportPhone" value={formData.supportPhone} onChange={handleChange}
                 sx={inputSx} label="Support Phone" placeholder="+91 800-456-7890" />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="email" name="supportEmail" value={formData.supportEmail}
                 onChange={handleChange} sx={inputSx} label="Support Email" placeholder="support@vendor.com" />
             </Grid>
@@ -226,7 +226,7 @@ const AddAsset = () => {
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
           <SectionLabel number="3" title="Deployment & Location" subtitle="Assign to a department and set the asset's physical location." />
           <Grid container spacing={2.5}>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth select name="department" value={formData.department}
                 onChange={handleChange} sx={inputSx} label="Target Department *">
                 <MenuItem value="Information Technology">Information Technology</MenuItem>
@@ -239,11 +239,11 @@ const AddAsset = () => {
                 <MenuItem value="Security">Security</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField fullWidth name="location" value={formData.location} onChange={handleChange}
                 sx={inputSx} label="Physical Location" placeholder="e.g. Tower B, Floor 4, Desk 12" />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth select name="status" value={formData.status}
                 onChange={handleChange} sx={inputSx} label="Current Status *">
                 <MenuItem value="Active">Active / Deployed</MenuItem>
@@ -253,7 +253,7 @@ const AddAsset = () => {
                 <MenuItem value="Decommissioned">Decommissioned</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}
                 onChange={handleChange} sx={inputSx} label="Notes (optional)"
                 placeholder="Any additional notes about this asset..." />

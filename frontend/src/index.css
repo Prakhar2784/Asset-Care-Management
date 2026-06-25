@@ -1,20 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 
-/* === MODERN CLOUD LIGHT THEME === */
+/* === ASSETCARE PRO — DARK + LIME DESIGN SYSTEM === */
 :root {
-  --bg-root: #f8fafc;
+  --bg-root: #F5F4F0;
   --bg-panel: #ffffff;
-  --bg-card: #f1f5f9;
-  --bg-hover: #e2e8f0;
-  
-  --primary: #4f46e5; /* Deep Indigo */
-  --secondary: #0ea5e9; /* Sky Blue Accent */
-  
-  --text-main: #0f172a; /* Dark Slate for primary text */
-  --text-muted: #64748b; /* Muted Slate for secondary text */
-  
-  --border: #e2e8f0;
-  --border-light: #cbd5e1;
+  --bg-card: #F9F8F5;
+  --bg-hover: rgba(17,17,17,0.05);
+
+  --primary: #111111;
+  --secondary: #CBFA57;
+
+  --text-main: #111111;
+  --text-muted: #6B6B65;
+
+  --border: rgba(17,17,17,0.10);
+  --border-light: rgba(17,17,17,0.15);
   
   --success-bg: #dcfce7;
   --success-text: #166534;
@@ -326,8 +326,8 @@ a {
 }
 
 .status-badge.vendor-assigned {
-  background: #e0f2fe;
-  color: #0284c7;
+  background: #EFF6FF;
+  color: #2563EB;
 }
 
 .status-badge.resolved {

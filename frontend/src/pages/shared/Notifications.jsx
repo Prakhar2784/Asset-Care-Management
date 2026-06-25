@@ -13,15 +13,15 @@ import {
 import api from '../../api/axios';
 
 const TYPE_CONFIG = {
-  ticket_created:   { icon: <ConfirmationNumberRounded />, color: '#4f46e5', bg: '#eef2ff', label: 'Ticket' },
-  ticket_status:    { icon: <ConfirmationNumberRounded />, color: '#0ea5e9', bg: '#e0f2fe', label: 'Ticket' },
+  ticket_created:   { icon: <ConfirmationNumberRounded />, color: '#111111', bg: '#F5F5F4', label: 'Ticket' },
+  ticket_status:    { icon: <ConfirmationNumberRounded />, color: '#2563EB', bg: '#EFF6FF', label: 'Ticket' },
   ticket_resolved:  { icon: <CheckCircleOutlineRounded />, color: '#16a34a', bg: '#dcfce7', label: 'Resolved' },
   request_approved: { icon: <CheckCircleOutlineRounded />, color: '#16a34a', bg: '#dcfce7', label: 'Approved' },
   request_rejected: { icon: <InfoOutlined />, color: '#dc2626', bg: '#fee2e2', label: 'Rejected' },
-  asset_assigned:   { icon: <Inventory2Rounded />, color: '#0F766E', bg: '#ccfbf1', label: 'Asset' },
-  asset_revoked:    { icon: <Inventory2Rounded />, color: '#9333ea', bg: '#f3e8ff', label: 'Asset' },
+  asset_assigned:   { icon: <Inventory2Rounded />, color: '#16a34a', bg: '#dcfce7', label: 'Asset' },
+  asset_revoked:    { icon: <Inventory2Rounded />, color: '#7C3AED', bg: '#F5F3FF', label: 'Asset' },
   warranty_expiry:  { icon: <WarningAmberRounded />, color: '#d97706', bg: '#fef3c7', label: 'Warranty' },
-  system:           { icon: <InfoOutlined />, color: '#64748b', bg: '#f1f5f9', label: 'System' },
+  system:           { icon: <InfoOutlined />, color: '#6B6B65', bg: '#F5F5F4', label: 'System' },
 };
 
 const timeAgo = (date) => {
@@ -95,9 +95,9 @@ export default function Notifications() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{
             width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
-            background: 'linear-gradient(135deg, #4f46e5, #0ea5e9)'
+            bgcolor: '#111111'
           }}>
-            <NotificationsRounded sx={{ color: 'white' }} />
+            <NotificationsRounded sx={{ color: '#CBFA57' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Notifications</Typography>
@@ -141,8 +141,8 @@ export default function Notifications() {
               return (
                 <Box key={n._id}>
                   <ListItem
-                    alignItems="flex-start"
                     sx={{
+                      alignItems: 'flex-start',
                       px: 3, py: 2,
                       bgcolor: n.isRead ? 'transparent' : 'action.selected',
                       borderLeft: n.isRead ? '3px solid transparent' : `3px solid ${config.color}`,
@@ -176,6 +176,7 @@ export default function Notifications() {
                       {config.icon}
                     </Box>
                     <ListItemText
+                      disableTypography
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                           <Typography fontWeight={n.isRead ? 600 : 800} fontSize={14} color="text.primary">
@@ -187,10 +188,10 @@ export default function Notifications() {
                       }
                       secondary={
                         <Box>
-                          <Typography variant="body2" color="text.secondary" mt={0.3} fontSize={13}>
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.3, fontSize: 13 }}>
                             {n.message}
                           </Typography>
-                          <Typography variant="caption" color="text.disabled" mt={0.5} display="block">
+                          <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
                             {timeAgo(n.createdAt)}
                           </Typography>
                         </Box>

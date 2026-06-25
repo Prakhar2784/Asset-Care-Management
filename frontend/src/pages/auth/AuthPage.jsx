@@ -123,57 +123,55 @@ const AuthPage = () => {
   return (
     <>
       <style>{`
-        :root { 
-          --auth-primary: #1E3A8A; 
-          --auth-secondary: #0F766E; 
-          --auth-bg: #F8FAFC; 
-          --text-main: #0F172A; 
-          --text-muted: #64748B; 
-          --input-bg: #F8FAFC; 
-          --input-border: #CBD5E1;
+        :root {
+          --auth-primary: #111111;
+          --auth-secondary: #111111;
+          --auth-bg: #ECEAE3;
+          --text-main: #111111;
+          --text-muted: #6B6B65;
+          --input-bg: #F9F8F5;
+          --input-border: #D4CFC6;
         }
-        
-        @keyframes fadeInUp { 
-          from { opacity: 0; transform: translateY(30px); } 
-          to { opacity: 1; transform: translateY(0); } 
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes floatSoft {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-14px); }
         }
-        
-        .auth-wrapper { 
+
+        .auth-wrapper {
           min-height: 100vh;
-          padding: 120px 24px 60px; 
-          display: flex; 
-          align-items: center; 
-          justify-content: center; 
+          padding: 120px 24px 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           background:
-            radial-gradient(circle at top left, rgba(15,118,110,0.10), transparent 34%),
-            radial-gradient(circle at top right, rgba(30,58,138,0.12), transparent 35%),
-            var(--auth-bg); 
-          font-family: 'Inter', sans-serif; 
+            radial-gradient(circle at top left, rgba(203,250,87,0.10), transparent 34%),
+            radial-gradient(circle at bottom right, rgba(17,17,17,0.04), transparent 35%),
+            var(--auth-bg);
+          font-family: 'Inter', sans-serif;
         }
 
         .auth-container {
           width: 100%;
           max-width: 1200px;
-          background: rgba(255,255,255,0.92);
+          background: rgba(255,255,255,0.94);
           border-radius: 36px;
-          box-shadow: 0 30px 70px rgba(15, 23, 42, 0.12);
+          box-shadow: 0 30px 70px rgba(17, 17, 17, 0.12);
           display: flex;
           overflow: hidden;
           animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          border: 1px solid #E2E8F0;
+          border: 1px solid rgba(17,17,17,0.08);
           backdrop-filter: blur(20px);
         }
 
         .auth-info {
           flex: 1;
-          background:
-            radial-gradient(circle at top right, rgba(20,184,166,0.26), transparent 35%),
-            linear-gradient(135deg, #0F172A, #1E3A8A);
+          background: #111111;
           padding: 70px 50px;
           color: white;
           display: flex;
@@ -191,7 +189,7 @@ const AuthPage = () => {
           right: 24px;
           width: 180px;
           height: 180px;
-          border: 1px dashed rgba(255,255,255,0.20);
+          border: 1px dashed rgba(203,250,87,0.22);
           border-radius: 50%;
           animation: floatSoft 5s ease-in-out infinite;
         }
@@ -203,7 +201,7 @@ const AuthPage = () => {
           right: -20%;
           width: 420px;
           height: 420px;
-          background: radial-gradient(circle, rgba(20,184,166,0.22) 0%, rgba(255,255,255,0) 70%);
+          background: radial-gradient(circle, rgba(203,250,87,0.14) 0%, rgba(0,0,0,0) 70%);
           border-radius: 50%;
         }
 
@@ -213,37 +211,37 @@ const AuthPage = () => {
           border-radius: 16px;
           display: grid;
           place-items: center;
-          background: linear-gradient(135deg, #1E3A8A, #0F766E);
-          box-shadow: 0 14px 28px rgba(15,118,110,0.34);
-          border: 1px solid rgba(255,255,255,0.16);
+          background: #CBFA57;
+          box-shadow: 0 14px 28px rgba(203,250,87,0.28);
+          border: 1px solid rgba(203,250,87,0.30);
         }
 
-        .info-list { 
-          margin-top: 48px; 
-          display: flex; 
-          flex-direction: column; 
-          gap: 24px; 
+        .info-list {
+          margin-top: 48px;
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
           position: relative;
           z-index: 1;
         }
 
-        .info-item { 
-          display: flex; 
-          align-items: flex-start; 
-          gap: 16px; 
+        .info-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 16px;
           padding: 18px;
           border-radius: 20px;
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.10);
           backdrop-filter: blur(14px);
         }
 
-        .info-icon { 
-          background: rgba(255,255,255,0.16); 
-          padding: 8px; 
-          border-radius: 12px; 
-          display: flex; 
-          color: #5EEAD4;
+        .info-icon {
+          background: rgba(203,250,87,0.12);
+          padding: 8px;
+          border-radius: 12px;
+          display: flex;
+          color: #CBFA57;
         }
 
         .auth-form-container {
@@ -283,55 +281,55 @@ const AuthPage = () => {
 
         .role-btn.active {
           background: #ffffff;
-          color: var(--auth-primary);
-          box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+          color: #111111;
+          box-shadow: 0 10px 20px rgba(17,17,17,0.08);
         }
 
-        .input-wrapper { 
-          position: relative; 
-          width: 100%; 
-          margin-bottom: 16px; 
+        .input-wrapper {
+          position: relative;
+          width: 100%;
+          margin-bottom: 16px;
         }
 
-        .input-icon { 
-          position: absolute; 
-          left: 16px; 
-          top: 50%; 
-          transform: translateY(-50%); 
-          color: #94A3B8; 
-          transition: color 0.3s ease; 
-          pointer-events: none; 
+        .input-icon {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #A0A09A;
+          transition: color 0.3s ease;
+          pointer-events: none;
         }
 
-        .input-icon-right { 
-          position: absolute; 
-          right: 16px; 
-          top: 50%; 
-          transform: translateY(-50%); 
-          color: #94A3B8; 
-          cursor: pointer; 
-          background: none; 
-          border: none; 
-          padding: 0; 
-          display: flex; 
-          transition: color 0.2s ease; 
+        .input-icon-right {
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #A0A09A;
+          cursor: pointer;
+          background: none;
+          border: none;
+          padding: 0;
+          display: flex;
+          transition: color 0.2s ease;
         }
 
-        .input-icon-right:hover { 
-          color: var(--text-main); 
+        .input-icon-right:hover {
+          color: var(--text-main);
         }
 
-        .auth-input { 
-          width: 100%; 
-          padding: 16px 48px; 
-          background-color: var(--input-bg); 
-          border: 1px solid var(--input-border); 
-          border-radius: 16px; 
-          color: var(--text-main); 
-          font-size: 15px; 
-          font-weight: 600; 
-          outline: none; 
-          transition: all 0.3s ease; 
+        .auth-input {
+          width: 100%;
+          padding: 16px 48px;
+          background-color: var(--input-bg);
+          border: 1.5px solid var(--input-border);
+          border-radius: 16px;
+          color: var(--text-main);
+          font-size: 15px;
+          font-weight: 600;
+          outline: none;
+          transition: all 0.3s ease;
           box-sizing: border-box;
         }
 
@@ -342,61 +340,62 @@ const AuthPage = () => {
           -moz-appearance: none;
         }
 
-        .auth-input::placeholder { 
-          color: #94A3B8; 
-          font-weight: 500; 
+        .auth-input::placeholder {
+          color: #A0A09A;
+          font-weight: 500;
         }
 
-        .input-wrapper:focus-within .input-icon { 
-          color: var(--auth-secondary); 
+        .input-wrapper:focus-within .input-icon {
+          color: #111111;
         }
 
-        .input-wrapper:focus-within .auth-input { 
-          border-color: var(--auth-secondary); 
-          box-shadow: 0 0 0 4px rgba(15,118,110,0.12); 
-          background-color: #ffffff; 
+        .input-wrapper:focus-within .auth-input {
+          border-color: #111111;
+          box-shadow: 0 0 0 4px rgba(17,17,17,0.08);
+          background-color: #ffffff;
         }
 
-        .auth-btn { 
-          width: 100%; 
-          padding: 18px; 
-          background: linear-gradient(135deg, var(--auth-primary), var(--auth-secondary)); 
-          color: white; 
-          border: none; 
-          border-radius: 16px; 
-          font-size: 16px; 
-          font-weight: 900; 
-          cursor: pointer; 
-          margin-bottom: 24px; 
-          transition: all 0.3s ease; 
-          box-shadow: 0 14px 28px rgba(15,118,110,0.26); 
+        .auth-btn {
+          width: 100%;
+          padding: 18px;
+          background: #111111;
+          color: #CBFA57;
+          border: none;
+          border-radius: 16px;
+          font-size: 16px;
+          font-weight: 900;
+          cursor: pointer;
+          margin-bottom: 24px;
+          transition: all 0.3s ease;
+          box-shadow: 0 14px 28px rgba(17,17,17,0.22);
         }
 
-        .auth-btn:hover { 
-          transform: translateY(-3px); 
-          box-shadow: 0 22px 42px rgba(15,118,110,0.38); 
+        .auth-btn:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 22px 42px rgba(17,17,17,0.32);
+          background: #222222;
         }
 
-        .auth-btn:disabled { 
-          opacity: 0.7; 
-          cursor: not-allowed; 
-          transform: none; 
+        .auth-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+          transform: none;
         }
 
-        .auth-link { 
-          color: var(--auth-primary); 
-          background: none; 
-          border: none; 
-          font-size: 14px; 
-          font-weight: 800; 
-          cursor: pointer; 
-          padding: 0; 
-          text-decoration: none; 
-          transition: all 0.2s ease; 
+        .auth-link {
+          color: #111111;
+          background: none;
+          border: none;
+          font-size: 14px;
+          font-weight: 800;
+          cursor: pointer;
+          padding: 0;
+          text-decoration: none;
+          transition: all 0.2s ease;
         }
 
-        .auth-link:hover { 
-          color: var(--auth-secondary); 
+        .auth-link:hover {
+          color: #333333;
         }
 
         .error-message { 
@@ -421,22 +420,22 @@ const AuthPage = () => {
         }
 
         .auth-stat-card {
-          background: #F8FAFC;
-          border: 1px solid #E2E8F0;
+          background: #F9F8F5;
+          border: 1px solid rgba(17,17,17,0.08);
           border-radius: 16px;
           padding: 15px;
           text-align: center;
         }
 
         .auth-stat-card h4 {
-          color: #1E3A8A;
+          color: #111111;
           font-size: 22px;
           font-weight: 950;
           margin: 0 0 4px;
         }
 
         .auth-stat-card span {
-          color: #64748B;
+          color: #6B6B65;
           font-size: 12px;
           font-weight: 800;
         }
@@ -482,7 +481,7 @@ const AuthPage = () => {
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
                 <div className="auth-brand-box">
-                  <Inventory2Icon fontSize="large" />
+                  <Inventory2Icon fontSize="large" style={{ color: '#111111' }} />
                 </div>
                 <h1 style={{ fontSize: "24px", fontWeight: "900", letterSpacing: "-0.5px", margin: 0 }}>AssetCare Pro</h1>
               </div>
@@ -601,7 +600,7 @@ const AuthPage = () => {
               {view === "login" && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "32px" }}>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontSize: "14px", cursor: "pointer", fontWeight: "600" }}>
-                    <input type="checkbox" style={{ accentColor: "var(--auth-secondary)", width: "16px", height: "16px" }} /> Remember me
+                    <input type="checkbox" style={{ accentColor: "#111111", width: "16px", height: "16px" }} /> Remember me
                   </label>
                   <button type="button" className="auth-link" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
                 </div>

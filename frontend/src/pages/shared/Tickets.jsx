@@ -231,7 +231,7 @@ const Tickets = () => {
         title="Breakdown Tickets"
         subtitle="Raise issues, track service activity, and view repair lifecycles across the organization."
         action={
-          <Box display="flex" gap={2}>
+          <Box sx={{ display: "flex", gap: 2 }}>
             <Tooltip title="Refresh Data">
               <IconButton
                 onClick={fetchData}
@@ -255,16 +255,16 @@ const Tickets = () => {
       {error && <Alert severity="error" sx={{ mb: 4, borderRadius: "12px", fontWeight: 600 }}>{error}</Alert>}
 
       <Paper sx={{ p: 2.5, borderRadius: "20px", mb: 4, bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={2} sx={{ alignItems: "center" }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField
               fullWidth sx={inputStyles}
               placeholder="Search by Ticket ID or Asset Name..."
               value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{ startAdornment: <SearchRounded sx={{ color: "text.disabled", mr: 1 }} /> }}
+              slotProps={{ input: { startAdornment: <SearchRounded sx={{ color: "text.disabled", mr: 1 }} /> } }}
             />
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <TextField fullWidth select sx={inputStyles} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <MenuItem value="All">All Statuses</MenuItem>
               <MenuItem value="Pending Approval">Pending Approval</MenuItem>
@@ -280,7 +280,7 @@ const Tickets = () => {
               <MenuItem value="Rejected">Rejected</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid size={{ xs: 12, md: 2 }}>
             <Button fullWidth variant="outlined" onClick={() => { setSearchQuery(""); setStatusFilter("All"); }}
               sx={{ height: "56px", borderColor: "divider", color: "text.secondary", borderRadius: "12px", fontWeight: 700, textTransform: "none", "&:hover": { bgcolor: "action.hover" } }}>
               Clear Filters
@@ -290,7 +290,7 @@ const Tickets = () => {
       </Paper>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="40vh">
+        <Box sx={{ display: "flex", justifyContent: "", alignItems: "", minHeight: "" }}>
           <CircularProgress color="inherit" />
         </Box>
       ) : filteredTickets.length === 0 ? (
@@ -303,7 +303,7 @@ const Tickets = () => {
         <Grid container spacing={3} component={motion.div} variants={containerVariants} initial="hidden" animate="show">
           <AnimatePresence>
             {filteredTickets.map((ticket) => (
-              <Grid item xs={12} md={6} lg={4} key={ticket._id} component={motion.div} variants={itemVariants} layout exit={{ opacity: 0, scale: 0.9 }}>
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={ticket._id} component={motion.div} variants={itemVariants} layout exit={{ opacity: 0, scale: 0.9 }}>
                 <Paper
                   sx={{
                     p: 3.5, borderRadius: "24px", height: "100%", bgcolor: "background.paper", border: 1, borderColor: "divider",
@@ -428,8 +428,7 @@ const Tickets = () => {
       {/* Raise Ticket Dialog */}
       <Dialog
         open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: "28px", overflow: "hidden" } }}
-        BackdropProps={{ sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } }}
+        slotProps={{ paper: { sx: { bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: "28px", overflow: "hidden" } }, backdrop: { sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } } }}
       >
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3.5, display: "flex", alignItems: "flex-start", gap: 2 }}>
@@ -503,13 +502,13 @@ const Tickets = () => {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} PaperProps={{ sx: { borderRadius: "24px", p: 2, maxWidth: "400px" } }}>
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} slotProps={{ paper: { sx: { borderRadius: "24px", p: 2, maxWidth: "400px" } } }}>
         <DialogTitle sx={{ fontWeight: 900, color: "text.primary", pb: 1, display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{ width: 40, height: 40, borderRadius: "50%", bgcolor: "#FEE2E2", color: "#DC2626", display: "grid", placeItems: "center" }}><DeleteOutlineRounded /></Box>
           Confirm Deletion
         </DialogTitle>
         <DialogContent>
-          <Typography color="text.secondary" fontWeight={600} lineHeight={1.6}>
+          <Typography color="text.secondary" fontWeight={600} sx={{ lineHeight: 1.6 }}>
             Are you sure you want to permanently delete ticket <strong>{selectedTicket?.ticketId}</strong>? This action cannot be undone.
           </Typography>
         </DialogContent>
@@ -524,8 +523,7 @@ const Tickets = () => {
 
       {/* Timeline Dialog */}
       <Dialog open={timelineOpen} onClose={handleTimelineClose} fullWidth maxWidth="md"
-        PaperProps={{ sx: { bgcolor: "background.paper", borderRadius: "28px", border: 1, borderColor: "divider", overflow: "hidden" } }}
-        BackdropProps={{ sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } }}>
+        slotProps={{ paper: { sx: { bgcolor: "background.paper", borderRadius: "28px", border: 1, borderColor: "divider", overflow: "hidden" } }, backdrop: { sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } } }}>
         {selectedTicket && (
           <>
             <DialogTitle sx={{ p: 0 }}>
@@ -547,7 +545,7 @@ const Tickets = () => {
                   ["Department", selectedTicket.asset?.department || selectedTicket.raisedBy?.department || "N/A", null],
                   ["Raised By", selectedTicket.raisedBy?.name || currentUser?.name || "—", null],
                 ].map(([label, value, color]) => (
-                  <Grid item xs={6} md={3} key={label}>
+                  <Grid size={{ xs: 6, md: 3 }} key={label}>
                     <Box sx={{ p: 2, borderRadius: "16px", bgcolor: "background.default", border: 1, borderColor: "divider" }}>
                       <Typography fontSize="12px" color="text.secondary" fontWeight={800} textTransform="uppercase">{label}</Typography>
                       <Typography mt={0.5} color={color || "text.primary"} fontWeight={900}>{value}</Typography>
@@ -558,14 +556,14 @@ const Tickets = () => {
               <Box>
                 {generateTimeline(selectedTicket).map((step, index) => (
                   <Box key={step.title} sx={{ display: "flex", gap: 2.5, position: "relative", pb: index === 3 ? 0 : 4 }}>
-                    {index !== 3 && <Box sx={{ position: "absolute", left: "22px", top: "48px", bottom: 0, width: "2px", bgcolor: step.done ? "#0F766E" : "divider" }} />}
-                    <Box sx={{ width: 46, height: 46, borderRadius: "50%", bgcolor: step.done ? "#F0FDFA" : "background.default", color: step.done ? "#0F766E" : "text.disabled", display: "grid", placeItems: "center", flexShrink: 0, border: step.done ? "2px solid #0F766E" : "2px solid", borderColor: step.done ? "#0F766E" : "divider", zIndex: 1 }}>
+                    {index !== 3 && <Box sx={{ position: "absolute", left: "22px", top: "48px", bottom: 0, width: "2px", bgcolor: step.done ? "#16a34a" : "divider" }} />}
+                    <Box sx={{ width: 46, height: 46, borderRadius: "50%", bgcolor: step.done ? "#dcfce7" : "background.default", color: step.done ? "#16a34a" : "text.disabled", display: "grid", placeItems: "center", flexShrink: 0, border: step.done ? "2px solid #16a34a" : "2px solid", borderColor: step.done ? "#16a34a" : "divider", zIndex: 1 }}>
                       {step.done ? <CheckCircleRounded /> : <PendingActionsRounded />}
                     </Box>
                     <Box sx={{ pt: 1.5 }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                         <Typography sx={{ fontWeight: 900, color: step.done ? "text.primary" : "text.secondary", fontSize: "16px" }}>{step.title}</Typography>
-                        <Typography sx={{ fontSize: "13px", color: step.done ? "#0F766E" : "text.disabled", fontWeight: 800, bgcolor: step.done ? "#F0FDFA" : "background.default", px: 1.5, py: 0.5, borderRadius: "6px" }}>{step.time}</Typography>
+                        <Typography sx={{ fontSize: "13px", color: step.done ? "#16a34a" : "text.disabled", fontWeight: 800, bgcolor: step.done ? "#dcfce7" : "background.default", px: 1.5, py: 0.5, borderRadius: "6px" }}>{step.time}</Typography>
                       </Box>
                       <Typography sx={{ color: "text.secondary", fontWeight: 600, mt: 0.5, fontSize: "15px" }}>{step.desc}</Typography>
                     </Box>

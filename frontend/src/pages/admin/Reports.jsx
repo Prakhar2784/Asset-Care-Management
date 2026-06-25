@@ -18,10 +18,10 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const COLORS = ['#4f46e5', '#0ea5e9', '#16a34a', '#d97706', '#dc2626', '#9333ea', '#0F766E'];
+const COLORS = ['#111111', '#CBFA57', '#16a34a', '#d97706', '#dc2626', '#9333ea', '#2563EB'];
 
 const StatCard = ({ icon, label, value, color, sub }) => (
-  <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: 2 }}>
+  <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2 }}>
     <Box sx={{
       width: 48, height: 48, borderRadius: 2, flexShrink: 0,
       bgcolor: `${color}18`, color: color,
@@ -84,7 +84,7 @@ export default function Reports() {
           a.warrantyEnd ? new Date(a.warrantyEnd).toLocaleDateString('en-IN') : '—'
         ]),
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [30, 58, 138] }
+        headStyles: { fillColor: [17, 17, 17] }
       });
 
       doc.addPage();
@@ -99,7 +99,7 @@ export default function Reports() {
           new Date(t.createdAt).toLocaleDateString('en-IN')
         ]),
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [15, 118, 110] }
+        headStyles: { fillColor: [17, 17, 17] }
       });
 
       doc.save(`AssetCare_Report_${Date.now()}.pdf`);
@@ -175,9 +175,9 @@ export default function Reports() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{
             width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
-            background: 'linear-gradient(135deg, #1E3A8A, #0F766E)'
+            bgcolor: '#111111'
           }}>
-            <AssessmentRounded sx={{ color: 'white' }} />
+            <AssessmentRounded sx={{ color: '#CBFA57' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Reports & Analytics</Typography>
@@ -196,16 +196,16 @@ export default function Reports() {
 
       {/* Summary Cards */}
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard icon={<InventoryRounded />} label="Total Assets" value={summary.totals.assets} color="#4f46e5" />
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <StatCard icon={<InventoryRounded />} label="Total Assets" value={summary.totals.assets} color="#111111" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard icon={<ConfirmationNumberRounded />} label="Total Tickets" value={summary.totals.tickets} color="#0ea5e9" />
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <StatCard icon={<ConfirmationNumberRounded />} label="Total Tickets" value={summary.totals.tickets} color="#2563EB" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard icon={<PeopleRounded />} label="Total Users" value={summary.totals.users} color="#16a34a" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             icon={<WarningAmberRounded />}
             label="Warranty Expiring"
@@ -218,8 +218,8 @@ export default function Reports() {
 
       {/* Charts Row 1 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
             <Typography fontWeight={700} mb={2}>Asset Status Distribution</Typography>
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
@@ -231,8 +231,8 @@ export default function Reports() {
             </ResponsiveContainer>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
             <Typography fontWeight={700} mb={2}>Assets by Category</Typography>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={assetCategoryData}>
@@ -240,7 +240,7 @@ export default function Reports() {
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="#111111" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -249,8 +249,8 @@ export default function Reports() {
 
       {/* Charts Row 2 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
             <Typography fontWeight={700} mb={2}>Tickets by Status</Typography>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ticketStatusData} layout="vertical">
@@ -258,13 +258,13 @@ export default function Reports() {
                 <XAxis type="number" fontSize={12} />
                 <YAxis dataKey="name" type="category" fontSize={11} width={110} />
                 <Tooltip />
-                <Bar dataKey="count" fill="#0ea5e9" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="count" fill="#2563EB" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
             <Typography fontWeight={700} mb={2}>Tickets by Priority</Typography>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ticketPriorityData}>
@@ -287,11 +287,11 @@ export default function Reports() {
       </Grid>
 
       {/* Department breakdown */}
-      <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid #e2e8f0' }}>
+      <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
         <Typography fontWeight={700} mb={2}>Assets by Department</Typography>
         <TableContainer>
           <Table size="small">
-            <TableHead sx={{ bgcolor: '#f8fafc' }}>
+            <TableHead sx={{ bgcolor: 'action.hover' }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
                 <TableCell sx={{ fontWeight: 700 }} align="right">Asset Count</TableCell>

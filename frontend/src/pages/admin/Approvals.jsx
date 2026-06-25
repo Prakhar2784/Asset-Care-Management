@@ -178,7 +178,7 @@ const Approvals = () => {
 
   const getStatusStyle = (status) => {
     if (status === "Authorized" || status === "Approved") {
-      return { icon: <VerifiedRounded />, bg: "rgba(15,118,110,0.10)", color: "#0F766E", border: "rgba(15,118,110,0.25)" };
+      return { icon: <VerifiedRounded />, bg: "rgba(22,163,74,0.10)", color: "#16a34a", border: "rgba(22,163,74,0.25)" };
     }
     if (status === "Rejected") {
       return { icon: <CancelRounded />, bg: "rgba(220,38,38,0.10)", color: "#DC2626", border: "rgba(220,38,38,0.25)" };
@@ -189,7 +189,7 @@ const Approvals = () => {
   const urgencyColor = (u) => {
     if (u === "High") return "#DC2626";
     if (u === "Medium") return "#D97706";
-    return "#0F766E";
+    return "#16a34a";
   };
 
   const ticketPendingCount = tickets.filter(t => getTicketDisplayStatus(t.status) === "Pending").length;
@@ -204,7 +204,7 @@ const Approvals = () => {
     p: { xs: 2.5, md: 4 }, borderRadius: "24px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider",
     boxShadow: "0 14px 34px rgba(15,23,42,0.06)", display: "flex", alignItems: { xs: "flex-start", md: "center" },
     justifyContent: "space-between", gap: 3, flexDirection: { xs: "column", lg: "row" }, transition: "all 0.3s ease",
-    "&:hover": { borderColor: "rgba(15,118,110,0.35)", transform: "translateY(-3px)", boxShadow: "0 24px 48px rgba(15,23,42,0.10)" },
+    "&:hover": { borderColor: "rgba(17,17,17,0.22)", transform: "translateY(-3px)", boxShadow: "0 24px 48px rgba(17,17,17,0.08)" },
   };
 
   return (
@@ -233,8 +233,8 @@ const Approvals = () => {
           </Box>
 
           {ticketsLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="30vh">
-              <CircularProgress sx={{ color: "#0F766E" }} />
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "30vh" }}>
+              <CircularProgress sx={{ color: "#16a34a" }} />
             </Box>
           ) : tickets.length === 0 ? (
             <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider" }}>
@@ -302,8 +302,8 @@ const Approvals = () => {
           </Box>
 
           {requestsLoading ? (
-            <Box display="flex" justifyContent="center" alignItems="center" minHeight="30vh">
-              <CircularProgress sx={{ color: "#0F766E" }} />
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "30vh" }}>
+              <CircularProgress sx={{ color: "#16a34a" }} />
             </Box>
           ) : deviceRequests.length === 0 ? (
             <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px", bgcolor: "background.paper", border: "1px dashed", borderColor: "divider" }}>
@@ -365,7 +365,7 @@ const Approvals = () => {
 
       {/* Ticket Action Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         {selectedApproval && (
           <>
             <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
@@ -411,7 +411,7 @@ const Approvals = () => {
 
       {/* Device Request Action Dialog */}
       <Dialog open={requestDialogOpen} onClose={() => setRequestDialogOpen(false)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "26px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         {selectedRequest && (
           <>
             <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
@@ -447,7 +447,7 @@ const Approvals = () => {
               {requestAction === "approve" && (
                 <Box sx={{ mt: 3 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
-                    <InventoryRounded sx={{ fontSize: 18, color: "#0F766E" }} />
+                    <InventoryRounded sx={{ fontSize: 18, color: "#16a34a" }} />
                     <Typography fontWeight={800} fontSize={14} color="text.primary">Assign from Inventory</Typography>
                     <Chip label="Optional" size="small" sx={{ fontSize: 11, height: 20, bgcolor: "#f1f5f9", color: "#64748b", fontWeight: 700 }} />
                   </Box>

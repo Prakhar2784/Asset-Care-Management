@@ -9,20 +9,22 @@ const theme = createTheme({
   palette: {
     mode: "light",
     background: {
-      default: "#f8fafc",
+      default: "#F5F4F0",
       paper: "#ffffff",
     },
     primary: {
-      main: "#1E3A8A",
+      main: "#111111",
+      contrastText: "#CBFA57",
     },
     secondary: {
-      main: "#0F766E",
+      main: "#CBFA57",
+      contrastText: "#111111",
     },
     text: {
-      primary: "#0f172a",
-      secondary: "#64748b",
+      primary: "#111111",
+      secondary: "#6B6B65",
     },
-    divider: "#e2e8f0",
+    divider: "rgba(17,17,17,0.10)",
     success: {
       main: "#16a34a",
     },
@@ -31,6 +33,10 @@ const theme = createTheme({
     },
     error: {
       main: "#dc2626",
+    },
+    action: {
+      hover: "rgba(17,17,17,0.04)",
+      selected: "rgba(17,17,17,0.08)",
     },
   },
   typography: {
@@ -56,14 +62,14 @@ const theme = createTheme({
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: "#f8fafc",
+          backgroundColor: "rgba(17,17,17,0.03)",
         },
       },
     },
     MuiTableCell: {
       styleOverrides: {
         head: {
-          color: "#0f172a",
+          color: "#111111",
           fontWeight: 700,
         },
       },

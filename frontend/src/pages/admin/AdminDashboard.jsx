@@ -138,14 +138,14 @@ const AdminDashboard = () => {
       {error && <Alert severity="error" sx={{ mb: 4, borderRadius: "12px", fontWeight: 600 }}>{error}</Alert>}
 
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
           <CircularProgress color="inherit" />
         </Box>
       ) : (
         <>
           <Grid container spacing={3} sx={{ mb: 3 }}>
             {stats.map((stat, index) => (
-              <Grid item xs={12} sm={6} lg={4} key={index}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={index}>
                 <Box onClick={() => navigate(stat.route)} sx={{ cursor: "pointer", height: "100%", transition: "0.3s ease", "&:hover": { transform: "translateY(-5px)" } }}>
                   <StatCard title={stat.title} value={stat.value} subtitle={stat.subtitle} icon={stat.icon} color={stat.color} />
                 </Box>
@@ -206,7 +206,7 @@ const AdminDashboard = () => {
 
           <Grid container spacing={3}>
             {/* Active Service Tickets */}
-            <Grid item xs={12} lg={8}>
+            <Grid size={{ xs: 12, lg: 8 }}>
               <Paper sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "28px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, gap: 2, mb: 3, flexDirection: { xs: "column", sm: "row" } }}>
                   <Box>
@@ -220,14 +220,14 @@ const AdminDashboard = () => {
 
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {recentTickets.length === 0 ? (
-                    <Box p={4} textAlign="center" sx={{ border: "1px dashed", borderColor: "divider", borderRadius: "20px", bgcolor: "background.default" }}>
+                    <Box sx={{ p: 4, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "20px", bgcolor: "background.default" }}>
                       <Typography color="text.secondary" fontWeight={600}>No recent tickets found.</Typography>
                     </Box>
                   ) : (
                     recentTickets.map((ticket) => (
                       <Box
                         key={ticket.id} onClick={() => handleTicketOpen(ticket)}
-                        sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, flexDirection: { xs: "column", md: "row" }, gap: 2, transition: "all 0.3s ease", cursor: "pointer", "&:hover": { borderColor: "rgba(15,118,110,0.35)", bgcolor: "background.paper", transform: "translateY(-3px)", boxShadow: "0 14px 30px rgba(15,23,42,0.08)" } }}
+                        sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, flexDirection: { xs: "column", md: "row" }, gap: 2, transition: "all 0.3s ease", cursor: "pointer", "&:hover": { borderColor: "rgba(17,17,17,0.20)", bgcolor: "background.paper", transform: "translateY(-3px)", boxShadow: "0 14px 30px rgba(17,17,17,0.08)" } }}
                       >
                         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                           <Avatar sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, width: 44, height: 44, fontSize: 16 }}>
@@ -253,7 +253,7 @@ const AdminDashboard = () => {
             </Grid>
 
             {/* Right Column: Alerts + Quick Links + Dept Breakdown */}
-            <Grid item xs={12} lg={4}>
+            <Grid size={{ xs: 12, lg: 4 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 <Paper sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "28px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
                   <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "22px", mb: 2.5, letterSpacing: "-0.7px" }}>System Alerts</Typography>
@@ -287,7 +287,7 @@ const AdminDashboard = () => {
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                       {deptBreakdown.map((dept) => (
                         <Box key={dept._id || "Unknown"}>
-                          <Box display="flex" justifyContent="space-between" mb={0.5}>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
                             <Typography fontSize={13} fontWeight={700} color="text.primary">{dept._id || "Unassigned"}</Typography>
                             <Typography fontSize={13} fontWeight={800} color="text.primary">{dept.count}</Typography>
                           </Box>
@@ -308,7 +308,7 @@ const AdminDashboard = () => {
       )}
 
       {/* Ticket Detail Dialog */}
-      <Dialog open={ticketDialogOpen} onClose={() => setTicketDialogOpen(false)} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } }}>
+      <Dialog open={ticketDialogOpen} onClose={() => setTicketDialogOpen(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } } }}>
         {selectedTicket && (
           <>
             <DialogTitle sx={{ p: 0 }}>
@@ -344,7 +344,7 @@ const AdminDashboard = () => {
       </Dialog>
 
       {/* Alert Detail Dialog */}
-      <Dialog open={alertDialogOpen} onClose={() => setAlertDialogOpen(false)} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } }}>
+      <Dialog open={alertDialogOpen} onClose={() => setAlertDialogOpen(false)} fullWidth maxWidth="xs" slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } } }}>
         {selectedAlert && (
           <>
             <DialogTitle sx={{ p: 0 }}>

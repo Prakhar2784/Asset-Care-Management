@@ -222,19 +222,19 @@ const Departments = () => {
       />
 
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <SummaryCard title="Total Departments" value={summary.total} />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <SummaryCard title="Active Departments" value={summary.active} />
         </Grid>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <SummaryCard title="Approval Required" value={summary.approval} warning />
         </Grid>
       </Grid>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" pt={5}>
+        <Box sx={{ display: "flex", justifyContent: "center", pt: 5 }}>
           <CircularProgress />
         </Box>
       ) : departments.length === 0 ? (
@@ -250,7 +250,7 @@ const Departments = () => {
       ) : (
         <Grid container spacing={3}>
           {departments.map((dept) => (
-            <Grid item xs={12} sm={6} lg={4} key={dept._id}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={dept._id}>
               <Paper
                 sx={{
                   p: 3,
@@ -261,7 +261,7 @@ const Departments = () => {
                   boxShadow: "0 14px 34px rgba(15,23,42,0.06)",
                 }}
               >
-                <Box display="flex" justifyContent="space-between" gap={2}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
                   <Box
                     sx={{
                       width: 58,
@@ -318,7 +318,7 @@ const Departments = () => {
                   {dept.approvalRequired ? dept.approvalLevel : "Approval not required"}
                 </Typography>
 
-                <Box display="flex" gap={1.2} mt={2.5}>
+                <Box sx={{ display: "flex", gap: 1.2, mt: 2.5 }}>
                   <Button
                     fullWidth
                     variant="outlined"
@@ -360,13 +360,13 @@ const Departments = () => {
         onClose={() => setFormOpen(false)}
         fullWidth
         maxWidth="md"
-        PaperProps={{
+        slotProps={{ paper: {
           sx: {
             borderRadius: "26px",
             bgcolor: "background.paper",
             overflow: "hidden",
           },
-        }}
+        } }}
       >
         <DialogTitle sx={{ bgcolor: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
           <Typography fontWeight={950} fontSize={24}>
@@ -387,7 +387,7 @@ const Departments = () => {
         <DialogContent dividers sx={{ bgcolor: "#F8FAFC", p: 3 }}>
           <FormBlock title="Department Details">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   required
@@ -398,7 +398,7 @@ const Departments = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   required
@@ -409,7 +409,7 @@ const Departments = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="Location"
@@ -419,7 +419,7 @@ const Departments = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
                   fullWidth
                   label="Floor / Building"
@@ -433,7 +433,7 @@ const Departments = () => {
 
           <FormBlock title="HOD / Approval Owner">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField
                   fullWidth
                   required
@@ -444,7 +444,7 @@ const Departments = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField
                   fullWidth
                   required
@@ -455,7 +455,7 @@ const Departments = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField
                   fullWidth
                   label="HOD Phone"
@@ -469,7 +469,7 @@ const Departments = () => {
 
           <FormBlock title="Approval Settings">
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Box
                   sx={{
                     height: "100%",
@@ -491,7 +491,7 @@ const Departments = () => {
                 </Box>
               </Grid>
 
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField
                   select
                   fullWidth
@@ -509,7 +509,7 @@ const Departments = () => {
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <TextField
                   select
                   fullWidth
@@ -523,7 +523,7 @@ const Departments = () => {
                 </TextField>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <TextField
                   fullWidth
                   multiline

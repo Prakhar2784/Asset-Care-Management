@@ -16,9 +16,9 @@ const StatusChip = ({ label }) => {
         return { bgcolor: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }; // Amber
       case "Vendor Assigned":
       case "Medium":
-        return { bgcolor: "#e0f2fe", color: "#075985", border: "1px solid #bae6fd" }; // Sky Blue
+        return { bgcolor: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE" }; // Blue
       default: // Low or unknown
-        return { bgcolor: "#f1f5f9", color: "#475569", border: "1px solid #e2e8f0" }; // Slate Gray
+        return { bgcolor: "#F5F5F4", color: "#6B6B65", border: "1px solid rgba(17,17,17,0.12)" }; // Warm gray
     }
   };
 

@@ -63,7 +63,7 @@ function ProfileTab({ currentUser }) {
 
   return (
     <Grid container spacing={4}>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={3} color="text.primary">Personal Information</Typography>
           <TextField label="Full Name" value={name} onChange={e => setName(e.target.value)} fullWidth sx={{ mb: 3 }} />
@@ -78,18 +78,18 @@ function ProfileTab({ currentUser }) {
         </Paper>
       </Grid>
 
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={3} color="text.primary">Change Password</Typography>
           <TextField
             label="Current Password" type={showCurr ? 'text' : 'password'}
             value={current} onChange={e => setCurrent(e.target.value)} fullWidth sx={{ mb: 3 }}
-            InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowCurr(v => !v)}>{showCurr ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }}
+            slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowCurr(v => !v)}>{showCurr ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
           />
           <TextField
             label="New Password" type={showNew ? 'text' : 'password'}
             value={newPass} onChange={e => setNewPass(e.target.value)} fullWidth sx={{ mb: 3 }}
-            InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowNew(v => !v)}>{showNew ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }}
+            slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowNew(v => !v)}>{showNew ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
           />
           <TextField
             label="Confirm New Password" type="password"
@@ -114,7 +114,7 @@ function AppearanceTab() {
   const { mode, toggleMode, isDark } = useAppTheme();
   return (
     <Grid container spacing={4}>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Theme</Typography>
           <Typography fontSize={14} color="text.secondary" mb={3}>
@@ -130,21 +130,21 @@ function AppearanceTab() {
                   sx={{
                     flex: 1, border: '2px solid', borderRadius: 3, p: 2.5,
                     cursor: !isActive ? 'pointer' : 'default',
-                    borderColor: isActive ? '#4f46e5' : 'divider',
+                    borderColor: isActive ? '#111111' : 'divider',
                     bgcolor: isActive
-                      ? (isDark ? 'rgba(99,102,241,0.15)' : '#eef2ff')
+                      ? (isDark ? 'rgba(203,250,87,0.08)' : 'rgba(17,17,17,0.04)')
                       : 'transparent',
                     textAlign: 'center', transition: 'all 0.2s',
-                    '&:hover': !isActive ? { borderColor: '#818cf8' } : {}
+                    '&:hover': !isActive ? { borderColor: 'rgba(17,17,17,0.4)' } : {}
                   }}
                 >
                   {m === 'light'
-                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#4f46e5' : 'text.disabled' }} />
-                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#4f46e5' : 'text.disabled' }} />}
-                  <Typography fontWeight={700} fontSize={14} color={isActive ? '#4f46e5' : 'text.secondary'} mt={1}>
+                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#111111' : 'text.disabled' }} />
+                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#111111' : 'text.disabled' }} />}
+                  <Typography fontWeight={700} fontSize={14} color={isActive ? '#111111' : 'text.secondary'} mt={1}>
                     {m === 'light' ? 'Light Mode' : 'Dark Mode'}
                   </Typography>
-                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: '#4f46e5', color: 'white', fontWeight: 700, height: 20, fontSize: 11 }} />}
+                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: '#111111', color: '#CBFA57', fontWeight: 700, height: 20, fontSize: 11 }} />}
                 </Box>
               );
             })}
@@ -248,8 +248,8 @@ function ReportsTab() {
           t.raisedAt, t.resolutionHours ?? '—', t.estimatedCost
         ]),
         styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [30, 58, 138], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [248, 250, 252] },
+        headStyles: { fillColor: [17, 17, 17], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 248, 246] },
       });
 
       doc.save(`assetcare-ticket-report-${Date.now()}.pdf`);
@@ -280,8 +280,8 @@ function ReportsTab() {
               {['All', 'Low', 'Medium', 'High', 'Critical'].map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
             </Select>
           </FormControl>
-          <TextField size="small" type="date" label="From Date" value={from} onChange={e => setFrom(e.target.value)} sx={{ minWidth: 160 }} InputLabelProps={{ shrink: true }} />
-          <TextField size="small" type="date" label="To Date" value={to} onChange={e => setTo(e.target.value)} sx={{ minWidth: 160 }} InputLabelProps={{ shrink: true }} />
+          <TextField size="small" type="date" label="From Date" value={from} onChange={e => setFrom(e.target.value)} sx={{ minWidth: 160 }} slotProps={{ inputLabel: { shrink: true } }} />
+          <TextField size="small" type="date" label="To Date" value={to} onChange={e => setTo(e.target.value)} sx={{ minWidth: 160 }} slotProps={{ inputLabel: { shrink: true } }} />
         </Box>
 
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -357,9 +357,9 @@ function DataTab({ currentUser }) {
       const doc = new jsPDF();
 
       // Header
-      doc.setFillColor(30, 58, 138);
+      doc.setFillColor(17, 17, 17);
       doc.rect(0, 0, 210, 30, 'F');
-      doc.setTextColor(255, 255, 255);
+      doc.setTextColor(203, 250, 87);
       doc.setFontSize(18); doc.setFont('helvetica', 'bold');
       doc.text('AssetCare Pro — My Data Export', 14, 14);
       doc.setFontSize(10); doc.setFont('helvetica', 'normal');
@@ -370,7 +370,7 @@ function DataTab({ currentUser }) {
 
       // Profile section
       doc.setFontSize(13); doc.setFont('helvetica', 'bold');
-      doc.setTextColor(30, 58, 138);
+      doc.setTextColor(17, 17, 17);
       doc.text('Profile Information', 14, y); y += 7;
       doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
       const profile = data.profile || {};
@@ -392,7 +392,7 @@ function DataTab({ currentUser }) {
           head: [['Asset Name', 'Serial No.', 'Category', 'Status', 'Department']],
           body: data.assignedAssets.map(a => [a.name, a.serialNumber, a.category, a.status, a.department]),
           styles: { fontSize: 9 },
-          headStyles: { fillColor: [30, 58, 138] },
+          headStyles: { fillColor: [17, 17, 17] },
           margin: { left: 14, right: 14 },
         });
         y = (t1?.finalY ?? doc.lastAutoTable?.finalY ?? y + 20) + 6;
@@ -409,7 +409,7 @@ function DataTab({ currentUser }) {
           head: [['Ticket ID', 'Issue', 'Status', 'Priority', 'Asset', 'Raised At']],
           body: data.tickets.map(t => [t.ticketId, t.issue.substring(0, 35), t.status, t.priority, t.asset, new Date(t.raisedAt).toLocaleDateString('en-IN')]),
           styles: { fontSize: 9 },
-          headStyles: { fillColor: [30, 58, 138] },
+          headStyles: { fillColor: [17, 17, 17] },
           margin: { left: 14, right: 14 },
         });
         y = (t2?.finalY ?? doc.lastAutoTable?.finalY ?? y + 20) + 6;
@@ -426,7 +426,7 @@ function DataTab({ currentUser }) {
           head: [['Request ID', 'Item Requested', 'Type', 'Status', 'Urgency', 'Date']],
           body: data.deviceRequests.map(r => [r.requestId, r.itemRequested, r.requestType, r.status, r.urgency, new Date(r.raisedAt).toLocaleDateString('en-IN')]),
           styles: { fontSize: 9 },
-          headStyles: { fillColor: [30, 58, 138] },
+          headStyles: { fillColor: [17, 17, 17] },
           margin: { left: 14, right: 14 },
         });
       }
@@ -440,7 +440,7 @@ function DataTab({ currentUser }) {
 
   return (
     <Grid container spacing={4}>
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Export My Data</Typography>
           <Typography fontSize={14} color="text.secondary" mb={3}>
@@ -458,7 +458,7 @@ function DataTab({ currentUser }) {
         </Paper>
       </Grid>
 
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Data Retention Policy</Typography>
           <Typography fontSize={14} color="text.secondary" mb={2.5}>
@@ -472,13 +472,13 @@ function DataTab({ currentUser }) {
           ].map(([label, desc]) => (
             <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: 1, borderColor: 'divider' }}>
               <Typography fontSize={13} fontWeight={600} color="text.secondary">{label}</Typography>
-              <Typography fontSize={13} color="text.primary" textAlign="right" maxWidth={220}>{desc}</Typography>
+              <Typography fontSize={13} color="text.primary" sx={{ textAlign: "right", maxWidth: 220 }}>{desc}</Typography>
             </Box>
           ))}
         </Paper>
       </Grid>
 
-      <Grid item xs={12} md={6}>
+      <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={2.5} color="text.primary">Account Information</Typography>
           {[
@@ -517,8 +517,8 @@ export default function Settings() {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <Box sx={{ width: 52, height: 52, borderRadius: 2.5, display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #1E3A8A, #0F766E)', flexShrink: 0 }}>
-          <PersonRounded sx={{ color: 'white', fontSize: 26 }} />
+        <Box sx={{ width: 52, height: 52, borderRadius: 2.5, display: 'grid', placeItems: 'center', bgcolor: '#111111', flexShrink: 0 }}>
+          <PersonRounded sx={{ color: '#CBFA57', fontSize: 26 }} />
         </Box>
         <Box>
           <Typography variant="h4" fontWeight={900} letterSpacing="-0.5px" sx={{ color: 'text.primary', lineHeight: 1.2 }}>Settings</Typography>

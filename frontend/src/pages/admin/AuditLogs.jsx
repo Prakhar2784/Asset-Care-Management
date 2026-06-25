@@ -8,8 +8,8 @@ import { HistoryRounded, FilterListRounded } from '@mui/icons-material';
 import api from '../../api/axios';
 
 const ACTION_COLORS = {
-  ticket_created: '#4f46e5',
-  ticket_status_changed: '#0ea5e9',
+  ticket_created: '#111111',
+  ticket_status_changed: '#2563EB',
   asset_created: '#16a34a',
   asset_updated: '#d97706',
   asset_deleted: '#dc2626',
@@ -100,9 +100,9 @@ export default function AuditLogs() {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
         <Box sx={{
           width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
-          background: 'linear-gradient(135deg, #1E3A8A, #0F766E)'
+          bgcolor: '#111111'
         }}>
-          <HistoryRounded sx={{ color: 'white' }} />
+          <HistoryRounded sx={{ color: '#CBFA57' }} />
         </Box>
         <Box>
           <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Audit Logs</Typography>

@@ -12,7 +12,7 @@ import { useAuth } from '../context/AuthContext';
 
 const STATUS_COLORS = {
   Active: '#16a34a', 'Under Repair': '#d97706', 'Decommissioned': '#64748b',
-  Resolved: '#16a34a', 'Pending Approval': '#d97706', 'Vendor Assigned': '#4f46e5',
+  Resolved: '#16a34a', 'Pending Approval': '#d97706', 'Vendor Assigned': '#2563EB',
   Rejected: '#dc2626',
 };
 
@@ -68,7 +68,7 @@ export default function GlobalSearch() {
     <>
       <IconButton
         onClick={() => setOpen(true)}
-        sx={{ color: '#64748b', '&:hover': { color: '#4f46e5', bgcolor: '#eef2ff' } }}
+        sx={{ color: 'text.secondary', '&:hover': { color: 'text.primary', bgcolor: 'action.hover' } }}
         title="Search (Ctrl+K)"
       >
         <SearchRounded />
@@ -129,7 +129,7 @@ export default function GlobalSearch() {
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}
                       >
                         <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: 'action.selected', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Inventory2Rounded sx={{ fontSize: 17, color: '#4f46e5' }} />
+                          <Inventory2Rounded sx={{ fontSize: 17, color: '#111111' }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
                           <Typography fontSize={14} fontWeight={600}>{a.name}</Typography>
@@ -154,7 +154,7 @@ export default function GlobalSearch() {
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1.2, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}
                       >
                         <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: 'action.selected', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <ConfirmationNumberRounded sx={{ fontSize: 17, color: '#0ea5e9' }} />
+                          <ConfirmationNumberRounded sx={{ fontSize: 17, color: '#2563EB' }} />
                         </Box>
                         <Box sx={{ flex: 1 }}>
                           <Typography fontSize={14} fontWeight={600}>{t.ticketId}</Typography>
