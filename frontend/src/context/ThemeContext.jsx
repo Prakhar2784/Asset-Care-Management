@@ -34,10 +34,10 @@ const ThemeProviderInner = ({ children }) => {
       mode,
       ...(isDark ? {
         primary: { main: '#CBFA57' },
-        background: { default: '#111111', paper: '#1C1C1C' },
-        text: { primary: '#EFEFEF', secondary: '#888888' },
-        divider: '#2E2E2E',
-        action: { hover: '#242424', selected: '#2A2A2A' },
+        background: { default: '#1E1E1E', paper: '#2C2C2C' },
+        text: { primary: '#F2F2F2', secondary: '#B0B0B0' },
+        divider: '#404040',
+        action: { hover: '#363636', selected: '#3E3E3E' },
       } : {
         primary: { main: '#141414' },
         background: { default: '#ECEAE3', paper: '#FFFFFF' },
