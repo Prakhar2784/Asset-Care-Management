@@ -28,7 +28,7 @@ router.route('/')
 router.route('/:id')
   .get(protect,    requirePermission('View All Assets', 'Register Assets', 'Edit / Delete Assets', 'Assign Assets'), getAssetById)
   .put(protect,    requirePermission('Edit / Delete Assets'), updateAsset)
-  .delete(protect, requirePermission('Edit / Delete Assets'), deleteAsset);
+  .delete(protect,  requirePermission('Edit / Delete Assets'), deleteAsset);
 
 router.put('/:id/restore',   protect, requirePermission('Edit / Delete Assets'), restoreAsset);
 router.get('/:id/timeline',  protect, requirePermission('View All Assets'), getAssetTimeline);
