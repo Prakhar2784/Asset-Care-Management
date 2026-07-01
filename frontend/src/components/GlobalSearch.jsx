@@ -23,7 +23,7 @@ export default function GlobalSearch() {
   const [query, setQuery]     = useState('');
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] =  useState(null);
   const inputRef    = useRef(null);
   const wrapperRef  = useRef(null);
   const navigate    = useNavigate();
