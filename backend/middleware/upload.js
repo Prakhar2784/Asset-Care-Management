@@ -42,3 +42,10 @@ exports.invoiceUpload = multer({
   limits:   { fileSize: 10 * 1024 * 1024 },
   fileFilter: fileFilter(['.jpg', '.jpeg', '.png', '.pdf']),
 }).single('file');
+
+// Company logo — images only, 5 MB
+exports.logoUpload = multer({
+  storage:  makeStorage('logos'),
+  limits:   { fileSize: 5 * 1024 * 1024 },
+  fileFilter: fileFilter(['.jpg', '.jpeg', '.png', '.svg', '.webp']),
+}).single('logo');

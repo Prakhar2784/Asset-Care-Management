@@ -129,6 +129,40 @@ const getTenantSettings = async (req, res) => {
   }
 };
 
+// GET /api/settings/tenant/profile — safe, read-only subset any logged-in user can view
+const getTenantProfile = async (req, res) => {
+  try {
+    const Tenant = require('../models/Tenant');
+    const tenant = await Tenant.findOne({ slug: req.tenantId })
+      .select('name slug industry employeeCount phone website contactEmail address branding plan limits planExpiry');
+    if (!tenant) {
+      return res.status(404).json({ message: 'Tenant profile not found.' });
+    }
+    res.json(tenant);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// POST /api/settings/tenant/logo — admin uploads a new company logo
+const uploadTenantLogo = async (req, res) => {
+  try {
+    const Tenant = require('../models/Tenant');
+    if (!req.file) return res.status(400).json({ message: 'No logo file uploaded.' });
+
+    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    if (!tenant) return res.status(404).json({ message: 'Tenant not found.' });
+
+    const logoUrl = `/uploads/logos/${req.file.filename}`;
+    tenant.branding.logoUrl = logoUrl;
+    await tenant.save();
+
+    res.json({ logoUrl });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // PUT /api/settings/tenant
 const updateTenantSettings = async (req, res) => {
   try {
@@ -183,5 +217,7 @@ module.exports = {
   exportMyData,
   getSystemStats,
   getTenantSettings,
-  updateTenantSettings
+  updateTenantSettings,
+  getTenantProfile,
+  uploadTenantLogo
 };

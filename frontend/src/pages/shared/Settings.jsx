@@ -10,7 +10,7 @@ import {
   SaveRounded, LockRounded, PictureAsPdfRounded, RefreshRounded, BusinessRounded,
   DeleteOutlineRounded, LocationOnRounded, PhoneRounded, EmailRounded,
   BadgeRounded, WorkRounded, PeopleRounded, LanguageRounded, ReceiptRounded,
-  VerifiedRounded, StarRounded
+  VerifiedRounded, StarRounded, CameraAltRounded, DomainRounded
 } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
@@ -180,7 +180,7 @@ function AppearanceTab() {
 // ─── Company Settings Tab (admin only) ──────────────────────────────────────────
 const INDUSTRIES = ['Technology', 'Manufacturing', 'Healthcare', 'Education', 'Finance', 'Retail', 'Construction', 'Logistics', 'Hospitality', 'Other'];
 
-function CompanySettingsTab() {
+function CompanySettingsTab({ isAdmin = true }) {
   const [form, setForm] = useState({
     name: '', industry: '', employeeCount: '', phone: '', website: '', contactEmail: '',
     gstNumber: '', panNumber: '',
@@ -191,37 +191,59 @@ function CompanySettingsTab() {
   const [tenant, setTenant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
   const [msg, setMsg] = useState('');
   const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
 
+  const applyTenant = (data) => {
+    setTenant(data);
+    setForm(f => ({
+      ...f,
+      name: data.name || '',
+      industry: data.industry || '',
+      employeeCount: data.employeeCount || '',
+      phone: data.phone || '',
+      website: data.website || '',
+      contactEmail: data.contactEmail || '',
+      gstNumber: data.gstNumber || '',
+      panNumber: data.panNumber || '',
+      addressLine: data.address?.line || '',
+      city: data.address?.city || '',
+      state: data.address?.state || '',
+      pin: data.address?.pin || '',
+      country: data.address?.country || 'India',
+      logoUrl: data.branding?.logoUrl || '',
+      primaryColor: data.branding?.primaryColor || '#141414',
+      secondaryColor: data.branding?.secondaryColor || '#A855F7',
+      smtpHost: data.smtp?.host || '',
+      smtpPort: data.smtp?.port || '',
+      smtpUser: data.smtp?.user || '',
+      smtpPass: data.smtp?.pass || '',
+      smtpFromEmail: data.smtp?.fromEmail || ''
+    }));
+  };
+
   useEffect(() => {
-    api.get('/settings/tenant').then(({ data }) => {
-      setTenant(data);
-      setForm({
-        name: data.name || '',
-        industry: data.industry || '',
-        employeeCount: data.employeeCount || '',
-        phone: data.phone || '',
-        website: data.website || '',
-        contactEmail: data.contactEmail || '',
-        gstNumber: data.gstNumber || '',
-        panNumber: data.panNumber || '',
-        addressLine: data.address?.line || '',
-        city: data.address?.city || '',
-        state: data.address?.state || '',
-        pin: data.address?.pin || '',
-        country: data.address?.country || 'India',
-        logoUrl: data.branding?.logoUrl || '',
-        primaryColor: data.branding?.primaryColor || '#141414',
-        secondaryColor: data.branding?.secondaryColor || '#A855F7',
-        smtpHost: data.smtp?.host || '',
-        smtpPort: data.smtp?.port || '',
-        smtpUser: data.smtp?.user || '',
-        smtpPass: data.smtp?.pass || '',
-        smtpFromEmail: data.smtp?.fromEmail || ''
-      });
-    }).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+    api.get(isAdmin ? '/settings/tenant' : '/settings/tenant/profile')
+      .then(({ data }) => applyTenant(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [isAdmin]);
+
+  const handleLogoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true); setMsg('');
+    try {
+      const fd = new FormData();
+      fd.append('logo', file);
+      const { data } = await api.post('/settings/tenant/logo', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setForm(f => ({ ...f, logoUrl: data.logoUrl }));
+      window.dispatchEvent(new Event('tenant-branding-changed'));
+    } catch (err) {
+      setMsg(err.response?.data?.message || 'Failed to upload logo.');
+    } finally { setUploadingLogo(false); }
+  };
 
   const handleSave = async () => {
     setSaving(true); setMsg('');
@@ -279,20 +301,45 @@ function CompanySettingsTab() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Chip label={tenant?.plan || 'Basic'} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: planColor, color: '#fff', px: 0.5 }} />
             <Chip label="ACTIVE" size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: 12, borderColor: '#10B981', color: '#10B981' }} />
-            <Button size="small" sx={{ fontWeight: 700, color: '#A855F7', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>
+            {isAdmin && <Button size="small" sx={{ fontWeight: 700, color: '#A855F7', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
           </Box>
         </Box>
       </Paper>
 
-      {/* Basic Information */}
+      {/* Logo + Basic Information */}
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<BusinessRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Basic Information" />
+        <SectionHeader icon={<DomainRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Basic Information" />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, mb: 3 }}>
+          <Box sx={{
+            width: 72, height: 72, borderRadius: '16px', flexShrink: 0, overflow: 'hidden',
+            bgcolor: 'action.hover', border: 1, borderColor: 'divider',
+            display: 'grid', placeItems: 'center'
+          }}>
+            {form.logoUrl
+              ? <Box component="img" src={form.logoUrl.startsWith('http') ? form.logoUrl : `${api.defaults.baseURL?.replace(/\/api\/?$/, '')}${form.logoUrl}`}
+                  alt="Company logo" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <BusinessRounded sx={{ fontSize: 32, color: 'text.disabled' }} />
+            }
+          </Box>
+          <Box>
+            <Typography fontWeight={800} fontSize={14}>Company Logo</Typography>
+            <Typography fontSize={12} color="text.secondary" mb={1}>PNG, JPG or SVG · max 5 MB · shown on the dashboard and sidebar</Typography>
+            {isAdmin && (
+              <Button component="label" size="small" startIcon={uploadingLogo ? <CircularProgress size={14} /> : <CameraAltRounded />}
+                disabled={uploadingLogo}
+                sx={{ fontWeight: 700, textTransform: 'none', color: '#A855F7' }}>
+                {uploadingLogo ? 'Uploading…' : 'Replace logo'}
+                <input type="file" hidden accept="image/*,.svg" onChange={handleLogoChange} />
+              </Button>
+            )}
+          </Box>
+        </Box>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="Company Name *" value={form.name} onChange={set('name')} fullWidth size="small" sx={inputSx} />
+            <TextField label="Company Name *" value={form.name} onChange={set('name')} fullWidth size="small" sx={inputSx} disabled={!isAdmin} />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <FormControl fullWidth size="small" sx={inputSx}>
+            <FormControl fullWidth size="small" sx={inputSx} disabled={!isAdmin}>
               <InputLabel>Industry</InputLabel>
               <Select value={form.industry} label="Industry" onChange={set('industry')}>
                 {INDUSTRIES.map(i => <MenuItem key={i} value={i}>{i}</MenuItem>)}
@@ -304,7 +351,7 @@ function CompanySettingsTab() {
               helperText="Auto-generated · used in registration URLs" />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="Employee Count" type="number" value={form.employeeCount} onChange={set('employeeCount')} fullWidth size="small" sx={inputSx}
+            <TextField label="Employee Count" type="number" value={form.employeeCount} onChange={set('employeeCount')} fullWidth size="small" sx={inputSx} disabled={!isAdmin}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><PeopleRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
           </Grid>
         </Grid>
@@ -315,102 +362,107 @@ function CompanySettingsTab() {
         <SectionHeader icon={<PhoneRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Contact Information" />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="Official Email" value={form.contactEmail} onChange={set('contactEmail')} fullWidth size="small" sx={inputSx} placeholder="reception@company.com"
+            <TextField label="Official Email" value={form.contactEmail} onChange={set('contactEmail')} fullWidth size="small" sx={inputSx} placeholder="reception@company.com" disabled={!isAdmin}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><EmailRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="Phone / Contact Number" value={form.phone} onChange={set('phone')} fullWidth size="small" sx={inputSx}
+            <TextField label="Phone / Contact Number" value={form.phone} onChange={set('phone')} fullWidth size="small" sx={inputSx} disabled={!isAdmin}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <TextField label="Website" value={form.website} onChange={set('website')} fullWidth size="small" sx={inputSx} placeholder="https://yourcompany.com"
+            <TextField label="Website" value={form.website} onChange={set('website')} fullWidth size="small" sx={inputSx} placeholder="https://yourcompany.com" disabled={!isAdmin}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><LanguageRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
           </Grid>
         </Grid>
       </Paper>
 
       {/* Legal & Compliance */}
-      <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<ReceiptRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Legal & Compliance" />
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="GST Number" value={form.gstNumber} onChange={set('gstNumber')} fullWidth size="small" sx={inputSx} placeholder="15-digit GSTIN" />
+      {isAdmin && (
+        <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+          <SectionHeader icon={<ReceiptRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Legal & Compliance" />
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField label="GST Number" value={form.gstNumber} onChange={set('gstNumber')} fullWidth size="small" sx={inputSx} placeholder="15-digit GSTIN" />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField label="PAN Number" value={form.panNumber} onChange={set('panNumber')} fullWidth size="small" sx={inputSx} placeholder="10-char PAN" />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="PAN Number" value={form.panNumber} onChange={set('panNumber')} fullWidth size="small" sx={inputSx} placeholder="10-char PAN" />
-          </Grid>
-        </Grid>
-      </Paper>
+        </Paper>
+      )}
 
       {/* Registered Address */}
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
         <SectionHeader icon={<LocationOnRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Registered Address" />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
-            <TextField label="Address Line" value={form.addressLine} onChange={set('addressLine')} fullWidth size="small" sx={inputSx} placeholder="Flat / Office no., building name, street name, locality" />
+            <TextField label="Address Line" value={form.addressLine} onChange={set('addressLine')} fullWidth size="small" sx={inputSx} placeholder="Flat / Office no., building name, street name, locality" disabled={!isAdmin} />
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <TextField label="City" value={form.city} onChange={set('city')} fullWidth size="small" sx={inputSx} />
+            <TextField label="City" value={form.city} onChange={set('city')} fullWidth size="small" sx={inputSx} disabled={!isAdmin} />
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <TextField label="State / Province" value={form.state} onChange={set('state')} fullWidth size="small" sx={inputSx} />
+            <TextField label="State / Province" value={form.state} onChange={set('state')} fullWidth size="small" sx={inputSx} disabled={!isAdmin} />
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <TextField label="PIN / ZIP Code" value={form.pin} onChange={set('pin')} fullWidth size="small" sx={inputSx} />
+            <TextField label="PIN / ZIP Code" value={form.pin} onChange={set('pin')} fullWidth size="small" sx={inputSx} disabled={!isAdmin} />
           </Grid>
           <Grid size={{ xs: 12, sm: 3 }}>
-            <TextField label="Country" value={form.country} onChange={set('country')} fullWidth size="small" sx={inputSx} />
+            <TextField label="Country" value={form.country} onChange={set('country')} fullWidth size="small" sx={inputSx} disabled={!isAdmin} />
           </Grid>
         </Grid>
       </Paper>
 
-      {/* Branding */}
-      <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<PaletteRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Branding" />
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12 }}>
-            <TextField label="Logo URL" value={form.logoUrl} onChange={set('logoUrl')} fullWidth size="small" sx={inputSx} placeholder="https://example.com/logo.png" />
+      {/* Branding colors */}
+      {isAdmin && (
+        <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+          <SectionHeader icon={<PaletteRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Brand Colors" />
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 6 }}>
+              <TextField label="Primary Color" type="color" value={form.primaryColor} onChange={set('primaryColor')} fullWidth sx={inputSx} slotProps={{ input: { sx: { height: 40, p: 0.5 } } }} />
+            </Grid>
+            <Grid size={{ xs: 6 }}>
+              <TextField label="Accent Color" type="color" value={form.secondaryColor} onChange={set('secondaryColor')} fullWidth sx={inputSx} slotProps={{ input: { sx: { height: 40, p: 0.5 } } }} />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 6 }}>
-            <TextField label="Primary Color" type="color" value={form.primaryColor} onChange={set('primaryColor')} fullWidth sx={inputSx} slotProps={{ input: { sx: { height: 40, p: 0.5 } } }} />
-          </Grid>
-          <Grid size={{ xs: 6 }}>
-            <TextField label="Accent Color" type="color" value={form.secondaryColor} onChange={set('secondaryColor')} fullWidth sx={inputSx} slotProps={{ input: { sx: { height: 40, p: 0.5 } } }} />
-          </Grid>
-        </Grid>
-      </Paper>
+        </Paper>
+      )}
 
       {/* SMTP */}
-      <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<SecurityRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="SMTP Gateway" />
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 8 }}>
-            <TextField label="SMTP Host" value={form.smtpHost} onChange={set('smtpHost')} fullWidth size="small" sx={inputSx} placeholder="smtp.gmail.com" />
+      {isAdmin && (
+        <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+          <SectionHeader icon={<SecurityRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="SMTP Gateway" />
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <TextField label="SMTP Host" value={form.smtpHost} onChange={set('smtpHost')} fullWidth size="small" sx={inputSx} placeholder="smtp.gmail.com" />
+            </Grid>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <TextField label="Port" value={form.smtpPort} onChange={set('smtpPort')} fullWidth size="small" sx={inputSx} placeholder="587" />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField label="SMTP Username" value={form.smtpUser} onChange={set('smtpUser')} fullWidth size="small" sx={inputSx} />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField label="SMTP Password" type="password" value={form.smtpPass} onChange={set('smtpPass')} fullWidth size="small" sx={inputSx} />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField label="Sender (From) Email" value={form.smtpFromEmail} onChange={set('smtpFromEmail')} fullWidth size="small" sx={inputSx} placeholder="no-reply@company.com" />
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, md: 4 }}>
-            <TextField label="Port" value={form.smtpPort} onChange={set('smtpPort')} fullWidth size="small" sx={inputSx} placeholder="587" />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="SMTP Username" value={form.smtpUser} onChange={set('smtpUser')} fullWidth size="small" sx={inputSx} />
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField label="SMTP Password" type="password" value={form.smtpPass} onChange={set('smtpPass')} fullWidth size="small" sx={inputSx} />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField label="Sender (From) Email" value={form.smtpFromEmail} onChange={set('smtpFromEmail')} fullWidth size="small" sx={inputSx} placeholder="no-reply@company.com" />
-          </Grid>
-        </Grid>
-      </Paper>
+        </Paper>
+      )}
 
       {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ borderRadius: '12px' }}>{msg}</Alert>}
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
-          onClick={handleSave} disabled={saving}
-          sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', boxShadow: 'none' }}>
-          {saving ? 'Saving…' : 'Save Changes'}
-        </Button>
-      </Box>
+      {isAdmin && (
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
+            onClick={handleSave} disabled={saving}
+            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', boxShadow: 'none' }}>
+            {saving ? 'Saving…' : 'Save Changes'}
+          </Button>
+        </Box>
+      )}
     </Stack>
   );
 }
@@ -960,8 +1012,8 @@ export default function Settings() {
   const tabs = [
     { label: 'Profile', icon: <PersonRounded fontSize="small" /> },
     { label: 'Appearance', icon: <PaletteRounded fontSize="small" /> },
+    { label: 'Organisation Profile', icon: <BusinessRounded fontSize="small" /> },
     ...(isAdmin ? [
-      { label: 'Organisation Profile', icon: <BusinessRounded fontSize="small" /> },
       { label: 'Custom Fields', icon: <PaletteRounded fontSize="small" /> },
       { label: 'Reports', icon: <AssessmentRounded fontSize="small" /> }
     ] : []),
@@ -996,10 +1048,10 @@ export default function Settings() {
         <Box sx={{ p: { xs: 2.5, md: 4 } }}>
           <TabPanel value={tab} index={0}><ProfileTab currentUser={currentUser} /></TabPanel>
           <TabPanel value={tab} index={1}><AppearanceTab /></TabPanel>
-          {isAdmin && <TabPanel value={tab} index={2}><CompanySettingsTab /></TabPanel>}
+          <TabPanel value={tab} index={2}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>
           {isAdmin && <TabPanel value={tab} index={3}><CustomFieldsTab /></TabPanel>}
           {isAdmin && <TabPanel value={tab} index={4}><ReportsTab /></TabPanel>}
-          <TabPanel value={tab} index={isAdmin ? 5 : 2}><DataTab currentUser={currentUser} /></TabPanel>
+          <TabPanel value={tab} index={isAdmin ? 5 : 3}><DataTab currentUser={currentUser} /></TabPanel>
         </Box>
       </Paper>
     </Box>

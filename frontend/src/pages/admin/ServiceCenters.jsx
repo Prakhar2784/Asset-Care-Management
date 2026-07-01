@@ -95,6 +95,10 @@ export default function ServiceCenters() {
       c.city?.toLowerCase().includes(search.toLowerCase())),
     [centers, search]);
 
+  const presentCategories = useMemo(() =>
+    [...new Set(warrantyAssets.map(a => a.category).filter(Boolean))].sort(),
+    [warrantyAssets]);
+
   const filteredAssets = useMemo(() =>
     warrantyAssets.filter(a => catFilter === "All" || a.category === catFilter),
     [warrantyAssets, catFilter]);
@@ -230,7 +234,7 @@ export default function ServiceCenters() {
                 <InputLabel>Category</InputLabel>
                 <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>
                   <MenuItem value="All">All Categories</MenuItem>
-                  {ASSET_CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+                  {presentCategories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
                 </Select>
               </FormControl>
               <Chip label={`${expiringSoon} expiring in 30 days`} sx={{ fontWeight: 700, bgcolor: "rgba(239,68,68,0.1)", color: "#EF4444", alignSelf: "center" }} />
