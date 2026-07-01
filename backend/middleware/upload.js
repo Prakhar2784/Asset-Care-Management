@@ -49,3 +49,10 @@ exports.logoUpload = multer({
   limits:   { fileSize: 5 * 1024 * 1024 },
   fileFilter: fileFilter(['.jpg', '.jpeg', '.png', '.svg', '.webp']),
 }).single('logo');
+
+// Asset documents — invoice/warranty/AMC/manual/service report, 10 MB
+exports.assetDocUpload = multer({
+  storage:  makeStorage('asset-documents'),
+  limits:   { fileSize: 10 * 1024 * 1024 },
+  fileFilter: fileFilter(['.pdf', '.png', '.jpg', '.jpeg', '.docx']),
+}).array('documents', 5);

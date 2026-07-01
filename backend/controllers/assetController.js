@@ -384,4 +384,48 @@ const getAssetTimeline = async (req, res) => {
   }
 };
 
-module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets, bulkImportAssets, getAssetTimeline };
+// @route   POST /api/assets/:id/documents
+// @access  Admin / HOD (Register Assets / Edit Assets)
+const uploadAssetDocuments = async (req, res) => {
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) return res.status(404).json({ message: 'Asset not found.' });
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No files uploaded.' });
+    }
+
+    // docTypes[] arrives in the same order as the documents[] files
+    const docTypes = [].concat(req.body.docTypes || []);
+    const newDocs = req.files.map((f, i) => ({
+      docType: docTypes[i] || 'invoice',
+      originalName: f.originalname,
+      fileName: f.filename,
+      url: `/uploads/asset-documents/${f.filename}`,
+    }));
+
+    asset.documents.push(...newDocs);
+    await asset.save();
+
+    res.status(200).json(asset.documents);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @route   DELETE /api/assets/:id/documents/:docId
+// @access  Admin / HOD (Edit / Delete Assets)
+const deleteAssetDocument = async (req, res) => {
+  try {
+    const asset = await Asset.findById(req.params.id);
+    if (!asset) return res.status(404).json({ message: 'Asset not found.' });
+
+    asset.documents = asset.documents.filter(d => d._id.toString() !== req.params.docId);
+    await asset.save();
+
+    res.status(200).json(asset.documents);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets, bulkImportAssets, getAssetTimeline, uploadAssetDocuments, deleteAssetDocument };

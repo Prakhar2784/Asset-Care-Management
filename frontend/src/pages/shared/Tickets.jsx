@@ -76,7 +76,7 @@ const Tickets = () => {
   const [loading, setLoading]               = useState(true);
   const [error, setError]                   = useState(null);
   const [searchQuery, setSearchQuery]       = useState('');
-  const [statusFilter, setStatusFilter]     = useState('All');
+  const [statusFilter, setStatusFilter]     = useState('Active');
   const [snackbar, setSnackbar]             = useState('');
 
   // Pagination
@@ -127,7 +127,8 @@ const Tickets = () => {
   const filteredTickets = useMemo(() => tickets.filter(t => {
     const name = t.asset?.name || t.itemLabel || t.deviceRequestRef?.itemRequested || '';
     const matchSearch = t.ticketId?.toLowerCase().includes(searchQuery.toLowerCase()) || name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchStatus = statusFilter === 'All' || t.status === statusFilter;
+    const matchStatus = statusFilter === 'All' || t.status === statusFilter
+      || (statusFilter === 'Active' && !['Resolved', 'Rejected'].includes(t.status));
     return matchSearch && matchStatus;
   }), [tickets, searchQuery, statusFilter]);
 
@@ -316,10 +317,11 @@ const Tickets = () => {
         />
         <TextField select size="small" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
           sx={{ minWidth: 190, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}>
+          <MenuItem value="Active">Active (Open)</MenuItem>
           <MenuItem value="All">All Statuses</MenuItem>
           {STATUS_LIST.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
         </TextField>
-        <Button variant="outlined" onClick={() => { setSearchQuery(''); setStatusFilter('All'); }}
+        <Button variant="outlined" onClick={() => { setSearchQuery(''); setStatusFilter('Active'); }}
           sx={{ borderColor: 'divider', color: 'text.secondary', borderRadius: '10px', fontWeight: 700, textTransform: 'none', height: 40, px: 2 }}>
           Clear
         </Button>

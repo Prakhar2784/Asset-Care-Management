@@ -696,6 +696,15 @@ const AuthPage = () => {
               {view === "forgot" && <button type="button" className="auth-link" onClick={() => handleViewChange("login")}>← Back to Login</button>}
             </div>
 
+            {view !== "forgot" && (
+              <div style={{
+                marginTop: "20px", paddingTop: "20px", borderTop: "1px solid var(--border-color, rgba(168,85,247,0.15))",
+                textAlign: "center", fontSize: "14px", fontWeight: 600, color: "var(--text-muted)"
+              }}>
+                New company? <button type="button" className="auth-link" onClick={() => navigate('/register-company')}>Get Started Free</button>
+              </div>
+            )}
+
             <div className="auth-stats">
               <div className="auth-stat-card">
                 <h4>10K+</h4>

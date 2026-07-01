@@ -10,7 +10,7 @@ const maintenanceLogSchema = new mongoose.Schema({
   cost:               { type: Number, default: 0 },
   serviceDate:        { type: Date, required: true },
   nextServiceDate:    { type: Date },
-  status:             { type: String, enum: ['Completed', 'Pending', 'In Progress'], default: 'Completed' },
+  status:             { type: String, enum: ['Scheduled', 'In Progress', 'Completed', 'Cancelled'], default: 'Scheduled' },
   notes:              { type: String },
   loggedBy:           { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   tenantId:           { type: String, required: true, default: 'default' },

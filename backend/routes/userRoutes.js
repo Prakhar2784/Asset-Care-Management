@@ -12,6 +12,7 @@ const Ticket          = require('../models/Ticket');
 const DeviceRequest   = require('../models/DeviceRequest');
 const AuditLog        = require('../models/AuditLog');
 const { avatarUpload } = require('../middleware/upload');
+const { checkUserLimit } = require('../middleware/limitMiddleware');
 
 // GET /api/users/employees — lightweight list for assignment dropdown
 router.get('/employees', protect, authorize('admin', 'super_admin', 'hod'), async (req, res) => {
@@ -39,7 +40,7 @@ router.get('/', protect, authorize('admin', 'super_admin'), async (req, res) => 
 });
 
 // POST /api/users — create user (admin)
-router.post('/', protect, authorize('admin', 'super_admin'), async (req, res) => {
+router.post('/', protect, authorize('admin', 'super_admin'), checkUserLimit, async (req, res) => {
   try {
     const { name, email, password, role, department, phone } = req.body;
     if (!name || !email || !password || !department) {
@@ -165,12 +166,21 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
     if (!Array.isArray(rows) || rows.length === 0)
       return res.status(400).json({ message: 'No users provided.' });
 
+    const Tenant = require('../models/Tenant');
+    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    const maxUsers = tenant?.limits?.maxUsers ?? Infinity;
+    let userCount = await User.countDocuments();
+
     const results = { created: [], failed: [] };
 
     for (const row of rows) {
       const { name, email, role, department, phone } = row;
       if (!name || !email || !department) {
         results.failed.push({ email: email || '?', reason: 'Missing name, email or department.' });
+        continue;
+      }
+      if (maxUsers !== -1 && userCount >= maxUsers) {
+        results.failed.push({ email, reason: `Plan limit reached (${maxUsers} users). Upgrade your subscription to add more.` });
         continue;
       }
       try {
@@ -195,6 +205,7 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
         const inviteLink = `${frontendUrl}/reset-password/${inviteToken}?invite=true`;
         sendInviteEmail(user, inviteLink).catch(() => {});
         results.created.push({ name: user.name, email: user.email });
+        userCount++;
       } catch (e) {
         results.failed.push({ email, reason: e.message });
       }
@@ -207,7 +218,7 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
 });
 
 // POST /api/users/invite — create user without password, send invite link
-router.post('/invite', protect, authorize('admin', 'super_admin'), async (req, res) => {
+router.post('/invite', protect, authorize('admin', 'super_admin'), checkUserLimit, async (req, res) => {
   try {
     const { name, email, role, department, phone } = req.body;
     if (!name || !email || !department) {

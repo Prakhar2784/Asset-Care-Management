@@ -33,10 +33,16 @@ const ThemeProviderInner = ({ children }) => {
   };
 
   useEffect(() => {
+    if (!currentUser) {
+      // Logged out — reset to the generic default instead of keeping a stale tenant's branding
+      setBranding({ name: 'AssetCare', logoUrl: null, primaryColor: '#141414', secondaryColor: '#A855F7' });
+      setBrandingLoading(false);
+      return;
+    }
     fetchBranding();
     window.addEventListener('tenant-branding-changed', fetchBranding);
     return () => window.removeEventListener('tenant-branding-changed', fetchBranding);
-  }, []);
+  }, [currentUser?.tenantId]);
 
   useEffect(() => {
     const saved = localStorage.getItem(storageKey) || 'light';

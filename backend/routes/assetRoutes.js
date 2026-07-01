@@ -12,8 +12,11 @@ const {
   getActiveAssets,
   bulkImportAssets,
   getAssetTimeline,
+  uploadAssetDocuments,
+  deleteAssetDocument,
 } = require('../controllers/assetController');
 const { protect, authorize, requirePermission } = require('../middleware/authMiddleware');
+const { assetDocUpload } = require('../middleware/upload');
 
 // Must be before /:id to avoid route conflict
 router.get('/myassets',    protect, getMyAssets);
@@ -32,5 +35,11 @@ router.route('/:id')
 
 router.put('/:id/restore',   protect, requirePermission('Edit / Delete Assets'), restoreAsset);
 router.get('/:id/timeline',  protect, requirePermission('View All Assets'), getAssetTimeline);
+
+router.post('/:id/documents',
+  protect, requirePermission('Register Assets', 'Edit / Delete Assets'),
+  assetDocUpload, uploadAssetDocuments);
+router.delete('/:id/documents/:docId',
+  protect, requirePermission('Edit / Delete Assets'), deleteAssetDocument);
 
 module.exports = router;

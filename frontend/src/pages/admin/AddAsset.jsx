@@ -359,7 +359,22 @@ const AddAsset = () => {
     setLoading(true);
     try {
       const payload = { ...formData, customFields };
-      await api.post('/assets', payload);
+      const { data: createdAsset } = await api.post('/assets', payload);
+
+      const docEntries = Object.entries(docs);
+      if (docEntries.length > 0) {
+        const fd = new FormData();
+        docEntries.forEach(([key, file]) => {
+          fd.append('documents', file);
+          fd.append('docTypes', key);
+        });
+        try {
+          await api.post(`/assets/${createdAsset._id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        } catch {
+          setError("Asset was registered, but the attached documents failed to upload. You can add them later from the asset's detail page.");
+        }
+      }
+
       setOpen(true);
       setTimeout(() => navigate("/admin/assets"), 1500);
     } catch (err) {

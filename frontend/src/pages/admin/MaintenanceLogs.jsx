@@ -542,7 +542,8 @@ export default function MaintenanceLogs() {
               <TextField
                 fullWidth size="small" label="Technician Contact" sx={inputSx}
                 value={form.technicianContact}
-                onChange={e => setForm(f => ({ ...f, technicianContact: e.target.value }))}
+                onChange={e => setForm(f => ({ ...f, technicianContact: e.target.value.replace(/[^0-9]/g, '').slice(0, 15) }))}
+                slotProps={{ htmlInput: { inputMode: 'numeric' } }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>

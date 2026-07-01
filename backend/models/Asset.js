@@ -70,6 +70,15 @@ const assetSchema = new mongoose.Schema({
   warrantyAlertSent15: { type: Boolean, default: false },
   warrantyAlertSent7: { type: Boolean, default: false },
 
+  // Document Vault — invoice, warranty card, AMC contract, manual, service report
+  documents: [{
+    docType: { type: String, enum: ['invoice', 'warranty', 'amc', 'manual', 'service'], required: true },
+    originalName: { type: String, required: true },
+    fileName: { type: String, required: true },
+    url: { type: String, required: true },
+    uploadedAt: { type: Date, default: Date.now },
+  }],
+
   // Custom metadata fields (managed dynamically via CustomField config)
   customFields: {
     type: mongoose.Schema.Types.Mixed,
