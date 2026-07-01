@@ -20,12 +20,12 @@ const getDashboardStats = async (req, res) => {
       recentTickets,
       departmentBreakdown
     ] = await Promise.all([
-      Asset.countDocuments(),
+      Asset.countDocuments({ isDeleted: { $ne: true } }),
       Ticket.countDocuments(),
       Ticket.countDocuments({ status: 'Pending Approval' }),
       Ticket.countDocuments({ status: { $in: ['Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair'] } }),
       Ticket.countDocuments({ status: 'Resolved' }),
-      Asset.countDocuments({ warrantyEnd: { $gte: now, $lte: in30Days } }),
+      Asset.countDocuments({ isDeleted: { $ne: true }, warrantyEnd: { $gte: now, $lte: in30Days } }),
       DeviceRequest.countDocuments({ status: 'Pending' }),
       Ticket.find({})
         .sort({ createdAt: -1 })
@@ -33,6 +33,7 @@ const getDashboardStats = async (req, res) => {
         .populate('asset', 'name department')
         .populate('raisedBy', 'name'),
       Asset.aggregate([
+        { $match: { isDeleted: { $ne: true } } },
         { $group: { _id: '$department', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 6 }
