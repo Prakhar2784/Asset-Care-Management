@@ -1,409 +1,516 @@
 import React, { useState, useEffect } from "react";
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Snackbar,
-  Typography,
-  CircularProgress
+  Alert, Box, Button, Chip, CircularProgress, Dialog,
+  DialogContent, Grid, IconButton,
+  LinearProgress, Paper, Snackbar, Stack, Typography,
 } from "@mui/material";
 import {
-  Inventory2Rounded,
-  ConfirmationNumberRounded,
-  ApprovalRounded,
-  ArrowForwardRounded,
-  CloseRounded,
-  WarningAmberRounded,
-  TaskAltRounded,
-  BusinessRounded,
-  AddRounded,
-  TimelineRounded,
-  BuildRounded,
-  DevicesRounded
+  Inventory2Rounded, ConfirmationNumberRounded, ApprovalRounded,
+  ArrowForwardRounded, CloseRounded, TaskAltRounded,
+  BusinessRounded, AddRounded, BuildRounded, DevicesRounded,
+  ShieldRounded, SpeedRounded, PeopleRounded,
+  NotificationsActiveRounded, CalendarTodayRounded,
+  CheckCircleRounded, AccessTimeRounded,
+  ReceiptLongRounded, StorageRounded,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-
-import PageHeader from "../../components/PageHeader";
-import StatCard from "../../components/StatCard";
+import { useAuth } from "../../context/AuthContext";
 import StatusChip from "../../components/StatusChip";
 import api from "../../api/axios";
 
+/* ─────────────────────── helpers ─────────────────────── */
+const ADMIN_TIER = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+
+const PRIORITY_COLOR = { Critical: "#EF4444", High: "#F97316", Medium: "#F59E0B", Low: "#22C55E" };
+const STATUS_DOT = {
+  "Pending Approval": "#F59E0B",
+  "Under Repair":     "#8B5CF6",
+  Resolved:           "#22C55E",
+  Rejected:           "#EF4444",
+};
+const greet = () => {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+};
+const fmtDate = () =>
+  new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+/* ─────────────────────── sub-components ─────────────────────── */
+const KpiCard = ({ label, value, sub, icon, accent, onClick }) => (
+  <Paper onClick={onClick} sx={{
+    p: 2.8, borderRadius: "20px", border: "1px solid", borderColor: "divider",
+    bgcolor: "background.paper", cursor: "pointer", position: "relative", overflow: "hidden",
+    transition: "all 0.22s", "&:hover": { transform: "translateY(-4px)", boxShadow: `0 20px 48px ${accent}22`, borderColor: accent },
+  }}>
+    <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: accent, borderRadius: "20px 0 0 20px" }} />
+    <Box sx={{ width: 42, height: 42, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: `${accent}18` }}>
+      <Box sx={{ color: accent, "& svg": { fontSize: 22 } }}>{icon}</Box>
+    </Box>
+    <Typography sx={{ fontSize: 34, fontWeight: 950, color: "text.primary", lineHeight: 1.1, letterSpacing: "-1.5px", mt: 2, mb: 0.3 }}>
+      {value ?? "—"}
+    </Typography>
+    <Typography sx={{ fontSize: 13, fontWeight: 700, color: "text.primary", mb: 0.3 }}>{label}</Typography>
+    <Typography sx={{ fontSize: 12, color: "text.secondary" }}>{sub}</Typography>
+  </Paper>
+);
+
+const QuickAction = ({ label, icon, accent, onClick }) => (
+  <Paper onClick={onClick} sx={{
+    p: 2, borderRadius: "16px", border: "1px solid", borderColor: "divider",
+    bgcolor: "background.paper", cursor: "pointer", textAlign: "center",
+    transition: "all 0.2s", "&:hover": { borderColor: accent, bgcolor: `${accent}08`, transform: "translateY(-3px)" },
+  }}>
+    <Box sx={{ width: 44, height: 44, borderRadius: "14px", bgcolor: `${accent}15`, display: "grid", placeItems: "center", mx: "auto", mb: 1.2 }}>
+      <Box sx={{ color: accent, "& svg": { fontSize: 22 } }}>{icon}</Box>
+    </Box>
+    <Typography fontSize={12} fontWeight={700} color="text.primary" lineHeight={1.3}>{label}</Typography>
+  </Paper>
+);
+
+const TicketRow = ({ ticket, onClick }) => {
+  const dot = STATUS_DOT[ticket.status] || "#94A3B8";
+  const pri = PRIORITY_COLOR[ticket.priority] || "#94A3B8";
+  return (
+    <Box onClick={onClick} sx={{
+      display: "flex", alignItems: "center", gap: 2, px: 2, py: 1.6,
+      borderRadius: "14px", cursor: "pointer", transition: "all 0.18s",
+      "&:hover": { bgcolor: "action.hover" },
+    }}>
+      <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: dot, flexShrink: 0 }} />
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography fontSize={13} fontWeight={700} color="text.primary" noWrap>{ticket.issue}</Typography>
+        <Typography fontSize={11} color="text.secondary" noWrap>{ticket.asset} · {ticket.date}</Typography>
+      </Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+        <Box sx={{ px: 1, py: 0.25, borderRadius: "6px", fontSize: 10, fontWeight: 800, bgcolor: `${pri}18`, color: pri }}>
+          {ticket.priority}
+        </Box>
+        <StatusChip label={ticket.status} />
+      </Box>
+    </Box>
+  );
+};
+
+/* ─────────────────────── main component ─────────────────────── */
 const AdminDashboard = () => {
   const navigate = useNavigate();
-
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const [ticketDialogOpen, setTicketDialogOpen] = useState(false);
-  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
-  const [selectedAlert, setSelectedAlert] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const { currentUser: user } = useAuth();
 
   const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [snackbar, setSnackbar]           = useState({ open: false, message: "", severity: "success" });
+
+  /* ── permission helpers ── */
+  const isAdminTier = ADMIN_TIER.includes(user?.role);
+  const customPerms = user?.customPermissions || [];
+  const hasPerm = (feature) => {
+    if (isAdminTier) return true;
+    return customPerms.some(p => p.feature === feature && p.allowed);
+  };
+
+  const canViewAssets  = hasPerm('View All Assets') || hasPerm('Register Assets') || hasPerm('Edit / Delete Assets') || hasPerm('Assign Assets');
+  const canRegister    = hasPerm('Register Assets');
+  const canApprove     = hasPerm('Approve Device Requests');
+  const canViewTickets = hasPerm('Raise Tickets') || hasPerm('Manage All Tickets');
+  const canManageUsers = isAdminTier;
+  const canViewReports = isAdminTier;
 
   useEffect(() => {
-    const fetchDashboardStats = async () => {
-      try {
-        const response = await api.get('/dashboard/stats');
-        setDashboardData(response.data);
-      } catch {
-        setError("Failed to sync live data. Please verify your connection.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDashboardStats();
+    api.get("/dashboard/stats")
+      .then(r => setDashboardData(r.data))
+      .catch(() => setError("Failed to load dashboard data."))
+      .finally(() => setLoading(false));
   }, []);
 
-  const [alerts, setAlerts] = useState([
-    {
-      id: "ALR-001",
-      title: "System Notification",
-      type: "warning",
-      message: "Regular system maintenance is scheduled for this weekend. Some services may be delayed.",
-      actionText: "Acknowledge",
-      route: "/admin/dashboard",
-    }
-  ]);
-
-  const handleTicketOpen = (ticket) => { setSelectedTicket(ticket); setTicketDialogOpen(true); };
-  const handleAlertOpen = (alert) => { setSelectedAlert(alert); setAlertDialogOpen(true); };
-  const handleDismissAlert = (alertId) => {
-    setAlerts((prev) => prev.filter((item) => item.id !== alertId));
-    setSnackbar({ open: true, message: "Alert dismissed successfully.", severity: "success" });
-  };
-  const handleAlertAction = () => {
-    if (selectedAlert?.route) navigate(selectedAlert.route);
-    setAlertDialogOpen(false);
-  };
-
-  const quickLinks = [
-    { label: "Review Approvals", icon: <ApprovalRounded />, route: "/admin/approvals" },
-    { label: "Vendor Directory", icon: <BusinessRounded />, route: "/admin/vendors" },
-    { label: "Add New Asset", icon: <AddRounded />, route: "/admin/assets/add" },
-    { label: "Ticket Timeline", icon: <TimelineRounded />, route: "/tickets" },
-  ];
-
-  const stats = [
-    { title: "Total Assets", value: dashboardData?.totalAssets ?? "—", subtitle: "Registered in system", icon: <Inventory2Rounded sx={{ fontSize: 40 }} />, color: "#CBFA57", route: "/admin/assets" },
-    { title: "Total Tickets", value: dashboardData?.totalTickets ?? "—", subtitle: "All-time service requests", icon: <ConfirmationNumberRounded sx={{ fontSize: 40 }} />, color: "#CBFA57", route: "/tickets" },
-    { title: "Active Repairs", value: dashboardData?.activeRepairs ?? "—", subtitle: "Currently with vendors", icon: <BuildRounded sx={{ fontSize: 40 }} />, color: "#DC2626", route: "/tickets" },
-    { title: "Pending Approvals", value: dashboardData?.pendingTickets ?? "—", subtitle: "Requires HOD authorization", icon: <ApprovalRounded sx={{ fontSize: 40 }} />, color: "#D97706", route: "/admin/approvals" },
-    { title: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon ?? "—", subtitle: "Within next 30 days", icon: <WarningAmberRounded sx={{ fontSize: 40 }} />, color: "#EA580C", route: "/admin/assets" },
-    { title: "Device Requests", value: dashboardData?.pendingRequests ?? "—", subtitle: "Awaiting admin review", icon: <DevicesRounded sx={{ fontSize: 40 }} />, color: "#7C3AED", route: "/admin/approvals" },
-  ];
-
-  const recentTickets = dashboardData?.recentTickets?.map(ticket => ({
-    id: ticket.ticketId,
-    asset: ticket.asset?.name || "Unknown Asset",
-    issue: ticket.issue,
-    status: ticket.status,
-    priority: ticket.priority,
-    date: new Date(ticket.createdAt).toLocaleDateString(),
-    raisedBy: ticket.raisedBy?.name || "Employee",
-    department: ticket.asset?.department || "Unassigned",
-    timeline: [
-      `Ticket Created: ${new Date(ticket.createdAt).toLocaleDateString()}`,
-      `Current Status: ${ticket.status}`
-    ]
-  })) || [];
+  const recentTickets = (dashboardData?.recentTickets || []).map(t => ({
+    id: t.ticketId,
+    asset: t.asset?.name || "Unknown Asset",
+    issue: t.issue,
+    status: t.status,
+    priority: t.priority,
+    date: new Date(t.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }),
+    raisedBy: t.raisedBy?.name || "Employee",
+    department: t.asset?.department || "Unassigned",
+  }));
 
   const deptBreakdown = dashboardData?.departmentBreakdown || [];
-  const deptTotal = deptBreakdown.reduce((sum, d) => sum + d.count, 0) || 1;
+  const deptTotal     = deptBreakdown.reduce((s, d) => s + d.count, 0) || 1;
+  const DEPT_COLORS   = ["#A855F7", "#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"];
+
+  const inWarranty   = Math.max(0, (dashboardData?.totalAssets || 0) - (dashboardData?.warrantyExpiringSoon || 0));
+  const expiringSoon = dashboardData?.warrantyExpiringSoon || 0;
+  const totalAssets  = dashboardData?.totalAssets || 1;
+  const healthPct    = Math.round((inWarranty / totalAssets) * 100);
+
+  /* ── filtered KPIs ── */
+  const allKpis = [
+    { label: "Total Assets",      value: dashboardData?.totalAssets,         sub: "Registered in system",      icon: <Inventory2Rounded />,          accent: "#A855F7", route: "/admin/assets",    show: canViewAssets },
+    { label: "Active Repairs",    value: dashboardData?.activeRepairs,        sub: "Currently under service",    icon: <BuildRounded />,               accent: "#EF4444", route: "/tickets",         show: canViewAssets },
+    { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#F59E0B", route: "/admin/approvals", show: canApprove },
+    { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#3B82F6", route: "/tickets",         show: canViewTickets || isAdminTier },
+    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within next 30 days",       icon: <ShieldRounded />,               accent: "#EA580C", route: "/admin/assets",    show: canViewAssets },
+    { label: "Device Requests",   value: dashboardData?.pendingRequests,      sub: "Awaiting review",            icon: <DevicesRounded />,              accent: "#8B5CF6", route: "/admin/approvals", show: canApprove },
+  ].filter(k => k.show);
+
+  /* ── filtered quick actions ── */
+  const allQuickActions = [
+    { label: "Add Asset",    icon: <AddRounded />,                accent: "#A855F7", route: "/admin/assets/add",  show: canRegister },
+    { label: "Approvals",    icon: <ApprovalRounded />,           accent: "#F59E0B", route: "/admin/approvals",   show: canApprove },
+    { label: "Tickets",      icon: <ConfirmationNumberRounded />, accent: "#22C55E", route: "/tickets",            show: (canViewTickets || isAdminTier) && !canRegister },
+    { label: "Reports",      icon: <StorageRounded />,            accent: "#8B5CF6", route: "/admin/reports",     show: canViewReports },
+    { label: "Users",        icon: <PeopleRounded />,             accent: "#06B6D4", route: "/admin/users",       show: canManageUsers },
+    { label: "Departments",  icon: <BusinessRounded />,           accent: "#EC4899", route: "/admin/departments", show: canManageUsers },
+    { label: "Invoices",     icon: <ReceiptLongRounded />,        accent: "#EA580C", route: "/admin/invoices",    show: isAdminTier },
+    { label: "Assets",       icon: <Inventory2Rounded />,         accent: "#A855F7", route: "/admin/assets",      show: canViewAssets && !canRegister },
+  ].filter(a => a.show);
+
+  /* ── banner stat strip ── */
+  const bannerStats = [
+    canViewAssets              && { label: "Total Assets",   value: dashboardData?.totalAssets ?? 0,          icon: <Inventory2Rounded sx={{ fontSize: 16 }} />,       color: "#C4B5FD" },
+    canViewAssets              && { label: "Active Repairs", value: dashboardData?.activeRepairs ?? 0,         icon: <BuildRounded sx={{ fontSize: 16 }} />,            color: "#FCA5A5" },
+    canViewAssets              && { label: "Warranty Alert", value: dashboardData?.warrantyExpiringSoon ?? 0,  icon: <ShieldRounded sx={{ fontSize: 16 }} />,           color: "#FCD34D" },
+    (canViewTickets || isAdminTier) && { label: "Open Tickets", value: dashboardData?.totalTickets ?? 0,      icon: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />, color: "#6EE7B7" },
+  ].filter(Boolean);
 
   return (
-    <Box sx={{ width: "100%", pb: 5 }}>
-      <PageHeader
-        title="System Overview"
-        subtitle="Real-time overview for asset service, warranty tracking, tickets and pending operational workflows."
-        action={
-          <Button
-            variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
-            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 800, fontSize: "14px", px: 3, py: 1.1, borderRadius: "10px", boxShadow: "none", "&:hover": { bgcolor: "#1E1E1E", boxShadow: "none" } }}
-          >
-            New Asset
-          </Button>
-        }
-      />
+    <Box sx={{ width: "100%", pb: 6 }}>
 
-      {error && <Alert severity="error" sx={{ mb: 4, borderRadius: "12px", fontWeight: 600 }}>{error}</Alert>}
+      {/* ── Welcome Banner ─────────────────────────────────────── */}
+      <Box sx={{
+        mb: 4, borderRadius: "24px",
+        background: "linear-gradient(135deg,#4C1D95 0%,#7C3AED 45%,#A855F7 100%)",
+        position: "relative", overflow: "hidden",
+      }}>
+        <Box sx={{ position: "absolute", right: -80, top: -80, width: 280, height: 280, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.05)", pointerEvents: "none" }} />
+        <Box sx={{ position: "absolute", right: 80, bottom: -100, width: 200, height: 200, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
+        <Box sx={{ position: "absolute", left: "40%", top: -40, width: 160, height: 160, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />
+
+        <Box sx={{ p: { xs: 3, md: "28px 32px 20px" }, position: "relative", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1 }}>
+              <CalendarTodayRounded sx={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }} />
+              <Typography sx={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.55)", letterSpacing: "0.3px" }}>
+                {fmtDate()}
+              </Typography>
+            </Box>
+            <Typography sx={{ fontSize: { xs: 22, md: 30 }, fontWeight: 900, color: "#fff", letterSpacing: "-1px", lineHeight: 1.15, mb: 0.8 }}>
+              {greet()}, {user?.name?.split(" ")[0] || "there"}
+            </Typography>
+            <Typography sx={{ fontSize: 13.5, color: "rgba(255,255,255,0.65)", fontWeight: 500, maxWidth: 480 }}>
+              {isAdminTier
+                ? "Here is your asset operations summary for today. Review pending items and stay ahead."
+                : "Here's a quick overview of your activity. Raise a ticket or check your requests below."}
+            </Typography>
+          </Box>
+
+          {/* Action buttons — only what the user is allowed to do */}
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignSelf: "center" }}>
+            {canRegister && (
+              <Button variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
+                sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
+                Register Asset
+              </Button>
+            )}
+            {canApprove && (
+              <Button variant="contained" startIcon={<NotificationsActiveRounded />} onClick={() => navigate("/admin/approvals")}
+                sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
+                Approvals {dashboardData?.pendingTickets > 0 && `(${dashboardData.pendingTickets})`}
+              </Button>
+            )}
+            {!isAdminTier && !canRegister && !canApprove && canViewTickets && (
+              <Button variant="contained" startIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
+                sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
+                My Tickets
+              </Button>
+            )}
+          </Box>
+        </Box>
+
+        {/* Stat strip — only shown when there's something relevant to display */}
+        {bannerStats.length > 0 && (
+          <Box sx={{
+            position: "relative",
+            display: "grid", gridTemplateColumns: `repeat(${bannerStats.length}, 1fr)`,
+            borderTop: "1px solid rgba(255,255,255,0.12)",
+          }}>
+            {bannerStats.map((s, i) => (
+              <Box key={s.label} sx={{
+                px: { xs: 2, md: 3 }, py: 2,
+                borderRight: i < bannerStats.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                display: "flex", alignItems: "center", gap: 1.5,
+              }}>
+                <Box sx={{ width: 34, height: 34, borderRadius: "9px", flexShrink: 0, bgcolor: "rgba(255,255,255,0.1)", display: "grid", placeItems: "center", color: s.color }}>
+                  {s.icon}
+                </Box>
+                <Box>
+                  <Typography sx={{ fontSize: 20, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{s.value}</Typography>
+                  <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontWeight: 600, mt: 0.3, whiteSpace: "nowrap" }}>{s.label}</Typography>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        )}
+      </Box>
+
+      {error && <Alert severity="error" sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }}>{error}</Alert>}
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
-          <CircularProgress color="inherit" />
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh", gap: 2 }}>
+          <CircularProgress size={44} sx={{ color: "#A855F7" }} />
+          <Typography color="text.secondary" fontWeight={600}>Loading dashboard…</Typography>
         </Box>
       ) : (
         <>
-          <Grid container spacing={3} sx={{ mb: 3 }}>
-            {stats.map((stat, index) => (
-              <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={index}>
-                <Box onClick={() => navigate(stat.route)} sx={{ cursor: "pointer", height: "100%", transition: "0.3s ease", "&:hover": { transform: "translateY(-5px)" } }}>
-                  <StatCard title={stat.title} value={stat.value} subtitle={stat.subtitle} icon={stat.icon} color={stat.color} />
-                </Box>
-              </Grid>
-            ))}
-          </Grid>
-
-          {/* Warranty Management Row */}
-          <Paper sx={{ p: { xs: 2.5, md: 3 }, borderRadius: "24px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", mb: 3 }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5, flexWrap: "wrap", gap: 1 }}>
-              <Box>
-                <Typography sx={{ fontWeight: 900, fontSize: 18, color: "text.primary", letterSpacing: "-0.4px" }}>Warranty Management</Typography>
-                <Typography sx={{ fontSize: 13, color: "text.secondary", fontWeight: 500 }}>Real-time warranty health across your asset fleet.</Typography>
-              </Box>
-              <Button endIcon={<ArrowForwardRounded />} onClick={() => navigate("/admin/assets")}
-                sx={{ color: "text.secondary", fontWeight: 700, fontSize: 13, "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
-                View Assets
-              </Button>
-            </Box>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
-              {[
-                {
-                  label: "In Warranty",
-                  value: dashboardData?.totalAssets && dashboardData?.warrantyExpiringSoon != null
-                    ? (dashboardData.totalAssets - (dashboardData.warrantyExpiringSoon || 0))
-                    : "—",
-                  color: "#16A34A", bg: "#DCFCE7", bar: "#16A34A",
-                  desc: "Assets under active warranty",
-                },
-                {
-                  label: "Expiring Soon",
-                  value: dashboardData?.warrantyExpiringSoon ?? "—",
-                  color: "#D97706", bg: "#FEF3C7", bar: "#F59E0B",
-                  desc: "Expiring within next 30 days",
-                },
-                {
-                  label: "Expired / Unknown",
-                  value: "—",
-                  color: "#DC2626", bg: "#FEE2E2", bar: "#EF4444",
-                  desc: "Warranty expired or not set",
-                },
-              ].map((w) => (
-                <Box key={w.label} sx={{ p: 2.5, borderRadius: "16px", bgcolor: "background.default", border: "1px solid", borderColor: "divider", cursor: "pointer", transition: "all 0.2s", "&:hover": { borderColor: w.color, bgcolor: w.bg + "55" }, }} onClick={() => navigate("/admin/assets")}>
-                  <Typography sx={{ fontSize: 11, fontWeight: 800, color: w.color, textTransform: "uppercase", letterSpacing: "1px", mb: 1 }}>
-                    {w.label}
-                  </Typography>
-                  <Typography sx={{ fontSize: 34, fontWeight: 950, color: "text.primary", lineHeight: 1, letterSpacing: "-1.5px", mb: 0.5 }}>
-                    {w.value}
-                  </Typography>
-                  <Typography sx={{ fontSize: 12, color: "text.secondary", fontWeight: 500, mb: 1.5 }}>{w.desc}</Typography>
-                  <Box sx={{ height: 4, bgcolor: "action.selected", borderRadius: 2, overflow: "hidden" }}>
-                    <Box sx={{ height: "100%", width: "60%", bgcolor: w.bar, borderRadius: 2 }} />
-                  </Box>
-                </Box>
+          {/* ── KPI Cards ───────────────────────────────────────── */}
+          {allKpis.length > 0 && (
+            <Grid container spacing={2.5} sx={{ mb: 3.5 }}>
+              {allKpis.map((k, i) => (
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={i}>
+                  <KpiCard {...k} onClick={() => navigate(k.route)} />
+                </Grid>
               ))}
-            </Box>
-          </Paper>
+            </Grid>
+          )}
 
-          <Grid container spacing={3}>
-            {/* Active Service Tickets */}
-            <Grid size={{ xs: 12, lg: 8 }}>
-              <Paper sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "28px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: { xs: "flex-start", sm: "center" }, gap: 2, mb: 3, flexDirection: { xs: "column", sm: "row" } }}>
+          {/* ── Middle row: Tickets + Right sidebar ─────────────── */}
+          <Grid container spacing={3} sx={{ mb: 3 }} alignItems="flex-start">
+
+            {/* Recent Tickets */}
+            <Grid size={{ xs: 12, lg: canViewAssets ? 8 : 12 }}>
+              <Paper sx={{ borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper", overflow: "hidden" }}>
+                <Box sx={{ px: 3, py: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid", borderColor: "divider" }}>
                   <Box>
-                    <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "22px", letterSpacing: "-0.7px" }}>Active Service Tickets</Typography>
-                    <Typography sx={{ color: "text.secondary", fontSize: "14px", fontWeight: 600, mt: 0.5 }}>Click any ticket to view service details and timeline.</Typography>
+                    <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px">Recent Tickets</Typography>
+                    <Typography fontSize={12} color="text.secondary" fontWeight={500} mt={0.2}>Click a row to view full details</Typography>
                   </Box>
-                  <Button endIcon={<ArrowForwardRounded />} onClick={() => navigate("/tickets")} sx={{ color: "text.secondary", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
+                  <Button size="small" endIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
+                    sx={{ fontWeight: 700, color: "#A855F7", fontSize: 13, "&:hover": { bgcolor: "rgba(168,85,247,0.08)" } }}>
                     View All
                   </Button>
                 </Box>
 
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {recentTickets.length === 0 ? (
-                    <Box sx={{ p: 4, textAlign: "center", border: "1px dashed", borderColor: "divider", borderRadius: "20px", bgcolor: "background.default" }}>
-                      <Typography color="text.secondary" fontWeight={600}>No recent tickets found.</Typography>
+                <Box sx={{ px: 3, py: 1.5, display: "flex", gap: 2.5, flexWrap: "wrap", borderBottom: "1px solid", borderColor: "divider", bgcolor: "background.default" }}>
+                  {Object.entries(STATUS_DOT).map(([s, c]) => (
+                    <Box key={s} sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
+                      <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: c }} />
+                      <Typography fontSize={11} fontWeight={600} color="text.secondary">{s}</Typography>
                     </Box>
-                  ) : (
-                    recentTickets.map((ticket) => (
-                      <Box
-                        key={ticket.id} onClick={() => handleTicketOpen(ticket)}
-                        sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: { xs: "flex-start", md: "center" }, flexDirection: { xs: "column", md: "row" }, gap: 2, transition: "all 0.3s ease", cursor: "pointer", "&:hover": { borderColor: "rgba(17,17,17,0.20)", bgcolor: "background.paper", transform: "translateY(-3px)", boxShadow: "0 14px 30px rgba(17,17,17,0.08)" } }}
-                      >
-                        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                          <Avatar sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, width: 44, height: 44, fontSize: 16 }}>
-                            {ticket.asset.charAt(0)}
-                          </Avatar>
-                          <Box>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 0.7, flexWrap: "wrap" }}>
-                              <Typography sx={{ fontFamily: "monospace", fontSize: "12px", color: "text.secondary", fontWeight: 700, bgcolor: "action.selected", px: 1, py: 0.3, borderRadius: 1 }}>{ticket.id}</Typography>
-                              <StatusChip label={ticket.priority} />
-                            </Box>
-                            <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "16px", lineHeight: 1.4 }}>{ticket.issue}</Typography>
-                            <Typography sx={{ fontSize: "13px", color: "text.secondary", mt: 0.5, fontWeight: 600 }}>{ticket.asset} • Logged: {ticket.date}</Typography>
-                          </Box>
-                        </Box>
-                        <Box sx={{ alignSelf: { xs: "flex-start", md: "center" } }}>
-                          <StatusChip label={ticket.status} />
-                        </Box>
-                      </Box>
-                    ))
-                  )}
+                  ))}
+                </Box>
+
+                <Box sx={{ p: 1.5 }}>
+                  {recentTickets.length === 0 ? (
+                    <Box sx={{ py: 3, textAlign: "center" }}>
+                      <TaskAltRounded sx={{ fontSize: 32, color: "text.disabled", mb: 0.5 }} />
+                      <Typography color="text.disabled" fontWeight={600} fontSize={13}>No recent tickets</Typography>
+                    </Box>
+                  ) : recentTickets.map(t => (
+                    <TicketRow key={t.id} ticket={t} onClick={() => setSelectedTicket(t)} />
+                  ))}
                 </Box>
               </Paper>
             </Grid>
 
-            {/* Right Column: Alerts + Quick Links + Dept Breakdown */}
-            <Grid size={{ xs: 12, lg: 4 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                <Paper sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "28px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
-                  <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "22px", mb: 2.5, letterSpacing: "-0.7px" }}>System Alerts</Typography>
-
-                  {alerts.length === 0 ? (
-                    <Paper sx={{ p: 3, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", textAlign: "center", mb: 3 }}>
-                      <TaskAltRounded sx={{ color: "#CBFA57", fontSize: 38, mb: 1 }} />
-                      <Typography sx={{ color: "text.primary", fontWeight: 900 }}>No Active Alerts</Typography>
-                      <Typography sx={{ color: "text.secondary", fontSize: "14px", mt: 0.5 }}>Everything looks good right now.</Typography>
-                    </Paper>
-                  ) : (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
-                      {alerts.map((item) => <AlertBox key={item.id} alert={item} onOpen={() => handleAlertOpen(item)} onDismiss={() => handleDismissAlert(item.id)} />)}
+            {/* Right sidebar — asset health & dept breakdown, only for users who can view assets */}
+            {canViewAssets && (
+              <Grid size={{ xs: 12, lg: 4 }}>
+                <Stack spacing={3}>
+                  <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2.5 }}>
+                      <ShieldRounded sx={{ color: "#A855F7", fontSize: 20 }} />
+                      <Typography fontWeight={900} fontSize={16}>Asset Health</Typography>
                     </Box>
-                  )}
 
-                  <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "20px", mb: 2 }}>Quick Links</Typography>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                    {quickLinks.map((link) => (
-                      <Button key={link.label} variant="outlined" fullWidth startIcon={link.icon} endIcon={<ArrowForwardRounded />} onClick={() => navigate(link.route)}
-                        sx={{ borderColor: "divider", color: "text.primary", justifyContent: "space-between", py: 1.3, px: 2, borderRadius: "10px", fontWeight: 700, "& .MuiButton-startIcon": { color: "text.secondary" }, "&:hover": { bgcolor: "action.hover", borderColor: "text.disabled" } }}>
-                        <Box sx={{ flex: 1, textAlign: "left" }}>{link.label}</Box>
-                      </Button>
-                    ))}
-                  </Box>
-                </Paper>
+                    <Box sx={{ textAlign: "center", mb: 2.5 }}>
+                      <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 100, height: 100 }}>
+                        <CircularProgress variant="determinate" value={healthPct} size={100} thickness={5}
+                          sx={{ color: healthPct > 70 ? "#22C55E" : healthPct > 40 ? "#F59E0B" : "#EF4444", position: "absolute" }} />
+                        <CircularProgress variant="determinate" value={100} size={100} thickness={5}
+                          sx={{ color: "action.selected", position: "absolute" }} />
+                        <Box sx={{ position: "relative", textAlign: "center" }}>
+                          <Typography fontSize={22} fontWeight={950} color="text.primary" lineHeight={1}>{healthPct}%</Typography>
+                          <Typography fontSize={10} color="text.secondary" fontWeight={700}>healthy</Typography>
+                        </Box>
+                      </Box>
+                    </Box>
 
-                {deptBreakdown.length > 0 && (
-                  <Paper sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "28px", bgcolor: "background.paper", border: 1, borderColor: "divider" }}>
-                    <Typography sx={{ fontWeight: 900, color: "text.primary", fontSize: "20px", mb: 2.5, letterSpacing: "-0.5px" }}>Assets by Department</Typography>
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                      {deptBreakdown.map((dept) => (
-                        <Box key={dept._id || "Unknown"}>
+                    <Stack spacing={1.5}>
+                      {[
+                        { label: "In Warranty",    value: inWarranty,   color: "#22C55E" },
+                        { label: "Expiring Soon",  value: expiringSoon, color: "#F59E0B" },
+                        { label: "Active Repairs", value: dashboardData?.activeRepairs || 0, color: "#EF4444" },
+                      ].map(({ label, value, color }) => (
+                        <Box key={label}>
                           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                            <Typography fontSize={13} fontWeight={700} color="text.primary">{dept._id || "Unassigned"}</Typography>
-                            <Typography fontSize={13} fontWeight={800} color="text.primary">{dept.count}</Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                              <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
+                              <Typography fontSize={12} fontWeight={600} color="text.secondary">{label}</Typography>
+                            </Box>
+                            <Typography fontSize={12} fontWeight={800} color="text.primary">{value}</Typography>
                           </Box>
-                          <LinearProgress
-                            variant="determinate"
-                            value={Math.round((dept.count / deptTotal) * 100)}
-                            sx={{ height: 8, borderRadius: 4, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: "#CBFA57", borderRadius: 4 } }}
-                          />
+                          <LinearProgress variant="determinate" value={totalAssets > 0 ? Math.round((value / totalAssets) * 100) : 0}
+                            sx={{ height: 5, borderRadius: 3, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: color, borderRadius: 3 } }} />
                         </Box>
                       ))}
+                    </Stack>
+                  </Paper>
+
+                  {deptBreakdown.length > 0 && (
+                    <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
+                        <Typography fontWeight={900} fontSize={16}>Assets by Dept.</Typography>
+                        <Chip label={`${deptTotal} total`} size="small" sx={{ fontWeight: 800, fontSize: 11, bgcolor: "rgba(168,85,247,0.1)", color: "#A855F7" }} />
+                      </Box>
+                      <Stack spacing={1.8}>
+                        {deptBreakdown.slice(0, 6).map((d, i) => {
+                          const pct   = Math.round((d.count / deptTotal) * 100);
+                          const color = DEPT_COLORS[i % DEPT_COLORS.length];
+                          return (
+                            <Box key={d._id || "Unknown"}>
+                              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.6 }}>
+                                <Typography fontSize={12} fontWeight={700} color="text.primary" noWrap sx={{ maxWidth: "70%" }}>{d._id || "Unassigned"}</Typography>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+                                  <Typography fontSize={11} color="text.secondary">{pct}%</Typography>
+                                  <Typography fontSize={12} fontWeight={800} color={color}>{d.count}</Typography>
+                                </Box>
+                              </Box>
+                              <LinearProgress variant="determinate" value={pct}
+                                sx={{ height: 6, borderRadius: 3, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: color, borderRadius: 3 } }} />
+                            </Box>
+                          );
+                        })}
+                      </Stack>
+                    </Paper>
+                  )}
+                </Stack>
+              </Grid>
+            )}
+          </Grid>
+
+          {/* ── Warranty Overview + Quick Actions ──────────────── */}
+          {(canViewAssets || allQuickActions.length > 0) && (
+            <Grid container spacing={3} alignItems="flex-start">
+
+              {canViewAssets && (
+                <Grid size={{ xs: 12, lg: allQuickActions.length > 0 ? 8 : 12 }}>
+                  <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
+                      <Box>
+                        <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px">Warranty Overview</Typography>
+                        <Typography fontSize={12} color="text.secondary" mt={0.2}>Fleet warranty health across all registered assets</Typography>
+                      </Box>
+                      <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate("/admin/assets")}
+                        sx={{ fontWeight: 700, color: "#A855F7", "&:hover": { bgcolor: "rgba(168,85,247,0.08)" } }}>
+                        View Assets
+                      </Button>
+                    </Box>
+
+                    <Box sx={{ mb: 3 }}>
+                      <Box sx={{ display: "flex", gap: 0.5, height: 12, borderRadius: 6, overflow: "hidden", bgcolor: "action.selected" }}>
+                        {[
+                          { pct: Math.round((inWarranty / totalAssets) * 100),   color: "#22C55E" },
+                          { pct: Math.round((expiringSoon / totalAssets) * 100), color: "#F59E0B" },
+                          { pct: 100 - Math.round((inWarranty / totalAssets) * 100) - Math.round((expiringSoon / totalAssets) * 100), color: "#EF4444" },
+                        ].filter(s => s.pct > 0).map((s, i) => (
+                          <Box key={i} sx={{ width: `${s.pct}%`, bgcolor: s.color, borderRadius: 6 }} />
+                        ))}
+                      </Box>
+                      <Box sx={{ display: "flex", gap: 2.5, mt: 1.5 }}>
+                        {[{ label: "In Warranty", color: "#22C55E" }, { label: "Expiring Soon", color: "#F59E0B" }, { label: "Expired / Unknown", color: "#EF4444" }].map(({ label, color }) => (
+                          <Box key={label} sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
+                            <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
+                            <Typography fontSize={11} fontWeight={600} color="text.secondary">{label}</Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+
+                    <Grid container spacing={2}>
+                      {[
+                        { label: "In Warranty",         value: inWarranty,   color: "#22C55E", bg: "rgba(34,197,94,0.08)",   desc: "Assets under active warranty", icon: <CheckCircleRounded /> },
+                        { label: "Expiring in 30 days", value: expiringSoon, color: "#F59E0B", bg: "rgba(245,158,11,0.08)",  desc: "Renew before they lapse",       icon: <AccessTimeRounded /> },
+                        { label: "Active Repairs",       value: dashboardData?.activeRepairs || 0, color: "#EF4444", bg: "rgba(239,68,68,0.08)", desc: "Currently under service", icon: <BuildRounded /> },
+                      ].map(({ label, value, color, bg, desc, icon }) => (
+                        <Grid size={{ xs: 12, sm: 4 }} key={label}>
+                          <Box onClick={() => navigate("/admin/assets")} sx={{ p: 2.5, borderRadius: "18px", bgcolor: bg, border: "1px solid", borderColor: `${color}33`, cursor: "pointer", transition: "all 0.2s", "&:hover": { transform: "translateY(-3px)", boxShadow: `0 12px 28px ${color}22` } }}>
+                            <Box sx={{ color, mb: 1, "& svg": { fontSize: 20 } }}>{icon}</Box>
+                            <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{value}</Typography>
+                            <Typography fontSize={12} fontWeight={800} color={color} mt={0.5}>{label}</Typography>
+                            <Typography fontSize={11} color="text.secondary" mt={0.3}>{desc}</Typography>
+                          </Box>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Paper>
+                </Grid>
+              )}
+
+              {allQuickActions.length > 0 && (
+                <Grid size={{ xs: 12, lg: canViewAssets ? 4 : 12 }}>
+                  <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper", height: "100%" }}>
+                    <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px" mb={0.3}>Quick Actions</Typography>
+                    <Typography fontSize={12} color="text.secondary" mb={2.5}>Jump to any section instantly</Typography>
+                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
+                      {allQuickActions.map(a => <QuickAction key={a.label} {...a} onClick={() => navigate(a.route)} />)}
                     </Box>
                   </Paper>
-                )}
-              </Box>
+                </Grid>
+              )}
             </Grid>
-          </Grid>
+          )}
         </>
       )}
 
-      {/* Ticket Detail Dialog */}
-      <Dialog open={ticketDialogOpen} onClose={() => setTicketDialogOpen(false)} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } } }}>
+      {/* ── Ticket Detail Dialog ─────────────────────────────── */}
+      <Dialog open={!!selectedTicket} onClose={() => setSelectedTicket(null)} fullWidth maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider" } }}>
         {selectedTicket && (
           <>
-            <DialogTitle sx={{ p: 0 }}>
-              <DialogHeader icon={<ConfirmationNumberRounded />} title="Ticket Details" subtitle={`${selectedTicket.id} • ${selectedTicket.asset}`} onClose={() => setTicketDialogOpen(false)} />
-            </DialogTitle>
-            <Divider />
+            <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+                  <ConfirmationNumberRounded sx={{ color: "#fff", fontSize: 22 }} />
+                </Box>
+                <Box>
+                  <Typography fontWeight={900} fontSize={18}>{selectedTicket.issue}</Typography>
+                  <Typography fontSize={12} color="text.secondary">{selectedTicket.id} · {selectedTicket.asset}</Typography>
+                </Box>
+              </Box>
+              <IconButton onClick={() => setSelectedTicket(null)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
+            </Box>
             <DialogContent sx={{ p: 3 }}>
-              <Paper sx={{ p: 2.5, borderRadius: "20px", bgcolor: "background.default", border: 1, borderColor: "divider", mb: 3 }}>
-                <DetailLine label="Issue" value={selectedTicket.issue} />
-                <DetailLine label="Department" value={selectedTicket.department} />
-                <DetailLine label="Raised By" value={selectedTicket.raisedBy} />
-                <DetailLine label="Date" value={selectedTicket.date} />
-                <DetailLine label="Priority" value={selectedTicket.priority} />
-                <DetailLine label="Status" value={selectedTicket.status} />
-              </Paper>
-              <Typography sx={{ fontSize: "18px", color: "text.primary", fontWeight: 900, mb: 2 }}>Service Flow</Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                {selectedTicket.timeline.map((step, index) => (
-                  <Box key={index} sx={{ p: 2, borderRadius: "16px", bgcolor: "background.paper", border: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <Box sx={{ width: 32, height: 32, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: "#111111", color: "#CBFA57", fontWeight: 900 }}>{index + 1}</Box>
-                    <Typography sx={{ color: "text.secondary", fontWeight: 700 }}>{step}</Typography>
+              <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, mb: 3 }}>
+                {[
+                  { label: "Status",     value: selectedTicket.status },
+                  { label: "Priority",   value: selectedTicket.priority },
+                  { label: "Department", value: selectedTicket.department },
+                  { label: "Raised By",  value: selectedTicket.raisedBy },
+                  { label: "Date",       value: selectedTicket.date },
+                ].map(({ label, value }) => (
+                  <Box key={label} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "background.default", border: "1px solid", borderColor: "divider" }}>
+                    <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={0.3}>{label}</Typography>
+                    <Typography fontSize={13} fontWeight={800} color="text.primary">{value}</Typography>
                   </Box>
                 ))}
               </Box>
-              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-                <Button variant="contained" onClick={() => navigate("/tickets")} sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, textTransform: "none", borderRadius: "10px", px: 3 }}>
-                  Open Tickets Page
-                </Button>
-              </Box>
+              <Button fullWidth variant="contained" onClick={() => { setSelectedTicket(null); navigate("/tickets"); }}
+                sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
+                Open Full Ticket →
+              </Button>
             </DialogContent>
           </>
         )}
       </Dialog>
 
-      {/* Alert Detail Dialog */}
-      <Dialog open={alertDialogOpen} onClose={() => setAlertDialogOpen(false)} fullWidth maxWidth="xs" slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } } }}>
-        {selectedAlert && (
-          <>
-            <DialogTitle sx={{ p: 0 }}>
-              <DialogHeader icon={<WarningAmberRounded />} title={selectedAlert.title} subtitle={selectedAlert.id} onClose={() => setAlertDialogOpen(false)} danger={selectedAlert.type === "critical"} />
-            </DialogTitle>
-            <Divider />
-            <DialogContent sx={{ p: 3 }}>
-              <Typography sx={{ color: "text.secondary", fontWeight: 700, lineHeight: 1.7, mb: 3 }}>{selectedAlert.message}</Typography>
-              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-                <Button onClick={() => setAlertDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 900, textTransform: "none" }}>Cancel</Button>
-                <Button variant="contained" onClick={handleAlertAction} sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", px: 3, "&:hover": { bgcolor: "#222222" } }}>
-                  {selectedAlert.actionText}
-                </Button>
-              </Box>
-            </DialogContent>
-          </>
-        )}
-      </Dialog>
-
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );
 };
-
-const AlertBox = ({ alert, onOpen, onDismiss }) => {
-  const isCritical = alert.type === "critical";
-  return (
-    <Paper sx={{ p: 2.2, borderRadius: "18px", bgcolor: isCritical ? "#FEF2F2" : "#FFFBEB", border: isCritical ? "1px solid #FECACA" : "1px solid #FDE68A", cursor: "pointer", transition: "0.3s ease", "&:hover": { transform: "translateY(-3px)", boxShadow: "0 14px 28px rgba(15,23,42,0.08)" } }} onClick={onOpen}>
-    <Box sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
-      <Box>
-        <Typography sx={{ fontWeight: 900, color: isCritical ? "#991B1B" : "#92400E", fontSize: "14px", mb: 0.5, textTransform: "uppercase", letterSpacing: "0.5px" }}>{alert.title}</Typography>
-        <Typography sx={{ color: isCritical ? "#7F1D1D" : "#78350F", fontSize: "14px", fontWeight: 600, lineHeight: 1.6 }}>{alert.message}</Typography>
-      </Box>
-      <IconButton size="small" onClick={(e) => { e.stopPropagation(); onDismiss(); }} sx={{ width: 32, height: 32, color: isCritical ? "#991B1B" : "#92400E" }}>
-        <CloseRounded fontSize="small" />
-      </IconButton>
-    </Box>
-  </Paper>
-  );
-};
-
-const DialogHeader = ({ icon, title, subtitle, onClose, danger = false }) => (
-  <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
-    <Box sx={{ width: 48, height: 48, borderRadius: "12px", bgcolor: danger ? "#EF4444" : "#111111", color: danger ? "#FFF" : "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>{icon}</Box>
-    <Box sx={{ flex: 1 }}>
-      <Typography sx={{ fontWeight: 900, fontSize: "24px", color: "text.primary" }}>{title}</Typography>
-      <Typography sx={{ mt: 0.5, color: "text.secondary", fontWeight: 700, lineHeight: 1.5 }}>{subtitle}</Typography>
-    </Box>
-    <IconButton onClick={onClose}><CloseRounded /></IconButton>
-  </Box>
-);
-
-const DetailLine = ({ label, value }) => (
-  <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, borderBottom: 1, borderColor: "divider", py: 1.1, flexWrap: "wrap" }}>
-    <Typography sx={{ color: "text.secondary", fontWeight: 800 }}>{label}</Typography>
-    <Typography sx={{ color: "text.primary", fontWeight: 900 }}>{value}</Typography>
-  </Box>
-);
 
 export default AdminDashboard;

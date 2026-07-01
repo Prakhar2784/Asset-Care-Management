@@ -1,17 +1,5 @@
 const nodemailer = require('nodemailer');
-
-// ─── Transporter ───────────────────────────────────────────────────────────────
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-};
+const { getTenantId } = require('../middleware/tenantContext');
 
 // ─── Base Email Template ───────────────────────────────────────────────────────
 const baseTemplate = (title, bodyHtml, footerNote = '') => `
@@ -63,23 +51,55 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
 </body>
 </html>`;
 
+// ─── Transporter and Sender Resolution ──────────────────────────────────────────
+const getTenantSmtpConfig = async () => {
+  const tenantId = getTenantId();
+  if (tenantId && tenantId !== 'default') {
+    const Tenant = require('../models/Tenant');
+    try {
+      const tenant = await Tenant.findOne({ slug: tenantId });
+      if (tenant && tenant.smtp && tenant.smtp.host && tenant.smtp.user && tenant.smtp.pass) {
+        return tenant.smtp;
+      }
+    } catch (err) {
+      console.error('[EMAIL SMTP CONFIG ERROR]', err.message);
+    }
+  }
+  return null;
+};
+
 // ─── Send Email Utility ────────────────────────────────────────────────────────
 const sendEmail = async ({ to, subject, html, text }) => {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  const smtpConfig = await getTenantSmtpConfig();
+  
+  const host = smtpConfig?.host || process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = smtpConfig?.port || parseInt(process.env.SMTP_PORT) || 587;
+  const user = smtpConfig?.user || process.env.SMTP_USER;
+  const pass = smtpConfig?.pass || process.env.SMTP_PASS;
+  const fromEmail = smtpConfig?.fromEmail || user;
+
+  if (!user || !pass) {
     console.log(`[EMAIL SKIPPED] No SMTP config. Would send to: ${to} | Subject: ${subject}`);
     return;
   }
+
   try {
-    const transporter = createTransporter();
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass }
+    });
+
     await transporter.sendMail({
-      from: `"AssetCare Pro" <${process.env.SMTP_USER}>`,
-      replyTo: process.env.SMTP_USER,
+      from: `"AssetCare Pro" <${fromEmail}>`,
+      replyTo: fromEmail,
       to,
       subject,
       html,
       text: text || subject
     });
-    console.log(`[EMAIL SENT] To: ${to} | Subject: ${subject}`);
+    console.log(`[EMAIL SENT] To: ${to} | Subject: ${subject} (${smtpConfig ? 'Tenant SMTP' : 'Global SMTP'})`);
   } catch (err) {
     console.error(`[EMAIL ERROR] To: ${to} | ${err.message}`);
   }
@@ -372,6 +392,36 @@ const sendContactEmail = async ({ company, name, email, phone, orgSize, inquiryT
   });
 };
 
+// Invite Email (admin-sent invite link)
+const sendInviteEmail = async (user, inviteLink) => {
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      Hello <strong>${user.name}</strong>,<br><br>
+      You've been invited to join <strong>AssetCare Pro</strong> by your administrator.
+      Click the button below to set your password and activate your account.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Name</span><span class="info-val">${user.name}</span></div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val">${user.email}</span></div>
+      <div class="info-row"><span class="info-key">Role</span><span class="info-val">${user.role}</span></div>
+      <div class="info-row"><span class="info-key">Department</span><span class="info-val">${user.department}</span></div>
+    </div>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${inviteLink}" style="display:inline-block;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;font-weight:800;font-size:15px;padding:14px 36px;border-radius:12px;text-decoration:none;letter-spacing:-0.3px;">
+        Set My Password &amp; Activate Account
+      </a>
+    </div>
+    <p style="font-size:13px;color:#94a3b8;text-align:center;">
+      This invite link expires in <strong>48 hours</strong>. If you did not expect this email, you can safely ignore it.
+    </p>`;
+  await sendEmail({
+    to: user.email,
+    subject: `You're invited to AssetCare Pro`,
+    text: `Hello ${user.name}, you've been invited to AssetCare Pro. Set your password here: ${inviteLink}. This link expires in 48 hours.`,
+    html: baseTemplate('You\'re Invited to AssetCare Pro', body, 'Invite link expires in 48 hours.')
+  });
+};
+
 // OTP Password Reset Email
 const sendOtpEmail = async (user, otp) => {
   const body = `
@@ -415,5 +465,6 @@ module.exports = {
   sendApprovalApprovedEmail,
   sendApprovalRejectedEmail,
   sendWarrantyExpiryEmail,
-  sendWelcomeEmail
+  sendWelcomeEmail,
+  sendInviteEmail
 };

@@ -56,8 +56,17 @@ const assetAssignmentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    tenantId: {
+      type: String,
+      required: true,
+      default: 'default',
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("AssetAssignment", assetAssignmentSchema);
+assetAssignmentSchema.index({ tenantId: 1 });
+
+const AssetAssignment = mongoose.model("AssetAssignment", assetAssignmentSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('AssetAssignment', AssetAssignment);

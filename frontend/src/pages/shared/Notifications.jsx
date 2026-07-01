@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, IconButton, Button, Chip, CircularProgress,
@@ -13,15 +13,15 @@ import {
 import api from '../../api/axios';
 
 const TYPE_CONFIG = {
-  ticket_created:   { icon: <ConfirmationNumberRounded />, color: '#111111', bg: '#F5F5F4', label: 'Ticket' },
-  ticket_status:    { icon: <ConfirmationNumberRounded />, color: '#2563EB', bg: '#EFF6FF', label: 'Ticket' },
-  ticket_resolved:  { icon: <CheckCircleOutlineRounded />, color: '#16a34a', bg: '#dcfce7', label: 'Resolved' },
-  request_approved: { icon: <CheckCircleOutlineRounded />, color: '#16a34a', bg: '#dcfce7', label: 'Approved' },
-  request_rejected: { icon: <InfoOutlined />, color: '#dc2626', bg: '#fee2e2', label: 'Rejected' },
-  asset_assigned:   { icon: <Inventory2Rounded />, color: '#16a34a', bg: '#dcfce7', label: 'Asset' },
-  asset_revoked:    { icon: <Inventory2Rounded />, color: '#7C3AED', bg: '#F5F3FF', label: 'Asset' },
-  warranty_expiry:  { icon: <WarningAmberRounded />, color: '#d97706', bg: '#fef3c7', label: 'Warranty' },
-  system:           { icon: <InfoOutlined />, color: '#6B6B65', bg: '#F5F5F4', label: 'System' },
+  ticket_created:   { icon: <ConfirmationNumberRounded />, color: '#60A5FA', bg: 'rgba(37,99,235,0.13)',   label: 'Ticket' },
+  ticket_status:    { icon: <ConfirmationNumberRounded />, color: '#60A5FA', bg: 'rgba(37,99,235,0.13)',   label: 'Ticket' },
+  ticket_resolved:  { icon: <CheckCircleOutlineRounded />, color: '#4ADE80', bg: 'rgba(22,163,74,0.13)',  label: 'Resolved' },
+  request_approved: { icon: <CheckCircleOutlineRounded />, color: '#4ADE80', bg: 'rgba(22,163,74,0.13)',  label: 'Approved' },
+  request_rejected: { icon: <InfoOutlined />,              color: '#F87171', bg: 'rgba(220,38,38,0.13)',  label: 'Rejected' },
+  asset_assigned:   { icon: <Inventory2Rounded />,         color: '#4ADE80', bg: 'rgba(22,163,74,0.13)',  label: 'Asset' },
+  asset_revoked:    { icon: <Inventory2Rounded />,         color: '#A78BFA', bg: 'rgba(124,58,237,0.13)', label: 'Asset' },
+  warranty_expiry:  { icon: <WarningAmberRounded />,       color: '#FBBF24', bg: 'rgba(217,119,6,0.13)',  label: 'Warranty' },
+  system:           { icon: <InfoOutlined />,              color: '#94A3B8', bg: 'rgba(71,85,105,0.13)',  label: 'System' },
 };
 
 const timeAgo = (date) => {
@@ -95,9 +95,9 @@ export default function Notifications() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{
             width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
-            bgcolor: '#111111'
+            bgcolor: "rgba(124,58,237,0.12)"
           }}>
-            <NotificationsRounded sx={{ color: '#CBFA57' }} />
+            <NotificationsRounded sx={{ color: '#A855F7' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Notifications</Typography>
@@ -208,3 +208,4 @@ export default function Notifications() {
     </Box>
   );
 }
+

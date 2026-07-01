@@ -17,23 +17,39 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'employee', 'hod', 'vendor', 'it_support', 'super_admin'],
+    enum: ['admin', 'employee', 'hod', 'it_support', 'super_admin'],
     default: 'employee'
   },
   department: {
     type: String,
     required: true
   },
-  phone: { type: String },
-  isActive: { type: Boolean, default: true },
-
+  tenantId: {
+    type: String,
+    required: true,
+    default: 'default'
+  },
+  phone:        { type: String },
+  employeeId:   { type: String, default: null },
+  avatar:       { type: String, default: null },
+  onboardingDone: { type: Boolean, default: false },
+  isActive:     { type: Boolean, default: true },
+  
   // Password reset (token-based, used after OTP verification)
   passwordResetToken: { type: String, default: null },
   passwordResetExpiry: { type: Date, default: null },
 
   // OTP-based reset (step 1)
   otpHash: { type: String, default: null },
-  otpExpiry: { type: Date, default: null }
+  otpExpiry: { type: Date, default: null },
+
+  lastLogin: { type: Date, default: null },
+
+  // Per-user custom permissions (overrides role defaults when set)
+  customPermissions: [{
+    feature: { type: String },
+    allowed: { type: Boolean }
+  }]
 }, {
   timestamps: true
 });
@@ -55,5 +71,8 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 // Indexes for performance
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
+userSchema.index({ tenantId: 1 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('User', User);

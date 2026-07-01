@@ -20,11 +20,12 @@ const Navbar = () => {
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
   const links = [
-    { name: "Home", path: "/" },
+    { name: "Home",     path: "/" },
     { name: "Features", path: "/features" },
-    { name: "Modules", path: "/modules" },
+    { name: "Modules",  path: "/modules" },
     { name: "Workflow", path: "/workflow" },
-    { name: "Contact", path: "/contact" },
+    { name: "Pricing",  path: "/pricing" },
+    { name: "Contact",  path: "/contact" },
   ];
 
   return (
@@ -32,8 +33,7 @@ const Navbar = () => {
       <style>{`
         .nav-wrapper {
           position: fixed;
-          top: 0;
-          left: 0;
+          top: 0; left: 0;
           width: 100%;
           z-index: 1000;
           padding: ${scrolled ? "10px 20px" : "20px 20px"};
@@ -45,10 +45,10 @@ const Navbar = () => {
 
         .nav-pill {
           pointer-events: auto;
-          background: rgba(236, 234, 227, 0.88);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(17, 17, 17, 0.10);
+          background: rgba(8, 8, 18, 0.85);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(168, 85, 247, 0.18);
           border-radius: 100px;
           padding: 7px 7px 7px 22px;
           display: flex;
@@ -57,29 +57,26 @@ const Navbar = () => {
           max-width: 1100px;
           width: 100%;
           box-shadow: ${scrolled
-            ? "0 8px 32px -8px rgba(17, 17, 17, 0.14)"
-            : "0 2px 12px -4px rgba(17, 17, 17, 0.06)"};
+            ? "0 8px 32px -8px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,85,247,0.12)"
+            : "0 2px 16px -4px rgba(0,0,0,0.3)"};
           transition: all 0.35s ease;
           position: relative;
         }
 
         .brand-link {
-          display: flex;
-          align-items: center;
-          gap: 11px;
+          display: flex; align-items: center; gap: 11px;
           text-decoration: none;
         }
 
         .brand-icon-box {
-          background: #111111;
-          color: #CBFA57;
-          width: 34px;
-          height: 34px;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          color: #FFFFFF;
+          width: 34px; height: 34px;
           border-radius: 10px;
-          display: grid;
-          place-items: center;
+          display: grid; place-items: center;
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
           flex-shrink: 0;
+          box-shadow: 0 4px 12px rgba(124,58,237,0.45);
         }
 
         .brand-link:hover .brand-icon-box {
@@ -87,88 +84,80 @@ const Navbar = () => {
         }
 
         .brand-text {
-          font-size: 17px;
-          font-weight: 900;
-          color: #111111;
+          font-size: 17px; font-weight: 900;
+          color: #FFFFFF;
           letter-spacing: -0.5px;
         }
 
         .nav-link-track {
-          display: flex;
-          align-items: center;
-          gap: 2px;
+          display: flex; align-items: center; gap: 2px;
         }
 
         .nav-link-item {
           padding: 9px 18px;
-          color: #555550;
+          color: #8B8BAA;
           text-decoration: none;
-          font-weight: 600;
-          font-size: 14px;
+          font-weight: 600; font-size: 14px;
           border-radius: 100px;
           transition: all 0.2s ease;
           background: transparent;
         }
 
         .nav-link-item:hover {
-          background: rgba(17, 17, 17, 0.07);
-          color: #111111;
+          background: rgba(168,85,247,0.10);
+          color: #C4B5FD;
         }
 
         .nav-link-item.active {
-          background: #111111;
-          color: #CBFA57;
+          background: rgba(168,85,247,0.18);
+          color: #A855F7;
           font-weight: 800;
         }
 
         .nav-cta {
-          background: #111111;
-          color: #CBFA57;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          color: #FFFFFF;
           padding: 11px 22px;
           border-radius: 100px;
-          font-weight: 800;
-          font-size: 14px;
+          font-weight: 800; font-size: 14px;
           text-decoration: none;
-          display: flex;
-          align-items: center;
-          gap: 7px;
+          display: flex; align-items: center; gap: 7px;
           transition: all 0.2s ease;
           letter-spacing: -0.2px;
+          box-shadow: 0 4px 16px rgba(124,58,237,0.4);
         }
 
         .nav-cta:hover {
-          background: #222222;
+          background: linear-gradient(135deg, #6D28D9, #9333EA);
           transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(17, 17, 17, 0.2);
+          box-shadow: 0 8px 24px rgba(124,58,237,0.55);
         }
 
         .mobile-toggle {
           display: none;
           background: transparent;
-          color: #111111;
+          color: #8B8BAA;
           border: none;
-          width: 42px;
-          height: 42px;
+          width: 42px; height: 42px;
           border-radius: 50%;
           cursor: pointer;
           transition: all 0.2s ease;
           place-items: center;
         }
 
-        .mobile-toggle:hover { background: rgba(17, 17, 17, 0.07); }
+        .mobile-toggle:hover { background: rgba(168,85,247,0.10); color: #A855F7; }
 
         .mobile-menu-card {
           position: absolute;
           top: calc(100% + 12px);
-          left: 0;
-          right: 0;
-          background: rgba(236, 234, 227, 0.97);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(17, 17, 17, 0.10);
+          left: 0; right: 0;
+          background: rgba(8, 8, 18, 0.96);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(168,85,247,0.18);
           border-radius: 24px;
           padding: 14px;
-          box-shadow: 0 20px 40px -8px rgba(17, 17, 17, 0.16);
+          box-shadow: 0 20px 40px -8px rgba(0,0,0,0.6);
           opacity: 0;
           visibility: hidden;
           transform: translateY(-8px) scale(0.98);
@@ -178,8 +167,7 @@ const Navbar = () => {
         }
 
         .mobile-menu-card.open {
-          opacity: 1;
-          visibility: visible;
+          opacity: 1; visibility: visible;
           transform: translateY(0) scale(1);
           pointer-events: auto;
         }
@@ -188,18 +176,17 @@ const Navbar = () => {
           display: block;
           padding: 14px 20px;
           border-radius: 14px;
-          color: #555550;
+          color: #8B8BAA;
           text-decoration: none;
-          font-weight: 700;
-          font-size: 15px;
+          font-weight: 700; font-size: 15px;
           transition: all 0.18s ease;
           margin-bottom: 3px;
         }
 
-        .mob-link-item:hover { background: rgba(17,17,17,0.07); color: #111111; }
-        .mob-link-item.active { background: #111111; color: #CBFA57; }
+        .mob-link-item:hover { background: rgba(168,85,247,0.10); color: #C4B5FD; }
+        .mob-link-item.active { background: rgba(168,85,247,0.18); color: #A855F7; }
 
-        .mob-divider { height: 1px; background: rgba(17,17,17,0.08); margin: 10px 0; }
+        .mob-divider { height: 1px; background: rgba(168,85,247,0.12); margin: 10px 0; }
 
         @media (max-width: 900px) {
           .nav-link-track, .nav-cta { display: none; }
@@ -254,7 +241,7 @@ const Navbar = () => {
             <Link
               to="/login"
               className="mob-link-item"
-              style={{ background: "#111111", color: "#CBFA57", display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}
+              style={{ background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "#FFFFFF", display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}
               onClick={() => setOpen(false)}
             >
               <ArrowForwardRoundedIcon fontSize="small" /> Access Portal

@@ -6,7 +6,9 @@ const {
   getMyRequests,
   getMyApprovedRequests,
   reviewRequest,
-  deleteRequest
+  deleteRequest,
+  reviewWorkflowRequest,
+  getWorkflowTracking
 } = require('../controllers/deviceRequestController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -16,15 +18,21 @@ router.get('/mine', protect, getMyRequests);
 // Employee: view own approved requests (for ticket raising)
 router.get('/my-approved', protect, getMyApprovedRequests);
 
-// Admin: view all requests
+// Admin & Reviewers: view all requests
 router.route('/')
-  .get(protect, authorize('admin'), getAllRequests)
+  .get(protect, authorize('admin', 'super_admin', 'hod', 'it_support'), getAllRequests)
   .post(protect, createRequest);
 
-// Admin: approve or reject
+// Workflow tracking for a request
+router.get('/:id/workflow-tracking', protect, getWorkflowTracking);
+
+// Sequential stage action (HOD, IT Support, Admin, Super Admin)
+router.put('/:id/workflow-action', protect, reviewWorkflowRequest);
+
+// Admin: approve or reject (non-workflow / direct admin actions)
 router.put('/:id/review', protect, authorize('admin'), reviewRequest);
 
-// Admin: delete
-router.delete('/:id', protect, authorize('admin'), deleteRequest);
+// Admin: delete any request. Employee: withdraw own pending request.
+router.delete('/:id', protect, deleteRequest);
 
 module.exports = router;

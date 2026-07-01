@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -9,10 +9,11 @@ const Footer = () => {
     <>
       <style>{`
         .site-footer {
-          background: #111111;
-          border-top: 1px solid rgba(203, 250, 87, 0.10);
+          background: rgba(8, 6, 20, 0.95);
+          backdrop-filter: blur(20px);
+          border-top: 1px solid rgba(168,85,247,0.18);
           padding: 72px 24px 24px;
-          color: #A0A09A;
+          color: #8B8BAA;
           font-family: 'Inter', sans-serif;
         }
 
@@ -33,8 +34,8 @@ const Footer = () => {
         }
 
         .footer-brand-icon {
-          background: #CBFA57;
-          color: #111111;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          color: #FFFFFF;
           width: 38px;
           height: 38px;
           border-radius: 11px;
@@ -55,7 +56,7 @@ const Footer = () => {
           line-height: 1.75;
           font-size: 14.5px;
           max-width: 360px;
-          color: #7A7A74;
+          color: #8B8BAA;
           font-weight: 500;
           margin-bottom: 22px;
         }
@@ -66,9 +67,9 @@ const Footer = () => {
           gap: 8px;
           padding: 9px 14px;
           border-radius: 999px;
-          background: rgba(203, 250, 87, 0.08);
-          border: 1px solid rgba(203, 250, 87, 0.18);
-          color: #CBFA57;
+          background: rgba(168,85,247,0.08);
+          border: 1px solid rgba(168,85,247,0.18);
+          color: #A855F7;
           font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.3px;
@@ -96,7 +97,7 @@ const Footer = () => {
         }
 
         .footer-col a:hover {
-          color: #CBFA57;
+          color: #A855F7;
           transform: translateX(4px);
         }
 
@@ -115,8 +116,8 @@ const Footer = () => {
           width: 34px;
           height: 34px;
           border-radius: 10px;
-          background: rgba(203, 250, 87, 0.08);
-          color: #CBFA57;
+          background: rgba(168,85,247,0.08);
+          color: #A855F7;
           display: grid;
           place-items: center;
           flex-shrink: 0;
@@ -132,7 +133,7 @@ const Footer = () => {
           gap: 16px;
           flex-wrap: wrap;
           font-size: 13px;
-          color: #555550;
+          color: #8B8BAA;
         }
 
         .footer-bottom p { margin: 0; font-weight: 600; }
@@ -144,13 +145,13 @@ const Footer = () => {
         }
 
         .footer-bottom-links a {
-          color: #555550;
+          color: #8B8BAA;
           text-decoration: none;
           font-weight: 600;
           transition: 0.2s ease;
         }
 
-        .footer-bottom-links a:hover { color: #CBFA57; }
+        .footer-bottom-links a:hover { color: #A855F7; }
 
         @media (max-width: 900px) {
           .footer-container {

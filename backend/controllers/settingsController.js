@@ -115,4 +115,73 @@ const getSystemStats = async (req, res) => {
   }
 };
 
-module.exports = { updateProfile, changePassword, exportMyData, getSystemStats };
+// GET /api/settings/tenant
+const getTenantSettings = async (req, res) => {
+  try {
+    const Tenant = require('../models/Tenant');
+    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    if (!tenant) {
+      return res.status(404).json({ message: 'Tenant settings not found.' });
+    }
+    res.json(tenant);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PUT /api/settings/tenant
+const updateTenantSettings = async (req, res) => {
+  try {
+    const Tenant = require('../models/Tenant');
+    const { name, branding, smtp, industry, employeeCount, phone, website, contactEmail, gstNumber, panNumber, address } = req.body;
+
+    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    if (!tenant) {
+      return res.status(404).json({ message: 'Tenant settings not found.' });
+    }
+
+    if (name) tenant.name = name;
+    if (industry      !== undefined) tenant.industry      = industry;
+    if (employeeCount !== undefined) tenant.employeeCount = employeeCount;
+    if (phone         !== undefined) tenant.phone         = phone;
+    if (website       !== undefined) tenant.website       = website;
+    if (contactEmail  !== undefined) tenant.contactEmail  = contactEmail;
+    if (gstNumber     !== undefined) tenant.gstNumber     = gstNumber;
+    if (panNumber     !== undefined) tenant.panNumber     = panNumber;
+    if (address) {
+      if (!tenant.address) tenant.address = {};
+      if (address.line    !== undefined) tenant.address.line    = address.line;
+      if (address.city    !== undefined) tenant.address.city    = address.city;
+      if (address.state   !== undefined) tenant.address.state   = address.state;
+      if (address.pin     !== undefined) tenant.address.pin     = address.pin;
+      if (address.country !== undefined) tenant.address.country = address.country;
+    }
+    if (branding) {
+      if (branding.logoUrl !== undefined) tenant.branding.logoUrl = branding.logoUrl;
+      if (branding.primaryColor !== undefined) tenant.branding.primaryColor = branding.primaryColor;
+      if (branding.secondaryColor !== undefined) tenant.branding.secondaryColor = branding.secondaryColor;
+    }
+    if (smtp) {
+      if (!tenant.smtp) tenant.smtp = {};
+      if (smtp.host !== undefined) tenant.smtp.host = smtp.host;
+      if (smtp.port !== undefined) tenant.smtp.port = smtp.port ? parseInt(smtp.port) : null;
+      if (smtp.user !== undefined) tenant.smtp.user = smtp.user;
+      if (smtp.pass !== undefined) tenant.smtp.pass = smtp.pass;
+      if (smtp.fromEmail !== undefined) tenant.smtp.fromEmail = smtp.fromEmail;
+    }
+
+    await tenant.save();
+    res.json({ message: 'Organisation profile updated successfully.', tenant });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  updateProfile,
+  changePassword,
+  exportMyData,
+  getSystemStats,
+  getTenantSettings,
+  updateTenantSettings
+};

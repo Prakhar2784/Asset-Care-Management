@@ -3,14 +3,13 @@ import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Chip, CircularProgress, Alert, TextField,
   InputAdornment, Button, Avatar, Select, MenuItem, FormControl,
-  InputLabel, Snackbar
+  InputLabel, Snackbar, Grid
 } from '@mui/material';
 import {
   AssignmentIndRounded, SearchRounded, PersonRemoveRounded,
   LaptopMacRounded, PhoneIphoneRounded, DevicesRounded,
-  GroupRounded, ApartmentRounded
+  GroupRounded, ApartmentRounded, CategoryRounded
 } from '@mui/icons-material';
-import PageHeader from '../../components/PageHeader';
 import api from '../../api/axios';
 
 const categoryIcon = (cat) => {
@@ -26,10 +25,10 @@ const fmt = (date) => {
 };
 
 const COND = {
-  New:     { bg: '#dcfce7', color: '#16a34a' },
-  Good:    { bg: '#dbeafe', color: '#2563eb' },
-  Average: { bg: '#fef3c7', color: '#d97706' },
-  Damaged: { bg: '#fee2e2', color: '#dc2626' },
+  New:     { bg: 'rgba(22,163,74,0.14)',  color: '#4ADE80' },
+  Good:    { bg: 'rgba(37,99,235,0.14)',  color: '#60A5FA' },
+  Average: { bg: 'rgba(217,119,6,0.14)', color: '#FBBF24' },
+  Damaged: { bg: 'rgba(220,38,38,0.14)', color: '#F87171' },
 };
 
 export default function AssignedDevices() {
@@ -62,6 +61,13 @@ export default function AssignedDevices() {
       .filter(n => n && !seen.has(n) && seen.add(n));
   }, [assignments]);
 
+  const categories = useMemo(() => {
+    const seen = new Set();
+    return assignments
+      .map(a => a.asset?.category)
+      .filter(n => n && !seen.has(n) && seen.add(n));
+  }, [assignments]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return assignments.filter(a =>
@@ -89,139 +95,169 @@ export default function AssignedDevices() {
 
   const uniqueEmployees = new Set(assignments.map(a => a.employeeEmail)).size;
   const uniqueDepts = new Set(assignments.map(a => a.department?.name).filter(Boolean)).size;
+  const uniqueCategories = new Set(assignments.map(a => a.asset?.category).filter(Boolean)).size;
+
+  const kpis = [
+    { label: 'Total Assigned', value: assignments.length, color: '#A855F7', icon: <DevicesRounded fontSize="small" /> },
+    { label: 'Employees',      value: uniqueEmployees,    color: '#3B82F6', icon: <GroupRounded fontSize="small" /> },
+    { label: 'Departments',    value: uniqueDepts,        color: '#22C55E', icon: <ApartmentRounded fontSize="small" /> },
+    { label: 'Categories',     value: uniqueCategories,   color: '#F59E0B', icon: <CategoryRounded fontSize="small" /> },
+  ];
 
   return (
-    <Box>
-      <PageHeader
-        label="Asset Management"
-        title="Assigned Devices"
-        subtitle={`${assignments.length} device${assignments.length !== 1 ? 's' : ''} currently assigned across ${uniqueDepts} department${uniqueDepts !== 1 ? 's' : ''}`}
-      />
-
-      {/* Summary stats */}
-      <Box sx={{ display: 'flex', gap: 3, mb: 4, flexWrap: 'wrap' }}>
-        {[
-          { label: 'Devices Assigned', value: assignments.length, icon: <DevicesRounded />,      color: '#111111', bg: '#F5F5F4' },
-          { label: 'Employees',        value: uniqueEmployees,    icon: <GroupRounded />,         color: '#2563EB', bg: '#EFF6FF' },
-          { label: 'Departments',      value: uniqueDepts,        icon: <ApartmentRounded />,     color: '#16a34a', bg: '#dcfce7' },
-        ].map(s => (
-          <Paper key={s.label} sx={{ flex: '1 1 160px', p: 3, borderRadius: 3, border: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: s.bg, color: s.color, display: 'grid', placeItems: 'center' }}>
-              {s.icon}
-            </Box>
-            <Box>
-              <Typography fontWeight={900} fontSize={28} color="text.primary" sx={{ lineHeight: 1 }}>{s.value}</Typography>
-              <Typography fontSize={13} color="text.secondary" fontWeight={600}>{s.label}</Typography>
-            </Box>
-          </Paper>
-        ))}
+    <Box sx={{ pb: 4 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
+            <AssignmentIndRounded sx={{ color: '#A855F7' }} />
+          </Box>
+          <Box>
+            <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Assigned Devices</Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              {assignments.length} device{assignments.length !== 1 ? 's' : ''} assigned across {uniqueDepts} department{uniqueDepts !== 1 ? 's' : ''}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
-      {/* Filters */}
-      <Paper sx={{ p: 2.5, mb: 3, borderRadius: 3, border: 1, borderColor: 'divider', display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* KPI Cards */}
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        {kpis.map(k => (
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={k.label}>
+            <Paper sx={{ p: 2.5, borderRadius: '16px', border: 1, borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
+              <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, bgcolor: k.color }} />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: `${k.color}18`, display: 'grid', placeItems: 'center' }}>
+                  <Box sx={{ color: k.color }}>{k.icon}</Box>
+                </Box>
+              </Box>
+              <Typography sx={{ fontSize: 28, fontWeight: 950, color: 'text.primary', lineHeight: 1, letterSpacing: '-1px', mt: 1.5, mb: 0.3 }}>{k.value}</Typography>
+              <Typography fontSize={13} fontWeight={700} color="text.primary">{k.label}</Typography>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Filter Bar */}
+      <Paper sx={{ p: 2, borderRadius: '16px', border: 1, borderColor: 'divider', mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
-          size="small"
           placeholder="Search by employee, asset name or serial number…"
+          size="small"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          sx={{ flex: 1, minWidth: 260, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 18 }} /></InputAdornment> } }}
-          sx={{ flex: 1, minWidth: 260 }}
         />
         <FormControl size="small" sx={{ minWidth: 180 }}>
           <InputLabel>Department</InputLabel>
-          <Select value={deptFilter} label="Department" onChange={e => setDeptFilter(e.target.value)}>
+          <Select value={deptFilter} label="Department" onChange={e => setDeptFilter(e.target.value)}
+            sx={{ borderRadius: '10px' }}>
             <MenuItem value="">All Departments</MenuItem>
             {departments.map(d => <MenuItem key={d} value={d}>{d}</MenuItem>)}
           </Select>
         </FormControl>
         {(search || deptFilter) && (
           <Button size="small" variant="outlined" onClick={() => { setSearch(''); setDeptFilter(''); }}
-            sx={{ fontWeight: 700, borderRadius: 2 }}>
+            sx={{ fontWeight: 700, borderRadius: '10px', textTransform: 'none' }}>
             Clear
           </Button>
         )}
+        {!loading && (
+          <Typography fontSize={12} color="text.disabled" fontWeight={600} sx={{ ml: 'auto' }}>
+            {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+          </Typography>
+        )}
       </Paper>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>{error}</Alert>}
 
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><CircularProgress /></Box>
       ) : filtered.length === 0 ? (
-        <Paper sx={{ p: 8, textAlign: 'center', borderRadius: 3, border: '1px dashed', borderColor: 'divider' }}>
-          <AssignmentIndRounded sx={{ fontSize: 56, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h6" fontWeight={700} color="text.secondary">
+        <Paper sx={{ p: 8, textAlign: 'center', borderRadius: '20px', border: '1px dashed', borderColor: 'divider' }}>
+          <Box sx={{ width: 72, height: 72, borderRadius: '20px', bgcolor: 'rgba(124,58,237,0.08)', display: 'grid', placeItems: 'center', mx: 'auto', mb: 2 }}>
+            <AssignmentIndRounded sx={{ fontSize: 36, color: '#A855F7' }} />
+          </Box>
+          <Typography variant="h6" fontWeight={800} color="text.primary">
             {assignments.length === 0 ? 'No devices assigned yet' : 'No results match your search'}
           </Typography>
-          <Typography fontSize={14} color="text.disabled" mt={1}>
+          <Typography fontSize={14} color="text.secondary" mt={1}>
             {assignments.length === 0
               ? 'Go to Asset Registry to assign devices to employees.'
               : 'Try adjusting your search or clearing the department filter.'}
           </Typography>
         </Paper>
       ) : (
-        <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Table>
-            <TableHead sx={{ bgcolor: 'background.default' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 800, fontSize: 13 }}>Device</TableCell>
-                <TableCell sx={{ fontWeight: 800, fontSize: 13 }}>Assigned To</TableCell>
-                <TableCell sx={{ fontWeight: 800, fontSize: 13 }}>Department</TableCell>
-                <TableCell sx={{ fontWeight: 800, fontSize: 13 }}>Assigned Date</TableCell>
-                <TableCell sx={{ fontWeight: 800, fontSize: 13 }}>Condition</TableCell>
-                <TableCell sx={{ fontWeight: 800, fontSize: 13 }} align="right">Action</TableCell>
+        <TableContainer component={Paper} sx={{ borderRadius: '20px', border: 1, borderColor: 'divider', overflow: 'hidden' }}>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'background.default' }}>
+                {['Device', 'Assigned To', 'Department', 'Assigned Date', 'Condition', 'Action'].map((h, i) => (
+                  <TableCell key={h} align={i === 5 ? 'right' : 'left'}
+                    sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>
+                    {h}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               {filtered.map(a => {
                 const condStyle = COND[a.conditionAtAssign] || { bg: 'action.selected', color: 'text.secondary' };
                 return (
-                  <TableRow key={a._id} hover>
-                    <TableCell>
+                  <TableRow key={a._id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
+                    <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 38, height: 38, borderRadius: 2, bgcolor: 'action.selected', color: 'primary.main', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                        <Box sx={{ width: 38, height: 38, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.08)', color: '#A855F7', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                           {categoryIcon(a.asset?.category)}
                         </Box>
                         <Box>
                           <Typography fontWeight={700} fontSize={14} color="text.primary">{a.asset?.name || '—'}</Typography>
-                          <Typography fontWeight={600} fontSize={12} color="primary.main" fontFamily="monospace">{a.asset?.serialNumber || '—'}</Typography>
+                          <Typography fontWeight={600} fontSize={11} color="primary.main" fontFamily="monospace">{a.asset?.serialNumber || '—'}</Typography>
                           {a.asset?.category && <Typography fontSize={11} color="text.secondary">{a.asset.category}</Typography>}
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 36, height: 36, fontSize: 14, fontWeight: 800, bgcolor: 'action.selected', color: 'primary.main' }}>
+                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff' }}>
                           {a.employeeName?.[0]?.toUpperCase() || '?'}
                         </Avatar>
                         <Box>
-                          <Typography fontWeight={700} fontSize={14} color="text.primary">{a.employeeName || '—'}</Typography>
-                          <Typography fontSize={12} color="text.secondary">{a.employeeEmail || '—'}</Typography>
+                          <Typography fontWeight={700} fontSize={13} color="text.primary">{a.employeeName || '—'}</Typography>
+                          <Typography fontSize={11} color="text.secondary">{a.employeeEmail || '—'}</Typography>
                           {a.employeePhone && <Typography fontSize={11} color="text.disabled">{a.employeePhone}</Typography>}
                         </Box>
                       </Box>
                     </TableCell>
-                    <TableCell>
-                      <Typography fontWeight={600} fontSize={13} color="text.primary">{a.department?.name || '—'}</Typography>
-                      {a.department?.code && <Typography fontSize={11} color="text.secondary">{a.department.code}</Typography>}
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Typography fontWeight={700} fontSize={13} color="text.primary">{a.department?.name || '—'}</Typography>
+                      {a.department?.code && (
+                        <Typography fontSize={11} color="text.secondary" fontFamily="monospace">{a.department.code}</Typography>
+                      )}
                     </TableCell>
-                    <TableCell>
-                      <Typography fontSize={13} color="text.primary">{fmt(a.assignedDate)}</Typography>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Typography fontSize={13} fontWeight={600} color="text.primary">{fmt(a.assignedDate)}</Typography>
                     </TableCell>
-                    <TableCell>
-                      {a.conditionAtAssign
-                        ? <Chip label={a.conditionAtAssign} size="small" sx={{ fontSize: 11, fontWeight: 700, height: 22, bgcolor: condStyle.bg, color: condStyle.color, border: 0 }} />
-                        : <Typography fontSize={13} color="text.disabled">—</Typography>}
+                    <TableCell sx={{ py: 1.5 }}>
+                      {a.conditionAtAssign ? (
+                        <Box sx={{ display: 'inline-flex', px: 1.2, py: 0.4, borderRadius: '20px', bgcolor: condStyle.bg, color: condStyle.color, fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap' }}>
+                          {a.conditionAtAssign}
+                        </Box>
+                      ) : (
+                        <Typography fontSize={13} color="text.disabled">—</Typography>
+                      )}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ py: 1.5 }}>
                       <Button
                         size="small" variant="outlined"
                         startIcon={revoking === a._id ? <CircularProgress size={12} color="inherit" /> : <PersonRemoveRounded />}
                         disabled={revoking === a._id}
                         onClick={() => handleRevoke(a._id, a.asset?.name, a.employeeName)}
                         sx={{
-                          fontWeight: 700, fontSize: 12, borderRadius: 2, textTransform: 'none',
-                          borderColor: '#fca5a5', color: '#ef4444',
-                          '&:hover': { bgcolor: '#fee2e2', borderColor: '#ef4444' }
+                          fontWeight: 700, fontSize: 12, borderRadius: '10px', textTransform: 'none',
+                          borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444',
+                          '&:hover': { bgcolor: 'rgba(239,68,68,0.08)', borderColor: '#ef4444' }
                         }}
                       >
                         {revoking === a._id ? 'Revoking…' : 'Revoke'}

@@ -8,10 +8,52 @@ const getAssignments = async (req, res) => {
   try {
     const assignments = await AssetAssignment.find({})
       .populate("department", "name code")
-      .populate("asset", "assetId name category serialNumber")
+      .populate("asset", "assetId name category serialNumber assignedDepartment")
       .sort({ createdAt: -1 });
 
-    res.status(200).json(assignments);
+    // Collect all departments for lookup
+    const allDepts = await Department.find({}).select('name code');
+    const deptByName = {};
+    allDepts.forEach(d => { deptByName[d.name.toLowerCase()] = d; });
+    const deptById = {};
+    allDepts.forEach(d => { deptById[d._id.toString()] = d; });
+
+    // Collect unique employee emails from assignments missing a department
+    const missingEmails = assignments
+      .filter(a => !a.department)
+      .map(a => a.employeeEmail)
+      .filter(Boolean);
+
+    // Look up users by email to get their department string
+    const users = missingEmails.length > 0
+      ? await User.find({ email: { $in: missingEmails } }).select('email department')
+      : [];
+    const userDeptByEmail = {};
+    users.forEach(u => { if (u.department) userDeptByEmail[u.email.toLowerCase()] = u.department; });
+
+    const result = assignments.map(a => {
+      const obj = a.toObject();
+      if (obj.department) return obj; // already resolved
+
+      // Try asset's assignedDepartment (ObjectId)
+      if (a.asset?.assignedDepartment) {
+        const dept = deptById[a.asset.assignedDepartment.toString()];
+        if (dept) { obj.department = dept; return obj; }
+      }
+
+      // Try employee's department string (case-insensitive name match)
+      const empDeptStr = userDeptByEmail[a.employeeEmail?.toLowerCase()];
+      if (empDeptStr) {
+        const dept = deptByName[empDeptStr.toLowerCase()];
+        if (dept) { obj.department = dept; return obj; }
+        // fallback: synthesise a plain object so frontend shows the string
+        obj.department = { name: empDeptStr, code: '' };
+      }
+
+      return obj;
+    });
+
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -62,7 +104,9 @@ const assignAsset = async (req, res) => {
         if (doc) departmentId = doc._id;
       }
       if (!departmentId) {
-        const doc = await Department.findOne({ name: { $regex: new RegExp(`^${department}$`, 'i') } });
+        // Try exact name match, then partial match
+        let doc = await Department.findOne({ name: { $regex: new RegExp(`^${department}$`, 'i') } });
+        if (!doc) doc = await Department.findOne({ name: { $regex: new RegExp(department, 'i') } });
         if (doc) departmentId = doc._id;
       }
     }

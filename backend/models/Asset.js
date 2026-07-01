@@ -6,7 +6,8 @@ const assetSchema = new mongoose.Schema({
   formFactor: { type: String, default: 'Movable' },
   vendor: { type: String },
   modelNumber: { type: String },
-  serialNumber: { type: String, required: true, unique: true },
+  serialNumber: { type: String, required: true },
+  tenantId: { type: String, required: true, default: 'default' },
 
   // Lifecycle Data
   procurementDate: { type: Date },
@@ -30,6 +31,16 @@ const assetSchema = new mongoose.Schema({
     type: String,
     enum: ['Active', 'In Transit', 'Under Repair', 'Decommissioned', 'In Storage', 'Scrap'],
     default: 'Active'
+  },
+  warehouse: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Warehouse',
+    default: null
+  },
+  stockStatus: {
+    type: String,
+    enum: ['Available', 'Reserved', 'Damaged', 'Lost', 'Returned', 'N/A'],
+    default: 'N/A'
   },
 
   // Assignment Data (denormalized for fast reads)
@@ -59,6 +70,12 @@ const assetSchema = new mongoose.Schema({
   warrantyAlertSent15: { type: Boolean, default: false },
   warrantyAlertSent7: { type: Boolean, default: false },
 
+  // Custom metadata fields (managed dynamically via CustomField config)
+  customFields: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
+
   // Soft delete
   isDeleted: { type: Boolean, default: false },
   deletedAt: { type: Date, default: null },
@@ -71,5 +88,9 @@ assetSchema.index({ assignedTo: 1 });
 assetSchema.index({ isDeleted: 1 });
 assetSchema.index({ createdAt: -1 });
 assetSchema.index({ warrantyEnd: 1 });
+assetSchema.index({ tenantId: 1 });
+assetSchema.index({ serialNumber: 1, tenantId: 1 }, { unique: true });
 
-module.exports = mongoose.model('Asset', assetSchema);
+const Asset = mongoose.model('Asset', assetSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('Asset', Asset);

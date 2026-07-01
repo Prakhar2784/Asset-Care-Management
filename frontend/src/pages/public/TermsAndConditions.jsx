@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
@@ -152,13 +152,13 @@ const TermsAndConditions = () => {
         .terms-page {
           min-height: 100vh;
           background:
-            radial-gradient(circle at top left, rgba(203,250,87,0.06), transparent 38%),
+            radial-gradient(circle at top left, rgba(168,85,247,0.06), transparent 38%),
             radial-gradient(circle at top right, rgba(17,17,17,0.03), transparent 38%),
-            #ECEAE3;
+            #080812;
         }
 
         .terms-hero {
-          background: #111111;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
           padding: 160px 24px 72px;
           position: relative;
           overflow: hidden;
@@ -171,7 +171,7 @@ const TermsAndConditions = () => {
           right: -100px;
           width: 500px;
           height: 500px;
-          background: radial-gradient(circle, rgba(203,250,87,0.14), transparent 70%);
+          background: radial-gradient(circle, rgba(168,85,247,0.14), transparent 70%);
           border-radius: 50%;
           pointer-events: none;
         }
@@ -189,9 +189,9 @@ const TermsAndConditions = () => {
           gap: 8px;
           padding: 8px 18px;
           border-radius: 999px;
-          background: rgba(203,250,87,0.10);
-          border: 1px solid rgba(203,250,87,0.22);
-          color: #CBFA57;
+          background: rgba(255,255,255,0.15);
+          border: 1px solid rgba(255,255,255,0.35);
+          color: #FFFFFF;
           font-size: 13px;
           font-weight: 800;
           letter-spacing: 0.5px;
@@ -231,7 +231,7 @@ const TermsAndConditions = () => {
           gap: 8px;
           font-size: 14px;
           font-weight: 700;
-          color: #CBFA57;
+          color: rgba(255,255,255,0.85);
         }
 
         .terms-body {
@@ -247,8 +247,8 @@ const TermsAndConditions = () => {
         .terms-toc {
           position: sticky;
           top: 100px;
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 24px;
           padding: 28px 24px;
           box-shadow: 0 12px 32px rgba(17,17,17,0.06);
@@ -257,7 +257,7 @@ const TermsAndConditions = () => {
         .terms-toc h4 {
           font-size: 14px;
           font-weight: 950;
-          color: #111111;
+          color: #FFFFFF;
           text-transform: uppercase;
           letter-spacing: 1px;
           margin: 0 0 18px;
@@ -267,7 +267,7 @@ const TermsAndConditions = () => {
           display: block;
           font-size: 13px;
           font-weight: 700;
-          color: #6B6B65;
+          color: #8B8BAA;
           text-decoration: none;
           padding: 7px 10px;
           border-radius: 10px;
@@ -278,7 +278,7 @@ const TermsAndConditions = () => {
 
         .toc-link:hover {
           background: rgba(17,17,17,0.05);
-          color: #111111;
+          color: #FFFFFF;
           transform: translateX(4px);
         }
 
@@ -289,8 +289,8 @@ const TermsAndConditions = () => {
         }
 
         .terms-section {
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 24px;
           padding: 40px;
           box-shadow: 0 8px 24px rgba(15,23,42,0.04);
@@ -304,15 +304,15 @@ const TermsAndConditions = () => {
         .terms-section h2 {
           font-size: 22px;
           font-weight: 950;
-          color: #111111;
+          color: #FFFFFF;
           letter-spacing: -0.5px;
           margin: 0 0 18px;
           padding-bottom: 16px;
-          border-bottom: 2px solid rgba(17,17,17,0.08);
+          border-bottom: 2px solid rgba(168,85,247,0.25);
         }
 
         .terms-section-body {
-          color: #475569;
+          color: #CBD5E1;
           font-size: 15px;
           font-weight: 500;
           line-height: 1.85;
@@ -320,7 +320,7 @@ const TermsAndConditions = () => {
         }
 
         .terms-section-body strong {
-          color: #111111;
+          color: #FFFFFF;
           font-weight: 800;
         }
 
@@ -334,8 +334,8 @@ const TermsAndConditions = () => {
         }
 
         .terms-highlight-card {
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 22px;
           padding: 28px 24px;
           box-shadow: 0 8px 22px rgba(15,23,42,0.05);
@@ -348,8 +348,8 @@ const TermsAndConditions = () => {
           width: 48px;
           height: 48px;
           border-radius: 14px;
-          background: #111111;
-          color: #CBFA57;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          color: #A855F7;
           display: grid;
           place-items: center;
           flex-shrink: 0;
@@ -358,14 +358,14 @@ const TermsAndConditions = () => {
         .terms-hl-title {
           font-size: 15px;
           font-weight: 900;
-          color: #111111;
+          color: #FFFFFF;
           margin-bottom: 5px;
         }
 
         .terms-hl-text {
           font-size: 13px;
           font-weight: 600;
-          color: #64748B;
+          color: #94A3B8;
           line-height: 1.5;
         }
 
@@ -384,7 +384,7 @@ const TermsAndConditions = () => {
         }
 
         .terms-footer-note a {
-          color: #111111;
+          color: #FFFFFF;
           font-weight: 800;
           text-decoration: none;
         }

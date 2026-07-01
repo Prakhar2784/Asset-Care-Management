@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import PageHeader from "../../components/PageHeader";
+﻿import { Link } from "react-router-dom";
 import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumberRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
@@ -21,7 +20,7 @@ const Workflow = () => {
   return (
     <>
       <style>{`
-        .workflow-page { min-height: 100vh; background: #ECEAE3; }
+        .workflow-page { min-height: 100vh; background: #080812; }
         .workflow-container { max-width: 1400px; margin: 0 auto; }
         .workflow-hero { padding: 140px 24px 44px; }
 
@@ -32,19 +31,19 @@ const Workflow = () => {
         }
 
         .workflow-summary-card {
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 18px; padding: 18px;
           box-shadow: 0 4px 16px rgba(17,17,17,0.05);
         }
 
         .workflow-summary-value {
           font-size: 30px; font-weight: 950;
-          color: #111111; margin-bottom: 3px;
+          color: #FFFFFF; margin-bottom: 3px;
           letter-spacing: -1px; line-height: 1;
         }
 
-        .workflow-summary-label { font-size: 13px; font-weight: 700; color: #8A8A84; }
+        .workflow-summary-label { font-size: 13px; font-weight: 700; color: #94A3B8; }
 
         .workflow-section { padding: 16px 24px 100px; }
 
@@ -55,68 +54,44 @@ const Workflow = () => {
         }
 
         .work-card {
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 24px; padding: 32px 28px;
           position: relative; overflow: hidden;
-          transition: all 0.3s ease;
           box-shadow: 0 4px 16px rgba(17,17,17,0.04);
         }
-
-        .work-card::after {
-          content: "";
-          position: absolute; left: 0; bottom: 0;
-          width: 100%; height: 4px;
-          background: #CBFA57;
-          transform: scaleX(0); transform-origin: left;
-          transition: 0.3s ease;
-        }
-
-        .work-card:hover {
-          transform: translateY(-8px);
-          border-color: rgba(17,17,17,0.18);
-          box-shadow: 0 24px 48px rgba(17,17,17,0.10);
-        }
-
-        .work-card:hover::after { transform: scaleX(1); }
 
         .work-number {
           position: absolute; bottom: -20px; right: 14px;
           font-size: 120px; font-weight: 950;
-          color: rgba(17,17,17,0.04); z-index: 0; line-height: 1;
-          transition: all 0.3s ease;
+          color: rgba(168,85,247,0.07); z-index: 0; line-height: 1;
         }
-
-        .work-card:hover .work-number { color: rgba(203,250,87,0.18); }
 
         .work-content { position: relative; z-index: 1; }
 
         .work-icon {
           width: 54px; height: 54px;
-          background: #111111; color: #CBFA57;
+          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
           border-radius: 15px;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 18px;
-          transition: all 0.3s ease;
         }
-
-        .work-card:hover .work-icon { transform: rotate(-5deg) scale(1.05); }
 
         .work-badge {
           display: inline-block;
           padding: 6px 12px;
-          background: rgba(17,17,17,0.06); color: #111111;
+          background: rgba(17,17,17,0.06); color: #FFFFFF;
           border-radius: 999px; font-size: 11px; font-weight: 900;
           letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px;
         }
 
-        .work-title { font-size: 18px; font-weight: 900; color: #111111; margin-bottom: 12px; line-height: 1.35; letter-spacing: -0.3px; }
+        .work-title { font-size: 18px; font-weight: 900; color: #FFFFFF; margin-bottom: 12px; line-height: 1.35; letter-spacing: -0.3px; }
 
-        .work-text { font-size: 14.5px; line-height: 1.65; color: #6B6B65; font-weight: 500; margin: 0; }
+        .work-text { font-size: 14.5px; line-height: 1.65; color: #CBD5E1; font-weight: 500; margin: 0; }
 
         .workflow-timeline {
           max-width: 1400px; margin: 28px auto 0;
-          background: #111111;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
           border-radius: 28px; padding: 44px;
           display: grid; grid-template-columns: 0.95fr 1.05fr;
           gap: 38px; align-items: center;
@@ -127,7 +102,7 @@ const Workflow = () => {
           content: "";
           position: absolute; top: -80px; right: -80px;
           width: 240px; height: 240px;
-          background: radial-gradient(circle, rgba(203,250,87,0.10), transparent 70%);
+          background: radial-gradient(circle, rgba(168,85,247,0.10), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -138,7 +113,7 @@ const Workflow = () => {
         }
 
         .workflow-timeline p {
-          color: #7A7A74; line-height: 1.7; font-size: 15px;
+          color: rgba(255,255,255,0.8); line-height: 1.7; font-size: 15px;
           font-weight: 500; margin: 0; position: relative; z-index: 1;
         }
 
@@ -153,7 +128,7 @@ const Workflow = () => {
 
         .timeline-dot {
           width: 36px; height: 36px; border-radius: 10px;
-          background: #CBFA57; color: #111111;
+          background: #A855F7; color: #FFFFFF;
           display: grid; place-items: center;
           font-weight: 950; font-size: 13px; flex-shrink: 0;
         }
@@ -162,20 +137,20 @@ const Workflow = () => {
 
         .workflow-cta {
           max-width: 1400px; margin: 24px auto 0;
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 24px; padding: 32px 36px;
           display: flex; justify-content: space-between; align-items: center;
           gap: 24px; flex-wrap: wrap;
           box-shadow: 0 8px 24px rgba(17,17,17,0.06);
         }
 
-        .workflow-cta h3 { color: #111111; font-size: 26px; font-weight: 950; margin: 0 0 7px; letter-spacing: -0.7px; }
+        .workflow-cta h3 { color: #FFFFFF; font-size: 26px; font-weight: 950; margin: 0 0 7px; letter-spacing: -0.7px; }
 
-        .workflow-cta p { color: #6B6B65; font-size: 15px; font-weight: 500; margin: 0; line-height: 1.6; }
+        .workflow-cta p { color: #CBD5E1; font-size: 15px; font-weight: 500; margin: 0; line-height: 1.6; }
 
         .workflow-cta-btn {
-          background: #111111; color: #CBFA57;
+          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
           border: none; padding: 14px 24px; border-radius: 999px;
           font-weight: 900; cursor: pointer;
           display: inline-flex; align-items: center; gap: 8px;
@@ -199,11 +174,11 @@ const Workflow = () => {
       <div className="workflow-page">
         <div className="workflow-hero">
           <div className="workflow-container">
-            <PageHeader
-              label="System Protocol"
-              title="Clear approval and service workflow"
-              text="Every breakdown complaint follows a structured process so nothing is missed and every service action is traceable through the system."
-            />
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ color: '#A855F7', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>System Protocol</div>
+              <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Clear approval and service workflow</h1>
+              <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Every breakdown complaint follows a structured process so nothing is missed and every service action is traceable through the system.</p>
+            </div>
             <div className="workflow-summary">
               {[
                 { value: "06", label: "Workflow Steps" },

@@ -3,12 +3,10 @@ import {
   Alert,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Divider,
   Grid,
   IconButton,
@@ -22,16 +20,18 @@ import {
 import {
   AddRounded,
   ApartmentRounded,
+  CheckCircleRounded,
   CloseRounded,
   DeleteRounded,
   EditRounded,
   EmailRounded,
+  GppGoodRounded,
   LocationOnRounded,
   PhoneRounded,
   SaveRounded,
   VisibilityRounded,
+  WarningAmberRounded,
 } from "@mui/icons-material";
-import PageHeader from "../../components/PageHeader";
 import api from "../../api/axios";
 
 const initialForm = {
@@ -50,6 +50,14 @@ const initialForm = {
 
 const approvalLevels = ["HOD Only", "HOD + Admin", "HOD + Finance", "Admin Only"];
 
+const inputStyles = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "12px",
+    fontWeight: 700,
+  },
+  "& .MuiInputLabel-root": { fontWeight: 700 },
+};
+
 const Departments = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,11 +71,7 @@ const Departments = () => {
   const [selectedDept, setSelectedDept] = useState(null);
   const [formData, setFormData] = useState(initialForm);
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   useEffect(() => {
     fetchDepartments();
@@ -79,29 +83,20 @@ const Departments = () => {
       const res = await api.get("/departments");
       setDepartments(res.data || []);
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error?.response?.data?.message || "Failed to fetch departments.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: error?.response?.data?.message || "Failed to fetch departments.", severity: "error" });
     } finally {
       setLoading(false);
     }
   };
 
-  const summary = useMemo(() => {
-    return {
-      total: departments.length,
-      active: departments.filter((d) => d.status === "Active").length,
-      approval: departments.filter((d) => d.approvalRequired).length,
-    };
-  }, [departments]);
+  const summary = useMemo(() => ({
+    total: departments.length,
+    active: departments.filter(d => d.status === "Active").length,
+    approval: departments.filter(d => d.approvalRequired).length,
+  }), [departments]);
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const openAddForm = () => {
@@ -114,58 +109,35 @@ const Departments = () => {
   const openEditForm = (dept) => {
     setMode("edit");
     setSelectedDept(dept);
-    setFormData({
-      ...initialForm,
-      ...dept,
-    });
+    setFormData({ ...initialForm, ...dept });
     setFormOpen(true);
   };
 
   const validateForm = () => {
     if (!formData.name || !formData.code || !formData.hodName || !formData.hodEmail) {
-      setSnackbar({
-        open: true,
-        message: "Please fill department name, code, HOD name and HOD email.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: "Please fill department name, code, HOD name and HOD email.", severity: "error" });
       return false;
     }
-
     return true;
   };
 
   const handleSaveDepartment = async () => {
     if (!validateForm()) return;
-
     setSaving(true);
-
     try {
       if (mode === "edit" && selectedDept?._id) {
         await api.put(`/departments/${selectedDept._id}`, formData);
-        setSnackbar({
-          open: true,
-          message: "Department updated successfully.",
-          severity: "success",
-        });
+        setSnackbar({ open: true, message: "Department updated successfully.", severity: "success" });
       } else {
         await api.post("/departments", formData);
-        setSnackbar({
-          open: true,
-          message: "Department added successfully.",
-          severity: "success",
-        });
+        setSnackbar({ open: true, message: "Department added successfully.", severity: "success" });
       }
-
       setFormOpen(false);
       setSelectedDept(null);
       setFormData(initialForm);
       fetchDepartments();
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error?.response?.data?.message || "Failed to save department.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: error?.response?.data?.message || "Failed to save department.", severity: "error" });
     } finally {
       setSaving(false);
     }
@@ -173,64 +145,60 @@ const Departments = () => {
 
   const handleDeleteDepartment = async () => {
     if (!selectedDept?._id) return;
-
     try {
       await api.delete(`/departments/${selectedDept._id}`);
-
-      setSnackbar({
-        open: true,
-        message: "Department deleted successfully.",
-        severity: "success",
-      });
-
+      setSnackbar({ open: true, message: "Department deleted successfully.", severity: "success" });
       setDeleteOpen(false);
       setSelectedDept(null);
       fetchDepartments();
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error?.response?.data?.message || "Failed to delete department.",
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: error?.response?.data?.message || "Failed to delete department.", severity: "error" });
     }
   };
 
-  const inputStyles = {
-    "& .MuiOutlinedInput-root": {
-      bgcolor: "background.paper",
-      borderRadius: "14px",
-      fontWeight: 700,
-    },
-    "& .MuiInputLabel-root": { fontWeight: 700 },
-  };
+  const kpis = [
+    { label: "Total Departments", value: summary.total,    color: "#A855F7", icon: <ApartmentRounded fontSize="small" /> },
+    { label: "Active",            value: summary.active,   color: "#22C55E", icon: <CheckCircleRounded fontSize="small" /> },
+    { label: "Approval Required", value: summary.approval, color: "#F59E0B", icon: <GppGoodRounded fontSize="small" /> },
+  ];
 
   return (
     <Box sx={{ width: "100%", pb: 5 }}>
-      <PageHeader
-        title="Departments"
-        subtitle="Manage department-wise asset ownership, HOD approvals and service accountability."
-        action={
-          <Button
-            variant="contained"
-            startIcon={<AddRounded />}
-            onClick={openAddForm}
-            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "14px", px: 3, py: 1.2, "&:hover": { bgcolor: "#222222" } }}
-          >
-            Add Department
-          </Button>
-        }
-      />
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
+            <ApartmentRounded sx={{ color: "#A855F7" }} />
+          </Box>
+          <Box>
+            <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Departments</Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              Manage HOD approvals and asset ownership by department
+            </Typography>
+          </Box>
+        </Box>
+        <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm}
+          sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
+          Add Department
+        </Button>
+      </Box>
 
+      {/* KPI Cards */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <SummaryCard title="Total Departments" value={summary.total} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <SummaryCard title="Active Departments" value={summary.active} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 4 }}>
-          <SummaryCard title="Approval Required" value={summary.approval} warning />
-        </Grid>
+        {kpis.map(k => (
+          <Grid size={{ xs: 12, sm: 4 }} key={k.label}>
+            <Paper sx={{ p: 2.5, borderRadius: "16px", border: 1, borderColor: "divider", position: "relative", overflow: "hidden" }}>
+              <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: k.color }} />
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: `${k.color}18`, display: "grid", placeItems: "center" }}>
+                  <Box sx={{ color: k.color }}>{k.icon}</Box>
+                </Box>
+              </Box>
+              <Typography sx={{ fontSize: 28, fontWeight: 950, color: "text.primary", lineHeight: 1, letterSpacing: "-1px", mt: 1.5, mb: 0.3 }}>{k.value}</Typography>
+              <Typography fontSize={13} fontWeight={700} color="text.primary">{k.label}</Typography>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
 
       {loading ? (
@@ -238,114 +206,78 @@ const Departments = () => {
           <CircularProgress />
         </Box>
       ) : departments.length === 0 ? (
-        <Paper sx={{ p: 5, textAlign: "center", borderRadius: "24px" }}>
-          <ApartmentRounded sx={{ fontSize: 56, color: "#94A3B8", mb: 1 }} />
-          <Typography fontWeight={900} fontSize={22}>
-            No departments added yet
-          </Typography>
+        <Paper sx={{ p: 8, textAlign: "center", borderRadius: "20px", border: "1px dashed", borderColor: "divider" }}>
+          <Box sx={{ width: 72, height: 72, borderRadius: "20px", bgcolor: "rgba(124,58,237,0.08)", display: "grid", placeItems: "center", mx: "auto", mb: 2 }}>
+            <ApartmentRounded sx={{ fontSize: 36, color: "#A855F7" }} />
+          </Box>
+          <Typography fontWeight={800} fontSize={20} color="text.primary">No departments added yet</Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             Add departments to manage approvals and asset ownership.
           </Typography>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+            Add First Department
+          </Button>
         </Paper>
       ) : (
         <Grid container spacing={3}>
-          {departments.map((dept) => (
+          {departments.map(dept => (
             <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={dept._id}>
-              <Paper
-                sx={{
-                  p: 3,
-                  borderRadius: "26px",
-                  bgcolor: "background.paper",
-                  border: "1px solid", borderColor: "divider",
-                  height: "100%",
-                  boxShadow: "0 14px 34px rgba(15,23,42,0.06)",
-                }}
-              >
-                <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
-                  <Box
-                    sx={{
-                      width: 58,
-                      height: 58,
-                      borderRadius: "18px",
-                      bgcolor: "#111111",
-                      color: "#CBFA57",
-                      display: "grid",
-                      placeItems: "center",
-                    }}
-                  >
-                    <ApartmentRounded sx={{ fontSize: 32 }} />
-                  </Box>
+              <Paper sx={{
+                p: 3, borderRadius: "20px", border: "1px solid", borderColor: "divider",
+                height: "100%", bgcolor: "background.paper", position: "relative", overflow: "hidden",
+                transition: "box-shadow 0.2s", "&:hover": { boxShadow: "0 8px 32px rgba(124,58,237,0.12)" }
+              }}>
+                {/* Top accent bar */}
+                <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#7C3AED,#A855F7)" }} />
 
-                  <Chip
-                    label={dept.status}
-                    size="small"
-                    sx={{
-                      fontWeight: 900,
-                      bgcolor: dept.status === "Active" ? "#DCFCE7" : "#F1F5F9",
-                      color: dept.status === "Active" ? "#166534" : "#475569",
-                    }}
-                  />
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mt: 0.5 }}>
+                  <Box sx={{ width: 52, height: 52, borderRadius: "14px", bgcolor: "rgba(124,58,237,0.10)", color: "#A855F7", display: "grid", placeItems: "center" }}>
+                    <ApartmentRounded sx={{ fontSize: 28 }} />
+                  </Box>
+                  <Box sx={{
+                    display: "inline-flex", px: 1.5, py: 0.4, borderRadius: "20px",
+                    bgcolor: dept.status === "Active" ? "rgba(34,197,94,0.12)" : "action.selected",
+                    color: dept.status === "Active" ? "#22C55E" : "text.secondary",
+                    fontSize: 11, fontWeight: 800
+                  }}>
+                    {dept.status}
+                  </Box>
                 </Box>
 
-                <Typography sx={{ fontWeight: 900, fontSize: 21, mt: 2, color: "text.primary" }}>
+                <Typography sx={{ fontWeight: 900, fontSize: 20, mt: 2, color: "text.primary" }}>
                   {dept.name}
                 </Typography>
-
-                <Typography
-                  sx={{
-                    color: "text.secondary",
-                    fontSize: 13,
-                    fontWeight: 900,
-                    textTransform: "uppercase",
-                    mt: 0.5,
-                    mb: 2,
-                  }}
-                >
+                <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.8px", mt: 0.3, mb: 2, fontFamily: "monospace" }}>
                   {dept.code}
                 </Typography>
 
-                <InfoRow icon={<ApartmentRounded fontSize="small" />} text={`HOD: ${dept.hodName}`} />
-                <InfoRow icon={<EmailRounded fontSize="small" />} text={dept.hodEmail} />
-                <InfoRow icon={<PhoneRounded fontSize="small" />} text={dept.hodPhone || "-"} />
-                <InfoRow icon={<LocationOnRounded fontSize="small" />} text={dept.location || "-"} />
+                <InfoRow icon={<ApartmentRounded fontSize="small" />} text={`HOD: ${dept.hodName || "—"}`} />
+                <InfoRow icon={<EmailRounded fontSize="small" />} text={dept.hodEmail || "—"} />
+                <InfoRow icon={<PhoneRounded fontSize="small" />} text={dept.hodPhone || "—"} />
+                <InfoRow icon={<LocationOnRounded fontSize="small" />} text={dept.location || "—"} />
 
                 <Divider sx={{ my: 2 }} />
 
-                <Typography sx={{ fontWeight: 800, color: "text.secondary", fontSize: 13 }}>
-                  Approval Flow
-                </Typography>
-                <Typography sx={{ fontWeight: 900, color: "text.primary", mt: 0.3 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+                  <GppGoodRounded sx={{ fontSize: 16, color: dept.approvalRequired ? "#F59E0B" : "text.disabled" }} />
+                  <Typography fontSize={13} fontWeight={700} color="text.secondary">Approval Flow</Typography>
+                </Box>
+                <Typography fontSize={14} fontWeight={800} color="text.primary">
                   {dept.approvalRequired ? dept.approvalLevel : "Approval not required"}
                 </Typography>
 
                 <Box sx={{ display: "flex", gap: 1.2, mt: 2.5 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<VisibilityRounded />}
-                    onClick={() => {
-                      setSelectedDept(dept);
-                      setDetailOpen(true);
-                    }}
-                    sx={smallBtn}
-                  >
+                  <Button fullWidth variant="outlined" startIcon={<VisibilityRounded />}
+                    onClick={() => { setSelectedDept(dept); setDetailOpen(true); }}
+                    sx={{ borderRadius: "10px", fontWeight: 800, textTransform: "none", borderColor: "divider", color: "text.primary", fontSize: 13 }}>
                     View
                   </Button>
-
-                  <IconButton
-                    onClick={() => openEditForm(dept)}
-                    sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px", color: "text.secondary", "&:hover": { color: "text.primary" } }}
-                  >
+                  <IconButton onClick={() => openEditForm(dept)}
+                    sx={{ border: "1px solid", borderColor: "divider", borderRadius: "10px", color: "text.secondary", "&:hover": { color: "text.primary", borderColor: "text.secondary" } }}>
                     <EditRounded />
                   </IconButton>
-
-                  <IconButton
-                    onClick={() => {
-                      setSelectedDept(dept);
-                      setDeleteOpen(true);
-                    }}
-                    sx={{ border: "1px solid #FCA5A5", borderRadius: "12px", color: "#DC2626" }}
-                  >
+                  <IconButton onClick={() => { setSelectedDept(dept); setDeleteOpen(true); }}
+                    sx={{ border: "1px solid rgba(239,68,68,0.4)", borderRadius: "10px", color: "#EF4444", "&:hover": { bgcolor: "rgba(239,68,68,0.08)" } }}>
                     <DeleteRounded />
                   </IconButton>
                 </Box>
@@ -355,78 +287,39 @@ const Departments = () => {
         </Grid>
       )}
 
-      <Dialog
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        fullWidth
-        maxWidth="md"
-        slotProps={{ paper: {
-          sx: {
-            borderRadius: "26px",
-            bgcolor: "background.paper",
-            overflow: "hidden",
-          },
-        } }}
-      >
-        <DialogTitle sx={{ bgcolor: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}>
-          <Typography fontWeight={950} fontSize={24}>
-            {mode === "add" ? "Add Department" : "Update Department"}
-          </Typography>
-          <Typography sx={{ color: "#64748B", fontWeight: 700, fontSize: 14, mt: 0.5 }}>
-            Add department, HOD contact and approval flow details.
-          </Typography>
-
-          <IconButton
-            onClick={() => setFormOpen(false)}
-            sx={{ position: "absolute", right: 14, top: 14 }}
-          >
+      {/* Add / Edit Dialog */}
+      <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="md"
+        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden" } } }}>
+        {/* Gradient Header */}
+        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+              <ApartmentRounded sx={{ color: "#fff", fontSize: 22 }} />
+            </Box>
+            <Box>
+              <Typography fontWeight={900} fontSize={18}>{mode === "add" ? "Add Department" : "Update Department"}</Typography>
+              <Typography fontSize={12} color="text.secondary">Fill department, HOD contact and approval flow details</Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setFormOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}>
             <CloseRounded />
           </IconButton>
-        </DialogTitle>
+        </Box>
 
-        <DialogContent dividers sx={{ bgcolor: "#F8FAFC", p: 3 }}>
+        <DialogContent sx={{ p: 3, bgcolor: "background.default" }}>
           <FormBlock title="Department Details">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Department Name"
-                  value={formData.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth required label="Department Name" value={formData.name} onChange={e => handleChange("name", e.target.value)} sx={inputStyles} />
               </Grid>
-
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Department Code"
-                  value={formData.code}
-                  onChange={(e) => handleChange("code", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth required label="Department Code" value={formData.code} onChange={e => handleChange("code", e.target.value)} sx={inputStyles} />
               </Grid>
-
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Location"
-                  value={formData.location}
-                  onChange={(e) => handleChange("location", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth label="Location" value={formData.location} onChange={e => handleChange("location", e.target.value)} sx={inputStyles} />
               </Grid>
-
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  fullWidth
-                  label="Floor / Building"
-                  value={formData.floor}
-                  onChange={(e) => handleChange("floor", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth label="Floor / Building" value={formData.floor} onChange={e => handleChange("floor", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
           </FormBlock>
@@ -434,35 +327,13 @@ const Departments = () => {
           <FormBlock title="HOD / Approval Owner">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="HOD Name"
-                  value={formData.hodName}
-                  onChange={(e) => handleChange("hodName", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth required label="HOD Name" value={formData.hodName} onChange={e => handleChange("hodName", e.target.value)} sx={inputStyles} />
               </Grid>
-
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  required
-                  label="HOD Email"
-                  value={formData.hodEmail}
-                  onChange={(e) => handleChange("hodEmail", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth required label="HOD Email" value={formData.hodEmail} onChange={e => handleChange("hodEmail", e.target.value)} sx={inputStyles} />
               </Grid>
-
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  fullWidth
-                  label="HOD Phone"
-                  value={formData.hodPhone}
-                  onChange={(e) => handleChange("hodPhone", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth label="HOD Phone" value={formData.hodPhone} onChange={e => handleChange("hodPhone", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
           </FormBlock>
@@ -470,116 +341,66 @@ const Departments = () => {
           <FormBlock title="Approval Settings">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4 }}>
-                <Box
-                  sx={{
-                    height: "100%",
-                    minHeight: 56,
-                    px: 2,
-                    borderRadius: "14px",
-                    bgcolor: "background.paper",
-                    border: "1px solid #CBD5E1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography fontWeight={900}>Approval Required</Typography>
-                  <Switch
-                    checked={formData.approvalRequired}
-                    onChange={(e) => handleChange("approvalRequired", e.target.checked)}
-                  />
+                <Box sx={{ height: "100%", minHeight: 56, px: 2, borderRadius: "12px", border: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <Typography fontWeight={800} fontSize={14}>Approval Required</Typography>
+                  <Switch checked={formData.approvalRequired} onChange={e => handleChange("approvalRequired", e.target.checked)} />
                 </Box>
               </Grid>
-
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Approval Level"
-                  value={formData.approvalLevel}
-                  onChange={(e) => handleChange("approvalLevel", e.target.value)}
-                  disabled={!formData.approvalRequired}
-                  sx={inputStyles}
-                >
-                  {approvalLevels.map((item) => (
-                    <MenuItem key={item} value={item}>
-                      {item}
-                    </MenuItem>
-                  ))}
+                <TextField select fullWidth label="Approval Level" value={formData.approvalLevel} onChange={e => handleChange("approvalLevel", e.target.value)}
+                  disabled={!formData.approvalRequired} sx={inputStyles}>
+                  {approvalLevels.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                 </TextField>
               </Grid>
-
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Status"
-                  value={formData.status}
-                  onChange={(e) => handleChange("status", e.target.value)}
-                  sx={inputStyles}
-                >
+                <TextField select fullWidth label="Status" value={formData.status} onChange={e => handleChange("status", e.target.value)} sx={inputStyles}>
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
                 </TextField>
               </Grid>
-
               <Grid size={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  minRows={3}
-                  label="Description / Notes"
-                  value={formData.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                  sx={inputStyles}
-                />
+                <TextField fullWidth multiline minRows={3} label="Description / Notes" value={formData.description} onChange={e => handleChange("description", e.target.value)} sx={inputStyles} />
               </Grid>
             </Grid>
           </FormBlock>
         </DialogContent>
 
-        <DialogActions sx={{ p: 2, bgcolor: "background.paper", borderTop: "1px solid", borderTopColor: "divider" }}>
-          <Button
-            onClick={() => setFormOpen(false)}
-            sx={{ fontWeight: 900, color: "text.secondary" }}
-          >
+        <DialogActions sx={{ p: 2.5, bgcolor: "background.paper", borderTop: "1px solid", borderColor: "divider" }}>
+          <Button onClick={() => setFormOpen(false)} sx={{ fontWeight: 800, color: "text.secondary", textTransform: "none", borderRadius: "10px" }}>
             Cancel
           </Button>
-
-          <Button
-            variant="contained"
-            startIcon={<SaveRounded />}
-            onClick={handleSaveDepartment}
-            disabled={saving}
-            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", px: 3, "&:hover": { bgcolor: "#222222" } }}
-          >
+          <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
+            onClick={handleSaveDepartment} disabled={saving}
+            sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
             {saving ? "Saving..." : mode === "add" ? "Save Department" : "Update Department"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 950 }}>
-          Department Details
-          <IconButton
-            onClick={() => setDetailOpen(false)}
-            sx={{ position: "absolute", right: 12, top: 10 }}
-          >
+      {/* Detail Dialog */}
+      <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} fullWidth maxWidth="sm"
+        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden" } } }}>
+        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+              <ApartmentRounded sx={{ color: "#fff", fontSize: 22 }} />
+            </Box>
+            <Box>
+              <Typography fontWeight={900} fontSize={18}>Department Details</Typography>
+              <Typography fontSize={12} color="text.secondary">{selectedDept?.name}</Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setDetailOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}>
             <CloseRounded />
           </IconButton>
-        </DialogTitle>
-
-        <DialogContent dividers>
+        </Box>
+        <DialogContent sx={{ p: 3 }}>
           {selectedDept && (
             <Box>
-              <Typography fontWeight={950} fontSize={24}>
-                {selectedDept.name}
-              </Typography>
-
-              <Typography color="text.secondary" fontWeight={800} sx={{ mb: 2 }}>
-                {selectedDept.code}
-              </Typography>
-
+              <Box sx={{ mb: 3 }}>
+                <Typography fontWeight={950} fontSize={22} color="text.primary">{selectedDept.name}</Typography>
+                <Typography color="text.secondary" fontWeight={800} fontFamily="monospace" fontSize={13}>{selectedDept.code}</Typography>
+              </Box>
               <DetailRow label="HOD Name" value={selectedDept.hodName} />
               <DetailRow label="HOD Email" value={selectedDept.hodEmail} />
               <DetailRow label="HOD Phone" value={selectedDept.hodPhone} />
@@ -594,39 +415,42 @@ const Departments = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: 950 }}>Delete Department</DialogTitle>
-
-        <DialogContent>
-          <Typography sx={{ color: "text.secondary", fontWeight: 700 }}>
-            Are you sure you want to delete{" "}
-            <strong>{selectedDept?.name}</strong>?
+      {/* Delete Dialog */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} fullWidth maxWidth="xs"
+        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden" } } }}>
+        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(239,68,68,0.08),rgba(239,68,68,0.02))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "rgba(239,68,68,0.12)", display: "grid", placeItems: "center" }}>
+              <WarningAmberRounded sx={{ color: "#EF4444", fontSize: 22 }} />
+            </Box>
+            <Box>
+              <Typography fontWeight={900} fontSize={17}>Delete Department</Typography>
+              <Typography fontSize={12} color="text.secondary">This action cannot be undone</Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setDeleteOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}>
+            <CloseRounded />
+          </IconButton>
+        </Box>
+        <DialogContent sx={{ p: 3 }}>
+          <Typography color="text.secondary" fontWeight={600}>
+            Are you sure you want to delete <strong style={{ color: "inherit" }}>{selectedDept?.name}</strong>?
           </Typography>
         </DialogContent>
-
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setDeleteOpen(false)} sx={{ fontWeight: 900 }}>
+        <DialogActions sx={{ p: 2.5, pt: 0 }}>
+          <Button onClick={() => setDeleteOpen(false)} sx={{ fontWeight: 800, textTransform: "none", color: "text.secondary", borderRadius: "10px" }}>
             Cancel
           </Button>
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleDeleteDepartment}
-            sx={{ fontWeight: 900, textTransform: "none", borderRadius: "12px" }}
-          >
+          <Button variant="contained" onClick={handleDeleteDepartment}
+            sx={{ bgcolor: "#EF4444", "&:hover": { bgcolor: "#DC2626" }, fontWeight: 800, textTransform: "none", borderRadius: "10px", px: 3, boxShadow: "none" }}>
             Delete
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-      >
-        <Alert severity={snackbar.severity} variant="filled">
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+        <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: "12px" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
@@ -634,74 +458,25 @@ const Departments = () => {
   );
 };
 
-const SummaryCard = ({ title, value, warning = false }) => (
-  <Paper
-    sx={{
-      p: 2.5,
-      borderRadius: "22px",
-      bgcolor: "background.paper",
-      border: "1px solid", borderColor: "divider",
-      boxShadow: "0 12px 30px rgba(15,23,42,0.05)",
-    }}
-  >
-    <Typography sx={{ color: "text.secondary", fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px" }}>
-      {title}
-    </Typography>
-    <Typography sx={{ mt: 0.6, color: warning ? "#D97706" : "text.primary", fontSize: 36, fontWeight: 900, letterSpacing: "-1px", lineHeight: 1 }}>
-      {value}
-    </Typography>
-  </Paper>
-);
-
 const FormBlock = ({ title, children }) => (
-  <Paper
-    elevation={0}
-    sx={{
-      p: 2.5,
-      mb: 2.5,
-      borderRadius: "20px",
-      bgcolor: "background.paper",
-      border: "1px solid", borderColor: "divider",
-    }}
-  >
-    <Typography sx={{ fontWeight: 900, fontSize: 16, mb: 2, color: "text.primary" }}>
-      {title}
-    </Typography>
+  <Paper elevation={0} sx={{ p: 2.5, mb: 2.5, borderRadius: "16px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+    <Typography sx={{ fontWeight: 900, fontSize: 15, mb: 2, color: "text.primary" }}>{title}</Typography>
     {children}
   </Paper>
 );
 
 const InfoRow = ({ icon, text }) => (
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 1.3, color: "text.secondary" }}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1.3, mb: 1.2, color: "text.secondary" }}>
     {icon}
-    <Typography sx={{ fontWeight: 700 }}>{text || "-"}</Typography>
+    <Typography sx={{ fontWeight: 700, fontSize: 13 }}>{text || "—"}</Typography>
   </Box>
 );
 
 const DetailRow = ({ label, value }) => (
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      gap: 2,
-      py: 1.1,
-      borderBottom: "1px solid",
-      borderColor: "divider",
-    }}
-  >
-    <Typography sx={{ fontWeight: 900, color: "text.secondary" }}>{label}</Typography>
-    <Typography sx={{ fontWeight: 700, textAlign: "right", color: "text.primary" }}>
-      {value || "-"}
-    </Typography>
+  <Box sx={{ display: "flex", justifyContent: "space-between", gap: 2, py: 1.1, borderBottom: "1px solid", borderColor: "divider" }}>
+    <Typography sx={{ fontWeight: 800, color: "text.secondary", fontSize: 13 }}>{label}</Typography>
+    <Typography sx={{ fontWeight: 700, textAlign: "right", color: "text.primary", fontSize: 13 }}>{value || "—"}</Typography>
   </Box>
 );
-
-const smallBtn = {
-  borderColor: "divider",
-  color: "text.primary",
-  fontWeight: 900,
-  borderRadius: "12px",
-  "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" },
-};
 
 export default Departments;

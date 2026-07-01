@@ -9,6 +9,7 @@ import {
   Grid,
   MenuItem,
   Paper,
+  Select,
   Snackbar,
   Alert,
   Stack,
@@ -16,6 +17,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TablePagination,
@@ -25,14 +27,34 @@ import {
   CircularProgress,
   Divider,
   Tooltip,
-  Autocomplete
+  Autocomplete,
+  InputAdornment,
 } from "@mui/material";
-import { AddRounded, DownloadRounded, VisibilityRounded, CloseRounded, EditRounded, DeleteOutlineRounded, PersonAddRounded, PersonRemoveRounded } from "@mui/icons-material";
+import {
+  AddRounded,
+  DownloadRounded,
+  VisibilityRounded,
+  CloseRounded,
+  EditRounded,
+  DeleteOutlineRounded,
+  PersonAddRounded,
+  PersonRemoveRounded,
+  HistoryRounded,
+  UploadFileRounded,
+  Inventory2Rounded,
+  SearchRounded,
+  CheckCircleRounded,
+  BuildRounded,
+  DevicesRounded,
+  HelpOutlineRounded,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-import PageHeader from "../../components/PageHeader";
 import StatusChip from "../../components/StatusChip";
 import api from "../../api/axios";
+import BulkImportDialog from "../../components/BulkImportDialog";
+import AssetTimelineDrawer from "../../components/AssetTimelineDrawer";
 
 const CATEGORIES = ["IT Asset", "Electrical", "Electronic", "Furniture"];
 const STATUSES = ["Active", "Under Repair", "Decommissioned", "In Storage"];
@@ -40,8 +62,25 @@ const FORM_FACTORS = ["Movable", "Fixed"];
 
 const Assets = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+
+  // Permission helpers
+  const customPerms = currentUser?.customPermissions || [];
+  const adminRoles = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+  const isAdminTier = adminRoles.includes(currentUser?.role);
+  const hasPerm = (feature) => {
+    if (isAdminTier) return true;
+    const entry = customPerms.find(p => p.feature === feature);
+    return entry?.allowed === true;
+  };
+  const canView     = hasPerm('View All Assets') || hasPerm('Register Assets') || hasPerm('Edit / Delete Assets') || hasPerm('Assign Assets');
+  const canRegister = hasPerm('Register Assets');
+  const canEdit     = hasPerm('Edit / Delete Assets');
+  const canDelete   = hasPerm('Edit / Delete Assets');
+  const canAssign   = hasPerm('Assign Assets');
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [selected, setSelected] = useState(null);
 
   const [assets, setAssets] = useState([]);
@@ -71,13 +110,34 @@ const Assets = () => {
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
+  // Bulk import state
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  // Asset timeline state
+  const [timelineAsset, setTimelineAsset] = useState(null);
+
+  const [editCustomFieldConfigs, setEditCustomFieldConfigs] = useState([]);
+
+  useEffect(() => {
+    if (!editDialogOpen || !editForm.category) return;
+    const fetchEditCustomFields = async () => {
+      try {
+        const { data } = await api.get(`/custom-fields?category=${encodeURIComponent(editForm.category)}`);
+        setEditCustomFieldConfigs(data.data || []);
+      } catch (err) {
+        console.error("Failed to load edit custom fields configs:", err);
+      }
+    };
+    fetchEditCustomFields();
+  }, [editForm.category, editDialogOpen]);
+
   useEffect(() => {
     fetchAssets();
     fetchEmployees();
   }, []);
 
   // Reset page when filters change
-  useEffect(() => { setPage(0); }, [search, category]);
+  useEffect(() => { setPage(0); }, [search, category, statusFilter]);
 
   const fetchEmployees = async () => {
     try {
@@ -108,6 +168,15 @@ const Assets = () => {
     "& .MuiOutlinedInput-root": { borderRadius: "12px" },
   };
 
+  // KPI computations
+  const kpis = useMemo(() => {
+    const total = assets.length;
+    const active = assets.filter(a => a.status === "Active").length;
+    const underRepair = assets.filter(a => a.status === "Under Repair").length;
+    const unassigned = assets.filter(a => a.assignedStatus !== "Assigned").length;
+    return { total, active, underRepair, unassigned };
+  }, [assets]);
+
   const filteredAssets = useMemo(() => {
     if (!assets) return [];
     return assets.filter((asset) => {
@@ -116,9 +185,10 @@ const Assets = () => {
         asset._id?.toLowerCase().includes(search.toLowerCase()) ||
         asset.serialNumber?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category === "All" || asset.category === category;
-      return matchesSearch && matchesCategory;
+      const matchesStatus = statusFilter === "All" || asset.status === statusFilter;
+      return matchesSearch && matchesCategory && matchesStatus;
     });
-  }, [search, category, assets]);
+  }, [search, category, statusFilter, assets]);
 
   const paginatedAssets = useMemo(
     () => filteredAssets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -162,6 +232,7 @@ const Assets = () => {
       vendor: asset.vendor || "",
       status: asset.status || "Active",
       warrantyEnd: asset.warrantyEnd ? asset.warrantyEnd.split('T')[0] : "",
+      customFields: asset.customFields || {},
     });
     setEditDialogOpen(true);
   };
@@ -246,125 +317,214 @@ const Assets = () => {
     }
   };
 
+  const KPI_CARDS = [
+    { label: "Total Assets", value: kpis.total, color: "#A855F7", icon: <Inventory2Rounded sx={{ fontSize: 20 }} /> },
+    { label: "Active / In-Use", value: kpis.active, color: "#22C55E", icon: <CheckCircleRounded sx={{ fontSize: 20 }} /> },
+    { label: "Under Repair", value: kpis.underRepair, color: "#F59E0B", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
+    { label: "Unassigned", value: kpis.unassigned, color: "#3B82F6", icon: <HelpOutlineRounded sx={{ fontSize: 20 }} /> },
+  ];
+
   return (
     <Box sx={{ width: "100%", pb: 5 }}>
-      <PageHeader
-        title="Asset Registry"
-        subtitle="Centralized database for hardware telemetry, lifecycle tracking, and maintenance operations."
-        action={
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
+            <Inventory2Rounded sx={{ color: "#A855F7" }} />
+          </Box>
+          <Box>
+            <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Asset Registry</Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              Centralized lifecycle tracking, telemetry and maintenance operations
+            </Typography>
+          </Box>
+        </Box>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            startIcon={<DownloadRounded />}
+            onClick={handleExportCSV}
+            disabled={filteredAssets.length === 0}
+            sx={{ borderColor: "divider", color: "text.primary", borderRadius: "10px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}
+          >
+            Export CSV
+          </Button>
+          {canRegister && (
             <Button
-              variant="outlined" startIcon={<DownloadRounded />} onClick={handleExportCSV} disabled={filteredAssets.length === 0}
+              variant="outlined"
+              startIcon={<UploadFileRounded />}
+              onClick={() => setImportDialogOpen(true)}
               sx={{ borderColor: "divider", color: "text.primary", borderRadius: "10px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}
             >
-              Export CSV
+              Import CSV
             </Button>
+          )}
+          {canRegister && (
             <Button
-              variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
-              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 3, borderRadius: "10px", "&:hover": { bgcolor: "#222222" } }}
+              variant="contained"
+              startIcon={<AddRounded />}
+              onClick={() => navigate("/admin/assets/add")}
+              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" } }}
             >
-              Provision Asset
+              Add Asset
             </Button>
-          </Box>
-        }
-      />
+          )}
+        </Box>
+      </Box>
 
-      <Paper sx={{ p: 3, borderRadius: "16px", mb: 4, bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 7 }}>
-            <TextField fullWidth sx={inputStyles} label="Search by asset name, ID or serial number" value={search} onChange={(e) => setSearch(e.target.value)} />
+      {/* KPI Cards */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        {KPI_CARDS.map((kpi) => (
+          <Grid key={kpi.label} size={{ xs: 6, sm: 3 }}>
+            <Paper sx={{ p: 2.5, borderRadius: "16px", border: 1, borderColor: "divider", position: "relative", overflow: "hidden" }}>
+              <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: kpi.color }} />
+              <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: `${kpi.color}18`, display: "grid", placeItems: "center", mb: 1.5 }}>
+                <Box sx={{ color: kpi.color }}>{kpi.icon}</Box>
+              </Box>
+              <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{kpi.value}</Typography>
+              <Typography fontSize={13} fontWeight={700} color="text.primary" mt={0.3}>{kpi.label}</Typography>
+            </Paper>
           </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <TextField fullWidth select sx={inputStyles} label="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
-              <MenuItem value="All">All Categories</MenuItem>
-              {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-            </TextField>
-          </Grid>
-          <Grid size={{ xs: 12, md: 2 }}>
-            <Button fullWidth variant="outlined" onClick={() => { setSearch(""); setCategory("All"); }}
-              sx={{ height: "100%", minHeight: "56px", borderColor: "divider", color: "text.secondary", borderRadius: "12px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", color: "text.primary", borderColor: "text.secondary" } }}>
-              Clear Filters
-            </Button>
-          </Grid>
-        </Grid>
+        ))}
+      </Grid>
+
+      {/* Filter Bar */}
+      <Paper sx={{ p: 2, borderRadius: "16px", border: 1, borderColor: "divider", mb: 3, display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
+        <TextField
+          placeholder="Search by name, ID or serial…"
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ flex: 1, minWidth: 200, "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
+          InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: "text.disabled" }} /></InputAdornment> }}
+        />
+        <Select
+          size="small"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          sx={{ minWidth: 150, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
+          displayEmpty
+        >
+          <MenuItem value="All">All Categories</MenuItem>
+          {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+        </Select>
+        <Select
+          size="small"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          sx={{ minWidth: 140, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
+          displayEmpty
+        >
+          <MenuItem value="All">All Statuses</MenuItem>
+          {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+        </Select>
+        {(search || category !== "All" || statusFilter !== "All") && (
+          <Button
+            size="small"
+            onClick={() => { setSearch(""); setCategory("All"); setStatusFilter("All"); }}
+            sx={{ color: "text.secondary", fontWeight: 700, borderRadius: "8px", px: 2, border: 1, borderColor: "divider" }}
+          >
+            Clear
+          </Button>
+        )}
       </Paper>
 
-      <Paper sx={{ borderRadius: "16px", overflow: "hidden", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
-        <Box sx={{ overflowX: "auto" }}>
-          {loading ? (
-            <Box sx={{ p: 3 }}>
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} variant="rectangular" height={52} sx={{ mb: 1.5, borderRadius: "10px", opacity: 1 - i * 0.12 }} />
-              ))}
-            </Box>
-          ) : filteredAssets.length === 0 ? (
-            <Box sx={{ p: 5, textAlign: "center" }}>
-              <Typography color="text.secondary" fontWeight={600} fontSize="16px">No assets found. Click "Provision Asset" to add one.</Typography>
-            </Box>
-          ) : (
-            <>
-              <Table sx={{ minWidth: 700 }}>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: "action.hover" }}>
-                    {["Asset Identification", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
-                      <TableCell key={head} sx={{ color: "text.secondary", fontWeight: 700, borderBottom: "1px solid", borderColor: "divider", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                        {head}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedAssets.map((asset) => (
-                    <TableRow key={asset._id} sx={{ "&:hover": { bgcolor: "action.hover" }, "& td": { borderBottom: "1px solid", borderColor: "divider" }, transition: "background-color 0.2s ease" }}>
-                      <TableCell>
-                        <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: "15px" }}>{asset.name}</Typography>
-                        <Typography sx={{ fontSize: "13px", color: "text.secondary", fontFamily: "monospace", mt: 0.5 }}>
-                          AST-{asset._id.slice(-5).toUpperCase()} • {asset.serialNumber}
-                        </Typography>
-                      </TableCell>
-                      <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.category}</TableCell>
-                      <TableCell sx={{ color: "text.primary", fontWeight: 500 }}>{asset.department}</TableCell>
-                      <TableCell sx={{ color: "text.secondary", fontWeight: 500 }}>{asset.location || "Unassigned"}</TableCell>
-                      <TableCell><StatusChip label={getWarrantyStatus(asset.warrantyEnd)} /></TableCell>
-                      <TableCell><StatusChip label={asset.status} /></TableCell>
-                      <TableCell>
-                        <Box sx={{ display: "flex", gap: 1 }}>
-                          <Tooltip title="Inspect">
-                            <Button size="small" variant="outlined" startIcon={<VisibilityRounded />} onClick={() => setSelected(asset)}
-                              sx={{ borderColor: "divider", color: "text.primary", textTransform: "none", borderRadius: "8px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}>
-                              View
-                            </Button>
-                          </Tooltip>
+      {/* Table */}
+      <TableContainer component={Paper} sx={{ borderRadius: "20px", border: 1, borderColor: "divider", overflow: "hidden" }}>
+        {loading ? (
+          <Box sx={{ p: 3 }}>
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} variant="rectangular" height={52} sx={{ mb: 1.5, borderRadius: "10px", opacity: 1 - i * 0.12 }} />
+            ))}
+          </Box>
+        ) : filteredAssets.length === 0 ? (
+          <Box sx={{ p: 5, textAlign: "center" }}>
+            <Typography color="text.secondary" fontWeight={600} fontSize="16px">No assets found. Click "Add Asset" to provision one.</Typography>
+          </Box>
+        ) : (
+          <>
+            <Table size="small" sx={{ minWidth: 700 }}>
+              <TableHead>
+                <TableRow sx={{ bgcolor: "background.default" }}>
+                  {["Asset", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
+                    <TableCell key={head} sx={{ fontWeight: 800, fontSize: 11, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.6px", py: 1.5, borderBottom: 2, borderColor: "divider" }}>
+                      {head}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedAssets.map((asset) => (
+                  <TableRow key={asset._id} hover sx={{ "&:last-child td": { borderBottom: 0 }, cursor: "pointer" }}>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: 14 }}>{asset.name}</Typography>
+                      <Typography sx={{ fontSize: 11.5, color: "text.secondary", fontFamily: "monospace", mt: 0.3 }}>
+                        AST-{asset._id.slice(-5).toUpperCase()} · {asset.serialNumber}
+                      </Typography>
+                    </TableCell>
+                    <TableCell sx={{ py: 1.5, color: "text.secondary", fontWeight: 600, fontSize: 13 }}>{asset.category}</TableCell>
+                    <TableCell sx={{ py: 1.5, color: "text.primary", fontWeight: 600, fontSize: 13 }}>{asset.department}</TableCell>
+                    <TableCell sx={{ py: 1.5, color: "text.secondary", fontWeight: 500, fontSize: 13 }}>{asset.location || "—"}</TableCell>
+                    <TableCell sx={{ py: 1.5 }}><StatusChip label={getWarrantyStatus(asset.warrantyEnd)} /></TableCell>
+                    <TableCell sx={{ py: 1.5 }}><StatusChip label={asset.status} /></TableCell>
+                    <TableCell sx={{ py: 1.5 }}>
+                      <Box sx={{ display: "flex", gap: 0.5 }}>
+                        <Tooltip title="View details">
+                          <IconButton size="small" onClick={() => setSelected(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#A855F7", bgcolor: "rgba(168,85,247,0.08)" } }}>
+                            <VisibilityRounded fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Timeline / History">
+                          <IconButton size="small" onClick={() => setTimelineAsset(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#3B82F6", bgcolor: "rgba(59,130,246,0.08)" } }}>
+                            <HistoryRounded fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        {canEdit && (
                           <Tooltip title="Edit Asset">
                             <IconButton size="small" onClick={() => handleEditClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: "action.hover" } }}>
                               <EditRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
+                        )}
+                        {canAssign && (asset.assignedStatus !== "Assigned" ? (
+                          <Tooltip title="Assign to Employee">
+                            <IconButton size="small" onClick={() => handleOpenAssign(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#22C55E", bgcolor: "rgba(34,197,94,0.08)" } }}>
+                              <PersonAddRounded fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip title="Revoke Assignment">
+                            <IconButton size="small" onClick={() => handleRevokeAssignment(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#EF4444", bgcolor: "rgba(239,68,68,0.08)" } }}>
+                              <PersonRemoveRounded fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        ))}
+                        {canDelete && (
                           <Tooltip title="Delete Asset">
-                            <IconButton size="small" onClick={() => handleDeleteClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#DC2626", bgcolor: "#FEF2F2" } }}>
+                            <IconButton size="small" onClick={() => handleDeleteClick(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#EF4444", bgcolor: "rgba(239,68,68,0.08)" } }}>
                               <DeleteOutlineRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <TablePagination
-                component="div"
-                count={filteredAssets.length}
-                page={page}
-                onPageChange={(_, newPage) => setPage(newPage)}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
-              />
-            </>
-          )}
-        </Box>
-      </Paper>
+                        )}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <TablePagination
+              component="div"
+              count={filteredAssets.length}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+            />
+          </>
+        )}
+      </TableContainer>
 
       {/* Detail Drawer */}
       <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}
@@ -399,15 +559,37 @@ const Assets = () => {
                     <Typography sx={{ fontWeight: 700, color: "text.primary", textAlign: "right", maxWidth: "60%" }}>{value}</Typography>
                   </Box>
                 ))}
+
+                {Object.keys(selected.customFields || {}).length > 0 && (
+                  <Box sx={{ mt: 1.5, mb: 0.5 }}>
+                    <Divider>
+                      <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                        Custom Specifications
+                      </Typography>
+                    </Divider>
+                  </Box>
+                )}
+
+                {Object.entries(selected.customFields || {}).map(([key, val]) => (
+                  <Box key={key} sx={{ p: 2, borderRadius: "12px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Typography sx={{ fontSize: "13px", color: "text.secondary", fontWeight: 600 }}>{key}</Typography>
+                    <Typography sx={{ fontWeight: 700, color: "text.primary", textAlign: "right", maxWidth: "60%" }}>{val || "—"}</Typography>
+                  </Box>
+                ))}
               </Box>
               {selected.assignedStatus === 'Assigned' && (
-                <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#dcfce7', border: '1px solid #bbf7d0' }}>
-                  <Typography fontSize={12} fontWeight={700} color="#16a34a" mb={0.5}>Assigned To</Typography>
-                  <Typography fontSize={14} fontWeight={700} color="#0f172a">{selected.assignedEmployeeName || '—'}</Typography>
-                  <Typography fontSize={12} color="#64748b">{selected.assignedEmployeeEmail}</Typography>
-                  <Typography fontSize={12} color="#64748b">{selected.assignedTo?.department || ''}</Typography>
+                <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: 'rgba(22,163,74,0.10)', border: '1px solid rgba(22,163,74,0.25)' }}>
+                  <Typography fontSize={12} fontWeight={700} sx={{ color: '#4ADE80', mb: 0.5 }}>Assigned To</Typography>
+                  <Typography fontSize={14} fontWeight={700} color="text.primary">{selected.assignedEmployeeName || '—'}</Typography>
+                  <Typography fontSize={12} color="text.secondary">{selected.assignedEmployeeEmail}</Typography>
+                  <Typography fontSize={12} color="text.secondary">{selected.assignedTo?.department || ''}</Typography>
                 </Box>
               )}
+
+              <Button variant="outlined" startIcon={<HistoryRounded />} onClick={() => { setTimelineAsset(selected); setSelected(null); }}
+                sx={{ width: "100%", mb: 2, py: 1.4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "action.hover" } }}>
+                View Lifecycle History
+              </Button>
 
               <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
                 <Button variant="outlined" onClick={() => { handleEditClick(selected); setSelected(null); }}
@@ -416,7 +598,7 @@ const Assets = () => {
                 </Button>
                 {selected.assignedStatus !== 'Assigned' ? (
                   <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
-                    sx={{ flex: 1, py: 1.4, bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}>
+                    sx={{ flex: 1, py: 1.4, background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, borderRadius: "12px", boxShadow: "none", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" } }}>
                     Assign
                   </Button>
                 ) : (
@@ -434,21 +616,22 @@ const Assets = () => {
       {/* Edit Dialog */}
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="sm"
         slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
-        <DialogTitle sx={{ p: 0, bgcolor: "background.paper" }}>
-          <Box sx={{ p: 3, display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>
-              <EditRounded />
+        <DialogTitle sx={{ p: 0 }}>
+          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+                <EditRounded sx={{ color: "#fff" }} />
+              </Box>
+              <Box>
+                <Typography fontWeight={900} fontSize={18}>Edit Asset</Typography>
+                <Typography fontSize={12} color="text.secondary">{editAsset?.name}</Typography>
+              </Box>
             </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 900, fontSize: "22px", color: "text.primary" }}>Edit Asset</Typography>
-              <Typography sx={{ color: "text.secondary", fontSize: "13px", fontWeight: 600 }}>{editAsset?.name}</Typography>
-            </Box>
-            <IconButton onClick={() => setEditDialogOpen(false)}><CloseRounded /></IconButton>
+            <IconButton onClick={() => setEditDialogOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
           </Box>
         </DialogTitle>
-        <Divider />
         <DialogContent sx={{ p: 3 }}>
-          <Stack spacing={2.5}>
+          <Stack spacing={2.5} sx={{ mt: 0.5 }}>
             <TextField label="Asset Name" fullWidth required sx={inputStyles} value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
             <TextField label="Serial Number" fullWidth required sx={inputStyles} value={editForm.serialNumber || ""} onChange={(e) => setEditForm({ ...editForm, serialNumber: e.target.value })} />
             <Grid container spacing={2}>
@@ -482,11 +665,58 @@ const Assets = () => {
               </Grid>
             </Grid>
             <TextField label="Vendor" fullWidth sx={inputStyles} value={editForm.vendor || ""} onChange={(e) => setEditForm({ ...editForm, vendor: e.target.value })} />
+
+            {editCustomFieldConfigs.length > 0 && (
+              <Divider sx={{ my: 1.5 }}>
+                <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 700, textTransform: "uppercase" }}>
+                  Custom Specifications
+                </Typography>
+              </Divider>
+            )}
+
+            <Grid container spacing={2}>
+              {editCustomFieldConfigs.map((field) => (
+                <Grid key={field._id} size={6}>
+                  {field.type === "Select" ? (
+                    <TextField
+                      select
+                      fullWidth
+                      required={field.isRequired}
+                      label={`${field.name}${field.isRequired ? " *" : ""}`}
+                      value={editForm.customFields?.[field.name] || ""}
+                      onChange={(e) => setEditForm(prev => ({
+                        ...prev,
+                        customFields: { ...prev.customFields, [field.name]: e.target.value }
+                      }))}
+                      sx={inputStyles}
+                    >
+                      {field.options.map((opt) => (
+                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                      ))}
+                    </TextField>
+                  ) : (
+                    <TextField
+                      fullWidth
+                      required={field.isRequired}
+                      type={field.type === "Number" ? "number" : field.type === "Date" ? "date" : "text"}
+                      label={`${field.name}${field.isRequired ? " *" : ""}`}
+                      value={editForm.customFields?.[field.name] || ""}
+                      onChange={(e) => setEditForm(prev => ({
+                        ...prev,
+                        customFields: { ...prev.customFields, [field.name]: e.target.value }
+                      }))}
+                      sx={inputStyles}
+                      slotProps={field.type === "Date" ? { inputLabel: { shrink: true } } : undefined}
+                    />
+                  )}
+                </Grid>
+              ))}
+            </Grid>
           </Stack>
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
             <Button onClick={() => setEditDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, px: 3 }}>Cancel</Button>
             <Button variant="contained" disabled={saving} onClick={handleEditSave} startIcon={saving ? <CircularProgress size={18} color="inherit" /> : null}
-              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}>
+              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.2 }}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </Box>
@@ -508,7 +738,7 @@ const Assets = () => {
         <Box sx={{ p: 2, display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Button onClick={() => setDeleteDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, borderRadius: "10px" }}>Cancel</Button>
           <Button onClick={confirmDelete} disabled={deleting} variant="contained"
-            sx={{ bgcolor: "#EF4444", color: "#fff", fontWeight: 800, borderRadius: "10px", "&:hover": { bgcolor: "#DC2626" } }}>
+            sx={{ bgcolor: "#EF4444", color: "#fff", fontWeight: 800, borderRadius: "10px", boxShadow: "none", "&:hover": { bgcolor: "#DC2626" } }}>
             {deleting ? "Deleting..." : "Delete Asset"}
           </Button>
         </Box>
@@ -516,22 +746,23 @@ const Assets = () => {
 
       {/* Assign Employee Dialog */}
       <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
+        slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ p: 0 }}>
-          <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center" }}>
-              <PersonAddRounded />
+          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+                <PersonAddRounded sx={{ color: "#fff" }} />
+              </Box>
+              <Box>
+                <Typography fontWeight={900} fontSize={18}>Assign to Employee</Typography>
+                <Typography fontSize={12} color="text.secondary">{assignAssetTarget?.name}</Typography>
+              </Box>
             </Box>
-            <Box>
-              <Typography fontWeight={900} fontSize={20}>Assign to Employee</Typography>
-              <Typography fontSize={13} color="text.secondary">{assignAssetTarget?.name}</Typography>
-            </Box>
-            <IconButton sx={{ ml: 'auto' }} onClick={() => setAssignDialogOpen(false)}><CloseRounded /></IconButton>
+            <IconButton onClick={() => setAssignDialogOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
           </Box>
         </DialogTitle>
-        <Divider />
         <DialogContent sx={{ p: 3 }}>
-          <Typography fontSize={14} color="text.secondary" mb={2}>
+          <Typography fontSize={14} color="text.secondary" mb={2} mt={0.5}>
             Select a registered employee to assign this asset. Only active employees are shown.
           </Typography>
           <Autocomplete
@@ -539,7 +770,7 @@ const Assets = () => {
             getOptionLabel={(e) => `${e.name} — ${e.email} (${e.department})`}
             value={selectedEmployee}
             onChange={(_, val) => setSelectedEmployee(val)}
-            renderInput={(params) => <TextField {...params} label="Select Employee" fullWidth />}
+            renderInput={(params) => <TextField {...params} label="Select Employee" fullWidth sx={inputStyles} />}
             renderOption={(props, e) => (
               <Box component="li" {...props} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start !important', py: 1.5 }}>
                 <Typography fontWeight={700} fontSize={14}>{e.name}</Typography>
@@ -562,7 +793,7 @@ const Assets = () => {
             <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>Cancel</Button>
             <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
               startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
-              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "10px", "&:hover": { bgcolor: "#222222" } }}>
+              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
               {assigning ? "Assigning..." : "Confirm Assignment"}
             </Button>
           </Box>
@@ -572,6 +803,23 @@ const Assets = () => {
       <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>{snackbar.message}</Alert>
       </Snackbar>
+
+      <BulkImportDialog
+        open={importDialogOpen}
+        onClose={() => setImportDialogOpen(false)}
+        onSuccess={() => {
+          setImportDialogOpen(false);
+          setSnackbar({ open: true, message: "Assets imported successfully.", severity: "success" });
+          fetchAssets();
+        }}
+      />
+
+      <AssetTimelineDrawer
+        open={Boolean(timelineAsset)}
+        assetId={timelineAsset?._id}
+        assetName={timelineAsset?.name}
+        onClose={() => setTimelineAsset(null)}
+      />
     </Box>
   );
 };

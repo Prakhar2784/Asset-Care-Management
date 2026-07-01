@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   Box, Button, CircularProgress, Dialog, DialogContent, DialogTitle,
   Divider, Grid, IconButton, MenuItem, Paper, Snackbar, Alert,
@@ -6,7 +6,8 @@ import {
 } from "@mui/material";
 import {
   AddRounded, LaptopMacRounded, PhoneIphoneRounded, SupportAgentRounded,
-  DevicesRounded, CloseRounded, AccessTimeRounded, VerifiedRounded, CancelRounded
+  DevicesRounded, CloseRounded, AccessTimeRounded, VerifiedRounded, CancelRounded,
+  DeleteOutlineRounded
 } from "@mui/icons-material";
 import PageHeader from "../../components/PageHeader";
 import StatusChip from "../../components/StatusChip";
@@ -77,6 +78,17 @@ const EmployeePortal = () => {
 
   const handleFormChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  const handleDeleteRequest = async (id) => {
+    if (!window.confirm("Withdraw this device request?")) return;
+    try {
+      await api.delete(`/device-requests/${id}`);
+      setMyRequests(prev => prev.filter(r => r._id !== id));
+      setSnackbar({ open: true, message: "Request withdrawn.", severity: "success" });
+    } catch (err) {
+      setSnackbar({ open: true, message: err.response?.data?.message || "Failed to withdraw request.", severity: "error" });
+    }
+  };
+
   const handleSubmitRequest = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -96,9 +108,9 @@ const EmployeePortal = () => {
   };
 
   const requestStatusStyle = (status) => {
-    if (status === "Approved") return { bg: "#DCFCE7", color: "#16A34A", icon: <VerifiedRounded sx={{ fontSize: 14 }} /> };
-    if (status === "Rejected") return { bg: "#FEE2E2", color: "#DC2626", icon: <CancelRounded sx={{ fontSize: 14 }} /> };
-    return { bg: "#FEF3C7", color: "#D97706", icon: <AccessTimeRounded sx={{ fontSize: 14 }} /> };
+    if (status === "Approved") return { bg: "rgba(22,163,74,0.13)",  color: "#4ADE80", icon: <VerifiedRounded sx={{ fontSize: 14 }} /> };
+    if (status === "Rejected") return { bg: "rgba(220,38,38,0.13)", color: "#F87171", icon: <CancelRounded sx={{ fontSize: 14 }} /> };
+    return { bg: "rgba(217,119,6,0.13)", color: "#FBBF24", icon: <AccessTimeRounded sx={{ fontSize: 14 }} /> };
   };
 
   const inputStyles = {
@@ -123,7 +135,7 @@ const EmployeePortal = () => {
             <Button
               variant="contained" startIcon={<AddRounded />}
               onClick={() => navigate("/tickets")}
-              sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { bgcolor: "#222222" } }}
+              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)" } }}
             >
               Report an Issue
             </Button>
@@ -159,7 +171,7 @@ const EmployeePortal = () => {
                 }}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-                  <Box sx={{ width: 56, height: 56, borderRadius: 3, bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ width: 56, height: 56, borderRadius: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.18),rgba(168,85,247,0.12))", color: "#A855F7", display: "grid", placeItems: "center" }}>
                     {iconForCategory(asset.category)}
                   </Box>
                   <StatusChip label={asset.status} />
@@ -205,7 +217,7 @@ const EmployeePortal = () => {
                     const expired = daysLeft < 0;
                     const soon = !expired && daysLeft <= 90;
                     return (
-                      <Box sx={{ mt: 1.5, display: 'inline-flex', alignItems: 'center', px: 1.2, py: 0.4, borderRadius: 1, bgcolor: expired ? '#fee2e2' : soon ? '#fef3c7' : '#dcfce7', color: expired ? '#dc2626' : soon ? '#d97706' : '#16a34a' }}>
+                      <Box sx={{ mt: 1.5, display: 'inline-flex', alignItems: 'center', px: 1.2, py: 0.4, borderRadius: 1, bgcolor: expired ? 'rgba(220,38,38,0.13)' : soon ? 'rgba(217,119,6,0.13)' : 'rgba(22,163,74,0.13)', color: expired ? '#F87171' : soon ? '#FBBF24' : '#4ADE80' }}>
                         <Typography fontSize={12} fontWeight={700}>
                           {expired ? 'Warranty Expired' : soon ? `Warranty: ${daysLeft}d left` : 'Warranty Valid'}
                         </Typography>
@@ -216,7 +228,7 @@ const EmployeePortal = () => {
                 <Button
                   fullWidth variant="outlined" startIcon={<SupportAgentRounded />}
                   onClick={() => navigate("/tickets")}
-                  sx={{ mt: 4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "8px", textTransform: "none", "&:hover": { borderColor: "#ef4444", color: "#ef4444", bgcolor: "#fef2f2" } }}
+                  sx={{ mt: 4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "8px", textTransform: "none", "&:hover": { borderColor: "#ef4444", color: "#ef4444", bgcolor: "rgba(239,68,68,0.10)" } }}
                 >
                   Raise Ticket
                 </Button>
@@ -252,14 +264,22 @@ const EmployeePortal = () => {
                       <Typography fontFamily="monospace" fontSize={13} color="text.secondary" fontWeight={900}>{req.requestId}</Typography>
                       <Typography fontWeight={800} fontSize={18} color="text.primary" mt={0.3}>{req.itemRequested}</Typography>
                     </Box>
-                    <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, px: 1.4, py: 0.6, borderRadius: "999px", bgcolor: style.bg, color: style.color, fontSize: "12px", fontWeight: 900 }}>
-                      {style.icon}
-                      {req.status}
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, px: 1.4, py: 0.6, borderRadius: "999px", bgcolor: style.bg, color: style.color, fontSize: "12px", fontWeight: 900 }}>
+                        {style.icon}
+                        {req.status}
+                      </Box>
+                      {["Pending", "Under Review"].includes(req.status) && (
+                        <IconButton size="small" onClick={() => handleDeleteRequest(req._id)}
+                          sx={{ color: "text.secondary", "&:hover": { color: "#EF4444", bgcolor: "rgba(239,68,68,0.10)" } }}>
+                          <DeleteOutlineRounded fontSize="small" />
+                        </IconButton>
+                      )}
                     </Box>
                   </Box>
                   <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
                     <Chip label={req.requestType} size="small" sx={{ bgcolor: "action.selected", color: "text.primary", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
-                    <Chip label={req.urgency} size="small" sx={{ bgcolor: req.urgency === "High" ? "#FEF2F2" : req.urgency === "Medium" ? "#FFFBEB" : "#F0FDF4", color: req.urgency === "High" ? "#DC2626" : req.urgency === "Medium" ? "#D97706" : "#16A34A", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
+                    <Chip label={req.urgency} size="small" sx={{ bgcolor: req.urgency === "High" ? "rgba(220,38,38,0.13)" : req.urgency === "Medium" ? "rgba(217,119,6,0.13)" : "rgba(22,163,74,0.13)", color: req.urgency === "High" ? "#F87171" : req.urgency === "Medium" ? "#FBBF24" : "#4ADE80", fontWeight: 800, fontSize: "11px", borderRadius: "6px" }} />
                   </Box>
                   <Typography color="text.secondary" fontSize={13} fontWeight={600}>Reason: {req.reason}</Typography>
                   <Typography color="text.disabled" fontSize={12} mt={0.5}>{new Date(req.createdAt).toLocaleDateString()}</Typography>
@@ -281,7 +301,7 @@ const EmployeePortal = () => {
         slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } }, backdrop: { sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } } }}>
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3.5, display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 48, height: 48, borderRadius: "14px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "14px", background: "linear-gradient(135deg,rgba(124,58,237,0.18),rgba(168,85,247,0.12))", color: "#A855F7", display: "grid", placeItems: "center", flexShrink: 0 }}>
               <DevicesRounded />
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -330,7 +350,7 @@ const EmployeePortal = () => {
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 5, pt: 3, borderTop: 1, borderColor: "divider" }}>
               <Button onClick={() => setRequestDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, textTransform: "none", px: 3 }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting} startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : null}
-                sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { bgcolor: "#222222" } }}>
+                sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)" } }}>
                 {submitting ? "Submitting..." : "Submit Request"}
               </Button>
             </Box>
@@ -346,3 +366,5 @@ const EmployeePortal = () => {
 };
 
 export default EmployeePortal;
+
+

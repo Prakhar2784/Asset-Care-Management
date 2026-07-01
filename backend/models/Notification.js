@@ -16,10 +16,14 @@ const notificationSchema = new mongoose.Schema({
   message: { type: String, required: true },
   link: { type: String },
   isRead: { type: Boolean, default: false, index: true },
-  meta: { type: mongoose.Schema.Types.Mixed }
+  meta: { type: mongoose.Schema.Types.Mixed },
+  tenantId: { type: String, required: true, default: 'default' }
 }, { timestamps: true });
 
 // Compound index for fast unread count queries
 notificationSchema.index({ user: 1, isRead: 1, createdAt: -1 });
+notificationSchema.index({ tenantId: 1 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+const Notification = mongoose.model('Notification', notificationSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('Notification', Notification);

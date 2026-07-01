@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+﻿import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Box, Paper, Typography, TextField, Button, Alert,
   CircularProgress, InputAdornment, IconButton, Grid
@@ -20,6 +20,8 @@ const rules = [
 
 export default function ResetPassword() {
   const { token } = useParams();
+  const [searchParams] = useSearchParams();
+  const isInvite = searchParams.get('invite') === 'true';
   const navigate = useNavigate();
 
   const [tokenValid, setTokenValid] = useState(null);
@@ -73,7 +75,7 @@ export default function ResetPassword() {
 
   const containerSx = {
     minHeight: '100vh',
-    background: '#111111',
+    background: "rgba(124,58,237,0.12)",
     display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2
   };
 
@@ -97,7 +99,7 @@ export default function ResetPassword() {
             This password reset link is invalid or has expired. Please request a new one.
           </Typography>
           <Button component={Link} to="/forgot-password" variant="contained" fullWidth
-            sx={{ background: '#111111', color: '#CBFA57', fontWeight: 700, py: 1.4, '&:hover': { background: '#222222' } }}>
+            sx={{ background: "rgba(124,58,237,0.12)", color: '#A855F7', fontWeight: 700, py: 1.4, '&:hover': { background: '#222222' } }}>
             Request New Link
           </Button>
         </Paper>
@@ -111,23 +113,23 @@ export default function ResetPassword() {
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box sx={{
             width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
-            background: '#111111',
+            background: "rgba(124,58,237,0.12)",
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <LockResetRounded sx={{ color: '#CBFA57', fontSize: 28 }} />
+            <LockResetRounded sx={{ color: '#A855F7', fontSize: 28 }} />
           </Box>
-          <Typography variant="h5" fontWeight={700}>Reset Password</Typography>
+          <Typography variant="h5" fontWeight={700}>{isInvite ? 'Activate Your Account' : 'Reset Password'}</Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
-            Choose a new secure password
+            {isInvite ? 'Set a password to activate your AssetCare Pro account' : 'Choose a new secure password'}
           </Typography>
         </Box>
 
         {success ? (
           <Box sx={{ textAlign: 'center', py: 2 }}>
             <CheckCircleOutlined sx={{ fontSize: 56, color: '#16a34a', mb: 2 }} />
-            <Typography variant="h6" fontWeight={600} gutterBottom>Password Reset!</Typography>
+            <Typography variant="h6" fontWeight={600} gutterBottom>{isInvite ? 'Account Activated!' : 'Password Reset!'}</Typography>
             <Typography variant="body2" color="text.secondary">
-              Your password has been updated. A confirmation email has been sent. Redirecting to login...
+              {isInvite ? 'Your account is ready. Redirecting to login...' : 'Your password has been updated. A confirmation email has been sent. Redirecting to login...'}
             </Typography>
           </Box>
         ) : (
@@ -184,7 +186,7 @@ export default function ResetPassword() {
               disabled={loading}
               sx={{
                 py: 1.4, fontWeight: 700,
-                background: '#111111', color: '#CBFA57',
+                background: "rgba(124,58,237,0.12)", color: '#A855F7',
                 '&:hover': { background: '#222222' }
               }}
             >

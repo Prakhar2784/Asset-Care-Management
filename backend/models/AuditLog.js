@@ -9,11 +9,15 @@ const auditLogSchema = new mongoose.Schema({
   entityId: { type: String },
   entityLabel: { type: String },
   changes: { type: mongoose.Schema.Types.Mixed },
-  ipAddress: { type: String }
+  ipAddress: { type: String },
+  tenantId: { type: String, required: true, default: 'default' }
 }, { timestamps: true });
 
 auditLogSchema.index({ createdAt: -1 });
 auditLogSchema.index({ actor: 1 });
 auditLogSchema.index({ entity: 1 });
+auditLogSchema.index({ tenantId: 1 });
 
-module.exports = mongoose.model('AuditLog', auditLogSchema);
+const AuditLog = mongoose.model('AuditLog', auditLogSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('AuditLog', AuditLog);

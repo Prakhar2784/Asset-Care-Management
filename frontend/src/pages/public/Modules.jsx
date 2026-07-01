@@ -1,11 +1,9 @@
-import { Link } from "react-router-dom";
-import PageHeader from "../../components/PageHeader";
+﻿import { Link } from "react-router-dom";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
 import BuildRoundedIcon from "@mui/icons-material/BuildRounded";
 import ApprovalRoundedIcon from "@mui/icons-material/ApprovalRounded";
-import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import SettingsSuggestRoundedIcon from "@mui/icons-material/SettingsSuggestRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
@@ -18,7 +16,6 @@ const Modules = () => {
     { title: "Warranty Management", icon: <VerifiedRoundedIcon fontSize="large" />, text: "Track warranty start date, expiry date, AMC coverage, renewal reminders and service eligibility." },
     { title: "Breakdown Tickets", icon: <BuildRoundedIcon fontSize="large" />, text: "Create issue tickets for faulty assets, assign priority, upload proof and monitor repair progress." },
     { title: "Department Approvals", icon: <ApprovalRoundedIcon fontSize="large" />, text: "Route repair, replacement or paid service requests to department heads and admins for approval." },
-    { title: "Vendor / OEM Management", icon: <BusinessRoundedIcon fontSize="large" />, text: "Store vendor contacts, OEM details, complaint process, emails, websites and escalation information." },
     { title: "Service History", icon: <HistoryRoundedIcon fontSize="large" />, text: "Keep complete service history including complaint number, technician notes, repair cost and closure remarks." },
     { title: "Preventive Maintenance", icon: <SettingsSuggestRoundedIcon fontSize="large" />, text: "Schedule routine maintenance tasks, service reminders and inspection activities to avoid breakdowns." },
     { title: "Reports & Analytics", icon: <AssessmentRoundedIcon fontSize="large" />, text: "Generate department-wise, vendor-wise, warranty-wise and breakdown reports for better decision-making." },
@@ -27,7 +24,7 @@ const Modules = () => {
   return (
     <>
       <style>{`
-        .modules-page { min-height: 100vh; background: #ECEAE3; }
+        .modules-page { min-height: 100vh; background: #080812; }
         .modules-container { max-width: 1400px; margin: 0 auto; }
         .modules-hero { padding: 140px 24px 44px; }
 
@@ -38,19 +35,19 @@ const Modules = () => {
         }
 
         .modules-summary-card {
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 18px; padding: 18px;
           box-shadow: 0 4px 16px rgba(17,17,17,0.05);
         }
 
         .modules-summary-value {
           font-size: 30px; font-weight: 950;
-          color: #111111; margin-bottom: 3px;
+          color: #FFFFFF; margin-bottom: 3px;
           letter-spacing: -1px; line-height: 1;
         }
 
-        .modules-summary-label { font-size: 13px; font-weight: 700; color: #8A8A84; }
+        .modules-summary-label { font-size: 13px; font-weight: 700; color: #94A3B8; }
 
         .modules-section { padding: 16px 24px 100px; }
 
@@ -61,68 +58,43 @@ const Modules = () => {
         }
 
         .mod-card {
-          background: #FFFFFF;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(15,10,40,0.55);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 24px; padding: 32px 28px;
           position: relative; overflow: hidden;
-          transition: all 0.3s ease;
           box-shadow: 0 4px 16px rgba(17,17,17,0.04);
         }
-
-        .mod-card::after {
-          content: "";
-          position: absolute; left: 0; bottom: 0;
-          width: 100%; height: 4px;
-          background: #CBFA57;
-          transform: scaleX(0); transform-origin: left;
-          transition: 0.3s ease;
-        }
-
-        .mod-card:hover {
-          transform: translateY(-8px);
-          border-color: rgba(17,17,17,0.18);
-          box-shadow: 0 24px 48px rgba(17,17,17,0.10);
-        }
-
-        .mod-card:hover::after { transform: scaleX(1); }
 
         .mod-number {
           position: absolute; top: -10px; right: 16px;
           font-size: 96px; font-weight: 950;
-          color: rgba(17,17,17,0.04); z-index: 0; line-height: 1;
-          transition: all 0.3s ease;
+          color: rgba(168,85,247,0.07); z-index: 0; line-height: 1;
         }
-
-        .mod-card:hover .mod-number { color: rgba(203,250,87,0.16); }
 
         .mod-content { position: relative; z-index: 1; }
 
         .mod-icon {
           width: 54px; height: 54px;
-          background: #111111; color: #CBFA57;
+          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
           border-radius: 15px;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 20px;
-          transition: all 0.3s ease;
         }
 
-        .mod-card:hover .mod-icon { transform: rotate(-5deg) scale(1.05); }
+        .mod-title { font-size: 19px; font-weight: 900; color: #FFFFFF; margin-bottom: 12px; letter-spacing: -0.3px; }
 
-        .mod-title { font-size: 19px; font-weight: 900; color: #111111; margin-bottom: 12px; letter-spacing: -0.3px; }
-
-        .mod-text { font-size: 14.5px; line-height: 1.65; color: #6B6B65; font-weight: 500; margin-bottom: 24px; }
+        .mod-text { font-size: 14.5px; line-height: 1.65; color: #CBD5E1; font-weight: 500; margin-bottom: 24px; }
 
         .mod-link {
           display: inline-flex; align-items: center; gap: 7px;
-          font-weight: 800; font-size: 13px; color: #111111;
+          font-weight: 800; font-size: 13px; color: #FFFFFF;
         }
 
-        .mod-arrow { transition: transform 0.28s ease; }
-        .mod-card:hover .mod-arrow { transform: translateX(7px); }
+        .mod-arrow { }
 
         .modules-flow {
           max-width: 1400px; margin: 28px auto 0;
-          background: #111111;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
           border-radius: 28px; padding: 44px;
           display: grid; grid-template-columns: 1fr 1.2fr;
           gap: 38px; align-items: center;
@@ -133,7 +105,7 @@ const Modules = () => {
           content: "";
           position: absolute; top: -80px; left: -80px;
           width: 240px; height: 240px;
-          background: radial-gradient(circle, rgba(203,250,87,0.10), transparent 70%);
+          background: radial-gradient(circle, rgba(168,85,247,0.10), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -144,7 +116,7 @@ const Modules = () => {
         }
 
         .modules-flow p {
-          color: #7A7A74; line-height: 1.7; font-size: 15px;
+          color: rgba(255,255,255,0.8); line-height: 1.7; font-size: 15px;
           font-weight: 500; margin: 0; position: relative; z-index: 1;
         }
 
@@ -159,7 +131,7 @@ const Modules = () => {
 
         .flow-step-number {
           width: 36px; height: 36px; border-radius: 10px;
-          background: #CBFA57; color: #111111;
+          background: #A855F7; color: #FFFFFF;
           display: grid; place-items: center;
           font-weight: 950; font-size: 13px; flex-shrink: 0;
         }
@@ -178,11 +150,11 @@ const Modules = () => {
       <div className="modules-page">
         <div className="modules-hero">
           <div className="modules-container">
-            <PageHeader
-              label="System Modules"
-              title="Complete modules for company asset lifecycle"
-              text="Every module is designed to reduce manual work and provide clear tracking from asset purchase to service closure."
-            />
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ color: '#A855F7', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>System Modules</div>
+              <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Complete modules for company asset lifecycle</h1>
+              <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Every module is designed to reduce manual work and provide clear tracking from asset purchase to service closure.</p>
+            </div>
             <div className="modules-summary">
               {[
                 { value: "09", label: "Core Modules" },
@@ -208,10 +180,7 @@ const Modules = () => {
                   <div className="mod-icon">{item.icon}</div>
                   <h3 className="mod-title">{item.title}</h3>
                   <p className="mod-text">{item.text}</p>
-                  <div className="mod-link">
-                    Module Details
-                    <ArrowForwardRoundedIcon className="mod-arrow" fontSize="small" />
-                  </div>
+
                 </div>
               </div>
             ))}

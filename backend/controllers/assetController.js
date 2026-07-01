@@ -1,10 +1,55 @@
 const Asset = require('../models/Asset');
+const Ticket = require('../models/Ticket');
+const AssetAssignment = require('../models/AssetAssignment');
+const AuditLog = require('../models/AuditLog');
+const TransferRequest = require('../models/TransferRequest');
+const MaintenanceSchedule = require('../models/MaintenanceSchedule');
+const CustomField = require('../models/CustomField');
 const { audit } = require('../services/auditService');
+const validateCustomFieldsHelper = async (category, customFieldsInput = {}) => {
+  const configs = await CustomField.find({ category });
+  const errors = [];
+
+  for (const config of configs) {
+    const value = customFieldsInput[config.name];
+
+    // Check if required
+    if (config.isRequired && (value === undefined || value === null || value === '')) {
+      errors.push(`Custom field '${config.name}' is required.`);
+      continue;
+    }
+
+    if (value !== undefined && value !== null && value !== '') {
+      // Check type
+      if (config.type === 'Number') {
+        if (isNaN(Number(value))) {
+          errors.push(`Custom field '${config.name}' must be a valid number.`);
+        }
+      } else if (config.type === 'Date') {
+        if (isNaN(Date.parse(value))) {
+          errors.push(`Custom field '${config.name}' must be a valid date.`);
+        }
+      } else if (config.type === 'Select') {
+        if (config.options && config.options.length > 0 && !config.options.includes(value)) {
+          errors.push(`Custom field '${config.name}' value must be one of: ${config.options.join(', ')}.`);
+        }
+      }
+    }
+  }
+
+  return errors;
+};
 
 // @route   POST /api/assets
 // @access  Admin
 const createAsset = async (req, res) => {
   try {
+    const { category, customFields } = req.body;
+    const validationErrors = await validateCustomFieldsHelper(category, customFields);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ message: validationErrors.join(' ') });
+    }
+
     const asset = await Asset.create(req.body);
     audit({ req, action: 'asset_created', entity: 'asset', entityId: asset._id, entityLabel: asset.name });
     res.status(201).json(asset);
@@ -44,6 +89,17 @@ const updateAsset = async (req, res) => {
   try {
     const asset = await Asset.findById(req.params.id);
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
+
+    // Validate custom fields if category or customFields are supplied
+    const category = req.body.category || asset.category;
+    const customFields = req.body.customFields !== undefined ? req.body.customFields : asset.customFields;
+
+    if (req.body.customFields !== undefined || req.body.category !== undefined) {
+      const validationErrors = await validateCustomFieldsHelper(category, customFields);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ message: validationErrors.join(' ') });
+      }
+    }
 
     const updated = await Asset.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -134,4 +190,198 @@ const getMyAssets = async (req, res) => {
   }
 };
 
-module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets };
+// @route   POST /api/assets/bulk-import
+// @access  Admin
+// Body: { rows: [ { name, serialNumber, category, department, location, vendor, purchaseCost, procurementDate, warrantyEnd, status } ] }
+const bulkImportAssets = async (req, res) => {
+  try {
+    const { rows } = req.body;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({ message: 'No rows provided for import.' });
+    }
+    if (rows.length > 500) {
+      return res.status(400).json({ message: 'Maximum 500 rows per import batch.' });
+    }
+
+    // Load custom fields for validation and mapping
+    const customFieldsByCat = {};
+    const configs = await CustomField.find({});
+    configs.forEach(c => {
+      if (!customFieldsByCat[c.category]) customFieldsByCat[c.category] = [];
+      customFieldsByCat[c.category].push(c);
+    });
+
+    const REQUIRED = ['name', 'serialNumber', 'category', 'department'];
+    const errors = [];
+    const valid = [];
+    const seen = new Set();
+
+    rows.forEach((row, i) => {
+      const rowNum = i + 1;
+      const missing = REQUIRED.filter(f => !row[f]?.toString().trim());
+      if (missing.length > 0) {
+        errors.push({ row: rowNum, issue: `Missing required fields: ${missing.join(', ')}` });
+        return;
+      }
+      const serial = row.serialNumber.toString().trim();
+      if (seen.has(serial)) {
+        errors.push({ row: rowNum, issue: `Duplicate serial number in this batch: ${serial}` });
+        return;
+      }
+      seen.add(serial);
+
+      const category = row.category?.toString().trim();
+      const catConfigs = customFieldsByCat[category] || [];
+      const customFields = {};
+      let hasCustomFieldErrors = false;
+
+      for (const config of catConfigs) {
+        const val = row[config.name];
+        
+        // Required check
+        if (config.isRequired && (val === undefined || val === null || val.toString().trim() === '')) {
+          errors.push({ row: rowNum, issue: `Missing required custom field: ${config.name}` });
+          hasCustomFieldErrors = true;
+          break;
+        }
+
+        if (val !== undefined && val !== null && val.toString().trim() !== '') {
+          const stringVal = val.toString().trim();
+          
+          // Type checks
+          if (config.type === 'Number' && isNaN(Number(stringVal))) {
+            errors.push({ row: rowNum, issue: `Custom field '${config.name}' must be a valid number (got '${stringVal}').` });
+            hasCustomFieldErrors = true;
+            break;
+          }
+          if (config.type === 'Date' && isNaN(Date.parse(stringVal))) {
+            errors.push({ row: rowNum, issue: `Custom field '${config.name}' must be a valid YYYY-MM-DD date (got '${stringVal}').` });
+            hasCustomFieldErrors = true;
+            break;
+          }
+          if (config.type === 'Select' && config.options?.length > 0 && !config.options.includes(stringVal)) {
+            errors.push({ row: rowNum, issue: `Custom field '${config.name}' must be one of: ${config.options.join(', ')} (got '${stringVal}').` });
+            hasCustomFieldErrors = true;
+            break;
+          }
+
+          customFields[config.name] = stringVal;
+        }
+      }
+
+      if (hasCustomFieldErrors) return;
+
+      valid.push({
+        name: row.name?.toString().trim(),
+        serialNumber: serial,
+        category: category,
+        department: row.department?.toString().trim(),
+        location: row.location?.toString().trim() || '',
+        vendor: row.vendor?.toString().trim() || '',
+        modelNumber: row.modelNumber?.toString().trim() || '',
+        purchaseCost: row.purchaseCost ? Number(row.purchaseCost) : undefined,
+        procurementDate: row.procurementDate ? new Date(row.procurementDate) : undefined,
+        warrantyEnd: row.warrantyEnd ? new Date(row.warrantyEnd) : undefined,
+        status: row.status || 'Active',
+        formFactor: row.formFactor || 'Movable',
+        customFields,
+        tenantId: req.tenantId || 'default',
+      });
+    });
+
+    if (valid.length === 0) {
+      return res.status(400).json({ message: 'No valid rows to import.', errors });
+    }
+
+    // Check for existing serial numbers in DB (within this tenant)
+    const existingSerials = await Asset.find({ serialNumber: { $in: valid.map(r => r.serialNumber) }, isDeleted: { $ne: true } }).select('serialNumber');
+    const existingSet = new Set(existingSerials.map(a => a.serialNumber));
+    const dupeErrors = [];
+    const toInsert = valid.filter(r => {
+      if (existingSet.has(r.serialNumber)) {
+        dupeErrors.push({ row: '?', issue: `Serial "${r.serialNumber}" already exists in the registry.` });
+        return false;
+      }
+      return true;
+    });
+
+    const allErrors = [...errors, ...dupeErrors];
+
+    if (toInsert.length === 0) {
+      return res.status(400).json({ message: 'All rows were duplicates or invalid.', errors: allErrors });
+    }
+
+    const inserted = await Asset.insertMany(toInsert, { ordered: false });
+
+    audit({
+      req,
+      action: 'bulk_import',
+      entity: 'asset',
+      entityId: null,
+      entityLabel: `${inserted.length} assets`,
+      changes: { imported: inserted.length, errors: allErrors.length },
+    });
+
+    res.status(201).json({
+      message: `Successfully imported ${inserted.length} asset(s).`,
+      imported: inserted.length,
+      skipped: allErrors.length,
+      errors: allErrors,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @route   GET /api/assets/:id/timeline
+// @access  Admin
+const getAssetTimeline = async (req, res) => {
+  try {
+    const asset = await Asset.findById(req.params.id).populate('assignedTo', 'name email');
+    if (!asset) return res.status(404).json({ message: 'Asset not found.' });
+
+    const assetId = asset._id;
+
+    const [tickets, assignments, auditLogs, transfers, maintenance] = await Promise.all([
+      Ticket.find({ asset: assetId }).populate('raisedBy', 'name').populate('approvedBy', 'name').sort({ createdAt: -1 }),
+      AssetAssignment.find({ asset: assetId }).populate('assignedTo', 'name email department').sort({ createdAt: -1 }),
+      AuditLog.find({ entityId: String(assetId) }).sort({ createdAt: -1 }),
+      TransferRequest.find({ asset: assetId }).populate('requestedBy', 'name').sort({ createdAt: -1 }),
+      MaintenanceSchedule.find({ asset: assetId }).sort({ createdAt: -1 }),
+    ]);
+
+    const events = [];
+
+    // Registration event
+    events.push({ type: 'asset_created', date: asset.createdAt, title: 'Asset Registered', description: `${asset.name} (${asset.serialNumber}) was registered in the system.`, icon: 'create', color: '#4ade80' });
+
+    tickets.forEach(t => {
+      events.push({ type: 'ticket', date: t.createdAt, title: `Ticket Raised — ${t.ticketId}`, description: `${t.issue} · Priority: ${t.priority} · Status: ${t.status}`, icon: 'ticket', color: t.status === 'Resolved' ? '#4ade80' : t.priority === 'High' || t.priority === 'Critical' ? '#f87171' : '#f59e0b', link: '/tickets', meta: { ticketId: t.ticketId, priority: t.priority, status: t.status, cost: t.estimatedCost } });
+    });
+
+    assignments.forEach(a => {
+      events.push({ type: 'assignment', date: a.createdAt, title: `Assigned to ${a.assignedTo?.name || 'User'}`, description: `Assigned to ${a.assignedTo?.email || '—'} (${a.assignedTo?.department || '—'})`, icon: 'assign', color: '#60a5fa', meta: { userName: a.assignedTo?.name } });
+    });
+
+    transfers.forEach(t => {
+      events.push({ type: 'transfer', date: t.createdAt, title: `Transfer — ${t.status}`, description: `Requested by ${t.requestedBy?.name || '—'} · ${t.fromDepartment || '?'} → ${t.toDepartment || '?'}`, icon: 'transfer', color: '#a78bfa', meta: { status: t.status } });
+    });
+
+    maintenance.forEach(m => {
+      events.push({ type: 'maintenance', date: m.createdAt, title: `Maintenance: ${m.taskName}`, description: `Status: ${m.status} · Type: ${m.maintenanceType || '—'}`, icon: 'maintenance', color: '#f59e0b', meta: { status: m.status } });
+    });
+
+    auditLogs.filter(l => !['ticket'].includes(l.action)).forEach(l => {
+      events.push({ type: 'audit', date: l.createdAt, title: l.action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), description: `By ${l.actorName || 'System'} (${l.actorRole || '—'})`, icon: 'audit', color: '#64748b', meta: l.changes });
+    });
+
+    // Sort all events newest-first
+    events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json({ asset, events, counts: { tickets: tickets.length, assignments: assignments.length, transfers: transfers.length, maintenance: maintenance.length } });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets, bulkImportAssets, getAssetTimeline };

@@ -1,32 +1,32 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Chip, Skeleton, Alert, Select,
+  TableHead, TableRow, Skeleton, Alert, Select,
   MenuItem, FormControl, InputLabel, Button, TextField, Pagination, IconButton, Tooltip
 } from '@mui/material';
-import { HistoryRounded, FilterListRounded, RefreshRounded, ClearAllRounded } from '@mui/icons-material';
+import { HistoryRounded, FilterListRounded, RefreshRounded, ClearAllRounded, SearchRounded } from '@mui/icons-material';
 import api from '../../api/axios';
 
 const ACTION_META = {
-  ticket_created:        { label: 'Ticket Created',        color: '#2563EB', bg: '#EFF6FF' },
-  ticket_status_changed: { label: 'Status Changed',        color: '#7C3AED', bg: '#F3E8FF' },
-  ticket_deleted:        { label: 'Ticket Deleted',        color: '#DC2626', bg: '#FEF2F2' },
-  asset_created:         { label: 'Asset Created',         color: '#16A34A', bg: '#F0FDF4' },
-  asset_updated:         { label: 'Asset Updated',         color: '#D97706', bg: '#FFFBEB' },
-  asset_deleted:         { label: 'Asset Deleted',         color: '#DC2626', bg: '#FEF2F2' },
-  asset_assigned:        { label: 'Asset Assigned',        color: '#0891B2', bg: '#ECFEFF' },
-  asset_revoked:         { label: 'Asset Revoked',         color: '#D97706', bg: '#FFFBEB' },
-  request_approved:      { label: 'Request Approved',      color: '#16A34A', bg: '#F0FDF4' },
-  request_rejected:      { label: 'Request Rejected',      color: '#DC2626', bg: '#FEF2F2' },
-  user_created:          { label: 'User Created',          color: '#0891B2', bg: '#ECFEFF' },
-  user_updated:          { label: 'User Updated',          color: '#D97706', bg: '#FFFBEB' },
+  ticket_created:        { label: 'Ticket Created',        color: '#60A5FA', bg: 'rgba(37,99,235,0.12)' },
+  ticket_status_changed: { label: 'Status Changed',        color: '#A78BFA', bg: 'rgba(124,58,237,0.12)' },
+  ticket_deleted:        { label: 'Ticket Deleted',        color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
+  asset_created:         { label: 'Asset Created',         color: '#4ADE80', bg: 'rgba(22,163,74,0.12)' },
+  asset_updated:         { label: 'Asset Updated',         color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
+  asset_deleted:         { label: 'Asset Deleted',         color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
+  asset_assigned:        { label: 'Asset Assigned',        color: '#22D3EE', bg: 'rgba(8,145,178,0.12)' },
+  asset_revoked:         { label: 'Asset Revoked',         color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
+  request_approved:      { label: 'Request Approved',      color: '#4ADE80', bg: 'rgba(22,163,74,0.12)' },
+  request_rejected:      { label: 'Request Rejected',      color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
+  user_created:          { label: 'User Created',          color: '#22D3EE', bg: 'rgba(8,145,178,0.12)' },
+  user_updated:          { label: 'User Updated',          color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
 };
 
 const ENTITY_COLORS = {
-  ticket: { color: '#2563EB', bg: '#EFF6FF' },
-  asset:  { color: '#16A34A', bg: '#F0FDF4' },
-  device_request: { color: '#7C3AED', bg: '#F3E8FF' },
-  user:   { color: '#0891B2', bg: '#ECFEFF' },
+  ticket:         { color: '#60A5FA', bg: 'rgba(37,99,235,0.10)' },
+  asset:          { color: '#4ADE80', bg: 'rgba(22,163,74,0.10)' },
+  device_request: { color: '#A78BFA', bg: 'rgba(124,58,237,0.10)' },
+  user:           { color: '#22D3EE', bg: 'rgba(8,145,178,0.10)' },
 };
 
 const timeStr = (date) => {
@@ -49,7 +49,7 @@ const formatChanges = (changes) => {
           {changes.from}
         </Typography>
         <Typography fontSize={11} color="text.disabled" fontWeight={700}>→</Typography>
-        <Typography sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.25, borderRadius: '6px', bgcolor: '#dcfce7', color: '#16a34a', maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <Typography sx={{ fontSize: 11, fontWeight: 700, px: 1, py: 0.25, borderRadius: '6px', bgcolor: 'rgba(22,163,74,0.15)', color: '#4ADE80', maxWidth: 110, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {changes.to}
         </Typography>
       </Box>
@@ -74,7 +74,7 @@ const formatChanges = (changes) => {
   );
 };
 
-const ROLE_COLORS = { admin: '#111111', hod: '#7C3AED', employee: '#2563EB', it_support: '#0891B2', vendor: '#D97706' };
+const ROLE_COLORS = { admin: '#A855F7', hod: '#A78BFA', employee: '#60A5FA', it_support: '#22D3EE', vendor: '#FBBF24' };
 
 export default function AuditLogs() {
   const [logs, setLogs] = useState([]);
@@ -112,11 +112,11 @@ export default function AuditLogs() {
 
   return (
     <Box sx={{ pb: 4 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: '#111111' }}>
-            <HistoryRounded sx={{ color: '#CBFA57' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
+            <HistoryRounded sx={{ color: '#A855F7' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Audit Logs</Typography>
@@ -133,15 +133,15 @@ export default function AuditLogs() {
         </Tooltip>
       </Box>
 
-      {/* Filters */}
-      <Paper sx={{ p: 2.5, mb: 3, borderRadius: '20px', border: 1, borderColor: 'divider', display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Filter Bar */}
+      <Paper sx={{ p: 2, borderRadius: '16px', border: 1, borderColor: 'divider', mb: 3, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
           <FilterListRounded fontSize="small" />
           <Typography fontSize={13} fontWeight={700}>Filters</Typography>
         </Box>
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel>Entity Type</InputLabel>
-          <Select value={filterEntity} label="Entity Type" onChange={(e) => setFilterEntity(e.target.value)}
+          <Select value={filterEntity} label="Entity Type" onChange={e => setFilterEntity(e.target.value)}
             sx={{ borderRadius: '10px', fontSize: 13 }}>
             <MenuItem value="">All Entities</MenuItem>
             <MenuItem value="ticket">Ticket</MenuItem>
@@ -153,8 +153,9 @@ export default function AuditLogs() {
         <TextField
           size="small" label="Action keyword"
           value={filterAction}
-          onChange={(e) => setFilterAction(e.target.value)}
+          onChange={e => setFilterAction(e.target.value)}
           placeholder="e.g. created, updated"
+          slotProps={{ input: { startAdornment: <Box sx={{ mr: 0.5, color: 'text.disabled', display: 'flex' }}><SearchRounded fontSize="small" /></Box> } }}
           sx={{ minWidth: 200, '& .MuiOutlinedInput-root': { borderRadius: '10px', fontSize: 13 } }}
         />
         {(filterEntity || filterAction) && (
@@ -187,9 +188,11 @@ export default function AuditLogs() {
         </Paper>
       ) : logs.length === 0 ? (
         <Paper sx={{ p: 8, textAlign: 'center', borderRadius: '20px', border: '1px dashed', borderColor: 'divider' }}>
-          <HistoryRounded sx={{ fontSize: 60, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h6" fontWeight={700} color="text.secondary">No audit logs found</Typography>
-          <Typography fontSize={14} color="text.disabled" mt={0.5}>Try changing the filters or refreshing.</Typography>
+          <Box sx={{ width: 72, height: 72, borderRadius: '20px', bgcolor: 'rgba(124,58,237,0.08)', display: 'grid', placeItems: 'center', mx: 'auto', mb: 2 }}>
+            <HistoryRounded sx={{ fontSize: 36, color: '#A855F7' }} />
+          </Box>
+          <Typography variant="h6" fontWeight={800} color="text.primary">No audit logs found</Typography>
+          <Typography fontSize={14} color="text.secondary" mt={0.5}>Try changing the filters or refreshing.</Typography>
         </Paper>
       ) : (
         <>
@@ -213,28 +216,28 @@ export default function AuditLogs() {
                     <TableRow key={log._id} hover sx={{
                       '&:last-child td': { borderBottom: 0 },
                       bgcolor: idx % 2 === 0 ? 'transparent' : 'action.hover',
-                      transition: 'background 0.15s',
                     }}>
-                      <TableCell sx={{ py: 1, minWidth: 95 }}>
+                      <TableCell sx={{ py: 1.5, minWidth: 95 }}>
                         <Typography fontSize={11} fontWeight={700} color="text.primary" sx={{ whiteSpace: 'nowrap' }}>{ts.date}</Typography>
                         <Typography fontSize={10} color="text.disabled" fontWeight={600}>{ts.time}</Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1 }}>
+                      <TableCell sx={{ py: 1.5 }}>
                         <Typography fontSize={12} fontWeight={700} color="text.primary" sx={{ whiteSpace: 'nowrap' }}>{log.actorName}</Typography>
                         <Typography fontSize={10} fontWeight={700} sx={{ color: ROLE_COLORS[log.actorRole] || 'text.disabled', textTransform: 'capitalize' }}>
                           {log.actorRole?.replace(/_/g, ' ')}
                         </Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1 }}>
+                      <TableCell sx={{ py: 1.5 }}>
                         <Box sx={{
                           display: 'inline-flex', px: 1.2, py: 0.3, borderRadius: '20px',
-                          bgcolor: meta?.bg || '#F1F5F9', color: meta?.color || '#64748b',
+                          bgcolor: meta?.bg || 'action.selected',
+                          color: meta?.color || 'text.secondary',
                           fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap'
                         }}>
                           {meta?.label || log.action.replace(/_/g, ' ')}
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1 }}>
+                      <TableCell sx={{ py: 1.5 }}>
                         <Box sx={{
                           display: 'inline-flex', px: 1.2, py: 0.25, borderRadius: '20px', border: '1px solid',
                           borderColor: entityMeta?.color || 'divider',
@@ -245,13 +248,13 @@ export default function AuditLogs() {
                           {log.entity?.replace(/_/g, ' ')}
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ py: 1, maxWidth: 140 }}>
+                      <TableCell sx={{ py: 1.5, maxWidth: 140 }}>
                         <Typography fontSize={12} fontWeight={600} color="text.primary"
                           sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {log.entityLabel || log.entityId || '—'}
                         </Typography>
                       </TableCell>
-                      <TableCell sx={{ py: 1, maxWidth: 200 }}>
+                      <TableCell sx={{ py: 1.5, maxWidth: 200 }}>
                         {formatChanges(log.changes) ?? <Typography fontSize={11} color="text.disabled">—</Typography>}
                       </TableCell>
                     </TableRow>
@@ -267,7 +270,7 @@ export default function AuditLogs() {
                 count={totalPages} page={page} onChange={handlePageChange}
                 sx={{
                   '& .MuiPaginationItem-root': { fontWeight: 700, borderRadius: '10px' },
-                  '& .Mui-selected': { bgcolor: '#111111 !important', color: '#CBFA57' }
+                  '& .Mui-selected': { background: 'linear-gradient(135deg,#7C3AED,#A855F7) !important', color: '#FFFFFF !important' }
                 }}
               />
             </Box>

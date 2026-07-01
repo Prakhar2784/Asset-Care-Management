@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
@@ -11,7 +11,19 @@ import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSetting
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../context/AuthContext";
+
+const ADMIN_TIER_ROLES = ["admin", "super_admin", "hod", "manager", "it_support"];
+const BASIC_PERMS = ["View Dashboard", "Raise Tickets"];
+
+// Mirrors AdminRoute's access check: admin-tier roles, and employees granted
+// at least one non-basic permission, land on the admin dashboard.
+const landingRouteFor = (session) => {
+  if (ADMIN_TIER_ROLES.includes(session.role)) return "/admin/dashboard";
+  const customPerms = session.customPermissions || [];
+  const hasAdminPerm = customPerms.some(p => p.allowed && !BASIC_PERMS.includes(p.feature));
+  return hasAdminPerm ? "/admin/dashboard" : "/employee/portal";
+};
 
 const AuthPage = () => {
   const navigate = useNavigate();
@@ -25,6 +37,8 @@ const AuthPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [rememberMe, setRememberMe] = useState(false);
+
   // Form State
   const [formData, setFormData] = useState({
     name: "",
@@ -33,6 +47,18 @@ const AuthPage = () => {
     confirmPassword: "",
     department: ""
   });
+
+  // Load remembered email when role tab changes
+  useEffect(() => {
+    const saved = localStorage.getItem(`assetcare_remembered_email_${role}`);
+    if (saved) {
+      setFormData(f => ({ ...f, email: saved }));
+      setRememberMe(true);
+    } else {
+      setFormData(f => ({ ...f, email: "" }));
+      setRememberMe(false);
+    }
+  }, [role]);
 
   const pwRules = [
     { label: '8+ chars',  pass: formData.password.length >= 8 },
@@ -94,13 +120,15 @@ const AuthPage = () => {
 
     try {
       if (view === "login") {
-        const session = await login(formData.email, formData.password, role);
-        if (session.role === "admin") {
-          navigate("/admin/dashboard");
+        // Handle remember me
+        if (rememberMe) {
+          localStorage.setItem(`assetcare_remembered_email_${role}`, formData.email);
         } else {
-          navigate("/employee/portal");
+          localStorage.removeItem(`assetcare_remembered_email_${role}`);
         }
-      } 
+        const session = await login(formData.email, formData.password, role);
+        navigate(landingRouteFor(session));
+      }
       else if (view === "register") {
         if (formData.password !== formData.confirmPassword) {
           throw new Error("Passwords do not match.");
@@ -110,11 +138,7 @@ const AuthPage = () => {
         }
         // ADDED: Passing formData.department to the register function
         const session = await register(formData.name, formData.email, formData.password, role, formData.department);
-        if (session.role === "admin") {
-          navigate("/admin/dashboard");
-        } else {
-          navigate("/employee/portal");
-        }
+        navigate(landingRouteFor(session));
       } 
       else if (view === "forgot") {
         await api.post('/auth/forgot-password', { email: formData.email });
@@ -132,13 +156,13 @@ const AuthPage = () => {
     <>
       <style>{`
         :root {
-          --auth-primary: #111111;
-          --auth-secondary: #111111;
-          --auth-bg: #ECEAE3;
-          --text-main: #111111;
-          --text-muted: #6B6B65;
-          --input-bg: #F9F8F5;
-          --input-border: #D4CFC6;
+          --auth-primary: #A855F7;
+          --auth-secondary: #7C3AED;
+          --auth-bg: #080812;
+          --text-main: #FFFFFF;
+          --text-muted: #8B8BAA;
+          --input-bg: rgba(15,10,40,0.6);
+          --input-border: rgba(168,85,247,0.2);
         }
 
         @keyframes fadeInUp {
@@ -158,28 +182,32 @@ const AuthPage = () => {
           align-items: center;
           justify-content: center;
           background:
-            radial-gradient(circle at top left, rgba(203,250,87,0.10), transparent 34%),
-            radial-gradient(circle at bottom right, rgba(17,17,17,0.04), transparent 35%),
+            radial-gradient(ellipse at 15% 0%, rgba(124,58,237,0.22) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 100%, rgba(168,85,247,0.16) 0%, transparent 55%),
             var(--auth-bg);
+          background-attachment: fixed;
           font-family: 'Inter', sans-serif;
         }
 
         .auth-container {
           width: 100%;
           max-width: 1200px;
-          background: rgba(255,255,255,0.94);
+          background: rgba(15, 10, 40, 0.70);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(168,85,247,0.18);
           border-radius: 36px;
-          box-shadow: 0 30px 70px rgba(17, 17, 17, 0.12);
+          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
           display: flex;
           overflow: hidden;
           animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          border: 1px solid rgba(17,17,17,0.08);
+          border: 1px solid rgba(168,85,247,0.15);
           backdrop-filter: blur(20px);
         }
 
         .auth-info {
           flex: 1;
-          background: #111111;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
           padding: 70px 50px;
           color: white;
           display: flex;
@@ -197,7 +225,7 @@ const AuthPage = () => {
           right: 24px;
           width: 180px;
           height: 180px;
-          border: 1px dashed rgba(203,250,87,0.22);
+          border: 1px dashed rgba(168,85,247,0.22);
           border-radius: 50%;
           animation: floatSoft 5s ease-in-out infinite;
         }
@@ -209,7 +237,7 @@ const AuthPage = () => {
           right: -20%;
           width: 420px;
           height: 420px;
-          background: radial-gradient(circle, rgba(203,250,87,0.14) 0%, rgba(0,0,0,0) 70%);
+          background: radial-gradient(circle, rgba(168,85,247,0.14) 0%, rgba(0,0,0,0) 70%);
           border-radius: 50%;
         }
 
@@ -219,9 +247,9 @@ const AuthPage = () => {
           border-radius: 16px;
           display: grid;
           place-items: center;
-          background: #CBFA57;
-          box-shadow: 0 14px 28px rgba(203,250,87,0.28);
-          border: 1px solid rgba(203,250,87,0.30);
+          background: #A855F7;
+          box-shadow: 0 14px 28px rgba(168,85,247,0.28);
+          border: 1px solid rgba(168,85,247,0.30);
         }
 
         .info-list {
@@ -245,17 +273,17 @@ const AuthPage = () => {
         }
 
         .info-icon {
-          background: rgba(203,250,87,0.12);
+          background: rgba(255,255,255,0.15);
           padding: 8px;
           border-radius: 12px;
           display: flex;
-          color: #CBFA57;
+          color: #FFFFFF;
         }
 
         .auth-form-container {
           flex: 1;
           padding: 70px 54px;
-          background: #ffffff;
+          background: rgba(15,10,40,0.55);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -267,7 +295,7 @@ const AuthPage = () => {
           padding: 6px;
           border-radius: 18px;
           margin-bottom: 32px;
-          border: 1px solid #E2E8F0;
+          border: 1px solid rgba(168,85,247,0.2);
         }
 
         .role-btn {
@@ -288,8 +316,8 @@ const AuthPage = () => {
         }
 
         .role-btn.active {
-          background: #ffffff;
-          color: #111111;
+          background: rgba(15,10,40,0.55);
+          color: #FFFFFF;
           box-shadow: 0 10px 20px rgba(17,17,17,0.08);
         }
 
@@ -354,24 +382,26 @@ const AuthPage = () => {
         }
 
         .input-wrapper:focus-within .input-icon {
-          color: #111111;
+          color: #A855F7;
         }
 
         .input-wrapper:focus-within .auth-input {
-          border-color: #111111;
-          box-shadow: 0 0 0 4px rgba(17,17,17,0.08);
-          background-color: #ffffff;
+          border-color: #A855F7;
+          box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
+          background-color: rgba(20,12,50,0.8);
         }
 
         .auth-btn {
           width: 100%;
           padding: 18px;
-          background: #111111;
-          color: #CBFA57;
+          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          color: #FFFFFF !important;
+          -webkit-text-fill-color: #FFFFFF;
           border: none;
           border-radius: 16px;
           font-size: 16px;
           font-weight: 900;
+          letter-spacing: 0.3px;
           cursor: pointer;
           margin-bottom: 24px;
           transition: all 0.3s ease;
@@ -381,17 +411,18 @@ const AuthPage = () => {
         .auth-btn:hover {
           transform: translateY(-3px);
           box-shadow: 0 22px 42px rgba(17,17,17,0.32);
-          background: #222222;
+          background: linear-gradient(135deg, #6D28D9, #9333EA);
         }
 
         .auth-btn:disabled {
-          opacity: 0.7;
+          opacity: 1;
           cursor: not-allowed;
           transform: none;
+          color: #FFFFFF;
         }
 
         .auth-link {
-          color: #111111;
+          color: #FFFFFF;
           background: none;
           border: none;
           font-size: 14px;
@@ -410,8 +441,8 @@ const AuthPage = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 6px 14px;
-          background: #F9F8F5;
-          border: 1.5px solid #E2DDD5;
+          background: rgba(30,20,60,0.5);
+          border: 1.5px solid rgba(168,85,247,0.2);
           border-radius: 14px;
           padding: 12px 16px;
           margin-bottom: 16px;
@@ -457,22 +488,22 @@ const AuthPage = () => {
         }
 
         .auth-stat-card {
-          background: #F9F8F5;
-          border: 1px solid rgba(17,17,17,0.08);
+          background: rgba(30,20,60,0.5);
+          border: 1px solid rgba(168,85,247,0.15);
           border-radius: 16px;
           padding: 15px;
           text-align: center;
         }
 
         .auth-stat-card h4 {
-          color: #111111;
+          color: #FFFFFF;
           font-size: 22px;
           font-weight: 950;
           margin: 0 0 4px;
         }
 
         .auth-stat-card span {
-          color: #6B6B65;
+          color: #94A3B8;
           font-size: 12px;
           font-weight: 800;
         }
@@ -518,7 +549,7 @@ const AuthPage = () => {
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
                 <div className="auth-brand-box">
-                  <Inventory2Icon fontSize="large" style={{ color: '#111111' }} />
+                  <Inventory2Icon fontSize="large" style={{ color: "#FFFFFF" }} />
                 </div>
                 <h1 style={{ fontSize: "24px", fontWeight: "900", letterSpacing: "-0.5px", margin: 0 }}>AssetCare Pro</h1>
               </div>
@@ -648,7 +679,7 @@ const AuthPage = () => {
               {view === "login" && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "32px" }}>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontSize: "14px", cursor: "pointer", fontWeight: "600" }}>
-                    <input type="checkbox" style={{ accentColor: "#111111", width: "16px", height: "16px" }} /> Remember me
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: "#A855F7", width: "16px", height: "16px" }} /> Remember me
                   </label>
                   <button type="button" className="auth-link" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
                 </div>

@@ -53,7 +53,6 @@ const vendorSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
-      unique: true,
     },
 
     supportEmail: {
@@ -124,8 +123,18 @@ const vendorSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    tenantId: {
+      type: String,
+      required: true,
+      default: 'default',
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Vendor", vendorSchema);
+vendorSchema.index({ tenantId: 1 });
+vendorSchema.index({ email: 1, tenantId: 1 }, { unique: true });
+
+const Vendor = mongoose.model("Vendor", vendorSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('Vendor', Vendor);

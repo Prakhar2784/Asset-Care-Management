@@ -11,20 +11,35 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if user is already logged in on initial load
+  // On app load: hydrate from localStorage immediately, then refresh from server
   useEffect(() => {
     const storedUser = localStorage.getItem("assetcare_user");
     if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser));
+      const parsed = JSON.parse(storedUser);
+      setCurrentUser(parsed);
+      // Fetch fresh profile so role/permission changes take effect immediately
+      api.get('/auth/me', { headers: { Authorization: `Bearer ${parsed.token}` } })
+        .then(({ data }) => {
+          const fresh = { ...parsed, ...data, token: parsed.token };
+          setCurrentUser(fresh);
+          localStorage.setItem("assetcare_user", JSON.stringify(fresh));
+        })
+        .catch(() => {
+          // Token expired or invalid — log out
+          setCurrentUser(null);
+          localStorage.removeItem("assetcare_user");
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, role) => {
     setError(null);
     try {
       // Make POST request to your real backend
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/auth/login', { email, password, role });
       
       const user = response.data;
       setCurrentUser(user);
@@ -63,11 +78,25 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("assetcare_user");
   };
 
+  // Call this after admin updates current user's own profile/role
+  const refreshUser = async () => {
+    const storedUser = localStorage.getItem("assetcare_user");
+    if (!storedUser) return;
+    const parsed = JSON.parse(storedUser);
+    try {
+      const { data } = await api.get('/auth/me');
+      const fresh = { ...parsed, ...data, token: parsed.token };
+      setCurrentUser(fresh);
+      localStorage.setItem("assetcare_user", JSON.stringify(fresh));
+    } catch { /* ignore */ }
+  };
+
   const value = {
     currentUser,
     login,
     register,
     logout,
+    refreshUser,
     error,
     loading
   };

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
@@ -14,10 +14,10 @@ const theme = createTheme({
     },
     primary: {
       main: "#111111",
-      contrastText: "#CBFA57",
+      contrastText: "#A855F7",
     },
     secondary: {
-      main: "#CBFA57",
+      main: "#A855F7",
       contrastText: "#111111",
     },
     text: {

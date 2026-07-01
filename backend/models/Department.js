@@ -12,7 +12,6 @@ const departmentSchema = new mongoose.Schema(
       required: true,
       trim: true,
       uppercase: true,
-      unique: true,
     },
     hodName: {
       type: String,
@@ -59,8 +58,18 @@ const departmentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    tenantId: {
+      type: String,
+      required: true,
+      default: 'default',
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Department", departmentSchema);
+departmentSchema.index({ tenantId: 1 });
+departmentSchema.index({ code: 1, tenantId: 1 }, { unique: true });
+
+const Department = mongoose.model("Department", departmentSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('Department', Department);

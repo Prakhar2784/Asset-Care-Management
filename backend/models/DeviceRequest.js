@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const deviceRequestSchema = new mongoose.Schema({
   requestId: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   requestType: {
     type: String,
@@ -26,7 +25,7 @@ const deviceRequestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
+    enum: ['Pending', 'Under Review', 'Approved', 'Rejected'],
     default: 'Pending'
   },
   // The employee who raised the request
@@ -54,7 +53,17 @@ const deviceRequestSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Asset',
     default: null
+  },
+  tenantId: {
+    type: String,
+    required: true,
+    default: 'default'
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('DeviceRequest', deviceRequestSchema);
+deviceRequestSchema.index({ tenantId: 1 });
+deviceRequestSchema.index({ requestId: 1, tenantId: 1 }, { unique: true });
+
+const DeviceRequest = mongoose.model('DeviceRequest', deviceRequestSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('DeviceRequest', DeviceRequest);

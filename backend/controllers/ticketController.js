@@ -59,9 +59,10 @@ const createTicket = async (req, res) => {
       link: '/tickets'
     });
 
-    // Notify all admins about the new ticket
-    if (req.user.role !== 'admin') {
-      User.find({ role: 'admin' }).then(admins => {
+    // Notify all admin-tier reviewers about the new ticket
+    const reviewerRoles = ['admin', 'super_admin', 'hod', 'it_support', 'manager'];
+    if (!reviewerRoles.includes(req.user.role)) {
+      User.find({ role: { $in: reviewerRoles } }).then(admins => {
         const itemName = populated.asset?.name || populated.itemLabel || ticketId;
         admins.forEach(admin => {
           createNotification({
@@ -134,6 +135,9 @@ const updateTicketStatus = async (req, res) => {
     if (['Vendor Assigned', 'Under Repair'].includes(status)) {
       ticket.approvedBy = req.user._id;
     }
+    if (req.body.assignedVendor !== undefined) {
+      ticket.assignedVendor = req.body.assignedVendor;
+    }
 
     const updated = await ticket.save();
 
@@ -187,12 +191,70 @@ const updateTicketPriority = async (req, res) => {
   }
 };
 
+// @route   PUT /api/tickets/:id/confirm
+// @access  Ticket raiser only, once repair is Resolved
+const confirmResolution = async (req, res) => {
+  try {
+    const { remarks } = req.body;
+    const ticket = await Ticket.findById(req.params.id).populate('raisedBy', 'name email');
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+    if (ticket.raisedBy?._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Only the ticket raiser can confirm resolution.' });
+    }
+    if (ticket.status !== 'Resolved') {
+      return res.status(400).json({ message: 'Ticket must be marked Resolved before it can be confirmed.' });
+    }
+    if (ticket.userConfirmed) {
+      return res.status(400).json({ message: 'Resolution already confirmed.' });
+    }
+
+    ticket.userConfirmed = true;
+    ticket.userConfirmedAt = new Date();
+    if (remarks?.trim()) {
+      ticket.comments.push({ text: `Resolution confirmed: ${remarks.trim()}`, author: req.user._id, authorName: req.user.name });
+    }
+    const updated = await ticket.save();
+
+    audit({ req, action: 'ticket_resolution_confirmed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId });
+
+    // Notify all admin-tier reviewers that the user has closed out this ticket
+    const reviewerRoles = ['admin', 'super_admin', 'hod', 'it_support', 'manager'];
+    User.find({ role: { $in: reviewerRoles } }).then(admins => {
+      admins.forEach(admin => {
+        createNotification({
+          userId: admin._id,
+          type: 'ticket_resolution_confirmed',
+          title: 'Resolution Confirmed',
+          message: `${ticket.raisedBy?.name || 'The user'} confirmed ticket ${ticket.ticketId} is resolved. It can now be closed.`,
+          link: '/tickets'
+        });
+      });
+    }).catch(() => {});
+
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 // @route   DELETE /api/tickets/:id
 // @access  Admin
 const deleteTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+    const adminTier = ['admin', 'super_admin', 'hod', 'it_support', 'manager'];
+    const isOwner = ticket.raisedBy?.toString() === req.user._id.toString();
+
+    if (!adminTier.includes(req.user.role) && !isOwner) {
+      return res.status(403).json({ message: 'Not authorized to delete this ticket' });
+    }
+
+    if (isOwner && !adminTier.includes(req.user.role) && ticket.status !== 'Pending Approval') {
+      return res.status(400).json({ message: 'Only tickets pending approval can be withdrawn' });
+    }
 
     await ticket.deleteOne();
     res.status(200).json({ message: 'Ticket removed successfully' });
@@ -207,5 +269,6 @@ module.exports = {
   getMyTickets,
   updateTicketStatus,
   updateTicketPriority,
+  confirmResolution,
   deleteTicket
 };

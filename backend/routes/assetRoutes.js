@@ -9,24 +9,28 @@ const {
   restoreAsset,
   getDeletedAssets,
   getMyAssets,
-  getActiveAssets
+  getActiveAssets,
+  bulkImportAssets,
+  getAssetTimeline,
 } = require('../controllers/assetController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect, authorize, requirePermission } = require('../middleware/authMiddleware');
 
 // Must be before /:id to avoid route conflict
-router.get('/myassets', protect, getMyAssets);
-router.get('/all-active', protect, getActiveAssets);
-router.get('/trash', protect, authorize('admin'), getDeletedAssets);
+router.get('/myassets',    protect, getMyAssets);
+router.get('/all-active',  protect, getActiveAssets);
+router.get('/trash',       protect, requirePermission('View All Assets'), getDeletedAssets);
+router.post('/bulk-import',protect, requirePermission('Register Assets'), bulkImportAssets);
 
 router.route('/')
-  .get(protect, authorize('admin', 'hod'), getAssets)
-  .post(protect, authorize('admin'), createAsset);
+  .get(protect,  requirePermission('View All Assets', 'Register Assets', 'Edit / Delete Assets', 'Assign Assets'), getAssets)
+  .post(protect, requirePermission('Register Assets'), createAsset);
 
 router.route('/:id')
-  .get(protect, authorize('admin', 'hod'), getAssetById)
-  .put(protect, authorize('admin'), updateAsset)
-  .delete(protect, authorize('admin'), deleteAsset);
+  .get(protect,    requirePermission('View All Assets', 'Register Assets', 'Edit / Delete Assets', 'Assign Assets'), getAssetById)
+  .put(protect,    requirePermission('Edit / Delete Assets'), updateAsset)
+  .delete(protect, requirePermission('Edit / Delete Assets'), deleteAsset);
 
-router.put('/:id/restore', protect, authorize('admin'), restoreAsset);
+router.put('/:id/restore',   protect, requirePermission('Edit / Delete Assets'), restoreAsset);
+router.get('/:id/timeline',  protect, requirePermission('View All Assets'), getAssetTimeline);
 
 module.exports = router;

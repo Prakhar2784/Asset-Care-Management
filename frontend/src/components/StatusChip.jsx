@@ -6,19 +6,19 @@ const StatusChip = ({ label }) => {
       case "Active":
       case "In Warranty":
       case "Resolved":
-        return { bgcolor: "#dcfce7", color: "#166534", border: "1px solid #bbf7d0" }; // Emerald
+        return { bgcolor: "rgba(22,163,74,0.13)", color: "#4ADE80", border: "1px solid rgba(22,163,74,0.25)" };
       case "Expired":
       case "Critical":
-        return { bgcolor: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }; // Rose
+        return { bgcolor: "rgba(220,38,38,0.13)", color: "#F87171", border: "1px solid rgba(220,38,38,0.25)" };
       case "Under Repair":
       case "Pending Approval":
       case "High":
-        return { bgcolor: "#fef3c7", color: "#92400e", border: "1px solid #fde68a" }; // Amber
+        return { bgcolor: "rgba(217,119,6,0.13)", color: "#FBBF24", border: "1px solid rgba(217,119,6,0.25)" };
       case "Vendor Assigned":
       case "Medium":
-        return { bgcolor: "#EFF6FF", color: "#1D4ED8", border: "1px solid #BFDBFE" }; // Blue
-      default: // Low or unknown
-        return { bgcolor: "#F5F5F4", color: "#6B6B65", border: "1px solid rgba(17,17,17,0.12)" }; // Warm gray
+        return { bgcolor: "rgba(37,99,235,0.13)", color: "#60A5FA", border: "1px solid rgba(37,99,235,0.25)" };
+      default:
+        return { bgcolor: "rgba(71,85,105,0.13)", color: "#94A3B8", border: "1px solid rgba(71,85,105,0.25)" };
     }
   };
 

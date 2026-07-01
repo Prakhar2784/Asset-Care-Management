@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Grid, CircularProgress, Alert, Button,
-  Chip, Divider, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, ButtonGroup
+  Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, useTheme, InputAdornment, TextField
 } from '@mui/material';
 import {
   AssessmentRounded, PictureAsPdfRounded, TableChartRounded,
   WarningAmberRounded, InventoryRounded, ConfirmationNumberRounded,
-  PeopleRounded
+  PeopleRounded, BusinessRounded, SearchRounded
 } from '@mui/icons-material';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -18,30 +18,16 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const COLORS = ['#111111', '#CBFA57', '#16a34a', '#d97706', '#dc2626', '#9333ea', '#2563EB'];
-
-const StatCard = ({ icon, label, value, color, sub }) => (
-  <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 2 }}>
-    <Box sx={{
-      width: 48, height: 48, borderRadius: 2, flexShrink: 0,
-      bgcolor: `${color}18`, color: color,
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
-      {icon}
-    </Box>
-    <Box>
-      <Typography variant="h4" fontWeight={800} color="text.primary">{value}</Typography>
-      <Typography variant="body2" color="text.secondary" fontWeight={600}>{label}</Typography>
-      {sub && <Typography variant="caption" color="text.disabled">{sub}</Typography>}
-    </Box>
-  </Paper>
-);
+const COLORS = ['#A855F7', '#60A5FA', '#4ADE80', '#FBBF24', '#F87171', '#A78BFA', '#22D3EE'];
 
 export default function Reports() {
+  const muiTheme = useTheme();
+  const gridColor = muiTheme.palette.divider;
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [deptSearch, setDeptSearch] = useState('');
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -158,89 +144,111 @@ export default function Reports() {
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-      <CircularProgress />
+      <CircularProgress sx={{ color: '#A855F7' }} />
     </Box>
   );
 
-  if (error) return <Alert severity="error">{error}</Alert>;
+  if (error) return <Alert severity="error" sx={{ borderRadius: '12px' }}>{error}</Alert>;
 
   const assetStatusData = summary.assetsByStatus.map(d => ({ name: d._id || 'Unknown', value: d.count }));
   const assetCategoryData = summary.assetsByCategory.map(d => ({ name: d._id || 'Unknown', count: d.count }));
   const ticketStatusData = summary.ticketsByStatus.map(d => ({ name: d._id || 'Unknown', count: d.count }));
   const ticketPriorityData = summary.ticketsByPriority.map(d => ({ name: d._id || 'Unknown', count: d.count }));
 
+  const kpiStats = [
+    { label: 'Total Assets', value: summary.totals.assets, color: '#A855F7', icon: <InventoryRounded fontSize="small" /> },
+    { label: 'Total Tickets', value: summary.totals.tickets, color: '#3B82F6', icon: <ConfirmationNumberRounded fontSize="small" /> },
+    { label: 'Total Users', value: summary.totals.users, color: '#22C55E', icon: <PeopleRounded fontSize="small" /> },
+    { label: 'Warranty Expiring (30d)', value: summary.warrantyExpiring30, color: '#F59E0B', icon: <WarningAmberRounded fontSize="small" /> },
+  ];
+
+  const filteredDepts = summary.assetsByDept.filter(d =>
+    (d._id || 'Unassigned').toLowerCase().includes(deptSearch.toLowerCase())
+  );
+
+  const SectionHeader = ({ title, subtitle }) => (
+    <Box sx={{ mb: 2.5 }}>
+      <Typography fontWeight={800} fontSize={15} color="text.primary" letterSpacing="-0.3px">{title}</Typography>
+      {subtitle && <Typography fontSize={12} color="text.secondary" fontWeight={600}>{subtitle}</Typography>}
+    </Box>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+    <Box sx={{ pb: 5 }}>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{
-            width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
-            bgcolor: '#111111'
-          }}>
-            <AssessmentRounded sx={{ color: '#CBFA57' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
+            <AssessmentRounded sx={{ color: '#A855F7' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Reports & Analytics</Typography>
-            <Typography variant="body2" color="text.secondary">System-wide data snapshot</Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>System-wide data snapshot and export center</Typography>
           </Box>
         </Box>
-        <ButtonGroup variant="outlined" disabled={exporting}>
-          <Button startIcon={<PictureAsPdfRounded />} onClick={exportPDF} sx={{ fontWeight: 700 }}>
-            {exporting ? 'Exporting...' : 'Export PDF'}
-          </Button>
-          <Button startIcon={<TableChartRounded />} onClick={exportExcel} sx={{ fontWeight: 700 }}>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            startIcon={<TableChartRounded />}
+            onClick={exportExcel}
+            disabled={exporting}
+            sx={{ fontWeight: 700, borderRadius: '12px', borderColor: 'divider', color: 'text.primary', textTransform: 'none', px: 2.5 }}
+          >
             Export Excel
           </Button>
-        </ButtonGroup>
+          <Button
+            variant="contained"
+            startIcon={<PictureAsPdfRounded />}
+            onClick={exportPDF}
+            disabled={exporting}
+            sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
+          >
+            {exporting ? 'Exporting...' : 'Export PDF'}
+          </Button>
+        </Box>
       </Box>
 
-      {/* Summary Cards */}
+      {/* KPI Cards */}
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard icon={<InventoryRounded />} label="Total Assets" value={summary.totals.assets} color="#111111" />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard icon={<ConfirmationNumberRounded />} label="Total Tickets" value={summary.totals.tickets} color="#2563EB" />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard icon={<PeopleRounded />} label="Total Users" value={summary.totals.users} color="#16a34a" />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            icon={<WarningAmberRounded />}
-            label="Warranty Expiring"
-            value={summary.warrantyExpiring30}
-            color="#d97706"
-            sub="within 30 days"
-          />
-        </Grid>
+        {kpiStats.map(k => (
+          <Grid size={{ xs: 12, sm: 6, md: 3 }} key={k.label}>
+            <Paper sx={{ p: 2.5, borderRadius: '16px', border: 1, borderColor: 'divider', position: 'relative', overflow: 'hidden' }}>
+              <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, bgcolor: k.color }} />
+              <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: `${k.color}18`, display: 'grid', placeItems: 'center', mb: 1.5 }}>
+                <Box sx={{ color: k.color }}>{k.icon}</Box>
+              </Box>
+              <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{k.value}</Typography>
+              <Typography fontSize={13} fontWeight={700} color="text.primary" mt={0.3}>{k.label}</Typography>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
 
       {/* Charts Row 1 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-            <Typography fontWeight={700} mb={2}>Asset Status Distribution</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+            <SectionHeader title="Asset Status Distribution" subtitle="Breakdown by current lifecycle state" />
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
                 <Pie data={assetStatusData} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, value }) => `${name}: ${value}`} labelLine={false}>
                   {assetStatusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
               </PieChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-            <Typography fontWeight={700} mb={2}>Assets by Category</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+            <SectionHeader title="Assets by Category" subtitle="Count per asset type in inventory" />
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={assetCategoryData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#111111" radius={[4, 4, 0, 0]} />
+                <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
+                <Bar dataKey="count" fill="#A855F7" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -250,33 +258,33 @@ export default function Reports() {
       {/* Charts Row 2 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-            <Typography fontWeight={700} mb={2}>Tickets by Status</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+            <SectionHeader title="Tickets by Status" subtitle="Service request pipeline overview" />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ticketStatusData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                 <XAxis type="number" fontSize={12} />
                 <YAxis dataKey="name" type="category" fontSize={11} width={110} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#2563EB" radius={[0, 4, 4, 0]} />
+                <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
+                <Bar dataKey="count" fill="#3B82F6" radius={[0, 6, 6, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-            <Typography fontWeight={700} mb={2}>Tickets by Priority</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+            <SectionHeader title="Tickets by Priority" subtitle="Severity-level distribution" />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ticketPriorityData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {ticketPriorityData.map((entry, i) => (
                     <Cell key={i} fill={
-                      entry.name === 'High' ? '#dc2626' :
-                      entry.name === 'Medium' ? '#d97706' : '#16a34a'
+                      entry.name === 'High' ? '#EF4444' :
+                      entry.name === 'Medium' ? '#F59E0B' : '#22C55E'
                     } />
                   ))}
                 </Bar>
@@ -287,32 +295,62 @@ export default function Reports() {
       </Grid>
 
       {/* Department breakdown */}
-      <Paper sx={{ p: 3, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-        <Typography fontWeight={700} mb={2}>Assets by Department</Typography>
-        <TableContainer>
+      <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center' }}>
+              <BusinessRounded sx={{ color: '#A855F7', fontSize: 18 }} />
+            </Box>
+            <Box>
+              <Typography fontWeight={800} fontSize={15} color="text.primary" letterSpacing="-0.3px">Assets by Department</Typography>
+              <Typography fontSize={12} color="text.secondary" fontWeight={600}>Distribution across organizational units</Typography>
+            </Box>
+          </Box>
+          <TextField
+            size="small"
+            placeholder="Search department..."
+            value={deptSearch}
+            onChange={(e) => setDeptSearch(e.target.value)}
+            sx={{ minWidth: 200, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 18 }} /></InputAdornment> }}
+          />
+        </Box>
+        <TableContainer sx={{ borderRadius: '14px', border: 1, borderColor: 'divider', overflow: 'hidden' }}>
           <Table size="small">
-            <TableHead sx={{ bgcolor: 'action.hover' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Department</TableCell>
-                <TableCell sx={{ fontWeight: 700 }} align="right">Asset Count</TableCell>
-                <TableCell sx={{ fontWeight: 700 }} align="right">Share</TableCell>
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'background.default' }}>
+                <TableCell sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>Department</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>Asset Count</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>Share</TableCell>
+                <TableCell sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>Distribution</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {summary.assetsByDept.map((d) => {
+              {filteredDepts.map((d, idx) => {
                 const pct = summary.totals.assets > 0
                   ? ((d.count / summary.totals.assets) * 100).toFixed(1)
                   : 0;
+                const barColor = COLORS[idx % COLORS.length];
                 return (
-                  <TableRow key={d._id} hover>
-                    <TableCell fontWeight={600}>{d._id || 'Unassigned'}</TableCell>
-                    <TableCell align="right">
-                      <Chip label={d.count} size="small" sx={{ fontWeight: 700 }} />
+                  <TableRow key={d._id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
+                    <TableCell sx={{ py: 1.5, fontWeight: 700, fontSize: 13 }}>{d._id || 'Unassigned'}</TableCell>
+                    <TableCell align="right" sx={{ py: 1.5 }}>
+                      <Chip label={d.count} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: `${barColor}18`, color: barColor, border: `1px solid ${barColor}30` }} />
                     </TableCell>
-                    <TableCell align="right" sx={{ color: '#64748b', fontSize: 13 }}>{pct}%</TableCell>
+                    <TableCell align="right" sx={{ py: 1.5, fontWeight: 700, color: 'text.secondary', fontSize: 13 }}>{pct}%</TableCell>
+                    <TableCell sx={{ py: 1.5, minWidth: 120 }}>
+                      <Box sx={{ height: 6, bgcolor: 'action.hover', borderRadius: 3, overflow: 'hidden' }}>
+                        <Box sx={{ height: '100%', width: `${pct}%`, bgcolor: barColor, borderRadius: 3, transition: 'width 0.3s' }} />
+                      </Box>
+                    </TableCell>
                   </TableRow>
                 );
               })}
+              {filteredDepts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 4, color: 'text.secondary', fontWeight: 600 }}>No departments match your search.</TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

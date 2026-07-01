@@ -9,13 +9,17 @@ const AdminRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // If they are logged in, but their role is NOT "admin", redirect them
-  if (currentUser.role !== "admin") {
-    return <Navigate to="/employee/portal" replace />;
-  }
+  // Admin-tier roles always have access
+  const adminRoles = ["admin", "super_admin", "hod", "manager", "it_support"];
+  if (adminRoles.includes(currentUser.role)) return <Outlet />;
 
-  // If they are an admin, let them access the admin page
-  return <Outlet />;
+  // Employees with at least one non-default admin custom permission also get access
+  const customPerms = currentUser.customPermissions || [];
+  const basicPerms = ["View Dashboard", "Raise Tickets"];
+  const hasAdminPerm = customPerms.some(p => p.allowed && !basicPerms.includes(p.feature));
+  if (currentUser.role === "employee" && hasAdminPerm) return <Outlet />;
+
+  return <Navigate to="/employee/portal" replace />;
 };
 
 export default AdminRoute;

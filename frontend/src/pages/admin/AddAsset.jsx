@@ -1,27 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Alert, Box, Button, Chip, Divider, Grid, MenuItem,
   Paper, Snackbar, TextField, Typography, CircularProgress,
-  LinearProgress
+  LinearProgress, Fade, Tooltip, Dialog, DialogTitle,
+  DialogContent, DialogActions, List, ListItemButton,
+  ListItemText, ListItemSecondaryAction
 } from "@mui/material";
 import {
   SaveRounded, UploadFileRounded, CheckCircleRounded,
-  DescriptionRounded, DeleteRounded
+  DescriptionRounded, DeleteRounded, DocumentScannerRounded,
+  AutoAwesomeRounded, CloseRounded, ShoppingCartRounded,
+  Inventory2Rounded, ArrowBackRounded,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import PageHeader from "../../components/PageHeader";
+import { createWorker } from "tesseract.js";
 import api from "../../api/axios";
 
-const SECTION_LABEL_SX = {
-  display: "flex", alignItems: "center", gap: 1.5,
-  mb: 3, mt: 0.5,
-};
-
 const SectionLabel = ({ number, title, subtitle }) => (
-  <Box sx={SECTION_LABEL_SX}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3, mt: 0.5 }}>
     <Box sx={{
-      width: 32, height: 32, borderRadius: "10px",
-      bgcolor: "#111111", color: "#CBFA57",
+      width: 34, height: 34, borderRadius: "10px",
+      background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+      color: "#fff",
       display: "grid", placeItems: "center",
       fontWeight: 900, fontSize: 14, flexShrink: 0,
     }}>
@@ -74,10 +74,258 @@ const AddAsset = () => {
   });
 
   const [docs, setDocs] = useState({});
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState(null);
+  const [ocrFilled, setOcrFilled] = useState([]);
+  const [ocrItems, setOcrItems] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
+  const ocrInputRef = useRef(null);
+
+  // Custom fields configuration and values
+  const [customFieldConfigs, setCustomFieldConfigs] = useState([]);
+  const [customFields, setCustomFields] = useState({});
+
+  React.useEffect(() => {
+    const fetchCustomFieldConfigs = async () => {
+      try {
+        const { data } = await api.get(`/custom-fields?category=${encodeURIComponent(formData.category)}`);
+        setCustomFieldConfigs(data.data || []);
+        const initial = {};
+        (data.data || []).forEach(f => {
+          initial[f.name] = "";
+        });
+        setCustomFields(initial);
+      } catch (err) {
+        console.error("Failed to load custom fields configs:", err);
+      }
+    };
+    fetchCustomFieldConfigs();
+  }, [formData.category]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError(null);
+  };
+
+  const handleCustomFieldChange = (name, val) => {
+    setCustomFields(prev => ({ ...prev, [name]: val }));
+    setError(null);
+  };
+
+  const parseInvoiceText = (text) => {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    const full = text;
+    const updates = {};
+
+    // --- Serial Number ---
+    const snLabeled = full.match(/(?:serial\s*(?:no\.?|number|#)?|s\/n|service\s*tag)[:\s#]+([A-Z0-9][A-Z0-9\-]{4,18})/i);
+    const snInline = full.match(/\bSN[-:]([A-Z0-9]{5,15})\b/i);
+    const snVal = snLabeled?.[1] || snInline?.[1];
+    if (snVal) updates.serialNumber = snVal.trim();
+
+    // --- Model Number ---
+    const modelKnown = full.match(/\b(inspiron|latitude|thinkpad|elitebook|probook|ideapad|vostro|xps|pavilion|spectre|envy|omen|vivobook|zenbook|surface|macbook)\s+([A-Z0-9][A-Z0-9\-\/]*)/i);
+    if (modelKnown) {
+      const family = modelKnown[1];
+      const next = modelKnown[2];
+      updates.modelNumber = (/^\d{4}$/.test(next) ? family : `${family} ${next}`).trim().substring(0, 30);
+    } else {
+      const modelLabeled = full.match(/(?:model\s*(?:no\.?|number|#)?)[:\s]+([A-Z0-9][\w\-\/]{3,24})/i);
+      if (modelLabeled) updates.modelNumber = modelLabeled[1].trim();
+    }
+
+    // --- Purchase Cost ---
+    const totalLines = full.match(/^.*\bTOTAL\b.*$/gim) || [];
+    let maxCost = 0;
+    for (const line of totalLines) {
+      const nums = [...line.matchAll(/([\d,]+(?:\.\d{1,2})?)/g)];
+      for (const n of nums) {
+        const val = parseFloat(n[1].replace(/,/g, ""));
+        if (val > maxCost) maxCost = val;
+      }
+    }
+    if (maxCost >= 100) updates.purchaseCost = String(maxCost);
+    else {
+      const grandTotal = full.match(/(?:grand\s*total|net\s*amount|total\s*amount)[^\d]{0,10}([\d,]{4,}(?:\.\d{1,2})?)/i);
+      if (grandTotal) updates.purchaseCost = grandTotal[1].replace(/,/g, "");
+    }
+
+    // --- Dates ---
+    const MONTHS = { jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",
+                     jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12" };
+    const namedDates = [];
+    const namedPat = /(\d{1,2})[-\/\s](jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*[-\/\s](\d{4})/gi;
+    let nd;
+    while ((nd = namedPat.exec(full)) !== null) {
+      const mm = MONTHS[nd[2].toLowerCase().substring(0,3)];
+      namedDates.push(`${nd[3]}-${mm}-${nd[1].padStart(2,"0")}`);
+    }
+    const numericDates = [];
+    const numPat = /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/g;
+    let nm;
+    while ((nm = numPat.exec(full)) !== null) {
+      numericDates.push(`${nm[3]}-${nm[2]}-${nm[1]}`);
+    }
+    const allDates = [...namedDates, ...numericDates];
+    if (allDates.length > 0) updates.procurementDate = allDates[0];
+    if (allDates.length > 1) updates.warrantyEnd = allDates[allDates.length - 1];
+
+    // --- Email ---
+    const emailMatch = full.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+    if (emailMatch) updates.supportEmail = emailMatch[0];
+
+    // --- Phone (Indian) ---
+    const phoneMatch = full.match(/(?:\+91[\s\-]?)?[6-9]\d{9}|\d{3,4}[\s\-]\d{4}[\s\-]\d{4}/);
+    if (phoneMatch) updates.supportPhone = phoneMatch[0].replace(/\s/g, "").trim();
+
+    // --- Vendor / Brand ---
+    const BRANDS = ["Dell","HP","Lenovo","Apple","Samsung","Asus","Acer","Microsoft",
+      "Cisco","Epson","Canon","Brother","LG","Sony","Logitech","Zebra","Honeywell","HCL","Toshiba"];
+    for (const brand of BRANDS) {
+      if (new RegExp(`\\b${brand}\\b`, "i").test(full)) { updates.vendor = brand; break; }
+    }
+
+    // --- Asset Name ---
+    const productPat = /\b(dell\s+inspiron|dell\s+latitude|hp\s+\w+|lenovo\s+\w+|thinkpad\s+\w+|elitebook\s+\w+|probook\s+\w+|ideapad\s+\w+|macbook\s+\w+|xps\s+\w+|vostro\s+\w+|pavilion\s+\w+|spectre\s+\w+|asus\s+\w+|acer\s+\w+)/i;
+    const productMatch = full.match(productPat);
+    if (productMatch) {
+      const lineStart = full.lastIndexOf("\n", productMatch.index) + 1;
+      const lineEnd = full.indexOf("\n", productMatch.index);
+      const rawLine = full.substring(lineStart, lineEnd > 0 ? lineEnd : lineStart + 120);
+      const trimmed = rawLine.replace(/\s+\d{4}\s.*$/, "").replace(/[\|\[\]].*/g, "").replace(/\s+SN[-:]\S+/i, "");
+      updates.name = trimmed.replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim().substring(0, 60);
+    } else {
+      const skip = /^(invoice|bill|tax|gst|pan|cin|date|total|amount|page|flat|block|plot|no\.|s\.no|hsn|qty|rate|terms|place|state|buyer)/i;
+      const productLine = lines.find(l => l.length > 8 && l.length < 80 && /[a-zA-Z]{3}/.test(l) && /\d/.test(l) && !skip.test(l));
+      if (productLine) updates.name = productLine.replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim().substring(0, 60);
+    }
+
+    // --- Category ---
+    const catMap = [
+      [/laptop|desktop|inspiron|thinkpad|elitebook|notebook|workstation|monitor|keyboard|mouse|printer|scanner|projector/i, "IT Asset"],
+      [/switch|router|firewall|access\s*point|modem|wifi|network/i, "Networking"],
+      [/chair|table|desk|cabinet|sofa|shelf/i, "Furniture"],
+      [/ups|generator|stabilizer|inverter|battery|power/i, "Electrical"],
+      [/phone|camera|tv|television|speaker|headphone/i, "Electronic"],
+    ];
+    for (const [pat, cat] of catMap) {
+      if (pat.test(full)) { updates.category = cat; break; }
+    }
+
+    // --- Invoice number → notes ---
+    const invMatch = full.match(/invoice\s*(?:no\.?|#|number)?[:\s]+([A-Z0-9][A-Z0-9\/\-]{3,20})/i);
+    if (invMatch) updates.notes = `Invoice: ${invMatch[1].trim()}`;
+
+    return updates;
+  };
+
+  const extractLineItems = (text) => {
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    const items = [];
+    const BRANDS = ["Dell","HP","Lenovo","Apple","Samsung","Asus","Acer","Sandisk","ADATA",
+                    "Logitech","Canon","Epson","Brother","LG","Sony","Cisco","HCL","Toshiba","Kingston"];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+
+      if (!/\bNos\b/i.test(line)) continue;
+      if (/^(qty|rate|amount|total|hsn|gst|description|s\.?\s*no)/i.test(line)) continue;
+      if (!/[a-zA-Z]{2}/.test(line)) continue;
+
+      let desc = line
+        .replace(/\s+\d{4,8}[\s\|]*\d+\.\d{2}[\]\s\|]*\d+\s+Nos.*/i, "")
+        .replace(/\bSN[-:]\s*[A-Z0-9]{5,15}\b/gi, "")
+        .replace(/[\|\[\]]/g, " ")
+        .replace(/[^\x20-\x7E]/g, " ")
+        .replace(/\s+/g, " ").trim();
+
+      if (desc.length < 3) {
+        desc = line.replace(/\s+\d{4,}.*$/, "").replace(/[^\x20-\x7E]/g, " ").trim();
+      }
+      if (desc.length < 3 || !/[a-zA-Z]{2}/.test(desc)) continue;
+
+      const priceNums = [...line.matchAll(/([\d,]+\.\d{2})/g)]
+        .map(m => parseFloat(m[1].replace(/,/g, "")))
+        .filter(n => n >= 50);
+      const amount = priceNums.length ? priceNums[priceNums.length - 1] : null;
+
+      const context = [line, lines[i+1]||"", lines[i+2]||""].join(" ");
+      const snMatch = context.match(/\bSN[-:]([A-Z0-9]{5,15})\b/i) ||
+                      context.match(/(?:serial\s*(?:no\.?)?|s\/n)[:\s]+([A-Z0-9\-]{5,18})/i);
+      const sn = snMatch ? snMatch[1] : "";
+
+      const nextLine = lines[i+1] || "";
+      let fullName = desc;
+      if (nextLine && !/\bNos\b/i.test(nextLine) && /[A-Z0-9]{4,}/i.test(nextLine) && nextLine.length < 50) {
+        const contPart = nextLine.replace(/\bSN[-:]\S+/gi,"").replace(/[^\x20-\x7E]/g," ").trim();
+        if (contPart.length > 2) fullName = `${desc} ${contPart}`.substring(0, 60);
+      }
+
+      let category = "IT Asset";
+      if (/switch|router|modem|wifi|network/i.test(fullName)) category = "Networking";
+      else if (/chair|table|desk|furniture|rack/i.test(fullName)) category = "Furniture";
+      else if (/ups|generator|inverter|stabilizer/i.test(fullName)) category = "Electrical";
+      else if (/phone|camera|tv|speaker|headphone/i.test(fullName)) category = "Electronic";
+
+      const vendor = BRANDS.find(b => new RegExp(`\\b${b}\\b`, "i").test(fullName)) || "";
+
+      items.push({ name: fullName.trim(), serialNumber: sn, purchaseCost: amount ? String(amount) : "", category, vendor, index: items.length + 1 });
+    }
+
+    return items;
+  };
+
+  const applyOcrItem = (item, sharedData = {}) => {
+    const updates = { ...sharedData };
+    if (item.name) updates.name = item.name;
+    if (item.serialNumber) updates.serialNumber = item.serialNumber;
+    if (item.purchaseCost) updates.purchaseCost = item.purchaseCost;
+    if (item.category) updates.category = item.category;
+    if (item.vendor) updates.vendor = item.vendor;
+    const filled = Object.keys(updates).filter(k => updates[k]);
+    setFormData(prev => ({ ...prev, ...updates }));
+    setOcrFilled(filled);
+    setShowPicker(false);
+  };
+
+  const handleOcrScan = async (file) => {
+    if (!file) return;
+    setOcrLoading(true);
+    setOcrError(null);
+    setOcrFilled([]);
+    try {
+      const worker = await createWorker("eng");
+      const { data: { text } } = await worker.recognize(file);
+      await worker.terminate();
+
+      const shared = parseInvoiceText(text);
+      const sharedOnly = { ...shared };
+      delete sharedOnly.name; delete sharedOnly.serialNumber;
+      delete sharedOnly.purchaseCost; delete sharedOnly.modelNumber;
+
+      const items = extractLineItems(text);
+
+      if (items.length > 1) {
+        setOcrItems(items.map(it => ({ ...it, sharedData: sharedOnly })));
+        setShowPicker(true);
+      } else if (items.length === 1) {
+        applyOcrItem(items[0], sharedOnly);
+      } else {
+        const filled = Object.keys(shared).filter(k => shared[k]);
+        if (filled.length === 0) {
+          setOcrError("Could not extract any data from this image. Try a clearer photo.");
+        } else {
+          setFormData(prev => ({ ...prev, ...shared }));
+          setOcrFilled(filled);
+        }
+      }
+    } catch (err) {
+      setOcrError("OCR failed. Please try a clearer image.");
+      console.error(err);
+    } finally {
+      setOcrLoading(false);
+      if (ocrInputRef.current) ocrInputRef.current.value = "";
+    }
   };
 
   const handleDocChange = (key, file) => {
@@ -102,9 +350,16 @@ const AddAsset = () => {
       return;
     }
 
+    const missingFields = customFieldConfigs.filter(f => f.isRequired && !customFields[f.name]?.toString().trim());
+    if (missingFields.length > 0) {
+      setError(`Required custom field(s) missing: ${missingFields.map(f => f.name).join(', ')}`);
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.post('/assets', formData);
+      const payload = { ...formData, customFields };
+      await api.post('/assets', payload);
       setOpen(true);
       setTimeout(() => navigate("/admin/assets"), 1500);
     } catch (err) {
@@ -114,30 +369,48 @@ const AddAsset = () => {
     }
   };
 
-  const inputSx = {
+  const inputSx = (fieldName) => ({
     "& .MuiOutlinedInput-root": {
       borderRadius: "12px",
-      bgcolor: "background.paper",
+      bgcolor: ocrFilled.includes(fieldName) ? "rgba(124,58,237,0.06)" : "background.paper",
+      ...(ocrFilled.includes(fieldName) && {
+        "& fieldset": { borderColor: "#A855F7 !important", borderWidth: "2px !important" },
+      }),
     },
-    "& .MuiInputLabel-root": { fontWeight: 600 },
-  };
+    "& .MuiInputLabel-root": {
+      fontWeight: 600,
+      ...(ocrFilled.includes(fieldName) && { color: "#7C3AED" }),
+    },
+  });
 
   const docCount = Object.keys(docs).length;
 
   return (
     <Box sx={{ width: "100%", pb: 6 }}>
-      <PageHeader
-        title="Register New Asset"
-        subtitle="Add a new company asset for warranty monitoring, service tracking and department allocation."
-        action={
-          <Button variant="outlined" onClick={() => navigate("/admin/assets")}
-            sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "10px" }}>
-            Cancel
-          </Button>
-        }
-      />
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
+            <Inventory2Rounded sx={{ color: "#A855F7" }} />
+          </Box>
+          <Box>
+            <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Register New Asset</Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              Add a new company asset for warranty monitoring, service tracking and department allocation
+            </Typography>
+          </Box>
+        </Box>
+        <Button
+          variant="outlined"
+          startIcon={<ArrowBackRounded />}
+          onClick={() => navigate("/admin/assets")}
+          sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "10px" }}
+        >
+          Back to Registry
+        </Button>
+      </Box>
 
-      {loading && <LinearProgress sx={{ borderRadius: 2, mb: 2, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "#CBFA57" } }} />}
+      {loading && <LinearProgress sx={{ borderRadius: 2, mb: 2, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "#A855F7" } }} />}
 
       {error && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }} onClose={() => setError(null)}>
@@ -145,18 +418,122 @@ const AddAsset = () => {
         </Alert>
       )}
 
-      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+
+        {/* OCR Invoice Scanner */}
+        <Paper sx={{
+          p: { xs: 2.5, md: 3 }, borderRadius: "20px",
+          background: "linear-gradient(135deg, rgba(124,58,237,0.07) 0%, rgba(168,85,247,0.04) 100%)",
+          border: "1.5px dashed",
+          borderColor: ocrFilled.length > 0 ? "#7C3AED" : "rgba(124,58,237,0.3)",
+          position: "relative", overflow: "hidden",
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+            <Box sx={{
+              width: 44, height: 44, borderRadius: "14px", flexShrink: 0,
+              background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+              display: "grid", placeItems: "center",
+            }}>
+              <DocumentScannerRounded sx={{ color: "#fff", fontSize: 22 }} />
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 800, fontSize: 16, color: "text.primary" }}>
+                AI Invoice Scanner
+              </Typography>
+              <Typography sx={{ color: "text.secondary", fontSize: 12.5, fontWeight: 500, mt: 0.3 }}>
+                Upload a photo or scan of the purchase invoice — fields will be filled automatically.
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+              {ocrFilled.length > 0 && (
+                <>
+                  <Chip
+                    icon={<CheckCircleRounded sx={{ fontSize: "14px !important", color: "#22C55E !important" }} />}
+                    label={`${ocrFilled.length} field${ocrFilled.length > 1 ? "s" : ""} filled`}
+                    size="small"
+                    sx={{ bgcolor: "rgba(34,197,94,0.1)", color: "#22C55E", fontWeight: 700, fontSize: 11.5, border: "1px solid rgba(34,197,94,0.3)" }}
+                  />
+                  <Tooltip title="Clear OCR highlights">
+                    <Button size="small" onClick={() => setOcrFilled([])}
+                      sx={{ minWidth: 0, p: 0.5, color: "text.disabled", borderRadius: "8px" }}>
+                      <CloseRounded sx={{ fontSize: 16 }} />
+                    </Button>
+                  </Tooltip>
+                </>
+              )}
+              <Button
+                component="label"
+                variant="contained"
+                disabled={ocrLoading}
+                startIcon={ocrLoading ? <CircularProgress size={15} color="inherit" /> : <UploadFileRounded sx={{ fontSize: 17 }} />}
+                sx={{
+                  background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff",
+                  fontWeight: 800, borderRadius: "12px", px: 3, py: 1.1, fontSize: 13.5, boxShadow: "none",
+                  "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" },
+                  whiteSpace: "nowrap",
+                }}>
+                {ocrLoading ? "Scanning…" : ocrFilled.length > 0 ? "Scan Again" : "Upload Invoice"}
+                <input ref={ocrInputRef} type="file" hidden accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => {
+                    const f = e.target.files[0];
+                    if (f) { handleOcrScan(f); setDocs(prev => ({ ...prev, invoice: f })); }
+                  }} />
+              </Button>
+            </Box>
+          </Box>
+
+          {ocrLoading && (
+            <Fade in={ocrLoading}>
+              <Box sx={{ mt: 2 }}>
+                <LinearProgress sx={{ borderRadius: 2, bgcolor: "rgba(124,58,237,0.12)", "& .MuiLinearProgress-bar": { background: "linear-gradient(90deg,#7C3AED,#A855F7)" } }} />
+                <Typography sx={{ fontSize: 12, color: "#A855F7", fontWeight: 600, mt: 0.8, textAlign: "center" }}>
+                  Reading invoice — this may take 10–20 seconds…
+                </Typography>
+              </Box>
+            </Fade>
+          )}
+
+          {ocrError && (
+            <Alert severity="error" onClose={() => setOcrError(null)}
+              sx={{ mt: 2, borderRadius: "10px", fontSize: 13, fontWeight: 600 }}>
+              {ocrError}
+            </Alert>
+          )}
+
+          {ocrFilled.length > 0 && (
+            <Fade in>
+              <Box sx={{ mt: 1.5, p: 1.5, borderRadius: "10px", bgcolor: "rgba(34,197,94,0.07)", border: "1px solid rgba(34,197,94,0.2)" }}>
+                <Typography sx={{ fontSize: 12, color: "#16A34A", fontWeight: 700 }}>
+                  Fields auto-filled: {ocrFilled.map(f => ({
+                    name: "Asset Name", vendor: "Vendor", modelNumber: "Model",
+                    serialNumber: "Serial No.", purchaseCost: "Cost", procurementDate: "Procurement Date",
+                    warrantyStart: "Warranty Start", warrantyEnd: "Warranty Expiry",
+                    category: "Category", supportPhone: "Support Phone",
+                    supportEmail: "Support Email", notes: "Notes",
+                  }[f] || f)).join(" · ")}
+                </Typography>
+                <Typography sx={{ fontSize: 11.5, color: "text.secondary", mt: 0.3 }}>
+                  Review and correct any values before saving.
+                </Typography>
+              </Box>
+            </Fade>
+          )}
+        </Paper>
 
         {/* Section 1 — Hardware */}
-        <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
+        <Paper sx={{
+          p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper",
+          border: "1px solid", borderColor: "divider",
+          boxShadow: "0 1px 3px 0 rgba(0,0,0,0.04)",
+        }}>
           <SectionLabel number="1" title="Hardware Specifications" subtitle="Basic technical and identity details of the asset." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 5 }}>
               <TextField required fullWidth name="name" value={formData.name} onChange={handleChange}
-                sx={inputSx} label="Asset Name *" placeholder="e.g. Dell Latitude 5420" />
+                sx={inputSx("name")} label="Asset Name *" placeholder="e.g. Dell Latitude 5420" />
             </Grid>
             <Grid size={{ xs: 6, md: 3 }}>
-              <TextField required fullWidth select name="category" value={formData.category} onChange={handleChange} sx={inputSx} label="Category *">
+              <TextField required fullWidth select name="category" value={formData.category} onChange={handleChange} sx={inputSx("category")} label="Category *">
                 <MenuItem value="IT Asset">IT Asset</MenuItem>
                 <MenuItem value="Electrical">Electrical</MenuItem>
                 <MenuItem value="Electronic">Electronic</MenuItem>
@@ -166,69 +543,118 @@ const AddAsset = () => {
               </TextField>
             </Grid>
             <Grid size={{ xs: 6, md: 4 }}>
-              <TextField required fullWidth select name="formFactor" value={formData.formFactor} onChange={handleChange} sx={inputSx} label="Form Factor *">
+              <TextField required fullWidth select name="formFactor" value={formData.formFactor} onChange={handleChange} sx={inputSx("formFactor")} label="Form Factor *">
                 <MenuItem value="Movable">Movable</MenuItem>
                 <MenuItem value="Fixed">Fixed / Immovable</MenuItem>
               </TextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
-                sx={inputSx} label="OEM / Brand" placeholder="e.g. Dell" />
+                sx={inputSx("vendor")} label="OEM / Brand" placeholder="e.g. Dell" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="modelNumber" value={formData.modelNumber} onChange={handleChange}
-                sx={inputSx} label="Model Number" placeholder="e.g. LAT-5420-X" />
+                sx={inputSx("modelNumber")} label="Model Number" placeholder="e.g. LAT-5420-X" />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth name="serialNumber" value={formData.serialNumber} onChange={handleChange}
-                sx={inputSx} label="Serial Number / Service Tag *" placeholder="e.g. 8JZ91A" />
+                sx={inputSx("serialNumber")} label="Serial Number / Service Tag *" placeholder="e.g. 8JZ91A" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="purchaseCost" value={formData.purchaseCost} onChange={handleChange}
-                sx={inputSx} label="Purchase Cost (₹)" placeholder="e.g. 85000"
-                type="number" slotProps={{ htmlInput: { min: 0 } }} />
+                sx={inputSx("purchaseCost")} label="Purchase Cost (₹)" placeholder="e.g. 85000"
+                type="number" slotProps={{ htmlInput: { min: 0, step: "any" } }} />
             </Grid>
+
+            {customFieldConfigs.length > 0 && (
+              <Grid size={12}>
+                <Divider sx={{ my: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                    Custom CMDB Specifications
+                  </Typography>
+                </Divider>
+              </Grid>
+            )}
+
+            {customFieldConfigs.map((field) => (
+              <Grid key={field._id} size={{ xs: 12, sm: 6, md: 4 }}>
+                {field.type === "Select" ? (
+                  <TextField
+                    select
+                    fullWidth
+                    required={field.isRequired}
+                    label={`${field.name}${field.isRequired ? " *" : ""}`}
+                    value={customFields[field.name] || ""}
+                    onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
+                    sx={inputSx(field.name)}
+                  >
+                    {field.options.map((opt) => (
+                      <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                    ))}
+                  </TextField>
+                ) : (
+                  <TextField
+                    fullWidth
+                    required={field.isRequired}
+                    type={field.type === "Number" ? "number" : field.type === "Date" ? "date" : "text"}
+                    label={`${field.name}${field.isRequired ? " *" : ""}`}
+                    value={customFields[field.name] || ""}
+                    onChange={(e) => handleCustomFieldChange(field.name, e.target.value)}
+                    sx={inputSx(field.name)}
+                    slotProps={field.type === "Date" ? { inputLabel: { shrink: true } } : undefined}
+                  />
+                )}
+              </Grid>
+            ))}
           </Grid>
         </Paper>
 
         {/* Section 2 — Lifecycle */}
-        <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
+        <Paper sx={{
+          p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper",
+          border: "1px solid", borderColor: "divider",
+          boxShadow: "0 1px 3px 0 rgba(0,0,0,0.04)",
+        }}>
           <SectionLabel number="2" title="Lifecycle & Vendor Data" subtitle="Warranty period, procurement date and service partner." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="date" name="procurementDate" value={formData.procurementDate}
-                onChange={handleChange} sx={inputSx} label="Procurement Date" slotProps={{ inputLabel: { shrink: true } }} />
+                onChange={handleChange} sx={inputSx("procurementDate")} label="Procurement Date" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="date" name="warrantyStart" value={formData.warrantyStart}
-                onChange={handleChange} sx={inputSx} label="Warranty Start" slotProps={{ inputLabel: { shrink: true } }} />
+                onChange={handleChange} sx={inputSx("warrantyStart")} label="Warranty Start" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="date" name="warrantyEnd" value={formData.warrantyEnd}
-                onChange={handleChange} sx={inputSx} label="Warranty Expiry" slotProps={{ inputLabel: { shrink: true } }} />
+                onChange={handleChange} sx={inputSx("warrantyEnd")} label="Warranty Expiry" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
-                sx={inputSx} label="Authorized Service Partner" placeholder="e.g. Dell ProSupport" />
+                sx={inputSx("vendor")} label="Authorized Service Partner" placeholder="e.g. Dell ProSupport" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="supportPhone" value={formData.supportPhone} onChange={handleChange}
-                sx={inputSx} label="Support Phone" placeholder="+91 800-456-7890" />
+                sx={inputSx("supportPhone")} label="Support Phone" placeholder="+91 800-456-7890" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="email" name="supportEmail" value={formData.supportEmail}
-                onChange={handleChange} sx={inputSx} label="Support Email" placeholder="support@vendor.com" />
+                onChange={handleChange} sx={inputSx("supportEmail")} label="Support Email" placeholder="support@vendor.com" />
             </Grid>
           </Grid>
         </Paper>
 
         {/* Section 3 — Deployment */}
-        <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
+        <Paper sx={{
+          p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper",
+          border: "1px solid", borderColor: "divider",
+          boxShadow: "0 1px 3px 0 rgba(0,0,0,0.04)",
+        }}>
           <SectionLabel number="3" title="Deployment & Location" subtitle="Assign to a department and set the asset's physical location." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth select name="department" value={formData.department}
-                onChange={handleChange} sx={inputSx} label="Target Department *">
+                onChange={handleChange} sx={inputSx("department")} label="Target Department *">
                 <MenuItem value="Information Technology">Information Technology</MenuItem>
                 <MenuItem value="Administration">Administration</MenuItem>
                 <MenuItem value="Finance & Accounts">Finance & Accounts</MenuItem>
@@ -241,11 +667,11 @@ const AddAsset = () => {
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField fullWidth name="location" value={formData.location} onChange={handleChange}
-                sx={inputSx} label="Physical Location" placeholder="e.g. Tower B, Floor 4, Desk 12" />
+                sx={inputSx("location")} label="Physical Location" placeholder="e.g. Tower B, Floor 4, Desk 12" />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth select name="status" value={formData.status}
-                onChange={handleChange} sx={inputSx} label="Current Status *">
+                onChange={handleChange} sx={inputSx("status")} label="Current Status *">
                 <MenuItem value="Active">Active / Deployed</MenuItem>
                 <MenuItem value="In Storage">In Storage</MenuItem>
                 <MenuItem value="In Transit">In Transit</MenuItem>
@@ -255,17 +681,26 @@ const AddAsset = () => {
             </Grid>
             <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}
-                onChange={handleChange} sx={inputSx} label="Notes (optional)"
+                onChange={handleChange} sx={inputSx("notes")} label="Notes (optional)"
                 placeholder="Any additional notes about this asset..." />
             </Grid>
           </Grid>
         </Paper>
 
         {/* Section 4 — Documents */}
-        <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
+        <Paper sx={{
+          p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper",
+          border: "1px solid", borderColor: "divider",
+          boxShadow: "0 1px 3px 0 rgba(0,0,0,0.04)",
+        }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2, mb: 3 }}>
-            <Box sx={SECTION_LABEL_SX} style={{ marginBottom: 0 }}>
-              <Box sx={{ width: 32, height: 32, borderRadius: "10px", bgcolor: "#111111", color: "#CBFA57", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 14, flexShrink: 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box sx={{
+                width: 34, height: 34, borderRadius: "10px",
+                background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+                color: "#fff", display: "grid", placeItems: "center",
+                fontWeight: 900, fontSize: 14, flexShrink: 0,
+              }}>
                 4
               </Box>
               <Box>
@@ -279,7 +714,7 @@ const AddAsset = () => {
             </Box>
             {docCount > 0 && (
               <Chip label={`${docCount} file${docCount > 1 ? "s" : ""} attached`}
-                size="small" sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 800, fontSize: 11 }} />
+                size="small" sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 800, fontSize: 11 }} />
             )}
           </Box>
 
@@ -290,18 +725,18 @@ const AddAsset = () => {
                 <Box key={key}
                   sx={{
                     p: 2, borderRadius: "14px", border: "1.5px dashed",
-                    borderColor: file ? "#111111" : "divider",
-                    bgcolor: file ? "action.hover" : "background.default",
+                    borderColor: file ? "#7C3AED" : "divider",
+                    bgcolor: file ? "rgba(124,58,237,0.04)" : "background.default",
                     display: "flex", flexDirection: "column", gap: 1,
                     transition: "all 0.2s ease",
                   }}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: file ? "text.primary" : "text.secondary" }}>
+                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: file ? "#A855F7" : "text.secondary" }}>
                       {label}
                     </Typography>
                     {file && (
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <CheckCircleRounded sx={{ fontSize: 14, color: "#111111" }} />
+                        <CheckCircleRounded sx={{ fontSize: 14, color: "#A855F7" }} />
                         <Button size="small" onClick={() => handleRemoveDoc(key)}
                           sx={{ minWidth: 0, p: 0.3, color: "#EF4444" }}>
                           <DeleteRounded sx={{ fontSize: 14 }} />
@@ -338,7 +773,7 @@ const AddAsset = () => {
           </Box>
         </Paper>
 
-        {/* Action row */}
+        {/* Action Row */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
           <Button variant="outlined" onClick={() => navigate("/admin/assets")}
             sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "12px", px: 3, py: 1.2 }}>
@@ -347,12 +782,71 @@ const AddAsset = () => {
 
           <Button type="submit" variant="contained" disabled={loading}
             startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SaveRounded />}
-            sx={{ bgcolor: "#111111", color: "#CBFA57", fontWeight: 900, borderRadius: "12px", px: 4, py: 1.4, fontSize: 15, "&:hover": { bgcolor: "#222222" } }}>
+            sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" } }}>
             {loading ? "Registering…" : "Register Asset"}
           </Button>
         </Box>
 
       </Box>
+
+      {/* Multi-item picker dialog */}
+      <Dialog open={showPicker} onClose={() => setShowPicker(false)} maxWidth="sm" fullWidth
+        PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper" } }}>
+        <DialogTitle component="div" sx={{ fontWeight: 800, fontSize: 18, pb: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <ShoppingCartRounded sx={{ color: "#A855F7" }} />
+            Multiple Items Found
+          </Box>
+          <Typography component="div" sx={{ fontSize: 13, color: "text.secondary", fontWeight: 500, mt: 0.5 }}>
+            This invoice has {ocrItems.length} items. Select the asset you want to register.
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <List disablePadding>
+            {ocrItems.map((item, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <Divider />}
+                <ListItemButton onClick={() => applyOcrItem(item, item.sharedData)}
+                  sx={{ px: 3, py: 2, "&:hover": { bgcolor: "rgba(124,58,237,0.06)" } }}>
+                  <ListItemText
+                    primary={
+                      <Typography sx={{ fontWeight: 700, fontSize: 14, color: "text.primary" }}>
+                        {item.name}
+                      </Typography>
+                    }
+                    secondary={
+                      <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
+                        {item.serialNumber && (
+                          <Chip label={`S/N: ${item.serialNumber}`} size="small"
+                            sx={{ fontSize: 11, height: 20, bgcolor: "rgba(124,58,237,0.1)", color: "#A855F7" }} />
+                        )}
+                        {item.purchaseCost && (
+                          <Chip label={`₹${parseFloat(item.purchaseCost).toLocaleString("en-IN")}`} size="small"
+                            sx={{ fontSize: 11, height: 20, bgcolor: "action.hover" }} />
+                        )}
+                        <Chip label={item.category} size="small"
+                          sx={{ fontSize: 11, height: 20, bgcolor: "action.hover" }} />
+                      </Box>
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <Button size="small" variant="outlined"
+                      sx={{ borderRadius: "8px", fontWeight: 700, fontSize: 12, borderColor: "#A855F7", color: "#A855F7",
+                        "&:hover": { bgcolor: "rgba(124,58,237,0.08)" } }}>
+                      Select
+                    </Button>
+                  </ListItemSecondaryAction>
+                </ListItemButton>
+              </React.Fragment>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={() => setShowPicker(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar open={open} autoHideDuration={3000} onClose={() => setOpen(false)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity="success" variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>

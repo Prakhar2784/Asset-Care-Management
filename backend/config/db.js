@@ -11,6 +11,29 @@ const connectDB = async (retries = MAX_RETRIES) => {
     });
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
+    // Drop legacy single-field unique index if it exists
+    try {
+      const db = mongoose.connection.db;
+      const collections = await db.listCollections({ name: 'assets' }).toArray();
+      if (collections.length > 0) {
+        const assetsCollection = db.collection('assets');
+        const indexes = await assetsCollection.indexes();
+        const hasOldIndex = indexes.some(idx => idx.name === 'serialNumber_1' && !idx.key.hasOwnProperty('tenantId'));
+        if (hasOldIndex) {
+          console.log('[MongoDB] Dropping legacy unique index: serialNumber_1');
+          await assetsCollection.dropIndex('serialNumber_1');
+          console.log('[MongoDB] Legacy index dropped!');
+          
+          // Force Mongoose to sync and build current indexes
+          const Asset = require('../models/Asset');
+          await Asset.syncIndexes();
+          console.log('[MongoDB] Schema indexes synchronized.');
+        }
+      }
+    } catch (e) {
+      console.warn('[MongoDB] Index drop warning:', e.message);
+    }
+
     // Auto-reconnect on disconnect
     mongoose.connection.on('disconnected', () => {
       console.warn('[MongoDB] Disconnected. Attempting to reconnect...');

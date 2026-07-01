@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const ticketSchema = new mongoose.Schema({
   ticketId: { 
     type: String, 
-    required: true, 
-    unique: true 
+    required: true
   }, // e.g., "SRV-089"
   issue: { 
     type: String, 
@@ -17,18 +16,31 @@ const ticketSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['Pending Approval', 'Vendor Assigned', 'Under Repair', 'Resolved', 'Rejected'], 
+    enum: ['Pending Approval', 'Under Repair', 'Resolved', 'Rejected'],
     default: 'Pending Approval' 
   },
-  estimatedCost: { 
-    type: Number, 
-    default: 0 
+  estimatedCost: {
+    type: Number,
+    default: 0
   },
-  
+  userConfirmed: {
+    type: Boolean,
+    default: false
+  },
+  userConfirmedAt: {
+    type: Date,
+    default: null
+  },
+
   // References to other collections
   asset: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Asset',
+    default: null
+  },
+  assignedVendor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Vendor',
     default: null
   },
   // Used when ticket is raised for an approved device request (not yet a formal asset)
@@ -50,6 +62,45 @@ const ticketSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
+  },
+  tenantId: {
+    type: String,
+    required: true,
+    default: 'default'
+  },
+
+  // File attachments
+  attachments: [{
+    originalName: String,
+    fileName:     String,
+    url:          String,
+    size:         Number,
+    uploadedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    uploadedAt:   { type: Date, default: Date.now },
+  }],
+
+  // Recurring ticket support
+  isRecurring:       { type: Boolean, default: false },
+  recurringInterval: { type: String, enum: ['daily', 'weekly', 'monthly'], default: null },
+  recurringNextDate: { type: Date, default: null },
+  parentTicket:      { type: mongoose.Schema.Types.ObjectId, ref: 'Ticket', default: null },
+
+  // Comments / thread
+  comments: [{
+    text:      { type: String, required: true },
+    author:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    authorName: String,
+    createdAt: { type: Date, default: Date.now },
+  }],
+
+  // SLA tracking fields — managed by slaEscalationJob.js
+  slaDeadline: {
+    type: Date,
+    default: null
+  },
+  slaBreached: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -60,5 +111,11 @@ ticketSchema.index({ status: 1 });
 ticketSchema.index({ priority: 1 });
 ticketSchema.index({ raisedBy: 1 });
 ticketSchema.index({ createdAt: -1 });
+ticketSchema.index({ tenantId: 1 });
+ticketSchema.index({ ticketId: 1, tenantId: 1 }, { unique: true });
+ticketSchema.index({ slaBreached: 1 });
+ticketSchema.index({ slaDeadline: 1 });
 
-module.exports = mongoose.model('Ticket', ticketSchema);
+const Ticket = mongoose.model('Ticket', ticketSchema);
+const createTenantModelProxy = require('../middleware/tenantModelProxy');
+module.exports = createTenantModelProxy('Ticket', Ticket);

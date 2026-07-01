@@ -1,23 +1,26 @@
 const crypto = require('crypto');
 const User = require('../models/User');
+const Tenant = require('../models/Tenant');
 const jwt = require('jsonwebtoken');
 const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail } = require('../services/emailService');
 
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (id, tenantId) => jwt.sign({ id, tenantId }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
 // POST /api/auth/register
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, department } = req.body;
-    const userExists = await User.findOne({ email });
+    const { name, email, password, role, department, tenantId } = req.body;
+    // Check globally to avoid duplicate emails across tenants
+    const userExists = await User.findOne({ email }).setOptions({ bypassTenantFilter: true });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    const user = await User.create({ name, email, password, role, department });
+    const activeTenantId = tenantId || req.tenantId || 'default';
+    const user = await User.create({ name, email, password, role, department, tenantId: activeTenantId });
     if (user) {
       res.status(201).json({
         _id: user._id, name: user.name, email: user.email,
-        role: user.role, department: user.department,
-        token: generateToken(user._id)
+        role: user.role, department: user.department, tenantId: user.tenantId,
+        token: generateToken(user._id, user.tenantId)
       });
     } else {
       res.status(400).json({ message: 'Invalid user data' });
@@ -30,13 +33,33 @@ const registerUser = async (req, res) => {
 // POST /api/auth/login
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const { email, password, role } = req.body;
+    // Look up the user globally to identify which tenant they belong to
+    const user = await User.findOne({ email }).setOptions({ bypassTenantFilter: true });
     if (user && (await user.matchPassword(password))) {
+      // Validate role mapping to match selected portal tab
+      if (role) {
+        const adminRoles = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+        if (role === 'admin' && !adminRoles.includes(user.role)) {
+          return res.status(403).json({ message: 'Access Denied: This portal requires administrator permissions.' });
+        }
+        if (role === 'employee' && adminRoles.includes(user.role)) {
+          return res.status(403).json({ message: 'This account has admin access. Please switch to the Admin Access portal to log in.' });
+        }
+      }
+
+      // Stamp last login time (fire-and-forget)
+      User.findByIdAndUpdate(user._id, { lastLogin: new Date() }).catch(() => {});
+
+      const tenant = await Tenant.findOne({ slug: user.tenantId });
+
       res.json({
         _id: user._id, name: user.name, email: user.email,
-        role: user.role, department: user.department,
-        token: generateToken(user._id)
+        role: user.role, department: user.department, tenantId: user.tenantId,
+        customPermissions: user.customPermissions || [],
+        plan: tenant?.plan || 'Basic',
+        features: tenant?.features || {},
+        token: generateToken(user._id, user.tenantId)
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -49,7 +72,12 @@ const loginUser = async (req, res) => {
 // GET /api/auth/me
 const getMe = async (req, res) => {
   try {
-    res.status(200).json(req.user);
+    const tenant = await Tenant.findOne({ slug: req.user.tenantId });
+    res.status(200).json({
+      ...req.user.toObject(),
+      plan: tenant?.plan || 'Basic',
+      features: tenant?.features || {},
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -152,7 +180,7 @@ const resetPassword = async (req, res) => {
       passwordResetExpiry: null
     });
 
-    sendPasswordChangedEmail(user).catch(() => {});
+    sendPasswordChangedEmail(user).catch(err => console.error('[EMAIL] Password changed email failed:', err.message));
 
     res.status(200).json({ message: 'Password reset successful. You can now log in with your new password.' });
   } catch (error) {
@@ -176,4 +204,127 @@ const verifyResetToken = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getMe, forgotPassword, verifyOtp, resetPassword, verifyResetToken };
+// POST /api/auth/register-company
+const registerCompany = async (req, res) => {
+  try {
+    const { companyName, slug, adminName, adminEmail, adminPassword, adminPhone } = req.body;
+    
+    if (!companyName || !slug || !adminName || !adminEmail || !adminPassword) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const Tenant = require('../models/Tenant');
+    const Department = require('../models/Department');
+
+    // Check if tenant slug already exists
+    const tenantExists = await Tenant.findOne({ slug: slug.toLowerCase() });
+    if (tenantExists) {
+      return res.status(400).json({ message: 'Company URL / Slug is already in use.' });
+    }
+
+    // Check if user already exists globally (emails must be unique)
+    const userExists = await User.findOne({ email: adminEmail }).setOptions({ bypassTenantFilter: true });
+    if (userExists) {
+      return res.status(400).json({ message: 'Admin email already registered.' });
+    }
+
+    // Create the Tenant
+    const tenant = await Tenant.create({
+      name: companyName,
+      slug: slug.toLowerCase(),
+      plan: 'Basic', // Default to Basic tier
+      limits: { maxAssets: 50, maxUsers: 10 }
+    });
+
+    // We run User and Department creation in the tenant context so the Mongoose plugin captures it correctly
+    const { setTenantId } = require('../middleware/tenantContext');
+    
+    let adminUser;
+    await setTenantId(tenant.slug, async () => {
+      // Create default IT department
+      const defaultDept = await Department.create({
+        name: 'IT',
+        code: 'IT',
+        hodName: adminName,
+        hodEmail: adminEmail,
+        hodPhone: adminPhone || '',
+        approvalRequired: false,
+        status: 'Active',
+        description: 'Information Technology Department',
+        tenantId: tenant.slug
+      });
+
+      // Create Admin User
+      adminUser = await User.create({
+        name: adminName,
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+        department: defaultDept.name,
+        phone: adminPhone || '',
+        tenantId: tenant.slug
+      });
+    });
+
+    res.status(201).json({
+      message: 'Company registered successfully!',
+      tenant: {
+        _id: tenant._id,
+        name: tenant.name,
+        slug: tenant.slug,
+        plan: tenant.plan,
+        limits: tenant.limits
+      },
+      user: {
+        _id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+        department: adminUser.department,
+        tenantId: adminUser.tenantId,
+        token: generateToken(adminUser._id, tenant.slug)
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET /api/auth/tenant-branding
+const getTenantBranding = async (req, res) => {
+  try {
+    const Tenant = require('../models/Tenant');
+    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    
+    if (!tenant) {
+      return res.status(200).json({
+        name: 'AssetCare',
+        logoUrl: null,
+        primaryColor: '#141414',
+        secondaryColor: '#CBFA57'
+      });
+    }
+
+    res.status(200).json({
+      name: tenant.name,
+      logoUrl: tenant.branding.logoUrl,
+      primaryColor: tenant.branding.primaryColor || '#141414',
+      secondaryColor: tenant.branding.secondaryColor || '#CBFA57'
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { 
+  registerUser, 
+  loginUser, 
+  getMe, 
+  forgotPassword, 
+  verifyOtp, 
+  resetPassword, 
+  verifyResetToken,
+  registerCompany,
+  getTenantBranding
+};
