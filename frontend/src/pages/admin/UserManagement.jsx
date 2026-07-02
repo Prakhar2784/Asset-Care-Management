@@ -21,12 +21,13 @@ import {
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
-const ROLES = ['employee', 'hod', 'admin', 'it_support'];
+const ROLES = ['employee', 'hod', 'admin', 'it_support', 'technician'];
 const ROLE_COLORS = {
   admin:      { color: '#A855F7', bg: 'rgba(168,85,247,0.13)' },
   hod:        { color: '#A78BFA', bg: 'rgba(124,58,237,0.13)' },
   employee:   { color: '#60A5FA', bg: 'rgba(37,99,235,0.13)'  },
   it_support: { color: '#22D3EE', bg: 'rgba(8,145,178,0.13)'  },
+  technician: { color: '#fb923c', bg: 'rgba(249,115,22,0.13)'  },
 };
 const STATUS_COLORS = {
   Open: '#EAB308', 'In Progress': '#3B82F6', Resolved: '#22C55E',
@@ -39,21 +40,21 @@ const ACTION_COLORS = {
 
 // ── Role Permissions Matrix ───────────────────────────────────────────────────
 const DEFAULT_PERMISSION_MATRIX = [
-  { feature: 'View Dashboard',          admin: true,  hod: true,  it_support: true,  employee: true  },
-  { feature: 'Register Assets',         admin: true,  hod: false, it_support: true,  employee: false },
-  { feature: 'Edit / Delete Assets',    admin: true,  hod: false, it_support: false, employee: false },
-  { feature: 'Assign Assets',           admin: true,  hod: false, it_support: true,  employee: false },
-  { feature: 'View All Assets',         admin: true,  hod: true,  it_support: true,  employee: false },
-  { feature: 'Raise Tickets',           admin: true,  hod: true,  it_support: true,  employee: true  },
-  { feature: 'Manage All Tickets',      admin: true,  hod: false, it_support: true,  employee: false },
-  { feature: 'Approve Device Requests', admin: true,  hod: true,  it_support: false, employee: false },
-  { feature: 'Manage Users',            admin: true,  hod: false, it_support: false, employee: false },
-  { feature: 'View Reports',            admin: true,  hod: true,  it_support: false, employee: false },
-  { feature: 'View Audit Logs',         admin: true,  hod: false, it_support: false, employee: false },
-  { feature: 'Manage Departments',      admin: true,  hod: false, it_support: false, employee: false },
-  { feature: 'Settings & Config',       admin: true,  hod: false, it_support: false, employee: false },
-  { feature: 'Employee Portal',         admin: false, hod: false, it_support: false, employee: true  },
-  { feature: 'Submit Device Requests',  admin: false, hod: true,  it_support: false, employee: true  },
+  { feature: 'View Dashboard',          admin: true,  hod: true,  it_support: true,  employee: true,  technician: true  },
+  { feature: 'Register Assets',         admin: true,  hod: false, it_support: true,  employee: false, technician: false },
+  { feature: 'Edit / Delete Assets',    admin: true,  hod: false, it_support: false, employee: false, technician: false },
+  { feature: 'Assign Assets',           admin: true,  hod: false, it_support: true,  employee: false, technician: false },
+  { feature: 'View All Assets',         admin: true,  hod: true,  it_support: true,  employee: false, technician: true  },
+  { feature: 'Raise Tickets',           admin: true,  hod: true,  it_support: true,  employee: true,  technician: true  },
+  { feature: 'Manage All Tickets',      admin: true,  hod: false, it_support: true,  employee: false, technician: true  },
+  { feature: 'Approve Device Requests', admin: true,  hod: true,  it_support: false, employee: false, technician: false },
+  { feature: 'Manage Users',            admin: true,  hod: false, it_support: false, employee: false, technician: false },
+  { feature: 'View Reports',            admin: true,  hod: true,  it_support: false, employee: false, technician: false },
+  { feature: 'View Audit Logs',         admin: true,  hod: false, it_support: false, employee: false, technician: false },
+  { feature: 'Manage Departments',      admin: true,  hod: false, it_support: false, employee: false, technician: false },
+  { feature: 'Settings & Config',       admin: true,  hod: false, it_support: false, employee: false, technician: false },
+  { feature: 'Employee Portal',         admin: false, hod: false, it_support: false, employee: true,  technician: false },
+  { feature: 'Submit Device Requests',  admin: false, hod: true,  it_support: false, employee: true,  technician: false },
 ];
 
 const PERM_STORAGE_KEY = 'assetcare_permission_matrix';
@@ -246,7 +247,14 @@ export default function UserManagement() {
     api.get('/settings/tenant').then(({ data }) => setTenant(data)).catch(() => {});
   }, []);
 
-  const TAB_ROLES = { all: null, admin: ['admin', 'hod', 'it_support'], employee: ['employee'] };
+  const TAB_ROLES = {
+    all: null,
+    admin: ['admin'],
+    hod: ['hod'],
+    it_support: ['it_support'],
+    technician: ['technician'],
+    employee: ['employee']
+  };
 
   // Filter then sort
   const filtered = useMemo(() => {
@@ -497,15 +505,7 @@ export default function UserManagement() {
           </Box>
         </Box>
         <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap">
-          {tenant && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.8, borderRadius: '12px', border: 1, borderColor: 'rgba(168,85,247,0.3)', bgcolor: 'rgba(168,85,247,0.06)' }}>
-              <Typography fontSize={13} fontWeight={700} color="#A855F7">{tenant.plan || 'Basic'} plan</Typography>
-              <Box sx={{ width: 1, height: 16, bgcolor: 'divider' }} />
-              <Typography fontSize={13} fontWeight={700} color="text.secondary">
-                {users.filter(u => u.isActive).length} / {tenant.limits?.maxUsers || 10} seats
-              </Typography>
-            </Box>
-          )}
+
           <Button variant="outlined" startIcon={<UploadFileRounded />}
             onClick={() => { setCsvOpen(true); setCsvRows([]); setCsvError(''); setCsvResult(null); }}
             sx={{ borderRadius: '12px', fontWeight: 700, borderColor: 'divider', color: 'text.secondary', fontSize: 13 }}>
@@ -534,7 +534,14 @@ export default function UserManagement() {
           '& .MuiTab-root': { fontWeight: 700, fontSize: 13, textTransform: 'none', minHeight: 48, color: 'text.secondary' },
           '& .Mui-selected': { color: '#A855F7' },
         }}>
-          {[{ value: 'all', label: 'All Users' }, { value: 'admin', label: 'Admins & Staff' }, { value: 'employee', label: 'Employees' }].map(({ value, label }) => (
+          {[
+            { value: 'all', label: 'All Users' },
+            { value: 'admin', label: 'Admins' },
+            { value: 'hod', label: 'HODs' },
+            { value: 'it_support', label: 'IT Support' },
+            { value: 'technician', label: 'Technicians' },
+            { value: 'employee', label: 'Employees' }
+          ].map(({ value, label }) => (
             <Tab key={value} value={value} label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {label}

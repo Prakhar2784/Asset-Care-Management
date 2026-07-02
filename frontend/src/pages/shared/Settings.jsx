@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Tabs, Tab, TextField, Button, Alert, Switch, Stack,
   FormControlLabel, CircularProgress, Divider, Chip, Grid, MenuItem, Select,
-  FormControl, InputLabel, InputAdornment, IconButton, Snackbar
+  FormControl, InputLabel, InputAdornment, IconButton, Snackbar, LinearProgress
 } from '@mui/material';
 import {
   PersonRounded, PaletteRounded, AssessmentRounded, SecurityRounded,
@@ -189,6 +189,7 @@ function CompanySettingsTab({ isAdmin = true }) {
     smtpHost: '', smtpPort: '', smtpUser: '', smtpPass: '', smtpFromEmail: ''
   });
   const [tenant, setTenant] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -228,6 +229,12 @@ function CompanySettingsTab({ isAdmin = true }) {
       .then(({ data }) => applyTenant(data))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    if (isAdmin) {
+      api.get('/settings/system-stats')
+        .then(({ data }) => setStats(data))
+        .catch(() => {});
+    }
   }, [isAdmin]);
 
   const handleLogoChange = async (e) => {
@@ -294,8 +301,24 @@ function CompanySettingsTab({ isAdmin = true }) {
             <Box>
               <Typography fontWeight={800} fontSize={15} color="text.primary">Subscription</Typography>
               <Typography fontSize={13} color="text.secondary">
-                {tenant?.limits?.maxUsers || 10} seats · {tenant?.planExpiry ? `expires ${new Date(tenant.planExpiry).toLocaleDateString('en-IN')}` : 'expires never'}
+                {stats ? `${stats.activeUsers} / ` : ''}{tenant?.limits?.maxUsers || 10} seats · {tenant?.planExpiry ? `expires ${new Date(tenant.planExpiry).toLocaleDateString('en-IN')}` : 'expires never'}
               </Typography>
+              {stats && (() => {
+                const pct = (stats.activeUsers / (tenant?.limits?.maxUsers || 10)) * 100;
+                const pctString = pct > 0 && pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
+                return (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.8, width: 200 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={Math.min(100, pct)}
+                      sx={{ flex: 1, height: 5, borderRadius: 2.5, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: '#A855F7' } }}
+                    />
+                    <Typography fontSize={11} color="text.secondary" fontWeight={700}>
+                      {pctString}
+                    </Typography>
+                  </Box>
+                );
+              })()}
             </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -413,20 +436,7 @@ function CompanySettingsTab({ isAdmin = true }) {
         </Grid>
       </Paper>
 
-      {/* Branding colors */}
-      {isAdmin && (
-        <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-          <SectionHeader icon={<PaletteRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Brand Colors" />
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 6 }}>
-              <TextField label="Primary Color" type="color" value={form.primaryColor} onChange={set('primaryColor')} fullWidth sx={inputSx} slotProps={{ input: { sx: { height: 40, p: 0.5 } } }} />
-            </Grid>
-            <Grid size={{ xs: 6 }}>
-              <TextField label="Accent Color" type="color" value={form.secondaryColor} onChange={set('secondaryColor')} fullWidth sx={inputSx} slotProps={{ input: { sx: { height: 40, p: 0.5 } } }} />
-            </Grid>
-          </Grid>
-        </Paper>
-      )}
+
 
       {/* SMTP */}
       {isAdmin && (

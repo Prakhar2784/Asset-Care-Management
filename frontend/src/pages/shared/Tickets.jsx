@@ -20,16 +20,23 @@ import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 
 const STATUS_LIST = [
-  'Pending Approval', 'Under Repair', 'Resolved', 'Rejected'
+  'Pending HOD Approval', 'Pending Approval', 'Assigned to Technician',
+  'Service Center Required', 'Sent to Service Center',
+  'Vendor Assigned', 'Under Repair', 'Resolved', 'Rejected'
 ];
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'Pending Approval': return { bg: 'rgba(217,119,6,0.13)',  color: '#FBBF24', border: '#F59E0B' };
-    case 'Under Repair':     return { bg: 'rgba(147,51,234,0.13)', color: '#C084FC', border: '#A855F7' };
-    case 'Resolved':         return { bg: 'rgba(22,163,74,0.13)',  color: '#4ADE80', border: '#22C55E' };
-    case 'Rejected':         return { bg: 'rgba(220,38,38,0.13)',  color: '#F87171', border: '#EF4444' };
-    default:                 return { bg: 'rgba(71,85,105,0.13)',  color: '#94A3B8', border: '#64748B' };
+    case 'Pending HOD Approval':    return { bg: 'rgba(249,115,22,0.13)',  color: '#FB923C', border: '#F97316' };
+    case 'Pending Approval':        return { bg: 'rgba(217,119,6,0.13)',   color: '#FBBF24', border: '#F59E0B' };
+    case 'Assigned to Technician':  return { bg: 'rgba(14,165,233,0.13)',  color: '#38BDF8', border: '#0EA5E9' };
+    case 'Service Center Required': return { bg: 'rgba(239,68,68,0.13)',   color: '#F87171', border: '#EF4444' };
+    case 'Sent to Service Center':  return { bg: 'rgba(59,130,246,0.13)', color: '#60A5FA', border: '#3B82F6' };
+    case 'Vendor Assigned':         return { bg: 'rgba(59,130,246,0.13)', color: '#60A5FA', border: '#3B82F6' };
+    case 'Under Repair':            return { bg: 'rgba(147,51,234,0.13)', color: '#C084FC', border: '#A855F7' };
+    case 'Resolved':                return { bg: 'rgba(22,163,74,0.13)',  color: '#4ADE80', border: '#22C55E' };
+    case 'Rejected':                return { bg: 'rgba(220,38,38,0.13)',  color: '#F87171', border: '#EF4444' };
+    default:                        return { bg: 'rgba(71,85,105,0.13)',  color: '#94A3B8', border: '#64748B' };
   }
 };
 
@@ -44,40 +51,71 @@ const getPriorityColor = (priority) => {
 };
 
 const generateTimeline = (ticket) => {
-  const isApproved = ticket.status !== 'Pending Approval' && ticket.status !== 'Rejected';
-  const isAssigned = ['Under Repair', 'Resolved'].includes(ticket.status);
+  const isApproved = !['Pending HOD Approval', 'Pending Approval', 'Rejected'].includes(ticket.status);
+  const isAssigned = ['Assigned to Technician', 'Service Center Required', 'Sent to Service Center', 'Vendor Assigned', 'Under Repair', 'Resolved'].includes(ticket.status);
+  const needsServiceCenter = ['Service Center Required', 'Sent to Service Center'].includes(ticket.status);
+  const sentToSC = ticket.status === 'Sent to Service Center';
   const isResolved = ticket.status === 'Resolved';
   const isConfirmed = !!ticket.userConfirmed;
   return [
-    { title: 'Ticket Raised',     desc: 'Issue reported to the system.',      time: new Date(ticket.createdAt).toLocaleDateString(), done: true },
-    { title: 'System Approval',   desc: ticket.status === 'Rejected' ? 'Ticket was rejected.' : 'Department HOD approval.', time: isApproved ? 'Done' : ticket.status === 'Rejected' ? 'Rejected' : 'Pending', done: isApproved },
-    { title: 'Technician Assigned', desc: 'Technician assigned for repair.',   time: isAssigned ? 'Done' : 'Upcoming', done: isAssigned },
-    { title: 'Repair Completed',  desc: 'Technician marked the issue resolved.', time: isResolved ? 'Done' : 'Pending', done: isResolved },
-    { title: 'Service Closure',   desc: isConfirmed ? 'User confirmed resolution and ticket is closed.' : 'Awaiting user confirmation.', time: isConfirmed ? new Date(ticket.userConfirmedAt).toLocaleDateString() : 'Pending', done: isConfirmed },
+    { title: 'Ticket Raised',        desc: 'Issue reported to the system.',                      time: new Date(ticket.createdAt).toLocaleDateString(), done: true },
+    { title: 'HOD Approval',         desc: ticket.status === 'Rejected' ? 'Ticket was rejected.' : 'Approved by Department HOD.', time: isApproved ? 'Done' : ticket.status === 'Rejected' ? 'Rejected' : 'Pending', done: isApproved },
+    { title: 'Technician Assigned',  desc: ticket.assignedTechnician ? `Assigned to ${ticket.assignedTechnician?.name || 'Technician'}` : 'In-company technician assigned.', time: isAssigned ? 'Done' : 'Upcoming', done: isAssigned },
+    { title: 'Service Center',       desc: sentToSC ? 'Sent to external service center.' : needsServiceCenter ? 'Technician escalated — awaiting service center.' : 'Service center not required.', time: sentToSC ? 'Done' : needsServiceCenter ? 'Escalated' : 'N/A', done: sentToSC },
+    { title: 'Repair Completed',     desc: 'Technician marked the issue resolved.',               time: isResolved ? 'Done' : 'Pending', done: isResolved },
+    { title: 'Service Closure',      desc: isConfirmed ? 'User confirmed resolution and ticket is closed.' : 'Awaiting user confirmation.', time: isConfirmed ? new Date(ticket.userConfirmedAt).toLocaleDateString() : 'Pending', done: isConfirmed },
   ];
 };
 
 const Tickets = () => {
   const { currentUser } = useAuth();
   const isAdminOrHod = ['admin', 'super_admin', 'hod', 'manager', 'it_support'].includes(currentUser?.role);
+  const isTechnician = currentUser?.role === 'technician';
 
-  // Employee can withdraw their own ticket only while it's still Pending Approval
+  // Employee can withdraw their own ticket only while it's still Pending HOD or Pending Approval
   const canDeleteTicket = (ticket) =>
-    isAdminOrHod || (ticket.raisedBy?._id === currentUser?._id && ticket.status === 'Pending Approval');
+    isAdminOrHod || (ticket.raisedBy?._id === currentUser?._id && ['Pending HOD Approval', 'Pending Approval'].includes(ticket.status));
 
   // Ticket raiser confirms the repair is done once it's marked Resolved
   const canConfirmResolution = (ticket) =>
     ticket && ticket.raisedBy?._id === currentUser?._id && ticket.status === 'Resolved' && !ticket.userConfirmed;
 
+  // Technician can act on tickets:
+  // 1. Explicitly assigned to them (new flow)
+  // 2. No specific technician assigned yet (legacy tickets — any technician can pick them up)
+  const canTechnicianAct = (ticket) =>
+    isTechnician &&
+    ticket.status === 'Assigned to Technician' &&
+    (
+      !ticket.assignedTechnician ||  // legacy: no technician set, anyone can act
+      ticket.assignedTechnician?._id === currentUser?._id  // explicitly assigned
+    );
+
+  // HOD can assign service center when ticket is escalated
+  const canHodAssignServiceCenter = (ticket) =>
+    isAuthorizedApprover(ticket) && ticket.status === 'Service Center Required';
+
+  const isAuthorizedApprover = (ticket) =>
+    ['admin', 'super_admin'].includes(currentUser?.role) ||
+    (currentUser?.role === 'hod' && ticket?.raisedBy?.department === currentUser.department);
+
   // List state
   const [tickets, setTickets]               = useState([]);
   const [assets, setAssets]                 = useState([]);
   const [approvedRequests, setApprovedRequests] = useState([]);
+  const [technicians, setTechnicians]       = useState([]);
+  const [serviceCenters, setServiceCenters] = useState([]);
   const [loading, setLoading]               = useState(true);
   const [error, setError]                   = useState(null);
   const [searchQuery, setSearchQuery]       = useState('');
   const [statusFilter, setStatusFilter]     = useState('Active');
   const [snackbar, setSnackbar]             = useState('');
+
+  // HOD assign-technician state
+  const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
+  // HOD assign-service-center state
+  const [selectedServiceCenterId, setSelectedServiceCenterId] = useState('');
+  const [assigningAction, setAssigningAction] = useState(false);
 
   // Pagination
   const [page, setPage]                     = useState(0);
@@ -87,6 +125,7 @@ const Tickets = () => {
   const [raiseOpen, setRaiseOpen]           = useState(false);
   const [submitting, setSubmitting]         = useState(false);
   const [formData, setFormData]             = useState({ selectedItem: '', issue: '', priority: 'Medium' });
+  const [imageFile, setImageFile]           = useState(null);
 
   // Delete
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -110,17 +149,36 @@ const Tickets = () => {
     setLoading(true); setError(null);
     try {
       const isEmployee = currentUser?.role === 'employee';
-      const [ticketsRes, assetsRes] = await Promise.all([
-        api.get(isEmployee ? '/tickets/mytickets' : '/tickets'),
-        api.get(isEmployee ? '/assets/all-active' : '/assets'),
-      ]);
+      const isTechRole = currentUser?.role === 'technician';
+
+      // Tickets — technicians and non-employees hit /tickets; employees hit /mytickets
+      const ticketsRes = await api.get(isEmployee ? '/tickets/mytickets' : '/tickets');
       setTickets(ticketsRes.data);
-      setAssets(assetsRes.data);
+
+      // Assets — technicians don't need the asset list (they can't raise tickets)
+      if (!isTechRole) {
+        try {
+          const assetsRes = await api.get(isEmployee ? '/assets/all-active' : '/assets');
+          setAssets(assetsRes.data);
+        } catch { setAssets([]); }
+      }
+
       if (isEmployee) {
         try { const r = await api.get('/device-requests/my-approved'); setApprovedRequests(r.data); }
         catch { setApprovedRequests([]); }
       }
-    } catch { setError('Failed to load tickets. Please check your connection.'); }
+      // Fetch technicians & service centers for HOD/admin
+      if (!isEmployee && !isTechRole) {
+        try {
+          const [techRes, scRes] = await Promise.all([
+            api.get('/users/employees?role=technician'),
+            api.get('/service-centers')
+          ]);
+          setTechnicians(techRes.data || []);
+          setServiceCenters(scRes.data || []);
+        } catch { /* non-critical */ }
+      }
+    } catch (err) { setError('Failed to load tickets. Please check your connection.'); }
     finally { setLoading(false); }
   };
 
@@ -150,10 +208,20 @@ const Tickets = () => {
         payload.deviceRequestId = id;
         payload.itemLabel = labelParts.join(':');
       }
-      await api.post('/tickets', payload);
+      const response = await api.post('/tickets', payload);
+
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('files', imageFile);
+        await api.post(`/tickets/${response.data._id}/attachments`, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+      }
+
       setSnackbar('Ticket raised successfully.');
       setRaiseOpen(false);
       setFormData({ selectedItem: '', issue: '', priority: 'Medium' });
+      setImageFile(null);
       fetchData();
     } catch (err) { setError(err.response?.data?.message || 'Failed to submit ticket.'); }
     finally { setSubmitting(false); }
@@ -176,12 +244,14 @@ const Tickets = () => {
     setTimeout(() => { setSelectedTicket(null); setTicketDetail(null); setCommentText(''); }, 300);
   };
 
-  const handleStatusUpdate = async (id, newStatus) => {
+  const handleStatusUpdate = async (id, newStatus, extra = {}) => {
     try {
-      await api.put(`/tickets/${id}/status`, { status: newStatus });
+      await api.put(`/tickets/${id}/status`, { status: newStatus, ...extra });
       setTickets(prev => prev.map(t => t._id === id ? { ...t, status: newStatus } : t));
       setSelectedTicket(prev => prev ? { ...prev, status: newStatus } : prev);
       setSnackbar(`Status updated to "${newStatus}"`);
+      setSelectedTechnicianId('');
+      setSelectedServiceCenterId('');
     } catch (err) { setError(err.response?.data?.message || 'Failed to update status.'); }
   };
 
@@ -249,8 +319,8 @@ const Tickets = () => {
 
   // KPIs
   const totalCount   = tickets.length;
-  const pendingCount = tickets.filter(t => t.status === 'Pending Approval').length;
-  const repairCount  = tickets.filter(t => t.status === 'Under Repair').length;
+  const pendingCount = tickets.filter(t => ['Pending HOD Approval', 'Pending Approval'].includes(t.status)).length;
+  const repairCount  = tickets.filter(t => ['Under Repair', 'Assigned to Technician', 'Vendor Assigned'].includes(t.status)).length;
   const resolvedCount = tickets.filter(t => t.status === 'Resolved').length;
   const kpiStats = [
     { label: 'Total Tickets',    value: totalCount,    color: '#A855F7', icon: <ConfirmationNumberRounded fontSize="small" /> },
@@ -283,10 +353,12 @@ const Tickets = () => {
               <RefreshRounded />
             </IconButton>
           </Tooltip>
-          <Button variant="contained" startIcon={<AddRounded />} onClick={() => setRaiseOpen(true)}
-            sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
-            Raise Ticket
-          </Button>
+          {!isTechnician && (
+            <Button variant="contained" startIcon={<AddRounded />} onClick={() => setRaiseOpen(true)}
+              sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
+              Raise Ticket
+            </Button>
+          )}
         </Box>
       </Box>
 
@@ -494,7 +566,8 @@ const Tickets = () => {
         {selectedTicket && (() => {
           const sc = getStatusColor(selectedTicket.status);
           const pc = getPriorityColor(selectedTicket.priority);
-          const tl = generateTimeline(selectedTicket);
+          const tl = generateTimeline(ticketDetail || selectedTicket);
+          const isAuth = isAuthorizedApprover(selectedTicket);
           return (
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               {/* Drawer Header */}
@@ -524,6 +597,103 @@ const Tickets = () => {
                   <Chip label={`${selectedTicket.priority} Priority`} size="small" variant="outlined" sx={{ bgcolor: pc.bg, color: pc.color, borderColor: pc.border, fontWeight: 800, borderRadius: '8px', fontSize: 12 }} />
                 </Box>
               </Box>
+
+              {/* ── HOD/Admin Quick Approval Panel (Pending HOD Approval) ── */}
+              {selectedTicket.status === 'Pending HOD Approval' && isAuth && (
+                <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(22,163,74,0.03)' }}>
+                  <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={1}>Assign Technician &amp; Approve</Typography>
+                  <Select fullWidth size="small" displayEmpty value={selectedTechnicianId}
+                    onChange={e => setSelectedTechnicianId(e.target.value)}
+                    sx={{ borderRadius: '10px', fontSize: 13, fontWeight: 700, mb: 1.5 }}>
+                    <MenuItem value="" disabled><em>Select a Technician…</em></MenuItem>
+                    {technicians.map(t => (
+                      <MenuItem key={t._id} value={t._id} sx={{ fontWeight: 600, fontSize: 13 }}>
+                        {t.name} <span style={{ marginLeft: 6, color: '#64748B', fontSize: 11 }}>({t.department})</span>
+                      </MenuItem>
+                    ))}
+                    {technicians.length === 0 && <MenuItem disabled>No technicians found</MenuItem>}
+                  </Select>
+                  <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Button fullWidth variant="contained" color="success" startIcon={<CheckCircleRounded />}
+                      disabled={!selectedTechnicianId}
+                      onClick={() => handleStatusUpdate(selectedTicket._id, 'Assigned to Technician', { assignedTechnicianId: selectedTechnicianId })}
+                      sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', py: 1, boxShadow: 'none', bgcolor: '#22C55E', '&:hover': { bgcolor: '#16A34A', boxShadow: 'none' } }}>
+                      Approve &amp; Assign
+                    </Button>
+                    <Button fullWidth variant="outlined" color="error" startIcon={<CloseRounded />}
+                      onClick={() => handleStatusUpdate(selectedTicket._id, 'Rejected')}
+                      sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', py: 1 }}>
+                      Reject
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+
+              {selectedTicket.status === 'Pending HOD Approval' && !isAuth && (
+                <Box sx={{ px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(249,115,22,0.03)' }}>
+                  <Typography fontSize={12} fontWeight={700} color="#F97316">
+                    Awaiting HOD approval from {selectedTicket.raisedBy?.department || 'their respective'} Department.
+                  </Typography>
+                </Box>
+              )}
+
+              {/* ── Technician Action Panel (Assigned to Technician) ── */}
+              {canTechnicianAct(selectedTicket) && (
+                <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(14,165,233,0.03)' }}>
+                  <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={1.5}>Take Action on This Ticket</Typography>
+                  <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Button fullWidth variant="contained" startIcon={<TaskAltRounded />}
+                      onClick={() => handleStatusUpdate(selectedTicket._id, 'Resolved')}
+                      sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', py: 1, boxShadow: 'none', bgcolor: '#22C55E', '&:hover': { bgcolor: '#16A34A', boxShadow: 'none' } }}>
+                      Mark Resolved
+                    </Button>
+                    <Button fullWidth variant="outlined" startIcon={<HandymanRounded />}
+                      onClick={() => handleStatusUpdate(selectedTicket._id, 'Service Center Required')}
+                      sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', py: 1, borderColor: '#F97316', color: '#F97316', '&:hover': { bgcolor: 'rgba(249,115,22,0.06)', borderColor: '#F97316' } }}>
+                      Service Center Required
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+
+              {/* ── HOD Service Center Assignment Panel (Service Center Required) ── */}
+              {selectedTicket.status === 'Service Center Required' && isAuth && (
+                <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(239,68,68,0.03)' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#EF4444', flexShrink: 0 }} />
+                    <Typography fontSize={12} fontWeight={700} color="#EF4444">Technician could not resolve this. Please assign a service center.</Typography>
+                  </Box>
+                  <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={1}>Select Service Center</Typography>
+                  <Select fullWidth size="small" displayEmpty value={selectedServiceCenterId}
+                    onChange={e => setSelectedServiceCenterId(e.target.value)}
+                    sx={{ borderRadius: '10px', fontSize: 13, fontWeight: 700, mb: 1.5 }}>
+                    <MenuItem value="" disabled><em>Select a Service Center…</em></MenuItem>
+                    {serviceCenters.map(sc => (
+                      <MenuItem key={sc._id} value={sc._id} sx={{ fontWeight: 600, fontSize: 13 }}>
+                        {sc.name} <span style={{ marginLeft: 6, color: '#64748B', fontSize: 11 }}>({sc.city || sc.location || ''})</span>
+                      </MenuItem>
+                    ))}
+                    {serviceCenters.length === 0 && <MenuItem disabled>No service centers found</MenuItem>}
+                  </Select>
+                  <Button fullWidth variant="contained" disabled={!selectedServiceCenterId || assigningAction}
+                    onClick={async () => {
+                      setAssigningAction(true);
+                      await handleStatusUpdate(selectedTicket._id, 'Sent to Service Center', { assignedVendor: selectedServiceCenterId });
+                      setAssigningAction(false);
+                    }}
+                    sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', py: 1, boxShadow: 'none', background: 'linear-gradient(135deg,#3B82F6,#2563EB)' }}>
+                    Send to Service Center
+                  </Button>
+                </Box>
+              )}
+
+              {selectedTicket.status === 'Service Center Required' && !isAuth && (
+                <Box sx={{ px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(239,68,68,0.03)' }}>
+                  <Typography fontSize={12} fontWeight={700} color="#EF4444">
+                    ⚠️ Technician escalated this ticket — awaiting HOD to assign a service center.
+                  </Typography>
+                </Box>
+              )}
 
               {/* Admin controls */}
               {isAdminOrHod && (
@@ -681,8 +851,12 @@ const Tickets = () => {
                       <Stack spacing={1.5}>
                         {ticketDetail.attachments.map(att => (
                           <Box key={att._id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, borderRadius: '12px', border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
-                            <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(168,85,247,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                              <AttachFileRounded sx={{ fontSize: 18, color: '#A855F7' }} />
+                            <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(168,85,247,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                              {['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => att.originalName.toLowerCase().endsWith(ext)) ? (
+                                <img src={`http://localhost:5000${att.url}`} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <AttachFileRounded sx={{ fontSize: 18, color: '#A855F7' }} />
+                              )}
                             </Box>
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Typography fontSize={13} fontWeight={700} noWrap>{att.originalName}</Typography>
@@ -778,9 +952,48 @@ const Tickets = () => {
                   <MenuItem value="Critical" sx={{ color: '#EF4444' }}>Critical</MenuItem>
                 </TextField>
               </Box>
+              <Box>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', mb: 1, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.6px' }}>Attachment / Image</Typography>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  startIcon={<UploadFileRounded />}
+                  sx={{
+                    width: "100%",
+                    py: 1.5,
+                    border: "1px dashed",
+                    borderColor: "rgba(124,58,237,0.4)",
+                    borderRadius: "12px",
+                    textTransform: "none",
+                    fontWeight: 700,
+                    color: "text.primary",
+                    "&:hover": { borderColor: "#A855F7", bgcolor: "rgba(168,85,247,0.04)" }
+                  }}
+                >
+                  {imageFile ? imageFile.name : "Upload image or screenshot (Optional)"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setImageFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </Button>
+                {imageFile && (
+                  <Box sx={{ mt: 1, display: "flex", alignItems: "center", justifyContent: "space-between", bgcolor: "action.hover", p: 1, borderRadius: "8px", border: "1px solid", borderColor: "divider" }}>
+                    <Typography fontSize={12} fontWeight={600} noWrap sx={{ maxWidth: "80%" }}>{imageFile.name}</Typography>
+                    <IconButton size="small" onClick={() => setImageFile(null)} sx={{ color: "error.main" }}>
+                      <CloseRounded fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
             </Stack>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
-              <Button onClick={() => setRaiseOpen(false)} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
+              <Button onClick={() => { setRaiseOpen(false); setImageFile(null); }} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting}
                 startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
                 sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, px: 3.5, borderRadius: '12px', boxShadow: 'none' }}>

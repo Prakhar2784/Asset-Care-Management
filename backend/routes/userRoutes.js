@@ -15,9 +15,12 @@ const { avatarUpload } = require('../middleware/upload');
 const { checkUserLimit } = require('../middleware/limitMiddleware');
 
 // GET /api/users/employees — lightweight list for assignment dropdown
+// Optional ?role=technician to filter by role
 router.get('/employees', protect, authorize('admin', 'super_admin', 'hod'), async (req, res) => {
   try {
-    const users = await User.find({ isActive: true })
+    const filter = { isActive: true };
+    if (req.query.role) filter.role = req.query.role;
+    const users = await User.find(filter)
       .select('name email phone department role')
       .sort({ name: 1 });
     res.json(users);

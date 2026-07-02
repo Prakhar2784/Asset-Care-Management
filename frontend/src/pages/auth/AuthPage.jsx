@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
@@ -19,6 +19,7 @@ const BASIC_PERMS = ["View Dashboard", "Raise Tickets"];
 // Mirrors AdminRoute's access check: admin-tier roles, and employees granted
 // at least one non-basic permission, land on the admin dashboard.
 const landingRouteFor = (session) => {
+  if (session.role === "technician") return "/technician/portal";
   if (ADMIN_TIER_ROLES.includes(session.role)) return "/admin/dashboard";
   const customPerms = session.customPermissions || [];
   const hasAdminPerm = customPerms.some(p => p.allowed && !BASIC_PERMS.includes(p.feature));

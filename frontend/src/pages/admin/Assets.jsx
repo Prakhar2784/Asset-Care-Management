@@ -29,6 +29,9 @@ import {
   Tooltip,
   Autocomplete,
   InputAdornment,
+  Tabs,
+  Tab,
+  Chip,
 } from "@mui/material";
 import {
   AddRounded,
@@ -107,6 +110,30 @@ const Assets = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [assigning, setAssigning] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+
+  const isIncomplete = (asset) => {
+    const optionalFields = [
+      "vendor",
+      "modelNumber",
+      "purchaseCost",
+      "procurementDate",
+      "warrantyStart",
+      "warrantyEnd",
+      "servicePartnerName",
+      "servicePartnerContact",
+      "supportPhone",
+      "supportEmail",
+      "location",
+      "notes",
+      "purchaseFromName",
+      "purchaseFromAddress",
+      "purchaseFromPhone",
+      "purchaseFromEmail",
+      "purchaseFromGst"
+    ];
+    return optionalFields.some(field => !asset[field] || asset[field].toString().trim() === "");
+  };
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
@@ -174,7 +201,8 @@ const Assets = () => {
     const active = assets.filter(a => a.status === "Active").length;
     const underRepair = assets.filter(a => a.status === "Under Repair").length;
     const unassigned = assets.filter(a => a.assignedStatus !== "Assigned").length;
-    return { total, active, underRepair, unassigned };
+    const incomplete = assets.filter(isIncomplete).length;
+    return { total, active, underRepair, unassigned, incomplete };
   }, [assets]);
 
   const filteredAssets = useMemo(() => {
@@ -186,9 +214,10 @@ const Assets = () => {
         asset.serialNumber?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category === "All" || asset.category === category;
       const matchesStatus = statusFilter === "All" || asset.status === statusFilter;
-      return matchesSearch && matchesCategory && matchesStatus;
+      const matchesTab = activeTab === "all" || isIncomplete(asset);
+      return matchesSearch && matchesCategory && matchesStatus && matchesTab;
     });
-  }, [search, category, statusFilter, assets]);
+  }, [search, category, statusFilter, activeTab, assets]);
 
   const paginatedAssets = useMemo(
     () => filteredAssets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -388,6 +417,22 @@ const Assets = () => {
         ))}
       </Grid>
 
+      {/* Navigation Tabs */}
+      <Tabs
+        value={activeTab}
+        onChange={(e, newVal) => { setActiveTab(newVal); setPage(0); }}
+        sx={{
+          mb: 3,
+          borderBottom: 1,
+          borderColor: "divider",
+          "& .MuiTabs-indicator": { bgcolor: "#A855F7" },
+          "& .MuiTab-root": { fontWeight: 800, textTransform: "none", fontSize: 14 }
+        }}
+      >
+        <Tab label="All Assets" value="all" />
+        <Tab label={`Incomplete Data (${kpis.incomplete})`} value="incomplete" sx={{ color: kpis.incomplete > 0 ? "#F97316" : "text.secondary" }} />
+      </Tabs>
+
       {/* Filter Bar */}
       <Paper sx={{ p: 2, borderRadius: "16px", border: 1, borderColor: "divider", mb: 3, display: "flex", gap: 2, flexWrap: "wrap", alignItems: "center" }}>
         <TextField
@@ -457,7 +502,12 @@ const Assets = () => {
                 {paginatedAssets.map((asset) => (
                   <TableRow key={asset._id} hover sx={{ "&:last-child td": { borderBottom: 0 }, cursor: "pointer" }}>
                     <TableCell sx={{ py: 1.5 }}>
-                      <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: 14 }}>{asset.name}</Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: 14 }}>{asset.name}</Typography>
+                        {isIncomplete(asset) && (
+                          <Chip label="Incomplete" size="small" sx={{ height: 16, fontSize: 9, bgcolor: "rgba(249,115,22,0.12)", color: "#F97316", fontWeight: 700, border: "1px solid rgba(249,115,22,0.3)" }} />
+                        )}
+                      </Box>
                       <Typography sx={{ fontSize: 11.5, color: "text.secondary", fontFamily: "monospace", mt: 0.3 }}>
                         AST-{asset._id.slice(-5).toUpperCase()} · {asset.serialNumber}
                       </Typography>
@@ -549,10 +599,14 @@ const Assets = () => {
                   ["Form Factor", selected.formFactor || "Movable"],
                   ["Department", selected.department],
                   ["Location", selected.location || "Unassigned"],
-                  ["Vendor", selected.vendor || "Standard OEM"],
+                  ["OEM / Brand", selected.vendor || "Standard OEM"],
                   ["Serial Number", selected.serialNumber],
                   ["Warranty Expiry", selected.warrantyEnd ? new Date(selected.warrantyEnd).toLocaleDateString() : "N/A"],
                   ["Status", selected.status],
+                  ["Purchase From", selected.purchaseFromName || "—"],
+                  ["Vendor GST", selected.purchaseFromGst || "—"],
+                  ["Service Partner", selected.servicePartnerName || "—"],
+                  ["Support Contact", selected.servicePartnerContact || "—"],
                 ].map(([label, value]) => (
                   <Box key={label} sx={{ p: 2, borderRadius: "12px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Typography sx={{ fontSize: "13px", color: "text.secondary", fontWeight: 600 }}>{label}</Typography>

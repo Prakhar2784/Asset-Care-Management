@@ -17,6 +17,17 @@ const assetSchema = new mongoose.Schema({
   supportPhone: { type: String },
   supportEmail: { type: String },
 
+  // Purchase From Details
+  purchaseFromName: { type: String },
+  purchaseFromAddress: { type: String },
+  purchaseFromPhone: { type: String },
+  purchaseFromEmail: { type: String },
+  purchaseFromGst: { type: String },
+
+  // Service Partner Details
+  servicePartnerName: { type: String },
+  servicePartnerContact: { type: String },
+
   // AMC (Annual Maintenance Contract)
   amcVendor: { type: String },
   amcStart: { type: Date },

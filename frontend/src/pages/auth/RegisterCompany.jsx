@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
@@ -30,11 +30,19 @@ const RegisterCompany = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const pwRules = [
+    { label: '8+ chars',  pass: formData.adminPassword.length >= 8 },
+    { label: 'Uppercase', pass: /[A-Z]/.test(formData.adminPassword) },
+    { label: 'Lowercase', pass: /[a-z]/.test(formData.adminPassword) },
+    { label: 'Number',    pass: /[0-9]/.test(formData.adminPassword) },
+    { label: 'Symbol',    pass: /[^A-Za-z0-9]/.test(formData.adminPassword) },
+  ];
+
   const handleInputChange = (e) => {
     let { name, value } = e.target;
-    // Slugs must be alphanumeric and lowercase only
+    // Slugs must be alphanumeric, periods and lowercase only
     if (name === "slug") {
-      value = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+      value = value.toLowerCase().replace(/[^a-z0-9.-]/g, "");
     }
     setFormData({ ...formData, [name]: value });
     setError("");
@@ -43,6 +51,12 @@ const RegisterCompany = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!pwRules.every(r => r.pass)) {
+      setError("Password must be 8+ chars with uppercase, lowercase, number, and symbol.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -332,6 +346,36 @@ const RegisterCompany = () => {
             display: none;
           }
         }
+
+        .pw-rules {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px 14px;
+          background: rgba(30,20,60,0.5);
+          border: 1.5px solid rgba(168,85,247,0.2);
+          border-radius: 14px;
+          padding: 12px 16px;
+          margin-top: 5px;
+          margin-bottom: 20px;
+        }
+
+        .pw-rule {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .pw-rule.pass { color: #16A34A; }
+        .pw-rule.fail { color: #DC2626; }
+
+        .pw-dot {
+          width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+
+        .pw-rule.pass .pw-dot { background: #16A34A; }
+        .pw-rule.fail .pw-dot { background: #DC2626; }
       `}</style>
 
       {/* LEFT DESIGN SIDE */}
@@ -466,7 +510,7 @@ const RegisterCompany = () => {
                 />
               </div>
 
-              <div className="input-group">
+              <div className="input-group" style={{ marginBottom: formData.adminPassword.length > 0 ? "12px" : "20px" }}>
                 <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -484,6 +528,17 @@ const RegisterCompany = () => {
                   {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
                 </span>
               </div>
+
+              {formData.adminPassword.length > 0 && (
+                <div className="pw-rules">
+                  {pwRules.map(r => (
+                    <div key={r.label} className={`pw-rule ${r.pass ? 'pass' : 'fail'}`}>
+                      <span className="pw-dot" />
+                      {r.label}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <button 
                 type="submit" 

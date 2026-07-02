@@ -44,8 +44,9 @@ import MaintenanceLogs from "./pages/admin/MaintenanceLogs";
 import ServiceCenters from "./pages/admin/ServiceCenters";
 import SuperAdminPanel from "./pages/superadmin/SuperAdminPanel";
 
-// Import Employee & Shared Pages
+// Import Employee, Technician & Shared Pages
 import EmployeePortal from "./pages/employee/EmployeePortal";
+import TechnicianPortal from "./pages/technician/TechnicianPortal";
 import Tickets from "./pages/shared/Tickets";
 import Notifications from "./pages/shared/Notifications";
 import Settings from "./pages/shared/Settings";
@@ -83,6 +84,7 @@ function App() {
             
             {/* Employee Route (Admins can view this too if they navigate to it) */}
             <Route path="/employee/portal" element={<EmployeePortal />} />
+            <Route path="/technician/portal" element={<TechnicianPortal />} />
             
             {/* Shared Route (Both roles use this to see tickets) */}
             <Route path="/tickets" element={<Tickets />} />

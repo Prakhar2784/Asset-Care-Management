@@ -193,8 +193,8 @@ export default function AssignedDevices() {
           <Table size="small">
             <TableHead>
               <TableRow sx={{ bgcolor: 'background.default' }}>
-                {['Device', 'Assigned To', 'Department', 'Assigned Date', 'Condition', 'Action'].map((h, i) => (
-                  <TableCell key={h} align={i === 5 ? 'right' : 'left'}
+                {['Device', 'Assigned To', 'Department', 'Assigned Date', 'Action'].map((h, i) => (
+                  <TableCell key={h} align={i === 4 ? 'right' : 'left'}
                     sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>
                     {h}
                   </TableCell>
@@ -239,15 +239,7 @@ export default function AssignedDevices() {
                     <TableCell sx={{ py: 1.5 }}>
                       <Typography fontSize={13} fontWeight={600} color="text.primary">{fmt(a.assignedDate)}</Typography>
                     </TableCell>
-                    <TableCell sx={{ py: 1.5 }}>
-                      {a.conditionAtAssign ? (
-                        <Box sx={{ display: 'inline-flex', px: 1.2, py: 0.4, borderRadius: '20px', bgcolor: condStyle.bg, color: condStyle.color, fontSize: 11, fontWeight: 800, whiteSpace: 'nowrap' }}>
-                          {a.conditionAtAssign}
-                        </Box>
-                      ) : (
-                        <Typography fontSize={13} color="text.disabled">—</Typography>
-                      )}
-                    </TableCell>
+
                     <TableCell align="right" sx={{ py: 1.5 }}>
                       <Button
                         size="small" variant="outlined"

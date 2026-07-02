@@ -16,8 +16,8 @@ const ticketSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['Pending Approval', 'Under Repair', 'Resolved', 'Rejected'],
-    default: 'Pending Approval' 
+    enum: ['Pending HOD Approval', 'Pending Approval', 'Assigned to Technician', 'Service Center Required', 'Sent to Service Center', 'Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair', 'Resolved', 'Rejected'],
+    default: 'Pending HOD Approval' 
   },
   estimatedCost: {
     type: Number,
@@ -59,6 +59,11 @@ const ticketSchema = new mongoose.Schema({
     required: true
   },
   approvedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  assignedTechnician: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null

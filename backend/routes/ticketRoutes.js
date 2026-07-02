@@ -5,7 +5,7 @@ const {
   createTicket, getTickets, getMyTickets,
   updateTicketStatus, updateTicketPriority, confirmResolution, deleteTicket
 } = require('../controllers/ticketController');
-const { protect, requirePermission } = require('../middleware/authMiddleware');
+const { protect, requirePermission, authorize } = require('../middleware/authMiddleware');
 const { attachmentUpload } = require('../middleware/upload');
 
 // Must be before /:id to avoid route conflict
@@ -13,10 +13,18 @@ router.get('/mytickets', protect, getMyTickets);
 
 router.route('/')
   .post(protect, createTicket)
-  .get(protect, requirePermission('Raise Tickets', 'Manage All Tickets'), getTickets);
+  .get(protect, (req, res, next) => {
+    // Technicians can always fetch tickets (they need to see assigned ones)
+    if (req.user?.role === 'technician') return next();
+    return requirePermission('Raise Tickets', 'Manage All Tickets')(req, res, next);
+  }, getTickets);
 
 router.route('/:id/status')
-  .put(protect, requirePermission('Manage All Tickets', 'Raise Tickets'), updateTicketStatus);
+  .put(protect, (req, res, next) => {
+    // Technicians can update status (resolve/escalate) on their assigned tickets
+    if (req.user?.role === 'technician') return next();
+    return requirePermission('Manage All Tickets', 'Raise Tickets')(req, res, next);
+  }, updateTicketStatus);
 
 router.route('/:id/priority')
   .put(protect, requirePermission('Manage All Tickets', 'Raise Tickets'), updateTicketPriority);
@@ -86,6 +94,7 @@ router.get('/:id', protect, async (req, res) => {
       .populate('asset', 'name serialNumber department')
       .populate('raisedBy', 'name email department avatar')
       .populate('approvedBy', 'name')
+      .populate('assignedTechnician', 'name email role')
       .populate('assignedVendor', 'name email')
       .populate('comments.author', 'name avatar');
     if (!ticket) return res.status(404).json({ message: 'Ticket not found.' });

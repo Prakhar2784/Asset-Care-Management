@@ -1,5 +1,6 @@
 const Ticket = require('../models/Ticket');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 const {
   sendTicketCreatedEmail,
   sendTicketStatusEmail,
@@ -20,14 +21,14 @@ const createTicket = async (req, res) => {
 
     const ticketId = `SRV-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    let initialStatus = 'Pending Approval';
+    let initialStatus = 'Pending HOD Approval';
     let autoApprover = null;
-
+ 
     if (req.user.role === 'admin' || req.user.role === 'hod') {
-      initialStatus = 'Vendor Assigned';
+      initialStatus = 'Assigned to Technician';
       autoApprover = req.user._id;
     }
-
+ 
     const ticket = await Ticket.create({
       ticketId,
       issue,
@@ -39,37 +40,63 @@ const createTicket = async (req, res) => {
       status: initialStatus,
       approvedBy: autoApprover
     });
-
+ 
     const populated = await Ticket.findById(ticket._id)
       .populate('asset', 'name serialNumber department')
       .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name email department');
-
+ 
     // Fire-and-forget email + notification + audit
     sendTicketCreatedEmail(populated.raisedBy, populated, populated.asset)
       .catch(err => console.error('[TICKET EMAIL ERROR] Created:', err.message));
     audit({ req, action: 'ticket_created', entity: 'ticket', entityId: ticket._id, entityLabel: ticketId });
-
+ 
     // Notify the employee who raised the ticket
     createNotification({
       userId: req.user._id,
       type: 'ticket_created',
       title: 'Ticket Raised',
-      message: `Your ticket ${ticketId} has been submitted${initialStatus === 'Vendor Assigned' ? ' and auto-approved' : ' and is pending approval'}.`,
+      message: `Your ticket ${ticketId} has been submitted${initialStatus === 'Assigned to Technician' ? ' and auto-approved to Technician' : ' and is pending HOD approval'}.`,
       link: '/tickets'
     });
-
-    // Notify all admin-tier reviewers about the new ticket
-    const reviewerRoles = ['admin', 'super_admin', 'hod', 'it_support', 'manager'];
-    if (!reviewerRoles.includes(req.user.role)) {
-      User.find({ role: { $in: reviewerRoles } }).then(admins => {
-        const itemName = populated.asset?.name || populated.itemLabel || ticketId;
+ 
+    const itemName = populated.asset?.name || populated.itemLabel || ticketId;
+ 
+    if (initialStatus === 'Pending HOD Approval') {
+      // 1. Notify Department HODs
+      User.find({ role: 'hod', department: req.user.department, isActive: true }).then(hods => {
+        hods.forEach(hod => {
+          createNotification({
+            userId: hod._id,
+            type: 'ticket_created',
+            title: 'New Department Ticket',
+            message: `${req.user.name} raised ticket ${ticketId} for "${itemName}" pending your approval.`,
+            link: '/tickets'
+          });
+        });
+      }).catch(() => {});
+ 
+      // 2. Notify Admins
+      User.find({ role: { $in: ['admin', 'super_admin'] }, isActive: true }).then(admins => {
         admins.forEach(admin => {
           createNotification({
             userId: admin._id,
             type: 'ticket_created',
-            title: 'New Ticket Raised',
-            message: `${populated.raisedBy?.name || 'An employee'} raised ticket ${ticketId} for "${itemName}".`,
+            title: 'New Ticket (Pending HOD)',
+            message: `${req.user.name} raised ticket ${ticketId} (Pending HOD Approval).`,
+            link: '/tickets'
+          });
+        });
+      }).catch(() => {});
+    } else {
+      // Auto-approved ticket — notify Admins
+      User.find({ role: { $in: ['admin', 'super_admin'] }, isActive: true }).then(admins => {
+        admins.forEach(admin => {
+          createNotification({
+            userId: admin._id,
+            type: 'ticket_created',
+            title: 'New Auto-Approved Ticket',
+            message: `${req.user.name} raised ticket ${ticketId} (Assigned to Technician).`,
             link: '/tickets'
           });
         });
@@ -83,14 +110,27 @@ const createTicket = async (req, res) => {
 };
 
 // @route   GET /api/tickets
-// @access  Admin / HOD
+// @access  Admin / HOD / Technician (technicians only see their assigned tickets)
 const getTickets = async (req, res) => {
   try {
-    const tickets = await Ticket.find({})
+    // Technicians only see:
+    //  1. Tickets explicitly assigned to them (new flow)
+    //  2. Tickets in 'Assigned to Technician' status with no specific technician set (legacy / unowned)
+    const filter = req.user.role === 'technician'
+      ? {
+          $or: [
+            { assignedTechnician: req.user._id },
+            { status: { $in: ['Assigned to Technician', 'Service Center Required'] }, assignedTechnician: null }
+          ]
+        }
+      : {};
+
+    const tickets = await Ticket.find(filter)
       .populate('asset', 'name serialNumber department')
       .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name department role')
       .populate('approvedBy', 'name')
+      .populate('assignedTechnician', 'name role')
       .sort({ createdAt: -1 });
 
     res.status(200).json(tickets);
@@ -117,10 +157,10 @@ const getMyTickets = async (req, res) => {
 };
 
 // @route   PUT /api/tickets/:id/status
-// @access  Admin / HOD
+// @access  Admin / HOD / Technician
 const updateTicketStatus = async (req, res) => {
   try {
-    const { status, estimatedCost } = req.body;
+    const { status, estimatedCost, assignedTechnicianId, assignedVendor } = req.body;
 
     const ticket = await Ticket.findById(req.params.id)
       .populate('raisedBy', 'name email department')
@@ -128,18 +168,139 @@ const updateTicketStatus = async (req, res) => {
 
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
+    // HOD department approval constraint
+    if (req.user.role === 'hod' && status === 'Assigned to Technician') {
+      if (ticket.raisedBy?.department !== req.user.department) {
+        return res.status(403).json({ message: `Access denied. You can only approve tickets for the ${req.user.department} department.` });
+      }
+    }
+
+    // Technician can only update their own assigned tickets (or resolve/escalate)
+    if (req.user.role === 'technician') {
+      // Allow if explicitly assigned to this technician OR if no technician is set (legacy unowned ticket)
+      const isAssigned =
+        !ticket.assignedTechnician ||  // unowned legacy ticket — any technician can act
+        ticket.assignedTechnician.toString() === req.user._id.toString();
+      if (!isAssigned) {
+        return res.status(403).json({ message: 'You can only act on tickets assigned to you.' });
+      }
+      // Technicians can only move to Resolved or Service Center Required
+      if (!['Resolved', 'Service Center Required'].includes(status)) {
+        return res.status(403).json({ message: 'Technicians can only mark tickets as Resolved or Service Center Required.' });
+      }
+    }
+
     const oldStatus = ticket.status;
     ticket.status = status;
     if (estimatedCost !== undefined) ticket.estimatedCost = estimatedCost;
 
-    if (['Vendor Assigned', 'Under Repair'].includes(status)) {
+    // HOD assigns a technician when approving
+    if (status === 'Assigned to Technician' && assignedTechnicianId) {
+      ticket.assignedTechnician = assignedTechnicianId;
+      ticket.approvedBy = req.user._id;
+    } else if (['Vendor Assigned', 'Under Repair', 'Assigned to Technician'].includes(status)) {
       ticket.approvedBy = req.user._id;
     }
-    if (req.body.assignedVendor !== undefined) {
-      ticket.assignedVendor = req.body.assignedVendor;
+
+    if (assignedVendor !== undefined) {
+      ticket.assignedVendor = assignedVendor;
     }
 
+    // HOD assigns service center after technician escalation
+    if (status === 'Sent to Service Center') {
+      ticket.approvedBy = req.user._id;
+    }
+
+
     const updated = await ticket.save();
+
+    // ─── NOTIFICATIONS ────────────────────────────────────────────────────────
+
+    // 1. Notify ALL admins / super_admins for every ticket event
+    User.find({ role: { $in: ['admin', 'super_admin'] }, isActive: true }).then(admins => {
+      admins.forEach(admin => {
+        if (admin._id.toString() === req.user._id.toString()) return;
+        createNotification({
+          userId: admin._id,
+          type: 'ticket_status',
+          title: `Ticket ${ticket.ticketId} — ${status}`,
+          message: `Status changed from "${oldStatus}" → "${status}" by ${req.user.name}.`,
+          link: '/tickets'
+        });
+      });
+    }).catch(() => {});
+
+    // 2. Notify the department HOD for EVERY status change on their department's tickets
+    //    (HOD should know everything happening with tickets they oversee)
+    User.find({ role: 'hod', department: ticket.raisedBy?.department, isActive: true }).then(hods => {
+      hods.forEach(hod => {
+        if (hod._id.toString() === req.user._id.toString()) return; // skip if HOD is the actor
+        let hodTitle = `Ticket ${ticket.ticketId} — ${status}`;
+        let hodMessage = `Ticket ${ticket.ticketId} status changed to "${status}" by ${req.user.name}.`;
+
+        // Customise message for key events
+        if (status === 'Resolved') {
+          hodTitle = `Ticket Resolved — ${ticket.ticketId}`;
+          hodMessage = `Technician ${req.user.name} resolved ticket ${ticket.ticketId}.`;
+        } else if (status === 'Service Center Required') {
+          hodTitle = `⚠️ Service Center Required — ${ticket.ticketId}`;
+          hodMessage = `Technician ${req.user.name} could not resolve ticket ${ticket.ticketId}. Please assign a service center.`;
+        } else if (status === 'Sent to Service Center') {
+          hodTitle = `Ticket Sent to Service Center — ${ticket.ticketId}`;
+          hodMessage = `Ticket ${ticket.ticketId} has been escalated to a service center.`;
+        }
+
+        createNotification({
+          userId: hod._id,
+          type: 'ticket_status',
+          title: hodTitle,
+          message: hodMessage,
+          link: '/tickets'
+        });
+      });
+    }).catch(() => {});
+
+    // 3. Notify assigned technician when ticket is assigned to them
+    if (status === 'Assigned to Technician' && assignedTechnicianId) {
+      createNotification({
+        userId: assignedTechnicianId,
+        type: 'ticket_assigned',
+        title: '🔧 New Ticket Assigned To You',
+        message: `Ticket ${ticket.ticketId} has been assigned to you by ${req.user.name}. Issue: "${ticket.issue}"`,
+        link: '/tickets'
+      });
+    }
+
+    // Auto-sync Asset and MaintenanceLog based on Ticket Status
+    if (ticket.asset) {
+      const AssetModel = mongoose.model('Asset');
+      const MaintenanceLogModel = mongoose.model('MaintenanceLog');
+      
+      if (status === 'Under Repair' && oldStatus !== 'Under Repair') {
+        await AssetModel.findByIdAndUpdate(ticket.asset._id, { status: 'Under Repair' });
+        const existingLog = await MaintenanceLogModel.findOne({
+          asset: ticket.asset._id,
+          status: { $in: ['Scheduled', 'In Progress'] }
+        });
+        if (!existingLog) {
+          await MaintenanceLogModel.create({
+            asset: ticket.asset._id,
+            type: 'Corrective',
+            description: `Automatically logged from ticket resolution: ${ticket.issue}`,
+            status: 'In Progress',
+            serviceDate: new Date(),
+            loggedBy: req.user?._id || null,
+            tenantId: req.tenantId || 'default'
+          });
+        }
+      } else if (status === 'Resolved' && oldStatus !== 'Resolved') {
+        await AssetModel.findByIdAndUpdate(ticket.asset._id, { status: 'Active' });
+        await MaintenanceLogModel.updateMany(
+          { asset: ticket.asset._id, status: { $in: ['Scheduled', 'In Progress'] } },
+          { status: 'Completed', notes: `Completed automatically via resolved ticket: ${ticket.ticketId}` }
+        );
+      }
+    }
 
     audit({ req, action: 'ticket_status_changed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId, changes: { from: oldStatus, to: status } });
 
@@ -173,6 +334,7 @@ const updateTicketStatus = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 
 // @route   PUT /api/tickets/:id/priority
 // @access  Admin / HOD

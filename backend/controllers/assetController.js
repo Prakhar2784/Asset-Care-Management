@@ -1,11 +1,94 @@
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
+const MaintenanceLog = require('../models/MaintenanceLog');
 const AssetAssignment = require('../models/AssetAssignment');
 const AuditLog = require('../models/AuditLog');
 const TransferRequest = require('../models/TransferRequest');
 const MaintenanceSchedule = require('../models/MaintenanceSchedule');
 const CustomField = require('../models/CustomField');
+const ServiceCenter = require('../models/ServiceCenter');
 const { audit } = require('../services/auditService');
+
+const syncServiceCenter = async (req, asset) => {
+  if (!asset.servicePartnerName || !asset.servicePartnerName.trim()) return;
+
+  const tenantId = req.tenantId || 'default';
+  const name = asset.servicePartnerName.trim();
+
+  try {
+    let sc = await ServiceCenter.findOne({ name, tenantId });
+
+    if (!sc) {
+      sc = await ServiceCenter.create({
+        name,
+        contactPerson: asset.servicePartnerContact || null,
+        phone: asset.supportPhone || null,
+        email: asset.supportEmail || null,
+        address: asset.purchaseFromAddress || null,
+        categories: asset.category ? [asset.category] : [],
+        brands: asset.vendor ? [asset.vendor] : [],
+        status: 'Active',
+        notes: 'Automatically created from asset registration',
+        tenantId
+      });
+      console.log(`[SERVICE CENTER SYNC] Created new service center: ${name}`);
+    } else {
+      let updated = false;
+      if (asset.servicePartnerContact && sc.contactPerson !== asset.servicePartnerContact) {
+        sc.contactPerson = asset.servicePartnerContact;
+        updated = true;
+      }
+      if (asset.supportPhone && sc.phone !== asset.supportPhone) {
+        sc.phone = asset.supportPhone;
+        updated = true;
+      }
+      if (asset.supportEmail && sc.email !== asset.supportEmail) {
+        sc.email = asset.supportEmail;
+        updated = true;
+      }
+      if (asset.category && !sc.categories.includes(asset.category)) {
+        sc.categories.push(asset.category);
+        updated = true;
+      }
+      if (asset.vendor && !sc.brands.includes(asset.vendor)) {
+        sc.brands.push(asset.vendor);
+        updated = true;
+      }
+      if (updated) {
+        await sc.save();
+        console.log(`[SERVICE CENTER SYNC] Updated service center: ${name}`);
+      }
+    }
+  } catch (err) {
+    console.error('[SERVICE CENTER SYNC ERROR]:', err.message);
+  }
+};
+
+const autoLogMaintenanceIfNeeded = async (req, asset, oldStatus) => {
+  if (asset.status === 'Under Repair' && oldStatus !== 'Under Repair') {
+    const existing = await MaintenanceLog.findOne({
+      asset: asset._id,
+      status: { $in: ['Scheduled', 'In Progress'] }
+    });
+
+    if (!existing) {
+      await MaintenanceLog.create({
+        asset: asset._id,
+        type: 'Corrective',
+        description: 'Automatically logged: Asset marked as Under Repair in registry.',
+        vendor: asset.servicePartnerName || '',
+        technicianName: asset.servicePartnerContact || '',
+        technicianContact: asset.supportPhone || '',
+        status: 'In Progress',
+        serviceDate: new Date(),
+        loggedBy: req.user?._id || null,
+        tenantId: req.tenantId || 'default'
+      });
+      console.log(`[AUTO MAINTENANCE LOG] Created In Progress log for asset ${asset.name}`);
+    }
+  }
+};
+
 const validateCustomFieldsHelper = async (category, customFieldsInput = {}) => {
   const configs = await CustomField.find({ category });
   const errors = [];
@@ -51,6 +134,8 @@ const createAsset = async (req, res) => {
     }
 
     const asset = await Asset.create(req.body);
+    await syncServiceCenter(req, asset);
+    await autoLogMaintenanceIfNeeded(req, asset, 'Active');
     audit({ req, action: 'asset_created', entity: 'asset', entityId: asset._id, entityLabel: asset.name });
     res.status(201).json(asset);
   } catch (error) {
@@ -101,10 +186,13 @@ const updateAsset = async (req, res) => {
       }
     }
 
+    const oldStatus = asset.status;
     const updated = await Asset.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true
     });
+    await syncServiceCenter(req, updated);
+    await autoLogMaintenanceIfNeeded(req, updated, oldStatus);
     audit({ req, action: 'asset_updated', entity: 'asset', entityId: asset._id, entityLabel: asset.name, changes: req.body });
     res.status(200).json(updated);
   } catch (error) {

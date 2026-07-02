@@ -4,7 +4,7 @@ import {
   Paper, Snackbar, TextField, Typography, CircularProgress,
   LinearProgress, Fade, Tooltip, Dialog, DialogTitle,
   DialogContent, DialogActions, List, ListItemButton,
-  ListItemText, ListItemSecondaryAction
+  ListItemText, ListItemSecondaryAction, Autocomplete, InputAdornment, IconButton
 } from "@mui/material";
 import {
   SaveRounded, UploadFileRounded, CheckCircleRounded,
@@ -71,7 +71,64 @@ const AddAsset = () => {
     status: "Active",
     purchaseCost: "",
     notes: "",
+    purchaseFromName: "",
+    purchaseFromAddress: "",
+    purchaseFromPhone: "",
+    purchaseFromEmail: "",
+    purchaseFromGst: "",
+    servicePartnerName: "",
+    servicePartnerContact: "",
   });
+
+  const [emptyFieldsDialog, setEmptyFieldsDialog] = useState(false);
+  const [blankOptionals, setBlankOptionals] = useState([]);
+
+  const getCompletionPercentage = () => {
+    const standardFields = [
+      "name",
+      "category",
+      "formFactor",
+      "vendor",
+      "modelNumber",
+      "serialNumber",
+      "purchaseCost",
+      "procurementDate",
+      "warrantyStart",
+      "warrantyEnd",
+      "servicePartnerName",
+      "servicePartnerContact",
+      "supportPhone",
+      "supportEmail",
+      "department",
+      "location",
+      "notes",
+      "purchaseFromName",
+      "purchaseFromAddress",
+      "purchaseFromPhone",
+      "purchaseFromEmail",
+      "purchaseFromGst"
+    ];
+
+    let filledCount = 0;
+    standardFields.forEach(field => {
+      if (formData[field] && formData[field].toString().trim() !== "") {
+        filledCount++;
+      }
+    });
+
+    const customConfigs = customFieldConfigs || [];
+    let customFilled = 0;
+    customConfigs.forEach(f => {
+      if (customFields[f.name] && customFields[f.name].toString().trim() !== "") {
+        customFilled++;
+      }
+    });
+
+    const totalFields = standardFields.length + customConfigs.length;
+    const totalFilled = filledCount + customFilled;
+
+    return Math.round((totalFilled / totalFields) * 100);
+  };
 
   const [docs, setDocs] = useState({});
   const [ocrLoading, setOcrLoading] = useState(false);
@@ -84,6 +141,21 @@ const AddAsset = () => {
   // Custom fields configuration and values
   const [customFieldConfigs, setCustomFieldConfigs] = useState([]);
   const [customFields, setCustomFields] = useState({});
+
+  const [serviceCenters, setServiceCenters] = useState([]);
+  const [scDialogOpen, setScDialogOpen] = useState(false);
+
+  React.useEffect(() => {
+    const fetchServiceCenters = async () => {
+      try {
+        const { data } = await api.get("/service-centers");
+        setServiceCenters(Array.isArray(data) ? data : data.serviceCenters || []);
+      } catch (err) {
+        console.error("Failed to load service centers:", err);
+      }
+    };
+    fetchServiceCenters();
+  }, []);
 
   React.useEffect(() => {
     const fetchCustomFieldConfigs = async () => {
@@ -336,8 +408,8 @@ const AddAsset = () => {
     setDocs(prev => { const n = { ...prev }; delete n[key]; return n; });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e, force = false) => {
+    if (e) e.preventDefault();
     setError(null);
 
     if (!formData.name.trim() || !formData.serialNumber.trim()) {
@@ -354,6 +426,48 @@ const AddAsset = () => {
     if (missingFields.length > 0) {
       setError(`Required custom field(s) missing: ${missingFields.map(f => f.name).join(', ')}`);
       return;
+    }
+
+    // Optional fields warning popup
+    if (!force) {
+      const emptyOptional = [];
+      const fieldLabels = {
+        vendor: "OEM / Brand",
+        modelNumber: "Model Number",
+        purchaseCost: "Purchase Cost",
+        procurementDate: "Procurement Date",
+        warrantyStart: "Warranty Start",
+        warrantyEnd: "Warranty Expiry",
+        servicePartnerName: "Authorized Service Partner",
+        servicePartnerContact: "Service Partner Contact Person",
+        supportPhone: "Support Phone",
+        supportEmail: "Support Email",
+        location: "Location",
+        notes: "Notes",
+        purchaseFromName: "Purchase From Name",
+        purchaseFromAddress: "Purchase From Address",
+        purchaseFromPhone: "Purchase From Phone",
+        purchaseFromEmail: "Purchase From Email",
+        purchaseFromGst: "Purchase From GST"
+      };
+
+      Object.keys(fieldLabels).forEach(key => {
+        if (!formData[key] || formData[key].toString().trim() === "") {
+          emptyOptional.push(fieldLabels[key]);
+        }
+      });
+
+      customFieldConfigs.forEach(f => {
+        if (!f.isRequired && (!customFields[f.name] || customFields[f.name].toString().trim() === "")) {
+          emptyOptional.push(`${f.name} (Custom)`);
+        }
+      });
+
+      if (emptyOptional.length > 0) {
+        setBlankOptionals(emptyOptional);
+        setEmptyFieldsDialog(true);
+        return;
+      }
     }
 
     setLoading(true);
@@ -434,6 +548,27 @@ const AddAsset = () => {
       )}
 
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+
+        {/* Progress Completion Indicator */}
+        <Paper sx={{
+          p: 2.2, borderRadius: "20px", border: "1px solid", borderColor: "divider",
+          bgcolor: "background.paper", boxShadow: "0 1px 3px 0 rgba(0,0,0,0.02)",
+          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2.5
+        }}>
+          <Typography fontSize={13.5} fontWeight={800} color="text.secondary" sx={{ minWidth: 140 }}>
+            Form Completion:
+          </Typography>
+          <Box sx={{ flex: 1 }}>
+            <LinearProgress
+              variant="determinate"
+              value={getCompletionPercentage()}
+              sx={{ height: 10, borderRadius: 5, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "#A855F7" } }}
+            />
+          </Box>
+          <Typography fontSize={14} fontWeight={900} color="#A855F7">
+            {getCompletionPercentage()}%
+          </Typography>
+        </Paper>
 
         {/* OCR Invoice Scanner */}
         <Paper sx={{
@@ -645,8 +780,35 @@ const AddAsset = () => {
                 onChange={handleChange} sx={inputSx("warrantyEnd")} label="Warranty Expiry" slotProps={{ inputLabel: { shrink: true } }} />
             </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
-              <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
-                sx={inputSx("vendor")} label="Authorized Service Partner" placeholder="e.g. Dell ProSupport" />
+              <TextField
+                fullWidth
+                name="servicePartnerName"
+                value={formData.servicePartnerName}
+                onChange={handleChange}
+                sx={inputSx("servicePartnerName")}
+                label="Authorized Service Partner"
+                placeholder="e.g. Dell ProSupport"
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={() => setScDialogOpen(true)}
+                          sx={{ fontSize: 11, fontWeight: 800, textTransform: "none", color: "#A855F7", minWidth: 0, p: 0.5 }}
+                        >
+                          Select Registered
+                        </Button>
+                      </InputAdornment>
+                    )
+                  }
+                }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField fullWidth name="servicePartnerContact" value={formData.servicePartnerContact} onChange={handleChange}
+                sx={inputSx("servicePartnerContact")} label="Contact Person Name" placeholder="e.g. John Doe" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="supportPhone" value={formData.supportPhone} onChange={handleChange}
@@ -659,13 +821,44 @@ const AddAsset = () => {
           </Grid>
         </Paper>
 
-        {/* Section 3 — Deployment */}
+        {/* Section 3 — Purchase & Transaction Details */}
         <Paper sx={{
           p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper",
           border: "1px solid", borderColor: "divider",
           boxShadow: "0 1px 3px 0 rgba(0,0,0,0.04)",
         }}>
-          <SectionLabel number="3" title="Deployment & Location" subtitle="Assign to a department and set the asset's physical location." />
+          <SectionLabel number="3" title="Purchase & Transaction Details" subtitle="Vendor purchase details, address, and GST registration." />
+          <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField fullWidth name="purchaseFromName" value={formData.purchaseFromName} onChange={handleChange}
+                sx={inputSx("purchaseFromName")} label="Purchase From (Vendor Name)" placeholder="e.g. Reliance Retail" />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField fullWidth name="purchaseFromGst" value={formData.purchaseFromGst} onChange={handleChange}
+                sx={inputSx("purchaseFromGst")} label="Vendor GST Number" placeholder="e.g. 27AAAAA1111A1Z1" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TextField fullWidth name="purchaseFromPhone" value={formData.purchaseFromPhone} onChange={handleChange}
+                sx={inputSx("purchaseFromPhone")} label="Vendor Phone" placeholder="+91 98765-43210" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+              <TextField fullWidth type="email" name="purchaseFromEmail" value={formData.purchaseFromEmail} onChange={handleChange}
+                sx={inputSx("purchaseFromEmail")} label="Vendor Email" placeholder="sales@vendor.com" />
+            </Grid>
+            <Grid size={{ xs: 12 }}>
+              <TextField fullWidth multiline rows={2} name="purchaseFromAddress" value={formData.purchaseFromAddress} onChange={handleChange}
+                sx={inputSx("purchaseFromAddress")} label="Vendor Address" placeholder="Street, City, State, ZIP" />
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* Section 4 — Deployment */}
+        <Paper sx={{
+          p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper",
+          border: "1px solid", borderColor: "divider",
+          boxShadow: "0 1px 3px 0 rgba(0,0,0,0.04)",
+        }}>
+          <SectionLabel number="4" title="Deployment & Location" subtitle="Assign to a department and set the asset's physical location." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField required fullWidth select name="department" value={formData.department}
@@ -716,7 +909,7 @@ const AddAsset = () => {
                 color: "#fff", display: "grid", placeItems: "center",
                 fontWeight: 900, fontSize: 14, flexShrink: 0,
               }}>
-                4
+                5
               </Box>
               <Box>
                 <Typography sx={{ fontWeight: 800, fontSize: 17, color: "text.primary", letterSpacing: "-0.3px" }}>
@@ -868,6 +1061,84 @@ const AddAsset = () => {
           Asset registered successfully.
         </Alert>
       </Snackbar>
+
+      {/* Optional fields empty notification popup dialog */}
+      <Dialog open={emptyFieldsDialog} onClose={() => setEmptyFieldsDialog(false)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper", p: 1 } }}>
+        <DialogTitle sx={{ fontWeight: 800, fontSize: 18, pb: 1, color: "text.primary" }}>
+          Empty Optional Fields
+        </DialogTitle>
+        <DialogContent>
+          <Typography fontSize={13} color="text.secondary" mb={2}>
+            You have left the following optional fields blank. If you'd like to fill them, click <strong>Fill Them</strong>. Otherwise, click <strong>Register Anyway</strong>.
+          </Typography>
+          <Box sx={{
+            maxHeight: 180, overflowY: "auto", bgcolor: "action.hover", p: 1.5, borderRadius: "12px", border: "1px solid", borderColor: "divider"
+          }}>
+            {blankOptionals.map((field, idx) => (
+              <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 1, mb: idx === blankOptionals.length - 1 ? 0 : 1 }}>
+                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#A855F7" }} />
+                <Typography fontSize={12} color="text.primary" fontWeight={700}>
+                  {field}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 1 }}>
+          <Button onClick={() => setEmptyFieldsDialog(false)} variant="outlined" sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "10px", flex: 1, textTransform: "none" }}>
+            Fill Them
+          </Button>
+          <Button onClick={() => { setEmptyFieldsDialog(false); handleSubmit(null, true); }} variant="contained" sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "10px", flex: 1, boxShadow: "none", textTransform: "none" }}>
+            Register Anyway
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Service Centers Selector Dialog */}
+      <Dialog open={scDialogOpen} onClose={() => setScDialogOpen(false)} fullWidth maxWidth="xs"
+        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
+        <DialogTitle sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography fontWeight={900} fontSize={17}>Select Registered Service Center</Typography>
+          <IconButton size="small" onClick={() => setScDialogOpen(false)} sx={{ bgcolor: "action.hover" }}><CloseRounded fontSize="small" /></IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 2 }}>
+          {serviceCenters.length === 0 ? (
+            <Box sx={{ py: 4, textAlign: "center" }}>
+              <Typography fontSize={13} color="text.secondary" fontWeight={600}>No registered service centers found.</Typography>
+            </Box>
+          ) : (
+            <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {serviceCenters.map(sc => (
+                <ListItemButton
+                  key={sc._id}
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      servicePartnerName: sc.name,
+                      servicePartnerContact: sc.contactPerson || "",
+                      supportPhone: sc.phone || "",
+                      supportEmail: sc.email || "",
+                    }));
+                    setScDialogOpen(false);
+                  }}
+                  sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px", p: 1.5 }}
+                >
+                  <ListItemText
+                    primary={<Typography fontWeight={800} fontSize={14}>{sc.name}</Typography>}
+                    secondary={
+                      <Typography fontSize={12} color="text.secondary" mt={0.5}>
+                        {sc.contactPerson ? `Contact: ${sc.contactPerson}` : ""}
+                        {sc.phone ? ` · Phone: ${sc.phone}` : ""}
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

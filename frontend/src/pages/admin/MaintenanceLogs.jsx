@@ -3,7 +3,7 @@ import {
   Box, Typography, Paper, Grid, TextField, InputAdornment,
   List, ListItemButton, Chip, IconButton, Dialog, DialogContent,
   Button, MenuItem, Select, FormControl, InputLabel, CircularProgress,
-  Divider, Tooltip, Skeleton,
+  Divider, Tooltip, Skeleton, Autocomplete, ListItemText, DialogTitle
 } from "@mui/material";
 import {
   BuildRounded, SearchRounded, AddRounded, EditRounded, DeleteRounded,
@@ -69,12 +69,21 @@ export default function MaintenanceLogs() {
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Load assets
+  const [serviceCenters, setServiceCenters] = useState([]);
+  const [scDialogOpen, setScDialogOpen] = useState(false);
+
+  // Load assets & service centers
   useEffect(() => {
     setLoadingAssets(true);
     api.get("/assets").then(({ data }) => {
       setAssets(Array.isArray(data) ? data : data.assets || []);
     }).catch(() => {}).finally(() => setLoadingAssets(false));
+
+    api.get("/service-centers").then(({ data }) => {
+      setServiceCenters(Array.isArray(data) ? data : data.serviceCenters || []);
+    }).catch((err) => {
+      console.error("Failed to load service centers:", err);
+    });
   }, []);
 
   // Load logs for selected asset
@@ -104,7 +113,11 @@ export default function MaintenanceLogs() {
     return { total, cost: fmtCurrency(cost), last: fmtDate(last), next: fmtDate(next) };
   })();
 
-  const openAdd = () => { setEditLog(null); setForm(EMPTY_FORM); setDialogOpen(true); };
+  const openAdd = () => {
+    setEditLog(null);
+    setForm(EMPTY_FORM);
+    setDialogOpen(true);
+  };
   const openEdit = (log) => {
     setEditLog(log);
     setForm({
@@ -551,6 +564,22 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Vendor" sx={inputSx}
                 value={form.vendor}
                 onChange={e => setForm(f => ({ ...f, vendor: e.target.value }))}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={() => setScDialogOpen(true)}
+                          sx={{ fontSize: 11, fontWeight: 800, textTransform: "none", color: "#A855F7", minWidth: 0, p: 0.5 }}
+                        >
+                          Select Registered
+                        </Button>
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -614,6 +643,50 @@ export default function MaintenanceLogs() {
             </Button>
           </Box>
         </Box>
+      </Dialog>
+
+      {/* Service Centers Selector Dialog */}
+      <Dialog open={scDialogOpen} onClose={() => setScDialogOpen(false)} fullWidth maxWidth="xs"
+        slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
+        <DialogTitle sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography fontWeight={900} fontSize={17}>Select Registered Service Center</Typography>
+          <IconButton size="small" onClick={() => setScDialogOpen(false)} sx={{ bgcolor: "action.hover" }}><CloseRounded fontSize="small" /></IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 2 }}>
+          {serviceCenters.length === 0 ? (
+            <Box sx={{ py: 4, textAlign: "center" }}>
+              <Typography fontSize={13} color="text.secondary" fontWeight={600}>No registered service centers found.</Typography>
+            </Box>
+          ) : (
+            <List sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {serviceCenters.map(sc => (
+                <ListItemButton
+                  key={sc._id}
+                  onClick={() => {
+                    setForm(prev => ({
+                      ...prev,
+                      vendor: sc.name,
+                      technicianName: sc.contactPerson || "",
+                      technicianContact: sc.phone || "",
+                    }));
+                    setScDialogOpen(false);
+                  }}
+                  sx={{ border: "1px solid", borderColor: "divider", borderRadius: "12px", p: 1.5 }}
+                >
+                  <ListItemText
+                    primary={<Typography fontWeight={800} fontSize={14}>{sc.name}</Typography>}
+                    secondary={
+                      <Typography fontSize={12} color="text.secondary" mt={0.5}>
+                        {sc.contactPerson ? `Contact: ${sc.contactPerson}` : ""}
+                        {sc.phone ? ` · Phone: ${sc.phone}` : ""}
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              ))}
+            </List>
+          )}
+        </DialogContent>
       </Dialog>
     </Box>
   );

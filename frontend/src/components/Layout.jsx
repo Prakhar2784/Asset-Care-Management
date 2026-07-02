@@ -53,6 +53,12 @@ const employeeMenu = [
   { text: "Settings",     path: "/settings",          icon: <SettingsRounded /> },
 ];
 
+const technicianMenu = [
+  { text: "My Tasks",         path: "/tickets",            icon: <ConfirmationNumberRounded /> },
+  { text: "Maintenance Logs",  path: "/admin/maintenance",  icon: <BuildRounded /> },
+  { text: "Settings",         path: "/settings",           icon: <SettingsRounded /> },
+];
+
 const superAdminMenu = [
   { text: "Platform Console", path: "/super-admin/console", icon: <DnsRounded /> },
   { text: "Settings",         path: "/settings",            icon: <SettingsRounded /> },
@@ -67,7 +73,7 @@ const Sidebar = ({ onClose }) => {
     ? (branding.logoUrl.startsWith("http") ? branding.logoUrl : `${api.defaults.baseURL?.replace(/\/api\/?$/, "")}${branding.logoUrl}`)
     : null;
 
-  const adminRoles = ["admin", "super_admin", "hod", "manager", "it_support"];
+  const adminRoles = ["admin", "super_admin", "hod", "manager", "it_support", "technician"];
   const customPerms = currentUser?.customPermissions || [];
   const hasCustomPerms = customPerms.length > 0;
   const isAdminTier = adminRoles.includes(currentUser?.role);
@@ -89,6 +95,7 @@ const Sidebar = ({ onClose }) => {
     customPerms.some(p => p.allowed && !["View Dashboard", "Raise Tickets"].includes(p.feature));
 
   const rawMenu = currentUser?.role === "super_admin" ? superAdminMenu
+    : currentUser?.role === "technician" ? technicianMenu
     : isAdminTier || employeeHasAdminPerms ? adminMenu
     : employeeMenu;
 
@@ -105,6 +112,7 @@ const Sidebar = ({ onClose }) => {
   const userInitials = userName.substring(0, 2).toUpperCase();
 
   const brandLabel = currentUser?.role === "super_admin"            ? "Platform Console"
+    : currentUser?.role === "technician"                            ? "Technician Portal"
     : adminRoles.includes(currentUser?.role)                        ? "Admin Panel"
     : "Employee Portal";
 
