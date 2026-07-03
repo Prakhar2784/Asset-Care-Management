@@ -679,7 +679,7 @@ const AddAsset = () => {
           <SectionLabel number="1" title="Hardware Specifications" subtitle="Basic technical and identity details of the asset." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 5 }}>
-              <TextField required fullWidth name="name" value={formData.name} onChange={handleChange}
+              <TextField required fullWidth autoFocus name="name" value={formData.name} onChange={handleChange}
                 sx={inputSx("name")} label="Asset Name *" placeholder="e.g. Dell Latitude 5420" />
             </Grid>
             <Grid size={{ xs: 6, md: 3 }}>
@@ -1056,7 +1056,7 @@ const AddAsset = () => {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={open} autoHideDuration={3000} onClose={() => setOpen(false)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+      <Snackbar open={open} autoHideDuration={4000} onClose={() => setOpen(false)} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity="success" variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>
           Asset registered successfully.
         </Alert>

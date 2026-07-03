@@ -51,7 +51,7 @@ import {
   DevicesRounded,
   HelpOutlineRounded,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 import StatusChip from "../../components/StatusChip";
@@ -65,6 +65,8 @@ const FORM_FACTORS = ["Movable", "Fixed"];
 
 const Assets = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const warrantyFilter = searchParams.get("filter") === "warranty";
   const { currentUser } = useAuth();
 
   // Permission helpers
@@ -163,6 +165,17 @@ const Assets = () => {
     fetchEmployees();
   }, []);
 
+  // Deep-link support: open an asset's detail drawer directly (e.g. from Global Search)
+  useEffect(() => {
+    const highlightId = searchParams.get("highlight");
+    if (!highlightId || assets.length === 0) return;
+    const match = assets.find(a => a._id === highlightId);
+    if (match) {
+      setSelected(match);
+      navigate("/admin/assets", { replace: true });
+    }
+  }, [assets, searchParams]);
+
   // Reset page when filters change
   useEffect(() => { setPage(0); }, [search, category, statusFilter]);
 
@@ -207,7 +220,8 @@ const Assets = () => {
 
   const filteredAssets = useMemo(() => {
     if (!assets) return [];
-    return assets.filter((asset) => {
+    const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    let list = assets.filter((asset) => {
       const matchesSearch =
         asset.name?.toLowerCase().includes(search.toLowerCase()) ||
         asset._id?.toLowerCase().includes(search.toLowerCase()) ||
@@ -215,9 +229,14 @@ const Assets = () => {
       const matchesCategory = category === "All" || asset.category === category;
       const matchesStatus = statusFilter === "All" || asset.status === statusFilter;
       const matchesTab = activeTab === "all" || isIncomplete(asset);
-      return matchesSearch && matchesCategory && matchesStatus && matchesTab;
+      const matchesWarranty = !warrantyFilter || (asset.warrantyEnd && new Date(asset.warrantyEnd) <= in30Days);
+      return matchesSearch && matchesCategory && matchesStatus && matchesTab && matchesWarranty;
     });
-  }, [search, category, statusFilter, activeTab, assets]);
+    if (warrantyFilter) {
+      list = [...list].sort((a, b) => new Date(a.warrantyEnd) - new Date(b.warrantyEnd));
+    }
+    return list;
+  }, [search, category, statusFilter, activeTab, assets, warrantyFilter]);
 
   const paginatedAssets = useMemo(
     () => filteredAssets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -355,6 +374,20 @@ const Assets = () => {
 
   return (
     <Box sx={{ width: "100%", pb: 5 }}>
+      {warrantyFilter && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }}
+          action={
+            <Button size="small" onClick={() => navigate("/admin/assets")} sx={{ fontWeight: 800, color: "inherit" }}>
+              Clear filter
+            </Button>
+          }
+        >
+          Showing assets whose warranty is expiring within 30 days or has already expired, sorted by soonest.
+        </Alert>
+      )}
+
       {/* Page Header */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -854,7 +887,7 @@ const Assets = () => {
         </DialogContent>
       </Dialog>
 
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>{snackbar.message}</Alert>
       </Snackbar>
 

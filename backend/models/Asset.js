@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const assetSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, trim: true, maxlength: [200, 'Asset name cannot exceed 200 characters.'] },
   category: { type: String, required: true },
   formFactor: { type: String, default: 'Movable' },
   vendor: { type: String },

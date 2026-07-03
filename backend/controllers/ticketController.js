@@ -57,7 +57,7 @@ const createTicket = async (req, res) => {
       type: 'ticket_created',
       title: 'Ticket Raised',
       message: `Your ticket ${ticketId} has been submitted${initialStatus === 'Assigned to Technician' ? ' and auto-approved to Technician' : ' and is pending HOD approval'}.`,
-      link: '/tickets'
+      link: `/tickets?highlight=${ticket._id}`
     });
  
     const itemName = populated.asset?.name || populated.itemLabel || ticketId;
@@ -71,7 +71,7 @@ const createTicket = async (req, res) => {
             type: 'ticket_created',
             title: 'New Department Ticket',
             message: `${req.user.name} raised ticket ${ticketId} for "${itemName}" pending your approval.`,
-            link: '/tickets'
+            link: `/tickets?highlight=${ticket._id}`
           });
         });
       }).catch(() => {});
@@ -84,7 +84,7 @@ const createTicket = async (req, res) => {
             type: 'ticket_created',
             title: 'New Ticket (Pending HOD)',
             message: `${req.user.name} raised ticket ${ticketId} (Pending HOD Approval).`,
-            link: '/tickets'
+            link: `/tickets?highlight=${ticket._id}`
           });
         });
       }).catch(() => {});
@@ -97,7 +97,7 @@ const createTicket = async (req, res) => {
             type: 'ticket_created',
             title: 'New Auto-Approved Ticket',
             message: `${req.user.name} raised ticket ${ticketId} (Assigned to Technician).`,
-            link: '/tickets'
+            link: `/tickets?highlight=${ticket._id}`
           });
         });
       }).catch(() => {});
@@ -225,7 +225,7 @@ const updateTicketStatus = async (req, res) => {
           type: 'ticket_status',
           title: `Ticket ${ticket.ticketId} — ${status}`,
           message: `Status changed from "${oldStatus}" → "${status}" by ${req.user.name}.`,
-          link: '/tickets'
+          link: `/tickets?highlight=${ticket._id}`
         });
       });
     }).catch(() => {});
@@ -255,7 +255,7 @@ const updateTicketStatus = async (req, res) => {
           type: 'ticket_status',
           title: hodTitle,
           message: hodMessage,
-          link: '/tickets'
+          link: `/tickets?highlight=${ticket._id}`
         });
       });
     }).catch(() => {});
@@ -267,7 +267,7 @@ const updateTicketStatus = async (req, res) => {
         type: 'ticket_assigned',
         title: '🔧 New Ticket Assigned To You',
         message: `Ticket ${ticket.ticketId} has been assigned to you by ${req.user.name}. Issue: "${ticket.issue}"`,
-        link: '/tickets'
+        link: `/tickets?highlight=${ticket._id}`
       });
     }
 
@@ -314,7 +314,7 @@ const updateTicketStatus = async (req, res) => {
           type: 'ticket_resolved',
           title: 'Ticket Resolved',
           message: `Your ticket ${ticket.ticketId} has been marked as Resolved.`,
-          link: '/tickets'
+          link: `/tickets?highlight=${ticket._id}`
         });
       } else if (status !== oldStatus) {
         sendTicketStatusEmail(ticket.raisedBy, ticket, ticket.asset, oldStatus)
@@ -324,7 +324,7 @@ const updateTicketStatus = async (req, res) => {
           type: 'ticket_status',
           title: 'Ticket Status Updated',
           message: `Your ticket ${ticket.ticketId} status changed from ${oldStatus} to ${status}.`,
-          link: '/tickets'
+          link: `/tickets?highlight=${ticket._id}`
         });
       }
     }
@@ -389,7 +389,7 @@ const confirmResolution = async (req, res) => {
           type: 'ticket_resolution_confirmed',
           title: 'Resolution Confirmed',
           message: `${ticket.raisedBy?.name || 'The user'} confirmed ticket ${ticket.ticketId} is resolved. It can now be closed.`,
-          link: '/tickets'
+          link: `/tickets?highlight=${ticket._id}`
         });
       });
     }).catch(() => {});

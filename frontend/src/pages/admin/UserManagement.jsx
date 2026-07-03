@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Button, IconButton, Dialog, DialogTitle, DialogContent,
@@ -121,6 +122,8 @@ const SortHead = ({ id, label, sort, onSort, sx = {} }) => (
 
 export default function UserManagement() {
   const { currentUser: me } = useAuth();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [users, setUsers]         = useState([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState('');
@@ -246,6 +249,18 @@ export default function UserManagement() {
     api.get('/departments').then(({ data }) => setDepartments(data)).catch(() => {});
     api.get('/settings/tenant').then(({ data }) => setTenant(data)).catch(() => {});
   }, []);
+
+  // Deep-link support: open a user's profile drawer directly (e.g. from Global Search)
+  useEffect(() => {
+    const highlightId = searchParams.get("highlight");
+    if (!highlightId || users.length === 0) return;
+    const match = users.find(u => u._id === highlightId);
+    if (match) {
+      openProfile(match);
+      navigate('/admin/users', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [users, searchParams]);
 
   const TAB_ROLES = {
     all: null,
@@ -1183,7 +1198,7 @@ export default function UserManagement() {
           <Box component="form" onSubmit={handleAdd}>
             {formError && <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>{formError}</Alert>}
             <Stack spacing={2}>
-              <TextField required fullWidth label="Full Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} sx={inputSx} />
+              <TextField required fullWidth autoFocus label="Full Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} sx={inputSx} />
               <TextField required fullWidth label="Email Address" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} sx={inputSx} />
               {addMode === 'password' && (
                 <TextField required fullWidth label="Temporary Password" type={showPass ? 'text' : 'password'} value={form.password}

@@ -16,6 +16,7 @@ import {
   ArrowForwardRounded, ChevronRightRounded
 } from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 
@@ -69,6 +70,8 @@ const generateTimeline = (ticket) => {
 
 const Tickets = () => {
   const { currentUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const isAdminOrHod = ['admin', 'super_admin', 'hod', 'manager', 'it_support'].includes(currentUser?.role);
   const isTechnician = currentUser?.role === 'technician';
 
@@ -226,6 +229,19 @@ const Tickets = () => {
     } catch (err) { setError(err.response?.data?.message || 'Failed to submit ticket.'); }
     finally { setSubmitting(false); }
   };
+
+  // Deep-link support: open a ticket's detail drawer directly (e.g. from Global Search)
+  useEffect(() => {
+    const highlightId = searchParams.get("highlight");
+    if (!highlightId || tickets.length === 0) return;
+    const match = tickets.find(t => t._id === highlightId);
+    if (match) {
+      setStatusFilter('All');
+      openDrawer(match);
+      navigate('/tickets', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tickets, searchParams]);
 
   const openDrawer = async (ticket) => {
     setSelectedTicket(ticket);
@@ -926,7 +942,7 @@ const Tickets = () => {
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', mb: 1, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.6px' }}>Select Asset / Device</Typography>
-                <TextField fullWidth select required sx={inputStyles} name="selectedItem" value={formData.selectedItem} onChange={e => setFormData({ ...formData, selectedItem: e.target.value })}>
+                <TextField fullWidth select required autoFocus sx={inputStyles} name="selectedItem" value={formData.selectedItem} onChange={e => setFormData({ ...formData, selectedItem: e.target.value })}>
                   {assets.length === 0 && approvedRequests.length === 0 && <MenuItem disabled value="">No assets available</MenuItem>}
                   {assets.length > 0 && [
                     <MenuItem key="__ah" disabled sx={{ fontSize: 11, fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.6px' }}>— Registered Assets —</MenuItem>,

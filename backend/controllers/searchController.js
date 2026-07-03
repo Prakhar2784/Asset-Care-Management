@@ -21,8 +21,10 @@ const globalSearch = async (req, res) => {
           }).select('name serialNumber category department status').limit(6)
         : Asset.find({
             isDeleted: { $ne: true },
-            $or: [{ assignedTo: req.user._id }, { assignedEmployeeEmail: req.user.email }],
-            $or: [{ name: regex }, { serialNumber: regex }]
+            $and: [
+              { $or: [{ assignedTo: req.user._id }, { assignedEmployeeEmail: req.user.email }] },
+              { $or: [{ name: regex }, { serialNumber: regex }] },
+            ],
           }).select('name serialNumber category status').limit(4),
 
       Ticket.find({

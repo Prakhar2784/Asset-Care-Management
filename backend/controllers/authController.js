@@ -248,7 +248,6 @@ const registerCompany = async (req, res) => {
         hodName: adminName,
         hodEmail: adminEmail,
         hodPhone: adminPhone || '',
-        approvalRequired: false,
         status: 'Active',
         description: 'Information Technology Department',
         tenantId: tenant.slug

@@ -1,4 +1,6 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+import { Box, CircularProgress } from "@mui/material";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
@@ -13,43 +15,44 @@ import Footer from "./components/Footer";
 import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
 
-// Import Public Pages
-import Home from "./pages/public/Home";
-import Features from "./pages/public/Features";
-import Modules from "./pages/public/Modules";
-import Workflow from "./pages/public/Workflow";
-import Contact from "./pages/public/Contact";
-import TermsAndConditions from "./pages/public/TermsAndConditions";
-import AuthPage from "./pages/auth/AuthPage";
-import RegisterCompany from "./pages/auth/RegisterCompany";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
-import Pricing from "./pages/public/Pricing";
+// Public Pages
+const Home = lazy(() => import("./pages/public/Home"));
+const Features = lazy(() => import("./pages/public/Features"));
+const Modules = lazy(() => import("./pages/public/Modules"));
+const Workflow = lazy(() => import("./pages/public/Workflow"));
+const Contact = lazy(() => import("./pages/public/Contact"));
+const TermsAndConditions = lazy(() => import("./pages/public/TermsAndConditions"));
+const AuthPage = lazy(() => import("./pages/auth/AuthPage"));
+const RegisterCompany = lazy(() => import("./pages/auth/RegisterCompany"));
+const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
+const Pricing = lazy(() => import("./pages/public/Pricing"));
+const NotFound = lazy(() => import("./pages/public/NotFound"));
 
-// Import Admin Pages
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import Assets from "./pages/admin/Assets";
-import AddAsset from "./pages/admin/AddAsset";
-import Approvals from "./pages/admin/Approvals";
-import Departments from "./pages/admin/Departments";
-import AuditLogs from "./pages/admin/AuditLogs";
-import Reports from "./pages/admin/Reports";
-import AssignedDevices from "./pages/admin/AssignedDevices";
-import UserManagement from "./pages/admin/UserManagement";
-import EnterpriseWorkspace from "./pages/admin/EnterpriseWorkspace";
-import Analytics from "./pages/admin/Analytics";
-import InvoiceManagement from "./pages/admin/InvoiceManagement";
-import ApiKeyManagement from "./pages/admin/ApiKeyManagement";
-import MaintenanceLogs from "./pages/admin/MaintenanceLogs";
-import ServiceCenters from "./pages/admin/ServiceCenters";
-import SuperAdminPanel from "./pages/superadmin/SuperAdminPanel";
+// Admin Pages
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const Assets = lazy(() => import("./pages/admin/Assets"));
+const AddAsset = lazy(() => import("./pages/admin/AddAsset"));
+const Approvals = lazy(() => import("./pages/admin/Approvals"));
+const Departments = lazy(() => import("./pages/admin/Departments"));
+const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
+const Reports = lazy(() => import("./pages/admin/Reports"));
+const AssignedDevices = lazy(() => import("./pages/admin/AssignedDevices"));
+const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
+const EnterpriseWorkspace = lazy(() => import("./pages/admin/EnterpriseWorkspace"));
+const Analytics = lazy(() => import("./pages/admin/Analytics"));
+const InvoiceManagement = lazy(() => import("./pages/admin/InvoiceManagement"));
+const ApiKeyManagement = lazy(() => import("./pages/admin/ApiKeyManagement"));
+const MaintenanceLogs = lazy(() => import("./pages/admin/MaintenanceLogs"));
+const ServiceCenters = lazy(() => import("./pages/admin/ServiceCenters"));
+const SuperAdminPanel = lazy(() => import("./pages/superadmin/SuperAdminPanel"));
 
-// Import Employee, Technician & Shared Pages
-import EmployeePortal from "./pages/employee/EmployeePortal";
-import TechnicianPortal from "./pages/technician/TechnicianPortal";
-import Tickets from "./pages/shared/Tickets";
-import Notifications from "./pages/shared/Notifications";
-import Settings from "./pages/shared/Settings";
+// Employee, Technician & Shared Pages
+const EmployeePortal = lazy(() => import("./pages/employee/EmployeePortal"));
+const TechnicianPortal = lazy(() => import("./pages/technician/TechnicianPortal"));
+const Tickets = lazy(() => import("./pages/shared/Tickets"));
+const Notifications = lazy(() => import("./pages/shared/Notifications"));
+const Settings = lazy(() => import("./pages/shared/Settings"));
 
 const WebsiteLayout = ({ children }) => (
   <>
@@ -59,11 +62,18 @@ const WebsiteLayout = ({ children }) => (
   </>
 );
 
+const RouteFallback = () => (
+  <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <CircularProgress sx={{ color: "#A855F7" }} />
+  </Box>
+);
+
 function App() {
   return (
     <AuthProvider>
     <ThemeProvider>
       <ScrollToTop />
+      <Suspense fallback={<RouteFallback />}>
       <Routes>
         {/* PUBLIC ROUTES - Anyone can access */}
         <Route path="/" element={<WebsiteLayout><Home /></WebsiteLayout>} />
@@ -81,11 +91,11 @@ function App() {
         {/* SECURE ROUTES - Must be logged in */}
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>
-            
+
             {/* Employee Route (Admins can view this too if they navigate to it) */}
             <Route path="/employee/portal" element={<EmployeePortal />} />
             <Route path="/technician/portal" element={<TechnicianPortal />} />
-            
+
             {/* Shared Route (Both roles use this to see tickets) */}
             <Route path="/tickets" element={<Tickets />} />
             <Route path="/notifications" element={<Notifications />} />
@@ -117,9 +127,10 @@ function App() {
           </Route>
         </Route>
 
-        {/* Catch-all: Redirect unknown URLs to home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Catch-all: show a proper 404 instead of silently redirecting */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
     </ThemeProvider>
     </AuthProvider>
   );

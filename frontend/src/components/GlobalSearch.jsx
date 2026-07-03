@@ -28,7 +28,7 @@ export default function GlobalSearch() {
   const wrapperRef  = useRef(null);
   const navigate    = useNavigate();
   const { currentUser } = useAuth();
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = ['admin', 'super_admin', 'hod'].includes(currentUser?.role);
   const debounceRef = useRef(null);
 
   const search = useCallback(async (q) => {
@@ -165,7 +165,7 @@ export default function GlobalSearch() {
                       Assets
                     </Typography>
                     {results.assets.map(a => (
-                      <Box key={a._id} onClick={() => goTo('/admin/assets')}
+                      <Box key={a._id} onClick={() => goTo(`/admin/assets?highlight=${a._id}`)}
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}>
                         <Box sx={{ width: 30, height: 30, borderRadius: '8px', bgcolor: 'rgba(168,85,247,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <Inventory2Rounded sx={{ fontSize: 16, color: '#A855F7' }} />
@@ -188,7 +188,7 @@ export default function GlobalSearch() {
                       Tickets
                     </Typography>
                     {results.tickets.map(t => (
-                      <Box key={t._id} onClick={() => goTo('/tickets')}
+                      <Box key={t._id} onClick={() => goTo(`/tickets?highlight=${t._id}`)}
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}>
                         <Box sx={{ width: 30, height: 30, borderRadius: '8px', bgcolor: 'rgba(37,99,235,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <ConfirmationNumberRounded sx={{ fontSize: 16, color: '#2563EB' }} />
@@ -211,7 +211,7 @@ export default function GlobalSearch() {
                       Users
                     </Typography>
                     {results.users.map(u => (
-                      <Box key={u._id} onClick={() => goTo('/admin/users')}
+                      <Box key={u._id} onClick={() => goTo(`/admin/users?highlight=${u._id}`)}
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}>
                         <Box sx={{ width: 30, height: 30, borderRadius: '50%', bgcolor: 'rgba(217,119,6,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <PersonRounded sx={{ fontSize: 16, color: '#d97706' }} />

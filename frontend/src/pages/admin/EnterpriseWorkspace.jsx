@@ -244,7 +244,7 @@ const EnterpriseWorkspace = () => {
         const card = printWindow.document.createElement("div");
         card.className = "label-card";
         card.innerHTML = `
-          <img class="qr-code" src="${qrDataUrl}" />
+          <img class="qr-code" src="${qrDataUrl}" alt="QR code for ${a.name}" />
           <div class="details">
             <div class="title">${a.name}</div>
             <div><strong>Serial:</strong> ${a.serialNumber}</div>

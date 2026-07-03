@@ -13,7 +13,6 @@ import {
   MenuItem,
   Paper,
   Snackbar,
-  Switch,
   TextField,
   Typography,
 } from "@mui/material";
@@ -25,7 +24,6 @@ import {
   DeleteRounded,
   EditRounded,
   EmailRounded,
-  GppGoodRounded,
   LocationOnRounded,
   PhoneRounded,
   SaveRounded,
@@ -42,13 +40,9 @@ const initialForm = {
   hodPhone: "",
   location: "",
   floor: "",
-  approvalRequired: true,
-  approvalLevel: "HOD Only",
   status: "Active",
   description: "",
 };
-
-const approvalLevels = ["HOD Only", "HOD + Admin", "HOD + Finance", "Admin Only"];
 
 const inputStyles = {
   "& .MuiOutlinedInput-root": {
@@ -92,7 +86,6 @@ const Departments = () => {
   const summary = useMemo(() => ({
     total: departments.length,
     active: departments.filter(d => d.status === "Active").length,
-    approval: departments.filter(d => d.approvalRequired).length,
   }), [departments]);
 
   const handleChange = (field, value) => {
@@ -159,7 +152,6 @@ const Departments = () => {
   const kpis = [
     { label: "Total Departments", value: summary.total,    color: "#A855F7", icon: <ApartmentRounded fontSize="small" /> },
     { label: "Active",            value: summary.active,   color: "#22C55E", icon: <CheckCircleRounded fontSize="small" /> },
-    { label: "Approval Required", value: summary.approval, color: "#F59E0B", icon: <GppGoodRounded fontSize="small" /> },
   ];
 
   return (
@@ -258,15 +250,7 @@ const Departments = () => {
 
                 <Divider sx={{ my: 2 }} />
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                  <GppGoodRounded sx={{ fontSize: 16, color: dept.approvalRequired ? "#F59E0B" : "text.disabled" }} />
-                  <Typography fontSize={13} fontWeight={700} color="text.secondary">Approval Flow</Typography>
-                </Box>
-                <Typography fontSize={14} fontWeight={800} color="text.primary">
-                  {dept.approvalRequired ? dept.approvalLevel : "Approval not required"}
-                </Typography>
-
-                <Box sx={{ display: "flex", gap: 1.2, mt: 2.5 }}>
+                <Box sx={{ display: "flex", gap: 1.2 }}>
                   <Button fullWidth variant="outlined" startIcon={<VisibilityRounded />}
                     onClick={() => { setSelectedDept(dept); setDetailOpen(true); }}
                     sx={{ borderRadius: "10px", fontWeight: 800, textTransform: "none", borderColor: "divider", color: "text.primary", fontSize: 13 }}>
@@ -310,7 +294,7 @@ const Departments = () => {
           <FormBlock title="Department Details">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth required label="Department Name" value={formData.name} onChange={e => handleChange("name", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth required autoFocus label="Department Name" value={formData.name} onChange={e => handleChange("name", e.target.value)} sx={inputStyles} />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField fullWidth required label="Department Code" value={formData.code} onChange={e => handleChange("code", e.target.value)} sx={inputStyles} />
@@ -338,20 +322,8 @@ const Departments = () => {
             </Grid>
           </FormBlock>
 
-          <FormBlock title="Approval Settings">
+          <FormBlock title="Status">
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Box sx={{ height: "100%", minHeight: 56, px: 2, borderRadius: "12px", border: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <Typography fontWeight={800} fontSize={14}>Approval Required</Typography>
-                  <Switch checked={formData.approvalRequired} onChange={e => handleChange("approvalRequired", e.target.checked)} />
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField select fullWidth label="Approval Level" value={formData.approvalLevel} onChange={e => handleChange("approvalLevel", e.target.value)}
-                  disabled={!formData.approvalRequired} sx={inputStyles}>
-                  {approvalLevels.map(item => <MenuItem key={item} value={item}>{item}</MenuItem>)}
-                </TextField>
-              </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
                 <TextField select fullWidth label="Status" value={formData.status} onChange={e => handleChange("status", e.target.value)} sx={inputStyles}>
                   <MenuItem value="Active">Active</MenuItem>
@@ -406,8 +378,6 @@ const Departments = () => {
               <DetailRow label="HOD Phone" value={selectedDept.hodPhone} />
               <DetailRow label="Location" value={selectedDept.location} />
               <DetailRow label="Floor / Building" value={selectedDept.floor} />
-              <DetailRow label="Approval Required" value={selectedDept.approvalRequired ? "Yes" : "No"} />
-              <DetailRow label="Approval Level" value={selectedDept.approvalLevel} />
               <DetailRow label="Status" value={selectedDept.status} />
               <DetailRow label="Description" value={selectedDept.description} />
             </Box>
@@ -448,7 +418,7 @@ const Departments = () => {
         </DialogActions>
       </Dialog>
 
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({ ...snackbar, open: false })}
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: "12px" }}>
           {snackbar.message}

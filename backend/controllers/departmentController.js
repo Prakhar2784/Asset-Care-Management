@@ -33,8 +33,6 @@ const createDepartment = async (req, res) => {
       hodPhone,
       location,
       floor,
-      approvalRequired,
-      approvalLevel,
       status,
       description,
     } = req.body;
@@ -61,8 +59,6 @@ const createDepartment = async (req, res) => {
       hodPhone,
       location,
       floor,
-      approvalRequired,
-      approvalLevel,
       status: status || "Active",
       description,
       createdBy: req.user?._id,

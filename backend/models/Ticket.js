@@ -5,9 +5,11 @@ const ticketSchema = new mongoose.Schema({
     type: String, 
     required: true
   }, // e.g., "SRV-089"
-  issue: { 
-    type: String, 
-    required: true 
+  issue: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [2000, 'Issue description cannot exceed 2000 characters.']
   },
   priority: { 
     type: String, 
@@ -92,7 +94,7 @@ const ticketSchema = new mongoose.Schema({
 
   // Comments / thread
   comments: [{
-    text:      { type: String, required: true },
+    text:      { type: String, required: true, trim: true, maxlength: [1000, 'Comment cannot exceed 1000 characters.'] },
     author:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     authorName: String,
     createdAt: { type: Date, default: Date.now },

@@ -152,7 +152,7 @@ const AdminDashboard = () => {
     { label: "Active Repairs",    value: dashboardData?.activeRepairs,        sub: "Currently under service",    icon: <BuildRounded />,               accent: "#EF4444", route: "/tickets",         show: canViewAssets },
     { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#F59E0B", route: "/admin/approvals", show: canApprove },
     { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#3B82F6", route: "/tickets",         show: canViewTickets || isAdminTier },
-    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within next 30 days",       icon: <ShieldRounded />,               accent: "#EA580C", route: "/admin/assets",    show: canViewAssets },
+    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within 30 days or overdue",       icon: <ShieldRounded />,               accent: "#EA580C", route: "/admin/assets",    show: canViewAssets },
     { label: "Device Requests",   value: dashboardData?.pendingRequests,      sub: "Awaiting review",            icon: <DevicesRounded />,              accent: "#8B5CF6", route: "/admin/approvals", show: canApprove },
   ].filter(k => k.show);
 
@@ -170,10 +170,10 @@ const AdminDashboard = () => {
 
   /* ── banner stat strip ── */
   const bannerStats = [
-    canViewAssets              && { label: "Total Assets",   value: dashboardData?.totalAssets ?? 0,          icon: <Inventory2Rounded sx={{ fontSize: 16 }} />,       color: "#C4B5FD" },
-    canViewAssets              && { label: "Active Repairs", value: dashboardData?.activeRepairs ?? 0,         icon: <BuildRounded sx={{ fontSize: 16 }} />,            color: "#FCA5A5" },
-    canViewAssets              && { label: "Warranty Alert", value: dashboardData?.warrantyExpiringSoon ?? 0,  icon: <ShieldRounded sx={{ fontSize: 16 }} />,           color: "#FCD34D" },
-    (canViewTickets || isAdminTier) && { label: "Open Tickets", value: dashboardData?.totalTickets ?? 0,      icon: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />, color: "#6EE7B7" },
+    canViewAssets              && { label: "Total Assets",   value: dashboardData?.totalAssets ?? 0,          icon: <Inventory2Rounded sx={{ fontSize: 16 }} />,       color: "#C4B5FD", route: "/admin/assets" },
+    canViewAssets              && { label: "Active Repairs", value: dashboardData?.activeRepairs ?? 0,         icon: <BuildRounded sx={{ fontSize: 16 }} />,            color: "#FCA5A5", route: "/tickets" },
+    canViewAssets              && { label: "Warranty Alert", value: dashboardData?.warrantyExpiringSoon ?? 0,  icon: <ShieldRounded sx={{ fontSize: 16 }} />,           color: "#FCD34D", route: "/admin/assets?filter=warranty" },
+    (canViewTickets || isAdminTier) && { label: "Open Tickets", value: dashboardData?.totalTickets ?? 0,      icon: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />, color: "#6EE7B7", route: "/tickets" },
   ].filter(Boolean);
 
   return (
@@ -238,10 +238,13 @@ const AdminDashboard = () => {
             borderTop: "1px solid rgba(255,255,255,0.12)",
           }}>
             {bannerStats.map((s, i) => (
-              <Box key={s.label} sx={{
+              <Box key={s.label} onClick={() => s.route && navigate(s.route)} sx={{
                 px: { xs: 2, md: 3 }, py: 2,
                 borderRight: i < bannerStats.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
                 display: "flex", alignItems: "center", gap: 1.5,
+                cursor: s.route ? "pointer" : "default",
+                transition: "background-color 0.15s",
+                "&:hover": s.route ? { bgcolor: "rgba(255,255,255,0.06)" } : {},
               }}>
                 <Box sx={{ width: 34, height: 34, borderRadius: "9px", flexShrink: 0, bgcolor: "rgba(255,255,255,0.1)", display: "grid", placeItems: "center", color: s.color }}>
                   {s.icon}
@@ -506,7 +509,7 @@ const AdminDashboard = () => {
         )}
       </Dialog>
 
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
         <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: "14px", fontWeight: 800 }}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>

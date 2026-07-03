@@ -265,7 +265,7 @@ export default function AssignedDevices() {
 
       <Snackbar
         open={!!toast}
-        autoHideDuration={3500}
+        autoHideDuration={4000}
         onClose={() => setToast('')}
         message={toast}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

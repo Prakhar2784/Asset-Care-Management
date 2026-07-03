@@ -36,15 +36,6 @@ const departmentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    approvalRequired: {
-      type: Boolean,
-      default: true,
-    },
-    approvalLevel: {
-      type: String,
-      enum: ["HOD Only", "HOD + Admin", "HOD + Finance", "Admin Only"],
-      default: "HOD Only",
-    },
     status: {
       type: String,
       enum: ["Active", "Inactive"],

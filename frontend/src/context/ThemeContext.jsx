@@ -100,7 +100,21 @@ const ThemeProviderInner = ({ children }) => {
             `,
             backgroundAttachment: 'fixed',
             minHeight: '100vh',
-          }
+          },
+          // Themed scrollbar (WebKit + Firefox) instead of the default browser bar
+          '*': {
+            scrollbarWidth: 'thin',
+            scrollbarColor: isDark ? 'rgba(168,85,247,0.35) transparent' : 'rgba(124,58,237,0.30) transparent',
+          },
+          '*::-webkit-scrollbar': { width: 8, height: 8 },
+          '*::-webkit-scrollbar-track': { background: 'transparent' },
+          '*::-webkit-scrollbar-thumb': {
+            background: isDark ? 'rgba(168,85,247,0.35)' : 'rgba(124,58,237,0.30)',
+            borderRadius: 8,
+          },
+          '*::-webkit-scrollbar-thumb:hover': {
+            background: isDark ? 'rgba(168,85,247,0.55)' : 'rgba(124,58,237,0.50)',
+          },
         }
       },
       MuiPaper: {

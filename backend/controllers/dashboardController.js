@@ -25,7 +25,8 @@ const getDashboardStats = async (req, res) => {
       Ticket.countDocuments({ status: 'Pending Approval' }),
       Ticket.countDocuments({ status: { $in: ['Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair'] } }),
       Ticket.countDocuments({ status: 'Resolved' }),
-      Asset.countDocuments({ isDeleted: { $ne: true }, warrantyEnd: { $gte: now, $lte: in30Days } }),
+      // Counts assets already past warranty as well as those expiring within 30 days
+      Asset.countDocuments({ isDeleted: { $ne: true }, warrantyEnd: { $ne: null, $lte: in30Days } }),
       DeviceRequest.countDocuments({ status: 'Pending' }),
       Ticket.find({})
         .sort({ createdAt: -1 })

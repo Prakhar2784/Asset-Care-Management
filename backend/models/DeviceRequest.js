@@ -16,7 +16,9 @@ const deviceRequestSchema = new mongoose.Schema({
   },
   reason: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
+    maxlength: [1000, 'Reason cannot exceed 1000 characters.']
   },
   urgency: {
     type: String,

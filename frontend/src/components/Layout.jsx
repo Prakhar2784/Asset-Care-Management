@@ -229,7 +229,6 @@ const PAGE_TITLES = {
   "/admin/assets/add":    "Register Asset",
   "/admin/assets":        "Asset Registry",
   "/admin/assignments":   "Assigned Devices",
-  "/admin/procurement":   "Procurement",
   "/admin/enterprise":    "Enterprise Hub",
   "/admin/analytics":     "Analytics",
   "/admin/approvals":     "Approvals",
