@@ -150,8 +150,8 @@ const Departments = () => {
   };
 
   const kpis = [
-    { label: "Total Departments", value: summary.total,    color: "#A855F7", icon: <ApartmentRounded fontSize="small" /> },
-    { label: "Active",            value: summary.active,   color: "#22C55E", icon: <CheckCircleRounded fontSize="small" /> },
+    { label: "Total Departments", value: summary.total,    color: "text.primary", icon: <ApartmentRounded fontSize="small" /> },
+    { label: "Active",            value: summary.active,   color: "#FBBF24", icon: <CheckCircleRounded fontSize="small" /> },
   ];
 
   return (
@@ -159,8 +159,8 @@ const Departments = () => {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
-            <ApartmentRounded sx={{ color: "#A855F7" }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+            <ApartmentRounded sx={{ color: "text.primary" }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Departments</Typography>
@@ -170,7 +170,7 @@ const Departments = () => {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm}
-          sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
+          sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
           Add Department
         </Button>
       </Box>
@@ -199,14 +199,14 @@ const Departments = () => {
         </Box>
       ) : departments.length === 0 ? (
         <Paper sx={{ p: 8, textAlign: "center", borderRadius: "20px", border: "1px dashed", borderColor: "divider" }}>
-          <Box sx={{ width: 72, height: 72, borderRadius: "20px", bgcolor: "rgba(124,58,237,0.08)", display: "grid", placeItems: "center", mx: "auto", mb: 2 }}>
-            <ApartmentRounded sx={{ fontSize: 36, color: "#A855F7" }} />
+          <Box sx={{ width: 72, height: 72, borderRadius: "20px", bgcolor: "rgba(17,24,39,0.08)", display: "grid", placeItems: "center", mx: "auto", mb: 2 }}>
+            <ApartmentRounded sx={{ fontSize: 36, color: "text.primary" }} />
           </Box>
           <Typography fontWeight={800} fontSize={20} color="text.primary">No departments added yet</Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             Add departments to manage approvals and asset ownership.
           </Typography>
-          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
             Add First Department
           </Button>
         </Paper>
@@ -217,13 +217,13 @@ const Departments = () => {
               <Paper sx={{
                 p: 3, borderRadius: "20px", border: "1px solid", borderColor: "divider",
                 height: "100%", bgcolor: "background.paper", position: "relative", overflow: "hidden",
-                transition: "box-shadow 0.2s", "&:hover": { boxShadow: "0 8px 32px rgba(124,58,237,0.12)" }
+                transition: "box-shadow 0.2s", "&:hover": { boxShadow: "0 8px 32px rgba(17,24,39,0.12)" }
               }}>
                 {/* Top accent bar */}
-                <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#7C3AED,#A855F7)" }} />
+                <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#111827" }} />
 
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mt: 0.5 }}>
-                  <Box sx={{ width: 52, height: 52, borderRadius: "14px", bgcolor: "rgba(124,58,237,0.10)", color: "#A855F7", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ width: 52, height: 52, borderRadius: "14px", bgcolor: "rgba(17,24,39,0.10)", color: "text.primary", display: "grid", placeItems: "center" }}>
                     <ApartmentRounded sx={{ fontSize: 28 }} />
                   </Box>
                   <Box sx={{
@@ -275,9 +275,9 @@ const Departments = () => {
       <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="md"
         slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden" } } }}>
         {/* Gradient Header */}
-        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
               <ApartmentRounded sx={{ color: "#fff", fontSize: 22 }} />
             </Box>
             <Box>
@@ -343,7 +343,7 @@ const Departments = () => {
           </Button>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSaveDepartment} disabled={saving}
-            sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
+            sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
             {saving ? "Saving..." : mode === "add" ? "Save Department" : "Update Department"}
           </Button>
         </DialogActions>
@@ -352,9 +352,9 @@ const Departments = () => {
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} fullWidth maxWidth="sm"
         slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden" } } }}>
-        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
               <ApartmentRounded sx={{ color: "#fff", fontSize: 22 }} />
             </Box>
             <Box>

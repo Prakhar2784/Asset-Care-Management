@@ -13,7 +13,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import { useAuth } from "../../context/AuthContext";
 
-const ADMIN_TIER_ROLES = ["admin", "super_admin", "hod", "manager", "it_support"];
+const ADMIN_TIER_ROLES = ["admin", "super_admin", "hod", "manager"];
 const BASIC_PERMS = ["View Dashboard", "Raise Tickets"];
 
 // Mirrors AdminRoute's access check: admin-tier roles, and employees granted
@@ -157,13 +157,13 @@ const AuthPage = () => {
     <>
       <style>{`
         :root {
-          --auth-primary: #A855F7;
-          --auth-secondary: #7C3AED;
-          --auth-bg: #080812;
+          --auth-primary: #111827;
+          --auth-secondary: #111827;
+          --auth-bg: #0B0D12;
           --text-main: #FFFFFF;
-          --text-muted: #8B8BAA;
-          --input-bg: rgba(15,10,40,0.6);
-          --input-border: rgba(168,85,247,0.2);
+          --text-muted: #9CA3AF;
+          --input-bg: rgba(20,20,20,0.75);
+          --input-border: rgba(17,24,39,0.2);
         }
 
         @keyframes fadeInUp {
@@ -183,8 +183,8 @@ const AuthPage = () => {
           align-items: center;
           justify-content: center;
           background:
-            radial-gradient(ellipse at 15% 0%, rgba(124,58,237,0.22) 0%, transparent 55%),
-            radial-gradient(ellipse at 85% 100%, rgba(168,85,247,0.16) 0%, transparent 55%),
+            radial-gradient(ellipse at 15% 0%, rgba(17,24,39,0.22) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 100%, rgba(17,24,39,0.16) 0%, transparent 55%),
             var(--auth-bg);
           background-attachment: fixed;
           font-family: 'Inter', sans-serif;
@@ -193,22 +193,22 @@ const AuthPage = () => {
         .auth-container {
           width: 100%;
           max-width: 1200px;
-          background: rgba(15, 10, 40, 0.70);
+          background: rgba(255, 255, 255, 0.70);
           backdrop-filter: blur(24px);
           -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(168,85,247,0.18);
+          border: 1px solid rgba(17,24,39,0.18);
           border-radius: 36px;
           box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
           display: flex;
           overflow: hidden;
           animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          border: 1px solid rgba(168,85,247,0.15);
+          border: 1px solid rgba(17,24,39,0.15);
           backdrop-filter: blur(20px);
         }
 
         .auth-info {
           flex: 1;
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          background: #111827;
           padding: 70px 50px;
           color: white;
           display: flex;
@@ -226,7 +226,7 @@ const AuthPage = () => {
           right: 24px;
           width: 180px;
           height: 180px;
-          border: 1px dashed rgba(168,85,247,0.22);
+          border: 1px dashed rgba(17,24,39,0.22);
           border-radius: 50%;
           animation: floatSoft 5s ease-in-out infinite;
         }
@@ -238,7 +238,7 @@ const AuthPage = () => {
           right: -20%;
           width: 420px;
           height: 420px;
-          background: radial-gradient(circle, rgba(168,85,247,0.14) 0%, rgba(0,0,0,0) 70%);
+          background: radial-gradient(circle, rgba(17,24,39,0.14) 0%, rgba(0,0,0,0) 70%);
           border-radius: 50%;
         }
 
@@ -248,9 +248,9 @@ const AuthPage = () => {
           border-radius: 16px;
           display: grid;
           place-items: center;
-          background: #A855F7;
-          box-shadow: 0 14px 28px rgba(168,85,247,0.28);
-          border: 1px solid rgba(168,85,247,0.30);
+          background: #111827;
+          box-shadow: 0 14px 28px rgba(17,24,39,0.28);
+          border: 1px solid rgba(17,24,39,0.30);
         }
 
         .info-list {
@@ -284,7 +284,7 @@ const AuthPage = () => {
         .auth-form-container {
           flex: 1;
           padding: 70px 54px;
-          background: rgba(15,10,40,0.55);
+          background: rgba(20,20,20,0.7);
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -296,7 +296,7 @@ const AuthPage = () => {
           padding: 6px;
           border-radius: 18px;
           margin-bottom: 32px;
-          border: 1px solid rgba(168,85,247,0.2);
+          border: 1px solid rgba(17,24,39,0.2);
         }
 
         .role-btn {
@@ -317,7 +317,7 @@ const AuthPage = () => {
         }
 
         .role-btn.active {
-          background: rgba(15,10,40,0.55);
+          background: rgba(20,20,20,0.7);
           color: #FFFFFF;
           box-shadow: 0 10px 20px rgba(17,17,17,0.08);
         }
@@ -383,19 +383,19 @@ const AuthPage = () => {
         }
 
         .input-wrapper:focus-within .input-icon {
-          color: #A855F7;
+          color: #FFFFFF;
         }
 
         .input-wrapper:focus-within .auth-input {
-          border-color: #A855F7;
-          box-shadow: 0 0 0 3px rgba(168,85,247,0.15);
-          background-color: rgba(20,12,50,0.8);
+          border-color: #FFFFFF;
+          box-shadow: 0 0 0 3px rgba(17,24,39,0.15);
+          background-color: rgba(25,25,25,0.85);
         }
 
         .auth-btn {
           width: 100%;
           padding: 18px;
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          background: #111827;
           color: #FFFFFF !important;
           -webkit-text-fill-color: #FFFFFF;
           border: none;
@@ -412,7 +412,7 @@ const AuthPage = () => {
         .auth-btn:hover {
           transform: translateY(-3px);
           box-shadow: 0 22px 42px rgba(17,17,17,0.32);
-          background: linear-gradient(135deg, #6D28D9, #9333EA);
+          background: #1F2937;
         }
 
         .auth-btn:disabled {
@@ -442,8 +442,8 @@ const AuthPage = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 6px 14px;
-          background: rgba(30,20,60,0.5);
-          border: 1.5px solid rgba(168,85,247,0.2);
+          background: rgba(20,20,20,0.65);
+          border: 1.5px solid rgba(17,24,39,0.2);
           border-radius: 14px;
           padding: 12px 16px;
           margin-bottom: 16px;
@@ -489,8 +489,8 @@ const AuthPage = () => {
         }
 
         .auth-stat-card {
-          background: rgba(30,20,60,0.5);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.65);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 16px;
           padding: 15px;
           text-align: center;
@@ -680,7 +680,7 @@ const AuthPage = () => {
               {view === "login" && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "32px" }}>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)", fontSize: "14px", cursor: "pointer", fontWeight: "600" }}>
-                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: "#A855F7", width: "16px", height: "16px" }} /> Remember me
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: "#FFFFFF", width: "16px", height: "16px" }} /> Remember me
                   </label>
                   <button type="button" className="auth-link" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
                 </div>
@@ -699,7 +699,7 @@ const AuthPage = () => {
 
             {view !== "forgot" && (
               <div style={{
-                marginTop: "20px", paddingTop: "20px", borderTop: "1px solid var(--border-color, rgba(168,85,247,0.15))",
+                marginTop: "20px", paddingTop: "20px", borderTop: "1px solid var(--border-color, rgba(17,24,39,0.15))",
                 textAlign: "center", fontSize: "14px", fontWeight: 600, color: "var(--text-muted)"
               }}>
                 New company? <button type="button" className="auth-link" onClick={() => navigate('/register-company')}>Get Started Free</button>

@@ -20,7 +20,7 @@ const TYPE_COLOR = {
   Preventive:  { bg: "rgba(34,197,94,0.12)",  color: "#22C55E" },
   Corrective:  { bg: "rgba(245,158,11,0.12)", color: "#F59E0B" },
   Inspection:  { bg: "rgba(59,130,246,0.12)", color: "#3B82F6" },
-  Upgrade:     { bg: "rgba(168,85,247,0.12)", color: "#A855F7" },
+  Upgrade:     { bg: "rgba(17,24,39,0.12)", color: "text.primary" },
   Other:       { bg: "rgba(107,114,128,0.12)",color: "#6B7280" },
 };
 
@@ -32,10 +32,10 @@ const STATUS_COLOR = {
 };
 
 const KPI_DEFS = [
-  { key: "total",    label: "Total Services", color: "#A855F7", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
-  { key: "cost",     label: "Total Cost",     color: "#22C55E", icon: <AttachMoneyRounded sx={{ fontSize: 20 }} /> },
-  { key: "last",     label: "Last Serviced",  color: "#3B82F6", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
-  { key: "next",     label: "Next Due",       color: "#F59E0B", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
+  { key: "total",    label: "Total Services", color: "text.primary", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
+  { key: "cost",     label: "Total Cost",     color: "#FBBF24", icon: <AttachMoneyRounded sx={{ fontSize: 20 }} /> },
+  { key: "last",     label: "Last Serviced",  color: "#FBBF24", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
+  { key: "next",     label: "Next Due",       color: "#FBBF24", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
 ];
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
@@ -169,8 +169,8 @@ export default function MaintenanceLogs() {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
-            <BuildRounded sx={{ color: "#A855F7" }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+            <BuildRounded sx={{ color: "text.primary" }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Maintenance Logs</Typography>
@@ -223,9 +223,9 @@ export default function MaintenanceLogs() {
                           onClick={() => selectAsset(asset)}
                           sx={{
                             px: 2, py: 1.5,
-                            borderLeft: `3px solid ${selected ? "#A855F7" : "transparent"}`,
-                            bgcolor: selected ? "rgba(168,85,247,0.08)" : "transparent",
-                            "&:hover": { bgcolor: "rgba(168,85,247,0.05)" },
+                            borderLeft: `3px solid ${selected ? "#111827" : "transparent"}`,
+                            bgcolor: selected ? "rgba(17,24,39,0.08)" : "transparent",
+                            "&:hover": { bgcolor: "rgba(17,24,39,0.05)" },
                           }}
                         >
                           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -264,8 +264,8 @@ export default function MaintenanceLogs() {
               display: "flex", flexDirection: "column", alignItems: "center",
               justifyContent: "center", minHeight: 400, gap: 2,
             }}>
-              <Box sx={{ width: 64, height: 64, borderRadius: "16px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.08)" }}>
-                <BuildRounded sx={{ color: "#A855F7", fontSize: 32 }} />
+              <Box sx={{ width: 64, height: 64, borderRadius: "16px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.08)" }}>
+                <BuildRounded sx={{ color: "text.primary", fontSize: 32 }} />
               </Box>
               <Typography variant="h6" fontWeight={700} color="text.secondary">Select an asset to view maintenance logs</Typography>
               <Typography variant="body2" color="text.secondary">Choose an asset from the left panel to get started</Typography>
@@ -276,8 +276,8 @@ export default function MaintenanceLogs() {
               <Paper sx={{ p: 2.5, borderRadius: "16px", border: 1, borderColor: "divider" }}>
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(168,85,247,0.12)" }}>
-                      <InventoryRounded sx={{ color: "#A855F7" }} />
+                    <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+                      <InventoryRounded sx={{ color: "text.primary" }} />
                     </Box>
                     <Box>
                       <Typography variant="subtitle1" fontWeight={800}>{selectedAsset.name}</Typography>
@@ -291,7 +291,7 @@ export default function MaintenanceLogs() {
                     startIcon={<AddRounded />}
                     onClick={openAdd}
                     sx={{
-                      background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+                      background: "#111827",
                       color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
                     }}
                   >
@@ -477,14 +477,14 @@ export default function MaintenanceLogs() {
         {/* Dialog header */}
         <Box sx={{
           p: 3,
-          background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))",
+          background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))",
           borderBottom: "1px solid", borderColor: "divider",
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box sx={{
               width: 44, height: 44, borderRadius: "12px",
-              background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+              background: "#111827",
               display: "grid", placeItems: "center",
             }}>
               <EngineeringRounded sx={{ color: "#fff" }} />
@@ -572,7 +572,7 @@ export default function MaintenanceLogs() {
                           variant="text"
                           size="small"
                           onClick={() => setScDialogOpen(true)}
-                          sx={{ fontSize: 11, fontWeight: 800, textTransform: "none", color: "#A855F7", minWidth: 0, p: 0.5 }}
+                          sx={{ fontSize: 11, fontWeight: 800, textTransform: "none", color: "text.primary", minWidth: 0, p: 0.5 }}
                         >
                           Select Registered
                         </Button>
@@ -609,7 +609,7 @@ export default function MaintenanceLogs() {
             onClick={handleSave}
             disabled={saving}
             sx={{
-              background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+              background: "#111827",
               color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
               minWidth: 120,
             }}

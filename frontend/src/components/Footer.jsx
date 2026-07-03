@@ -9,11 +9,10 @@ const Footer = () => {
     <>
       <style>{`
         .site-footer {
-          background: rgba(8, 6, 20, 0.95);
-          backdrop-filter: blur(20px);
-          border-top: 1px solid rgba(168,85,247,0.18);
+          background: #000000;
+          border-top: 1px solid rgba(255,255,255,0.1);
           padding: 72px 24px 24px;
-          color: #8B8BAA;
+          color: #9CA3AF;
           font-family: 'Inter', sans-serif;
         }
 
@@ -34,7 +33,7 @@ const Footer = () => {
         }
 
         .footer-brand-icon {
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          background: #111827;
           color: #FFFFFF;
           width: 38px;
           height: 38px;
@@ -56,7 +55,7 @@ const Footer = () => {
           line-height: 1.75;
           font-size: 14.5px;
           max-width: 360px;
-          color: #8B8BAA;
+          color: #9CA3AF;
           font-weight: 500;
           margin-bottom: 22px;
         }
@@ -67,9 +66,9 @@ const Footer = () => {
           gap: 8px;
           padding: 9px 14px;
           border-radius: 999px;
-          background: rgba(168,85,247,0.08);
-          border: 1px solid rgba(168,85,247,0.18);
-          color: #A855F7;
+          background: rgba(17,24,39,0.08);
+          border: 1px solid rgba(17,24,39,0.18);
+          color: #FFFFFF;
           font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.3px;
@@ -97,7 +96,7 @@ const Footer = () => {
         }
 
         .footer-col a:hover {
-          color: #A855F7;
+          color: #FFFFFF;
           transform: translateX(4px);
         }
 
@@ -116,8 +115,8 @@ const Footer = () => {
           width: 34px;
           height: 34px;
           border-radius: 10px;
-          background: rgba(168,85,247,0.08);
-          color: #A855F7;
+          background: rgba(17,24,39,0.08);
+          color: #FFFFFF;
           display: grid;
           place-items: center;
           flex-shrink: 0;
@@ -133,7 +132,7 @@ const Footer = () => {
           gap: 16px;
           flex-wrap: wrap;
           font-size: 13px;
-          color: #8B8BAA;
+          color: #9CA3AF;
         }
 
         .footer-bottom p { margin: 0; font-weight: 600; }
@@ -145,13 +144,13 @@ const Footer = () => {
         }
 
         .footer-bottom-links a {
-          color: #8B8BAA;
+          color: #9CA3AF;
           text-decoration: none;
           font-weight: 600;
           transition: 0.2s ease;
         }
 
-        .footer-bottom-links a:hover { color: #A855F7; }
+        .footer-bottom-links a:hover { color: #FFFFFF; }
 
         @media (max-width: 900px) {
           .footer-container {

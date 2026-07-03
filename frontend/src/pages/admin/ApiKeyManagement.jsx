@@ -96,8 +96,8 @@ export default function ApiKeyManagement() {
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <VpnKeyRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <VpnKeyRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">API Key Management</Typography>
@@ -105,17 +105,17 @@ export default function ApiKeyManagement() {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={() => { setNewKey(null); setAddOpen(true); }}
-          sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
+          sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
           Generate Key
         </Button>
       </Box>
 
       {/* Info banner */}
-      <Paper sx={{ p: 2.5, borderRadius: '16px', border: 1, borderColor: 'rgba(168,85,247,0.3)', bgcolor: 'rgba(168,85,247,0.06)', mb: 3, display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-        <WarningRounded sx={{ color: '#A855F7', flexShrink: 0, mt: 0.2 }} />
+      <Paper sx={{ p: 2.5, borderRadius: '16px', border: 1, borderColor: 'rgba(17,24,39,0.3)', bgcolor: 'rgba(17,24,39,0.06)', mb: 3, display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+        <WarningRounded sx={{ color: 'text.primary', flexShrink: 0, mt: 0.2 }} />
         <Box>
-          <Typography fontWeight={800} fontSize={14} sx={{ color: '#A855F7', mb: 0.3 }}>Secret keys are shown only once</Typography>
-          <Typography fontSize={13} color="text.secondary">After creation, only the key prefix is displayed. Store your key securely — it cannot be recovered later. Pass it as the <code style={{ background: 'rgba(168,85,247,0.1)', padding: '1px 6px', borderRadius: 4 }}>X-API-Key</code> header in requests.</Typography>
+          <Typography fontWeight={800} fontSize={14} sx={{ color: 'text.primary', mb: 0.3 }}>Secret keys are shown only once</Typography>
+          <Typography fontSize={13} color="text.secondary">After creation, only the key prefix is displayed. Store your key securely — it cannot be recovered later. Pass it as the <code style={{ background: 'rgba(17,24,39,0.1)', padding: '1px 6px', borderRadius: 4 }}>X-API-Key</code> header in requests.</Typography>
         </Box>
       </Paper>
 
@@ -139,7 +139,7 @@ export default function ApiKeyManagement() {
                 <TableRow key={key._id} hover sx={{ '&:last-child td': { borderBottom: 0 }, opacity: key.isActive ? 1 : 0.5 }}>
                   <TableCell sx={{ py: 1.5, fontWeight: 700, fontSize: 13 }}>{key.name}</TableCell>
                   <TableCell sx={{ py: 1.5 }}>
-                    <Box sx={{ fontFamily: 'monospace', fontSize: 13, bgcolor: 'action.hover', px: 1.5, py: 0.5, borderRadius: '8px', display: 'inline-block', color: '#A855F7', fontWeight: 700 }}>
+                    <Box sx={{ fontFamily: 'monospace', fontSize: 13, bgcolor: 'action.hover', px: 1.5, py: 0.5, borderRadius: '8px', display: 'inline-block', color: 'text.primary', fontWeight: 700 }}>
                       {key.prefix}
                     </Box>
                   </TableCell>
@@ -156,7 +156,7 @@ export default function ApiKeyManagement() {
                   </TableCell>
                   <TableCell sx={{ py: 1.5 }}>
                     <Switch size="small" checked={key.isActive} onChange={() => toggleActive(key)}
-                      sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#A855F7' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#A855F7' } }} />
+                      sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: 'text.primary' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: 'text.primary' } }} />
                   </TableCell>
                   <TableCell sx={{ py: 1.5 }}>
                     <Tooltip title="Delete key">
@@ -182,7 +182,7 @@ export default function ApiKeyManagement() {
             <Box>
               <Alert severity="success" sx={{ mb: 2, borderRadius: '12px' }}>Key generated! Copy it now — it won't be shown again.</Alert>
               <Box sx={{ p: 2, borderRadius: '12px', bgcolor: 'action.hover', border: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Typography sx={{ flex: 1, fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all', color: '#A855F7', fontWeight: 700 }}>{newKey}</Typography>
+                <Typography sx={{ flex: 1, fontFamily: 'monospace', fontSize: 12, wordBreak: 'break-all', color: 'text.primary', fontWeight: 700 }}>{newKey}</Typography>
                 <Tooltip title={copied ? 'Copied!' : 'Copy key'}>
                   <IconButton onClick={copyKey} sx={{ flexShrink: 0, bgcolor: copied ? 'rgba(34,197,94,0.1)' : 'action.hover', borderRadius: '10px', color: copied ? '#22C55E' : 'text.secondary' }}>
                     {copied ? <CheckRounded /> : <ContentCopyRounded />}
@@ -213,7 +213,7 @@ export default function ApiKeyManagement() {
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
                 <Button type="submit" variant="contained" disabled={saving}
-                  sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                  sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                   {saving ? 'Generating…' : 'Generate Key'}
                 </Button>
               </Box>
@@ -223,7 +223,7 @@ export default function ApiKeyManagement() {
         {newKey && (
           <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
             <Button variant="contained" onClick={() => { setAddOpen(false); setNewKey(null); }}
-              sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               Done
             </Button>
           </DialogActions>

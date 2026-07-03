@@ -27,7 +27,7 @@ const Features = () => {
     <>
       <style>{`
         .features-page {
-          background: #080812;
+          background: #0B0D12;
           min-height: 100vh;
         }
 
@@ -43,8 +43,8 @@ const Features = () => {
         }
 
         .feature-highlight-item {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 16px;
           padding: 16px 18px;
           display: flex;
@@ -58,7 +58,7 @@ const Features = () => {
 
         .feature-highlight-dot {
           width: 22px; height: 22px; border-radius: 50%;
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           display: grid; place-items: center;
           font-size: 11px; font-weight: 900; flex-shrink: 0;
         }
@@ -74,8 +74,8 @@ const Features = () => {
         }
 
         .feat-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 24px;
           padding: 32px 28px;
           display: flex; flex-direction: column;
@@ -86,7 +86,7 @@ const Features = () => {
 
         .feat-icon {
           width: 56px; height: 56px;
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           border-radius: 16px;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 20px;
@@ -106,7 +106,7 @@ const Features = () => {
 
         .features-bottom-cta {
           max-width: 1400px; margin: 28px auto 0;
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          background: #111827;
           border-radius: 28px; padding: 40px 44px;
           display: flex; align-items: center; justify-content: space-between;
           gap: 24px; flex-wrap: wrap;
@@ -117,7 +117,7 @@ const Features = () => {
           content: "";
           position: absolute; top: -80px; right: -80px;
           width: 240px; height: 240px;
-          background: radial-gradient(circle, rgba(168,85,247,0.14), transparent 70%);
+          background: radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -127,12 +127,12 @@ const Features = () => {
         }
 
         .features-bottom-cta p {
-          color: rgba(255,255,255,0.8); font-size: 15px; line-height: 1.65; margin: 0;
+          color: rgba(255,255,255,0.85); font-size: 15px; line-height: 1.65; margin: 0;
           max-width: 600px; font-weight: 500; position: relative; z-index: 1;
         }
 
         .cta-btn {
-          background: #A855F7; color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           border: none; padding: 14px 26px; border-radius: 999px;
           font-weight: 900; cursor: pointer;
           display: inline-flex; align-items: center; gap: 8px;
@@ -140,7 +140,7 @@ const Features = () => {
           position: relative; z-index: 1; white-space: nowrap;
         }
 
-        .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(168,85,247,0.3); }
+        .cta-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(17,24,39,0.3); }
 
         @media (max-width: 768px) {
           .features-hero { padding-top: 120px; }
@@ -154,7 +154,7 @@ const Features = () => {
         <div className="features-hero">
           <div className="features-container">
             <div style={{ marginBottom: 32 }}>
-              <div style={{ color: '#A855F7', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>Platform Features</div>
+              <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>Platform Features</div>
               <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Powerful features for complete asset control</h1>
               <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>AssetCare Pro is designed for companies that want proper tracking of assets, service complaints, warranties and approvals.</p>
             </div>

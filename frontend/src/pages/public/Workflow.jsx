@@ -20,7 +20,7 @@ const Workflow = () => {
   return (
     <>
       <style>{`
-        .workflow-page { min-height: 100vh; background: #080812; }
+        .workflow-page { min-height: 100vh; background: #0B0D12; }
         .workflow-container { max-width: 1400px; margin: 0 auto; }
         .workflow-hero { padding: 140px 24px 44px; }
 
@@ -31,8 +31,8 @@ const Workflow = () => {
         }
 
         .workflow-summary-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 18px; padding: 18px;
           box-shadow: 0 4px 16px rgba(17,17,17,0.05);
         }
@@ -54,8 +54,8 @@ const Workflow = () => {
         }
 
         .work-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 24px; padding: 32px 28px;
           position: relative; overflow: hidden;
           box-shadow: 0 4px 16px rgba(17,17,17,0.04);
@@ -64,14 +64,14 @@ const Workflow = () => {
         .work-number {
           position: absolute; bottom: -20px; right: 14px;
           font-size: 120px; font-weight: 950;
-          color: rgba(168,85,247,0.07); z-index: 0; line-height: 1;
+          color: rgba(17,24,39,0.07); z-index: 0; line-height: 1;
         }
 
         .work-content { position: relative; z-index: 1; }
 
         .work-icon {
           width: 54px; height: 54px;
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           border-radius: 15px;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 18px;
@@ -91,7 +91,7 @@ const Workflow = () => {
 
         .workflow-timeline {
           max-width: 1400px; margin: 28px auto 0;
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          background: #111827;
           border-radius: 28px; padding: 44px;
           display: grid; grid-template-columns: 0.95fr 1.05fr;
           gap: 38px; align-items: center;
@@ -102,7 +102,7 @@ const Workflow = () => {
           content: "";
           position: absolute; top: -80px; right: -80px;
           width: 240px; height: 240px;
-          background: radial-gradient(circle, rgba(168,85,247,0.10), transparent 70%);
+          background: radial-gradient(circle, rgba(17,24,39,0.10), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -113,7 +113,7 @@ const Workflow = () => {
         }
 
         .workflow-timeline p {
-          color: rgba(255,255,255,0.8); line-height: 1.7; font-size: 15px;
+          color: rgba(255,255,255,0.85); line-height: 1.7; font-size: 15px;
           font-weight: 500; margin: 0; position: relative; z-index: 1;
         }
 
@@ -128,7 +128,7 @@ const Workflow = () => {
 
         .timeline-dot {
           width: 36px; height: 36px; border-radius: 10px;
-          background: #A855F7; color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           display: grid; place-items: center;
           font-weight: 950; font-size: 13px; flex-shrink: 0;
         }
@@ -137,8 +137,8 @@ const Workflow = () => {
 
         .workflow-cta {
           max-width: 1400px; margin: 24px auto 0;
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 24px; padding: 32px 36px;
           display: flex; justify-content: space-between; align-items: center;
           gap: 24px; flex-wrap: wrap;
@@ -150,7 +150,7 @@ const Workflow = () => {
         .workflow-cta p { color: #CBD5E1; font-size: 15px; font-weight: 500; margin: 0; line-height: 1.6; }
 
         .workflow-cta-btn {
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           border: none; padding: 14px 24px; border-radius: 999px;
           font-weight: 900; cursor: pointer;
           display: inline-flex; align-items: center; gap: 8px;
@@ -175,7 +175,7 @@ const Workflow = () => {
         <div className="workflow-hero">
           <div className="workflow-container">
             <div style={{ marginBottom: 32 }}>
-              <div style={{ color: '#A855F7', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>System Protocol</div>
+              <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>System Protocol</div>
               <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Clear approval and service workflow</h1>
               <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Every breakdown complaint follows a structured process so nothing is missed and every service action is traceable through the system.</p>
             </div>

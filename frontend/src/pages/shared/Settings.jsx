@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Paper, Tabs, Tab, TextField, Button, Alert, Switch, Stack,
   FormControlLabel, CircularProgress, Divider, Chip, Grid, MenuItem, Select,
@@ -71,8 +72,8 @@ function ProfileTab({ currentUser }) {
       <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider', height: '100%' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 3 }}>
-            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center' }}>
-              <PersonRounded sx={{ color: '#A855F7', fontSize: 18 }} />
+            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center' }}>
+              <PersonRounded sx={{ color: 'text.primary', fontSize: 18 }} />
             </Box>
             <Typography fontWeight={800} fontSize={16} color="text.primary">Personal Information</Typography>
           </Box>
@@ -86,7 +87,7 @@ function ProfileTab({ currentUser }) {
           {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{msg}</Alert>}
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSave} disabled={saving}
-            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', boxShadow: 'none' }}>
+            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#111827', color: '#fff', boxShadow: 'none' }}>
             Save Changes
           </Button>
         </Paper>
@@ -95,8 +96,8 @@ function ProfileTab({ currentUser }) {
       <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider', height: '100%' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 3 }}>
-            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center' }}>
-              <LockRounded sx={{ color: '#A855F7', fontSize: 18 }} />
+            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center' }}>
+              <LockRounded sx={{ color: 'text.primary', fontSize: 18 }} />
             </Box>
             <Typography fontWeight={800} fontSize={16} color="text.primary">Change Password</Typography>
           </Box>
@@ -121,7 +122,7 @@ function ProfileTab({ currentUser }) {
           {passMsg && <Alert severity={passMsg.startsWith('✓') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{passMsg}</Alert>}
           <Button variant="contained" startIcon={passLoading ? <CircularProgress size={16} color="inherit" /> : <LockRounded />}
             onClick={handleChangePass} disabled={passLoading || !current || !newPass || !confirm}
-            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', boxShadow: 'none' }}>
+            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#111827', color: '#fff', boxShadow: 'none' }}>
             Change Password
           </Button>
         </Paper>
@@ -151,22 +152,22 @@ function AppearanceTab() {
                   sx={{
                     flex: 1, border: '2px solid', borderRadius: 3, p: 2.5,
                     cursor: !isActive ? 'pointer' : 'default',
-                    borderColor: isActive ? '#7C3AED' : 'divider',
+                    borderColor: isActive ? '#111827' : 'divider',
                     bgcolor: isActive
-                      ? (isDark ? 'rgba(168,85,247,0.08)' : 'rgba(124,58,237,0.06)')
+                      ? (isDark ? 'rgba(17,24,39,0.08)' : 'rgba(17,24,39,0.06)')
                       : 'transparent',
                     textAlign: 'center', transition: 'all 0.2s',
-                    '&:hover': !isActive ? { borderColor: 'rgba(124,58,237,0.4)' } : {}
+                    '&:hover': !isActive ? { borderColor: 'rgba(17,24,39,0.4)' } : {}
                   }}
                 >
                   {m === 'light'
-                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#7C3AED' : 'text.disabled' }} />
-                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#A855F7' : 'text.disabled' }} />}
-                  <Typography fontWeight={700} fontSize={14} sx={{ color: isActive ? (isDark ? '#A855F7' : '#7C3AED') : undefined, mt: 1 }}
+                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#111827' : 'text.disabled' }} />
+                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#111827' : 'text.disabled' }} />}
+                  <Typography fontWeight={700} fontSize={14} sx={{ color: isActive ? (isDark ? '#111827' : '#111827') : undefined, mt: 1 }}
                     color={!isActive ? 'text.secondary' : undefined}>
                     {m === 'light' ? 'Light Mode' : 'Dark Mode'}
                   </Typography>
-                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: "rgba(124,58,237,0.12)", color: isDark ? '#A855F7' : '#7C3AED', fontWeight: 700, height: 20, fontSize: 11 }} />}
+                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: "rgba(17,24,39,0.12)", color: isDark ? '#111827' : '#111827', fontWeight: 700, height: 20, fontSize: 11 }} />}
                 </Box>
               );
             })}
@@ -185,7 +186,7 @@ function CompanySettingsTab({ isAdmin = true }) {
     name: '', industry: '', employeeCount: '', phone: '', website: '', contactEmail: '',
     gstNumber: '', panNumber: '',
     addressLine: '', city: '', state: '', pin: '', country: 'India',
-    logoUrl: '', primaryColor: '#141414', secondaryColor: '#A855F7',
+    logoUrl: '', primaryColor: '#141414', secondaryColor: '#111827',
     smtpHost: '', smtpPort: '', smtpUser: '', smtpPass: '', smtpFromEmail: ''
   });
   const [tenant, setTenant] = useState(null);
@@ -215,7 +216,7 @@ function CompanySettingsTab({ isAdmin = true }) {
       country: data.address?.country || 'India',
       logoUrl: data.branding?.logoUrl || '',
       primaryColor: data.branding?.primaryColor || '#141414',
-      secondaryColor: data.branding?.secondaryColor || '#A855F7',
+      secondaryColor: data.branding?.secondaryColor || '#111827',
       smtpHost: data.smtp?.host || '',
       smtpPort: data.smtp?.port || '',
       smtpUser: data.smtp?.user || '',
@@ -278,25 +279,25 @@ function CompanySettingsTab({ isAdmin = true }) {
   const inputSx = { '& .MuiOutlinedInput-root': { borderRadius: '12px' } };
   const SectionHeader = ({ icon, title }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 2.5 }}>
-      <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center' }}>
+      <Box sx={{ width: 34, height: 34, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center' }}>
         {icon}
       </Box>
       <Typography fontWeight={800} fontSize={15} color="text.primary">{title}</Typography>
     </Box>
   );
 
-  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress sx={{ color: '#A855F7' }} /></Box>;
+  if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress sx={{ color: 'text.primary' }} /></Box>;
 
-  const planColor = tenant?.plan === 'Enterprise' ? '#F59E0B' : tenant?.plan === 'Pro' ? '#A855F7' : '#6B7280';
+  const planColor = tenant?.plan === 'Enterprise' ? '#F59E0B' : tenant?.plan === 'Pro' ? '#111827' : '#6B7280';
 
   return (
     <Stack spacing={3}>
       {/* Subscription Banner */}
-      <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider', background: 'linear-gradient(135deg,rgba(124,58,237,0.06),rgba(168,85,247,0.03))' }}>
+      <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider', background: 'linear-gradient(135deg,rgba(17,24,39,0.06),rgba(17,24,39,0.03))' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center' }}>
-              <StarRounded sx={{ color: '#A855F7', fontSize: 22 }} />
+            <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center' }}>
+              <StarRounded sx={{ color: 'text.primary', fontSize: 22 }} />
             </Box>
             <Box>
               <Typography fontWeight={800} fontSize={15} color="text.primary">Subscription</Typography>
@@ -311,7 +312,7 @@ function CompanySettingsTab({ isAdmin = true }) {
                     <LinearProgress
                       variant="determinate"
                       value={Math.min(100, pct)}
-                      sx={{ flex: 1, height: 5, borderRadius: 2.5, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: '#A855F7' } }}
+                      sx={{ flex: 1, height: 5, borderRadius: 2.5, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: 'text.primary' } }}
                     />
                     <Typography fontSize={11} color="text.secondary" fontWeight={700}>
                       {pctString}
@@ -324,14 +325,14 @@ function CompanySettingsTab({ isAdmin = true }) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Chip label={tenant?.plan || 'Basic'} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: planColor, color: '#fff', px: 0.5 }} />
             <Chip label="ACTIVE" size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: 12, borderColor: '#10B981', color: '#10B981' }} />
-            {isAdmin && <Button size="small" sx={{ fontWeight: 700, color: '#A855F7', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
+            {isAdmin && <Button size="small" sx={{ fontWeight: 700, color: 'text.primary', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
           </Box>
         </Box>
       </Paper>
 
       {/* Logo + Basic Information */}
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<DomainRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Basic Information" />
+        <SectionHeader icon={<DomainRounded sx={{ color: 'text.primary', fontSize: 18 }} />} title="Basic Information" />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, mb: 3 }}>
           <Box sx={{
             width: 72, height: 72, borderRadius: '16px', flexShrink: 0, overflow: 'hidden',
@@ -350,7 +351,7 @@ function CompanySettingsTab({ isAdmin = true }) {
             {isAdmin && (
               <Button component="label" size="small" startIcon={uploadingLogo ? <CircularProgress size={14} /> : <CameraAltRounded />}
                 disabled={uploadingLogo}
-                sx={{ fontWeight: 700, textTransform: 'none', color: '#A855F7' }}>
+                sx={{ fontWeight: 700, textTransform: 'none', color: 'text.primary' }}>
                 {uploadingLogo ? 'Uploading…' : 'Replace logo'}
                 <input type="file" hidden accept="image/*,.svg" onChange={handleLogoChange} />
               </Button>
@@ -382,7 +383,7 @@ function CompanySettingsTab({ isAdmin = true }) {
 
       {/* Contact Information */}
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<PhoneRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Contact Information" />
+        <SectionHeader icon={<PhoneRounded sx={{ color: 'text.primary', fontSize: 18 }} />} title="Contact Information" />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField label="Official Email" value={form.contactEmail} onChange={set('contactEmail')} fullWidth size="small" sx={inputSx} placeholder="reception@company.com" disabled={!isAdmin}
@@ -402,7 +403,7 @@ function CompanySettingsTab({ isAdmin = true }) {
       {/* Legal & Compliance */}
       {isAdmin && (
         <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-          <SectionHeader icon={<ReceiptRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Legal & Compliance" />
+          <SectionHeader icon={<ReceiptRounded sx={{ color: 'text.primary', fontSize: 18 }} />} title="Legal & Compliance" />
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
               <TextField label="GST Number" value={form.gstNumber} onChange={set('gstNumber')} fullWidth size="small" sx={inputSx} placeholder="15-digit GSTIN" />
@@ -416,7 +417,7 @@ function CompanySettingsTab({ isAdmin = true }) {
 
       {/* Registered Address */}
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <SectionHeader icon={<LocationOnRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="Registered Address" />
+        <SectionHeader icon={<LocationOnRounded sx={{ color: 'text.primary', fontSize: 18 }} />} title="Registered Address" />
         <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
             <TextField label="Address Line" value={form.addressLine} onChange={set('addressLine')} fullWidth size="small" sx={inputSx} placeholder="Flat / Office no., building name, street name, locality" disabled={!isAdmin} />
@@ -441,7 +442,7 @@ function CompanySettingsTab({ isAdmin = true }) {
       {/* SMTP */}
       {isAdmin && (
         <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-          <SectionHeader icon={<SecurityRounded sx={{ color: '#A855F7', fontSize: 18 }} />} title="SMTP Gateway" />
+          <SectionHeader icon={<SecurityRounded sx={{ color: 'text.primary', fontSize: 18 }} />} title="SMTP Gateway" />
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 8 }}>
               <TextField label="SMTP Host" value={form.smtpHost} onChange={set('smtpHost')} fullWidth size="small" sx={inputSx} placeholder="smtp.gmail.com" />
@@ -468,7 +469,7 @@ function CompanySettingsTab({ isAdmin = true }) {
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSave} disabled={saving}
-            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', boxShadow: 'none' }}>
+            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: '#111827', color: '#fff', boxShadow: 'none' }}>
             {saving ? 'Saving…' : 'Save Changes'}
           </Button>
         </Box>
@@ -555,8 +556,8 @@ function CustomFieldsTab() {
       <Grid size={{ xs: 12, md: 5 }}>
         <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 1 }}>
-            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-              <PaletteRounded sx={{ color: '#A855F7', fontSize: 18 }} />
+            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <PaletteRounded sx={{ color: 'text.primary', fontSize: 18 }} />
             </Box>
             <Typography fontWeight={800} fontSize={16} color="text.primary">Create Custom Field</Typography>
           </Box>
@@ -599,7 +600,7 @@ function CustomFieldsTab() {
 
             <Button type="submit" variant="contained" fullWidth disabled={saving || !name.trim()}
               startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
-              sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', py: 1.2, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', boxShadow: 'none' }}>
+              sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', py: 1.2, background: '#111827', color: '#fff', boxShadow: 'none' }}>
               {saving ? 'Adding…' : 'Add Custom Field'}
             </Button>
           </Box>
@@ -610,7 +611,7 @@ function CustomFieldsTab() {
         <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider', minHeight: 300 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
             <Typography fontWeight={800} fontSize={16} color="text.primary">Fields for {category}</Typography>
-            <Box sx={{ px: 1.2, py: 0.3, borderRadius: '20px', bgcolor: 'rgba(168,85,247,0.12)', color: '#A855F7', fontSize: 11, fontWeight: 800 }}>
+            <Box sx={{ px: 1.2, py: 0.3, borderRadius: '20px', bgcolor: 'rgba(17,24,39,0.12)', color: 'text.primary', fontSize: 11, fontWeight: 800 }}>
               {fields.length} field{fields.length !== 1 ? 's' : ''}
             </Box>
           </Box>
@@ -619,7 +620,7 @@ function CustomFieldsTab() {
           </Typography>
 
           {loading ? (
-            <Box display="flex" justifyContent="center" py={4}><CircularProgress size={28} sx={{ color: '#A855F7' }} /></Box>
+            <Box display="flex" justifyContent="center" py={4}><CircularProgress size={28} sx={{ color: 'text.primary' }} /></Box>
           ) : fields.length === 0 ? (
             <Box sx={{ py: 5, textAlign: 'center', bgcolor: 'action.hover', borderRadius: '14px', border: '1px dashed', borderColor: 'divider' }}>
               <Typography color="text.secondary" fontWeight={700} fontSize={13}>No custom fields yet for this category.</Typography>
@@ -768,8 +769,8 @@ function ReportsTab() {
     <Stack spacing={3}>
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <AssessmentRounded sx={{ color: '#A855F7', fontSize: 18 }} />
+          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+            <AssessmentRounded sx={{ color: 'text.primary', fontSize: 18 }} />
           </Box>
           <Typography fontWeight={800} fontSize={16} color="text.primary">Ticket Lifecycle Report</Typography>
         </Box>
@@ -1017,7 +1018,8 @@ function DataTab({ currentUser }) {
 export default function Settings() {
   const { currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
-  const [tab, setTab] = useState(0);
+  const [searchParams] = useSearchParams();
+  const [tab, setTab] = useState(searchParams.get('tab') === 'org' ? 2 : 0);
 
   const tabs = [
     { label: 'Profile', icon: <PersonRounded fontSize="small" /> },
@@ -1033,8 +1035,8 @@ export default function Settings() {
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-        <Box sx={{ width: 52, height: 52, borderRadius: 2.5, display: 'grid', placeItems: 'center', bgcolor: "rgba(124,58,237,0.12)", flexShrink: 0 }}>
-          <PersonRounded sx={{ color: '#A855F7', fontSize: 26 }} />
+        <Box sx={{ width: 52, height: 52, borderRadius: 2.5, display: 'grid', placeItems: 'center', bgcolor: "rgba(17,24,39,0.12)", flexShrink: 0 }}>
+          <PersonRounded sx={{ color: 'text.primary', fontSize: 26 }} />
         </Box>
         <Box>
           <Typography variant="h4" fontWeight={900} letterSpacing="-0.5px" sx={{ color: 'text.primary', lineHeight: 1.2 }}>Settings</Typography>

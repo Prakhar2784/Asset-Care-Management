@@ -75,7 +75,7 @@ export default function ResetPassword() {
 
   const containerSx = {
     minHeight: '100vh',
-    background: "rgba(124,58,237,0.12)",
+    background: "rgba(17,24,39,0.12)",
     display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2
   };
 
@@ -99,7 +99,7 @@ export default function ResetPassword() {
             This password reset link is invalid or has expired. Please request a new one.
           </Typography>
           <Button component={Link} to="/forgot-password" variant="contained" fullWidth
-            sx={{ background: "rgba(124,58,237,0.12)", color: '#A855F7', fontWeight: 700, py: 1.4, '&:hover': { background: '#222222' } }}>
+            sx={{ background: "rgba(17,24,39,0.12)", color: '#FFFFFF', fontWeight: 700, py: 1.4, '&:hover': { background: '#222222' } }}>
             Request New Link
           </Button>
         </Paper>
@@ -113,10 +113,10 @@ export default function ResetPassword() {
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Box sx={{
             width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
-            background: "rgba(124,58,237,0.12)",
+            background: "rgba(17,24,39,0.12)",
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
-            <LockResetRounded sx={{ color: '#A855F7', fontSize: 28 }} />
+            <LockResetRounded sx={{ color: '#FFFFFF', fontSize: 28 }} />
           </Box>
           <Typography variant="h5" fontWeight={700}>{isInvite ? 'Activate Your Account' : 'Reset Password'}</Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
@@ -186,7 +186,7 @@ export default function ResetPassword() {
               disabled={loading}
               sx={{
                 py: 1.4, fontWeight: 700,
-                background: "rgba(124,58,237,0.12)", color: '#A855F7',
+                background: "rgba(17,24,39,0.12)", color: '#FFFFFF',
                 '&:hover': { background: '#222222' }
               }}
             >

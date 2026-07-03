@@ -152,13 +152,13 @@ const TermsAndConditions = () => {
         .terms-page {
           min-height: 100vh;
           background:
-            radial-gradient(circle at top left, rgba(168,85,247,0.06), transparent 38%),
+            radial-gradient(circle at top left, rgba(17,24,39,0.06), transparent 38%),
             radial-gradient(circle at top right, rgba(17,17,17,0.03), transparent 38%),
-            #080812;
+            #0B0D12;
         }
 
         .terms-hero {
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
+          background: #111827;
           padding: 160px 24px 72px;
           position: relative;
           overflow: hidden;
@@ -171,7 +171,7 @@ const TermsAndConditions = () => {
           right: -100px;
           width: 500px;
           height: 500px;
-          background: radial-gradient(circle, rgba(168,85,247,0.14), transparent 70%);
+          background: radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%);
           border-radius: 50%;
           pointer-events: none;
         }
@@ -247,8 +247,8 @@ const TermsAndConditions = () => {
         .terms-toc {
           position: sticky;
           top: 100px;
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 24px;
           padding: 28px 24px;
           box-shadow: 0 12px 32px rgba(17,17,17,0.06);
@@ -267,7 +267,7 @@ const TermsAndConditions = () => {
           display: block;
           font-size: 13px;
           font-weight: 700;
-          color: #8B8BAA;
+          color: #9CA3AF;
           text-decoration: none;
           padding: 7px 10px;
           border-radius: 10px;
@@ -289,8 +289,8 @@ const TermsAndConditions = () => {
         }
 
         .terms-section {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 24px;
           padding: 40px;
           box-shadow: 0 8px 24px rgba(15,23,42,0.04);
@@ -308,7 +308,7 @@ const TermsAndConditions = () => {
           letter-spacing: -0.5px;
           margin: 0 0 18px;
           padding-bottom: 16px;
-          border-bottom: 2px solid rgba(168,85,247,0.25);
+          border-bottom: 2px solid rgba(17,24,39,0.25);
         }
 
         .terms-section-body {
@@ -334,8 +334,8 @@ const TermsAndConditions = () => {
         }
 
         .terms-highlight-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 22px;
           padding: 28px 24px;
           box-shadow: 0 8px 22px rgba(15,23,42,0.05);
@@ -348,8 +348,8 @@ const TermsAndConditions = () => {
           width: 48px;
           height: 48px;
           border-radius: 14px;
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
-          color: #A855F7;
+          background: #111827;
+          color: #FFFFFF;
           display: grid;
           place-items: center;
           flex-shrink: 0;

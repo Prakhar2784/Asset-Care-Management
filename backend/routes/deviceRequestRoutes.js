@@ -20,7 +20,7 @@ router.get('/my-approved', protect, getMyApprovedRequests);
 
 // Admin & Reviewers: view all requests
 router.route('/')
-  .get(protect, authorize('admin', 'super_admin', 'hod', 'it_support'), getAllRequests)
+  .get(protect, authorize('admin', 'super_admin', 'hod'), getAllRequests)
   .post(protect, createRequest);
 
 // Workflow tracking for a request

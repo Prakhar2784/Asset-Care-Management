@@ -39,7 +39,7 @@ const loginUser = async (req, res) => {
     if (user && (await user.matchPassword(password))) {
       // Validate role mapping to match selected portal tab
       if (role) {
-        const adminRoles = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+        const adminRoles = ['admin', 'super_admin', 'hod', 'manager'];
         if (role === 'admin' && !adminRoles.includes(user.role)) {
           return res.status(403).json({ message: 'Access Denied: This portal requires administrator permissions.' });
         }
@@ -57,6 +57,7 @@ const loginUser = async (req, res) => {
         _id: user._id, name: user.name, email: user.email,
         role: user.role, department: user.department, tenantId: user.tenantId,
         customPermissions: user.customPermissions || [],
+        onboardingDone: user.onboardingDone,
         plan: tenant?.plan || 'Basic',
         features: tenant?.features || {},
         token: generateToken(user._id, user.tenantId)
@@ -78,6 +79,16 @@ const getMe = async (req, res) => {
       plan: tenant?.plan || 'Basic',
       features: tenant?.features || {},
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PATCH /api/auth/complete-onboarding
+const completeOnboarding = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, { onboardingDone: true });
+    res.status(200).json({ onboardingDone: true });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -281,6 +292,7 @@ const registerCompany = async (req, res) => {
         role: adminUser.role,
         department: adminUser.department,
         tenantId: adminUser.tenantId,
+        onboardingDone: adminUser.onboardingDone,
         token: generateToken(adminUser._id, tenant.slug)
       }
     });
@@ -325,5 +337,6 @@ module.exports = {
   resetPassword, 
   verifyResetToken,
   registerCompany,
-  getTenantBranding
+  getTenantBranding,
+  completeOnboarding
 };

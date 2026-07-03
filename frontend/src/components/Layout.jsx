@@ -20,8 +20,8 @@ import api from "../api/axios";
 import GlobalSearch from "./GlobalSearch";
 
 const DRAWER_W = 256;
-const ACCENT = "#A855F7";
-const ACCENT_DIM = "rgba(168,85,247,0.6)";
+const ACCENT = "#FBBF24";
+const ACCENT_DIM = "rgba(255,255,255,0.55)";
 
 const adminMenu = [
   { section: "Overview" },
@@ -73,7 +73,7 @@ const Sidebar = ({ onClose }) => {
     ? (branding.logoUrl.startsWith("http") ? branding.logoUrl : `${api.defaults.baseURL?.replace(/\/api\/?$/, "")}${branding.logoUrl}`)
     : null;
 
-  const adminRoles = ["admin", "super_admin", "hod", "manager", "it_support", "technician"];
+  const adminRoles = ["admin", "super_admin", "hod", "manager", "technician"];
   const customPerms = currentUser?.customPermissions || [];
   const hasCustomPerms = customPerms.length > 0;
   const isAdminTier = adminRoles.includes(currentUser?.role);
@@ -123,18 +123,18 @@ const Sidebar = ({ onClose }) => {
   return (
     <Box sx={{
       height: "100%",
-      background: "linear-gradient(180deg, #0D0A1E 0%, #080812 100%)",
+      background: "#111827",
       display: "flex", flexDirection: "column", overflow: "hidden",
-      borderRight: "1px solid rgba(168,85,247,0.12)",
+      borderRight: "1px solid rgba(255,255,255,0.06)",
     }}>
       {/* Brand */}
-      <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid rgba(168,85,247,0.1)" }}>
+      <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{
             width: 36, height: 36, borderRadius: "10px", flexShrink: 0, overflow: "hidden",
-            background: logoSrc ? "transparent" : "linear-gradient(135deg, #7C3AED, #A855F7)",
+            background: logoSrc ? "transparent" : "#111827",
             display: "grid", placeItems: "center",
-            boxShadow: logoSrc ? "none" : "0 4px 16px rgba(124,58,237,0.5)",
+            boxShadow: logoSrc ? "none" : "0 4px 16px rgba(17,24,39,0.5)",
           }}>
             {logoSrc
               ? <Box component="img" src={logoSrc} alt={branding?.name} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -159,7 +159,7 @@ const Sidebar = ({ onClose }) => {
             if (item.section) {
               return (
                 <Typography key={`section-${idx}`} sx={{
-                  fontSize: 10, fontWeight: 800, color: "rgba(168,85,247,0.55)",
+                  fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.35)",
                   letterSpacing: "1.4px", textTransform: "uppercase",
                   px: 1.5, mt: idx === 0 ? 0 : 2, mb: 0.5,
                 }}>
@@ -174,11 +174,11 @@ const Sidebar = ({ onClose }) => {
                 onClick={() => handleNav(item.path)}
                 sx={{
                   borderRadius: "10px", mb: 0.25, py: 0.85, px: 1.5,
-                  color: active ? "#FFFFFF" : "#B0B8C8",
-                  bgcolor: active ? "rgba(168,85,247,0.15)" : "transparent",
+                  color: active ? "#FFFFFF" : "#9CA3AF",
+                  bgcolor: active ? "rgba(255,255,255,0.1)" : "transparent",
                   borderLeft: `2px solid ${active ? ACCENT : "transparent"}`,
                   transition: "all 0.15s ease",
-                  "&:hover": { bgcolor: "rgba(168,85,247,0.08)", color: "#E2D9F3" },
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.06)", color: "#FFFFFF" },
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 34, color: active ? ACCENT : "#7B8899", "& svg": { fontSize: 18 } }}>
@@ -196,13 +196,13 @@ const Sidebar = ({ onClose }) => {
       </Box>
 
       {/* User Row */}
-      <Box sx={{ borderTop: "1px solid rgba(168,85,247,0.1)", px: 2, py: 2 }}>
+      <Box sx={{ borderTop: "1px solid rgba(17,24,39,0.1)", px: 2, py: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Avatar sx={{
             width: 34, height: 34,
-            background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+            background: "#111827",
             color: "#FFFFFF", fontWeight: 900, fontSize: 12,
-            boxShadow: "0 2px 8px rgba(124,58,237,0.4)",
+            boxShadow: "0 2px 8px rgba(17,24,39,0.4)",
           }}>
             {userInitials}
           </Avatar>
@@ -298,11 +298,9 @@ const Layout = () => {
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
 
         <AppBar position="sticky" elevation={0} sx={{
-          bgcolor: isDark ? "rgba(8,8,18,0.90)" : "rgba(244,240,255,0.92)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          bgcolor: "background.paper",
           borderBottom: "1px solid",
-          borderColor: isDark ? "rgba(168,85,247,0.15)" : "rgba(124,58,237,0.12)",
+          borderColor: "divider",
           color: "text.primary",
         }}>
           <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: "60px !important", display: "flex", justifyContent: "space-between" }}>
@@ -320,13 +318,13 @@ const Layout = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <Tooltip title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}>
                 <IconButton onClick={toggleMode}
-                  sx={{ color: "text.secondary", "&:hover": { bgcolor: isDark ? "rgba(168,85,247,0.1)" : "rgba(124,58,237,0.08)", color: "#A855F7" } }}>
+                  sx={{ color: "text.secondary", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
                   {isDark ? <LightModeRounded sx={{ fontSize: 20 }} /> : <DarkModeRounded sx={{ fontSize: 20 }} />}
                 </IconButton>
               </Tooltip>
               <GlobalSearch />
               <IconButton onClick={() => navigate("/notifications")}
-                sx={{ color: "text.secondary", "&:hover": { bgcolor: isDark ? "rgba(168,85,247,0.1)" : "rgba(124,58,237,0.08)", color: "#7C3AED" } }}>
+                sx={{ color: "text.secondary", "&:hover": { bgcolor: isDark ? "rgba(17,24,39,0.1)" : "rgba(17,24,39,0.08)", color: "#111827" } }}>
                 <Badge badgeContent={unreadCount || null} color="error"
                   sx={{ "& .MuiBadge-badge": { fontSize: 10, minWidth: 16, height: 16 } }}>
                   <NotificationsRounded />
@@ -336,9 +334,9 @@ const Layout = () => {
                 onClick={() => navigate("/settings")}
                 sx={{
                   width: 34, height: 34, ml: 0.5, cursor: "pointer",
-                  background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                  background: "#111827",
                   color: "#FFFFFF", fontWeight: 900, fontSize: 12,
-                  boxShadow: isDark ? "0 2px 8px rgba(124,58,237,0.4)" : "0 2px 8px rgba(124,58,237,0.25)",
+                  boxShadow: isDark ? "0 2px 8px rgba(17,24,39,0.4)" : "0 2px 8px rgba(17,24,39,0.25)",
                   "&:hover": { opacity: 0.85 }
                 }}>
                 {userInitials}

@@ -30,7 +30,7 @@ const approvalTrackingSchema = new mongoose.Schema({
     },
     assignedRole: {
       type: String,
-      enum: ['hod', 'admin', 'it_support', 'super_admin'],
+      enum: ['hod', 'admin', 'super_admin'],
       required: true
     },
     action: {

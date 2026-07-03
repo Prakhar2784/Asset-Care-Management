@@ -119,8 +119,8 @@ export default function InvoiceManagement() {
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <ReceiptRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <ReceiptRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Invoice Management</Typography>
@@ -128,7 +128,7 @@ export default function InvoiceManagement() {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
+          sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
           Add Invoice
         </Button>
       </Box>
@@ -136,10 +136,10 @@ export default function InvoiceManagement() {
       {/* Summary cards */}
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 2, mb: 3 }}>
         {[
-          { label: 'Total Invoices', value: invoices.length, color: '#A855F7' },
-          { label: 'Total Value',    value: fmtCurrency(totalAmount), color: '#3B82F6' },
-          { label: 'Outstanding',    value: fmtCurrency(unpaidAmount), color: '#EF4444' },
-          { label: 'Paid',           value: invoices.filter(i => i.status === 'Paid').length, color: '#22C55E' },
+          { label: 'Total Invoices', value: invoices.length, color: 'text.primary' },
+          { label: 'Total Value',    value: fmtCurrency(totalAmount), color: '#FBBF24' },
+          { label: 'Outstanding',    value: fmtCurrency(unpaidAmount), color: '#FBBF24' },
+          { label: 'Paid',           value: invoices.filter(i => i.status === 'Paid').length, color: '#FBBF24' },
         ].map(({ label, value, color }) => (
           <Paper key={label} sx={{ p: 2.5, borderRadius: '16px', border: 1, borderColor: 'divider' }}>
             <Typography fontSize={12} fontWeight={700} color="text.secondary" sx={{ mb: 0.5 }}>{label}</Typography>
@@ -182,7 +182,7 @@ export default function InvoiceManagement() {
                 const sc = STATUS_COLORS[inv.status] || STATUS_COLORS.Unpaid;
                 return (
                   <TableRow key={inv._id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
-                    <TableCell sx={{ py: 1.5, fontWeight: 700, fontSize: 13, color: '#A855F7' }}>
+                    <TableCell sx={{ py: 1.5, fontWeight: 700, fontSize: 13, color: 'text.primary' }}>
                       {inv.invoiceNumber || <span style={{ color: '#94A3B8' }}>—</span>}
                     </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
@@ -276,7 +276,7 @@ export default function InvoiceManagement() {
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={saving}
-                sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                 {saving ? 'Saving…' : editTarget ? 'Save Changes' : 'Add Invoice'}
               </Button>
             </Box>

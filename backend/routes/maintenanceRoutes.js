@@ -59,7 +59,7 @@ const syncServiceCenterFromMaintenance = async (req, log) => {
 };
 
 // POST /api/maintenance/:assetId
-router.post('/:assetId', protect, authorize('admin', 'it_support', 'technician'), async (req, res) => {
+router.post('/:assetId', protect, authorize('admin', 'technician'), async (req, res) => {
   try {
     const { type, description, technicianName, technicianContact, vendor, cost, serviceDate, nextServiceDate, status, notes } = req.body;
     if (!description || !serviceDate) return res.status(400).json({ message: 'Description and service date are required.' });
@@ -87,7 +87,7 @@ router.post('/:assetId', protect, authorize('admin', 'it_support', 'technician')
 });
 
 // GET /api/maintenance — get all maintenance logs in the system
-router.get('/', protect, authorize('admin', 'hod', 'it_support', 'technician'), async (req, res) => {
+router.get('/', protect, authorize('admin', 'hod', 'technician'), async (req, res) => {
   try {
     const logs = await MaintenanceLog.find()
       .populate('asset', 'name serialNumber category')
@@ -100,7 +100,7 @@ router.get('/', protect, authorize('admin', 'hod', 'it_support', 'technician'), 
 });
 
 // GET /api/maintenance/:assetId
-router.get('/:assetId', protect, authorize('admin', 'hod', 'it_support', 'technician'), async (req, res) => {
+router.get('/:assetId', protect, authorize('admin', 'hod', 'technician'), async (req, res) => {
   try {
     const logs = await MaintenanceLog.find({ asset: req.params.assetId })
       .populate('loggedBy', 'name')
@@ -112,7 +112,7 @@ router.get('/:assetId', protect, authorize('admin', 'hod', 'it_support', 'techni
 });
 
 // PUT /api/maintenance/log/:id — edit a log entry
-router.put('/log/:id', protect, authorize('admin', 'it_support', 'technician'), async (req, res) => {
+router.put('/log/:id', protect, authorize('admin', 'technician'), async (req, res) => {
   try {
     const log = await MaintenanceLog.findByIdAndUpdate(req.params.id, req.body, { new: true })
       .populate('loggedBy', 'name');

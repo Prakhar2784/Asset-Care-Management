@@ -63,14 +63,14 @@ const verifyWorkflows = async () => {
       });
       console.log('Created HOD:', hod.name);
 
-      const itSupport = await User.create({
-        name: 'Mike IT',
+      const adminReviewer = await User.create({
+        name: 'Mike Admin',
         email: 'mike@workflow.com',
         password: 'password123',
-        role: 'it_support',
+        role: 'admin',
         department: 'IT'
       });
-      console.log('Created IT Support:', itSupport.name);
+      console.log('Created Admin Reviewer:', adminReviewer.name);
 
       console.log('\n--- STEP 2: Creating Approval Workflow Chain ---');
       const workflow = await ApprovalWorkflow.create({
@@ -79,7 +79,7 @@ const verifyWorkflows = async () => {
         isActive: true,
         stages: [
           { sequence: 1, label: 'Department Head Approval', role: 'hod' },
-          { sequence: 2, label: 'IT Review & Provisioning', role: 'it_support' }
+          { sequence: 2, label: 'Admin Review & Provisioning', role: 'admin' }
         ],
         tenantId: tenantSlug
       });
@@ -168,20 +168,16 @@ const verifyWorkflows = async () => {
       await activeTracking.save();
       console.log(`Stage 1 approved. Advancing. Next Stage: ${activeTracking.history[activeTracking.currentStageIndex].label}`);
 
-      console.log('\n--- STEP 5: Simulating IT Support Approval (Stage 2 - Final) ---');
-      activeTracking = await ApprovalTracking.findOne({ deviceRequest: request._id });
-      currentStage = activeTracking.history.find(h => h.stageIndex === activeTracking.currentStageIndex);
-
-      if (currentStage.assignedRole !== 'it_support') {
-        throw new Error(`Expected stage role to be IT Support, got ${currentStage.assignedRole}`);
+      if (currentStage.assignedRole !== 'admin') {
+        throw new Error(`Expected stage role to be Admin, got ${currentStage.assignedRole}`);
       }
 
-      const isITAuth = itSupport.role === currentStage.assignedRole;
-      if (!isITAuth) {
-        throw new Error('IT Support auth check failed!');
+      const isAdminAuth = adminReviewer.role === currentStage.assignedRole;
+      if (!isAdminAuth) {
+        throw new Error('Admin auth check failed!');
       }
 
-      console.log('Mike IT authorized to action final stage. Approving & completing request...');
+      console.log('Mike Admin authorized to action final stage. Approving & completing request...');
       currentStage.action = 'Approved';
       currentStage.remarks = 'IT stock available. Approved.';
       currentStage.actionedBy = itSupport._id;

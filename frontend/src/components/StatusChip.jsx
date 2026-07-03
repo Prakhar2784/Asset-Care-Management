@@ -6,23 +6,18 @@ const StatusChip = ({ label }) => {
       case "Active":
       case "In Warranty":
       case "Resolved":
-        return { bgcolor: "rgba(22,163,74,0.13)", color: "#4ADE80", border: "1px solid rgba(22,163,74,0.25)" };
-      case "Expired":
       case "Critical":
-        return { bgcolor: "rgba(220,38,38,0.13)", color: "#F87171", border: "1px solid rgba(220,38,38,0.25)" };
-      case "Under Repair":
-      case "Pending Approval":
       case "High":
-        return { bgcolor: "rgba(217,119,6,0.13)", color: "#FBBF24", border: "1px solid rgba(217,119,6,0.25)" };
-      case "Vendor Assigned":
-      case "Medium":
-        return { bgcolor: "rgba(37,99,235,0.13)", color: "#60A5FA", border: "1px solid rgba(37,99,235,0.25)" };
+        // Strong/positive-or-urgent states — solid fill
+        return { variant: "filled" };
       default:
-        return { bgcolor: "rgba(71,85,105,0.13)", color: "#94A3B8", border: "1px solid rgba(71,85,105,0.25)" };
+        // Neutral/pending/in-progress states — outlined
+        return { variant: "outlined" };
     }
   };
 
   const style = getStyle(label);
+  const isDark = style.variant === "filled";
 
   return (
     <Chip
@@ -31,12 +26,12 @@ const StatusChip = ({ label }) => {
       sx={{
         fontWeight: 700,
         fontSize: 12,
-        borderRadius: "100px", // Pill shape
+        borderRadius: "100px",
         px: 1,
-        bgcolor: style.bgcolor,
-        color: style.color,
-        border: style.border,
-        boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+        bgcolor: isDark ? "#FBBF24" : "transparent",
+        color: isDark ? "#111827" : "text.primary",
+        border: "1px solid",
+        borderColor: isDark ? "#FBBF24" : "divider",
       }}
     />
   );

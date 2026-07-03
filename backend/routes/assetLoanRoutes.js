@@ -5,7 +5,7 @@ const Asset     = require('../models/Asset');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
 // POST /api/asset-loans/:assetId/checkout
-router.post('/:assetId/checkout', protect, authorize('admin', 'it_support'), async (req, res) => {
+router.post('/:assetId/checkout', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
     const { borrowerId, borrowerName, borrowerEmail, purpose, expectedReturnDate, notes } = req.body;
     if (!expectedReturnDate) return res.status(400).json({ message: 'Expected return date is required.' });
@@ -39,7 +39,7 @@ router.post('/:assetId/checkout', protect, authorize('admin', 'it_support'), asy
 });
 
 // POST /api/asset-loans/:assetId/checkin
-router.post('/:assetId/checkin', protect, authorize('admin', 'it_support'), async (req, res) => {
+router.post('/:assetId/checkin', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
     const { notes } = req.body;
     const loan = await AssetLoan.findOne({ asset: req.params.assetId, status: 'Active' });
@@ -60,7 +60,7 @@ router.post('/:assetId/checkin', protect, authorize('admin', 'it_support'), asyn
 });
 
 // GET /api/asset-loans/:assetId — loan history
-router.get('/:assetId', protect, authorize('admin', 'hod', 'it_support'), async (req, res) => {
+router.get('/:assetId', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
     const loans = await AssetLoan.find({ asset: req.params.assetId })
       .populate('borrower', 'name email department')
@@ -74,7 +74,7 @@ router.get('/:assetId', protect, authorize('admin', 'hod', 'it_support'), async 
 });
 
 // GET /api/asset-loans — all loans (admin)
-router.get('/', protect, authorize('admin', 'it_support'), async (req, res) => {
+router.get('/', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
     const { status } = req.query;
     const filter = {};

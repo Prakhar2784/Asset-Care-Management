@@ -22,9 +22,9 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const ACCENT = '#A855F7';
-const DARK = '#1A0B2E';
-const PALETTE = ['#A855F7', '#60a5fa', '#4ade80', '#f59e0b', '#a78bfa', '#f87171', '#22d3ee', '#fb923c'];
+const ACCENT = '#111827';
+const DARK = '#111827';
+const PALETTE = ['#111827', '#60a5fa', '#4ade80', '#f59e0b', '#a78bfa', '#f87171', '#22d3ee', '#fb923c'];
 
 const fmt = (n) => n?.toLocaleString('en-IN') || '0';
 const fmtCurr = (n) => `₹${(n || 0).toLocaleString('en-IN')}`;
@@ -225,9 +225,9 @@ export default function Analytics() {
           { icon: <InventoryRounded sx={{ fontSize: 18 }} />, label: 'Total Assets', value: fmt(kpis?.totalAssets), color: ACCENT },
           { icon: <MonetizationOnRounded sx={{ fontSize: 18 }} />, label: 'Portfolio Value', value: fmtCurr(kpis?.totalPortfolioValue), color: '#4ade80' },
           { icon: <ConfirmationNumberRounded sx={{ fontSize: 18 }} />, label: 'Open Tickets', value: fmt(kpis?.openTickets), color: '#f87171' },
-          { icon: <CheckCircleRounded sx={{ fontSize: 18 }} />, label: 'Resolution Rate', value: `${kpis?.ticketResolutionRate || 0}%`, color: '#60a5fa' },
+          { icon: <CheckCircleRounded sx={{ fontSize: 18 }} />, label: 'Resolution Rate', value: `${kpis?.ticketResolutionRate || 0}%`, color: '#FBBF24' },
           { icon: <WarningAmberRounded sx={{ fontSize: 18 }} />, label: 'Warranty Expiring', value: fmt(kpis?.warrantyExpiring30), sub: 'within 30 days', color: '#f59e0b' },
-          { icon: <TimerRounded sx={{ fontSize: 18 }} />, label: 'Maintenance Due', value: fmt(kpis?.pendingMaintenance), sub: 'within 7 days', color: '#a78bfa' },
+          { icon: <TimerRounded sx={{ fontSize: 18 }} />, label: 'Maintenance Due', value: fmt(kpis?.pendingMaintenance), sub: 'within 7 days', color: '#FBBF24' },
         ].map(card => (
           <Grid key={card.label} size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
             <KPICard {...card} />
@@ -540,11 +540,11 @@ export default function Analytics() {
             <>
               <Grid container spacing={2.5} sx={{ mb: 3 }}>
                 {[
-                  { label: 'Original Cost', value: fmtCurr(depreciation.summary.totalOriginalCost), color: '#60a5fa' },
+                  { label: 'Original Cost', value: fmtCurr(depreciation.summary.totalOriginalCost), color: '#FBBF24' },
                   { label: 'Current Book Value', value: fmtCurr(depreciation.summary.totalBookValue), color: ACCENT },
                   { label: 'Accumulated Depreciation', value: fmtCurr(depreciation.summary.totalAccumulated), color: '#f59e0b' },
                   { label: 'Overall Depreciation', value: `${depreciation.summary.overallDepreciationPct}%`, color: '#f87171' },
-                  { label: 'Fully Depreciated Assets', value: fmt(depreciation.summary.fullyDepreciatedCount), color: '#a78bfa' },
+                  { label: 'Fully Depreciated Assets', value: fmt(depreciation.summary.fullyDepreciatedCount), color: '#FBBF24' },
                 ].map(card => (
                   <Grid key={card.label} size={{ xs: 12, sm: 6, md: 4, lg: 'auto' }} sx={{ flex: 1 }}>
                     <Paper sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>

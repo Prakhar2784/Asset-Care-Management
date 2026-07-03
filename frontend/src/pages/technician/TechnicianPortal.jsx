@@ -77,15 +77,15 @@ const TechnicianPortal = () => {
   );
 
   const kpis = [
-    { label: "My Assigned Tasks", value: myAssigned.length,      color: "#F59E0B", icon: <ConfirmationNumberRounded /> },
-    { label: "In Progress",       value: inProgressRepairs.length, color: "#3B82F6", icon: <BuildCircleRounded /> },
+    { label: "My Assigned Tasks", value: myAssigned.length,      color: "#FBBF24", icon: <ConfirmationNumberRounded /> },
+    { label: "In Progress",       value: inProgressRepairs.length, color: "#FBBF24", icon: <BuildCircleRounded /> },
     { label: "Resolved by Me",    value: completedRepairs.length, color: "#10B981", icon: <TaskAltRounded /> }
   ];
 
   if (loading) {
     return (
       <Box sx={{ display: 'grid', placeItems: 'center', minHeight: '50vh' }}>
-        <CircularProgress sx={{ color: '#A855F7' }} />
+        <CircularProgress sx={{ color: 'text.primary' }} />
       </Box>
     );
   }
@@ -132,7 +132,7 @@ const TechnicianPortal = () => {
                 {myAssigned.map(ticket => {
                   const pc = getPriorityColor(ticket.priority);
                   return (
-                    <Paper key={ticket._id} sx={{ p: 2, borderRadius: '14px', border: 1, borderColor: 'divider', transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(168,85,247,0.35)', transform: 'translateY(-1px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' } }}>
+                    <Paper key={ticket._id} sx={{ p: 2, borderRadius: '14px', border: 1, borderColor: 'divider', transition: 'all 0.2s', '&:hover': { borderColor: 'rgba(17,24,39,0.35)', transform: 'translateY(-1px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' } }}>
                       {/* Header row */}
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

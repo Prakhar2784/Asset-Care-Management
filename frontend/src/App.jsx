@@ -53,6 +53,7 @@ const TechnicianPortal = lazy(() => import("./pages/technician/TechnicianPortal"
 const Tickets = lazy(() => import("./pages/shared/Tickets"));
 const Notifications = lazy(() => import("./pages/shared/Notifications"));
 const Settings = lazy(() => import("./pages/shared/Settings"));
+const OnboardingWizard = lazy(() => import("./pages/admin/OnboardingWizard"));
 
 const WebsiteLayout = ({ children }) => (
   <>
@@ -64,7 +65,7 @@ const WebsiteLayout = ({ children }) => (
 
 const RouteFallback = () => (
   <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-    <CircularProgress sx={{ color: "#A855F7" }} />
+    <CircularProgress sx={{ color: "#111827" }} />
   </Box>
 );
 
@@ -90,6 +91,7 @@ function App() {
 
         {/* SECURE ROUTES - Must be logged in */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/onboarding" element={<OnboardingWizard />} />
           <Route element={<Layout />}>
 
             {/* Employee Route (Admins can view this too if they navigate to it) */}

@@ -12,8 +12,8 @@ import {
 } from '@mui/icons-material';
 import api from '../api/axios';
 
-const ACCENT = '#A855F7';
-const DARK = '#1A0B2E';
+const ACCENT = '#111827';
+const DARK = '#111827';
 
 const ICON_MAP = {
   ticket: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />,

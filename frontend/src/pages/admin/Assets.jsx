@@ -71,7 +71,7 @@ const Assets = () => {
 
   // Permission helpers
   const customPerms = currentUser?.customPermissions || [];
-  const adminRoles = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+  const adminRoles = ['admin', 'super_admin', 'hod', 'manager'];
   const isAdminTier = adminRoles.includes(currentUser?.role);
   const hasPerm = (feature) => {
     if (isAdminTier) return true;
@@ -366,10 +366,10 @@ const Assets = () => {
   };
 
   const KPI_CARDS = [
-    { label: "Total Assets", value: kpis.total, color: "#A855F7", icon: <Inventory2Rounded sx={{ fontSize: 20 }} /> },
-    { label: "Active / In-Use", value: kpis.active, color: "#22C55E", icon: <CheckCircleRounded sx={{ fontSize: 20 }} /> },
-    { label: "Under Repair", value: kpis.underRepair, color: "#F59E0B", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
-    { label: "Unassigned", value: kpis.unassigned, color: "#3B82F6", icon: <HelpOutlineRounded sx={{ fontSize: 20 }} /> },
+    { label: "Total Assets", value: kpis.total, color: "text.primary", icon: <Inventory2Rounded sx={{ fontSize: 20 }} /> },
+    { label: "Active / In-Use", value: kpis.active, color: "#FBBF24", icon: <CheckCircleRounded sx={{ fontSize: 20 }} /> },
+    { label: "Under Repair", value: kpis.underRepair, color: "#FBBF24", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
+    { label: "Unassigned", value: kpis.unassigned, color: "#FBBF24", icon: <HelpOutlineRounded sx={{ fontSize: 20 }} /> },
   ];
 
   return (
@@ -391,8 +391,8 @@ const Assets = () => {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
-            <Inventory2Rounded sx={{ color: "#A855F7" }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+            <Inventory2Rounded sx={{ color: "text.primary" }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Asset Registry</Typography>
@@ -426,7 +426,7 @@ const Assets = () => {
               variant="contained"
               startIcon={<AddRounded />}
               onClick={() => navigate("/admin/assets/add")}
-              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" } }}
+              sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "#1F2937", boxShadow: "none" } }}
             >
               Add Asset
             </Button>
@@ -458,7 +458,7 @@ const Assets = () => {
           mb: 3,
           borderBottom: 1,
           borderColor: "divider",
-          "& .MuiTabs-indicator": { bgcolor: "#A855F7" },
+          "& .MuiTabs-indicator": { bgcolor: "text.primary" },
           "& .MuiTab-root": { fontWeight: 800, textTransform: "none", fontSize: 14 }
         }}
       >
@@ -553,7 +553,7 @@ const Assets = () => {
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: "flex", gap: 0.5 }}>
                         <Tooltip title="View details">
-                          <IconButton size="small" onClick={() => setSelected(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#A855F7", bgcolor: "rgba(168,85,247,0.08)" } }}>
+                          <IconButton size="small" onClick={() => setSelected(asset)} sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: "rgba(17,24,39,0.08)" } }}>
                             <VisibilityRounded fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -685,7 +685,7 @@ const Assets = () => {
                 </Button>
                 {selected.assignedStatus !== 'Assigned' ? (
                   <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
-                    sx={{ flex: 1, py: 1.4, background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, borderRadius: "12px", boxShadow: "none", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" } }}>
+                    sx={{ flex: 1, py: 1.4, background: "#111827", color: "#FFFFFF", fontWeight: 900, borderRadius: "12px", boxShadow: "none", "&:hover": { background: "#1F2937", boxShadow: "none" } }}>
                     Assign
                   </Button>
                 ) : (
@@ -704,9 +704,9 @@ const Assets = () => {
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="sm"
         slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ p: 0 }}>
-          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
                 <EditRounded sx={{ color: "#fff" }} />
               </Box>
               <Box>
@@ -803,7 +803,7 @@ const Assets = () => {
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
             <Button onClick={() => setEditDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, px: 3 }}>Cancel</Button>
             <Button variant="contained" disabled={saving} onClick={handleEditSave} startIcon={saving ? <CircularProgress size={18} color="inherit" /> : null}
-              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.2 }}>
+              sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.2 }}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </Box>
@@ -835,9 +835,9 @@ const Assets = () => {
       <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm"
         slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         <DialogTitle sx={{ p: 0 }}>
-          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
                 <PersonAddRounded sx={{ color: "#fff" }} />
               </Box>
               <Box>
@@ -880,7 +880,7 @@ const Assets = () => {
             <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>Cancel</Button>
             <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
               startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
-              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+              sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
               {assigning ? "Assigning..." : "Confirm Assignment"}
             </Button>
           </Box>

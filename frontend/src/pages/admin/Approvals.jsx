@@ -123,9 +123,9 @@ const Approvals = () => {
   const ticketRejectedCount = tickets.filter(t => getTicketDisplayStatus(t.status) === "Rejected").length;
 
   const ticketKpis = [
-    { label: "Pending Approval", value: ticketPendingCount, color: "#F59E0B", icon: <HourglassEmptyRounded fontSize="small" /> },
-    { label: "Authorized", value: ticketAuthorizedCount, color: "#22C55E", icon: <CheckCircleRounded fontSize="small" /> },
-    { label: "Rejected", value: ticketRejectedCount, color: "#EF4444", icon: <ThumbDownRounded fontSize="small" /> },
+    { label: "Pending Approval", value: ticketPendingCount, color: "#FBBF24", icon: <HourglassEmptyRounded fontSize="small" /> },
+    { label: "Authorized", value: ticketAuthorizedCount, color: "#FBBF24", icon: <CheckCircleRounded fontSize="small" /> },
+    { label: "Rejected", value: ticketRejectedCount, color: "#FBBF24", icon: <ThumbDownRounded fontSize="small" /> },
   ];
 
   const cardSx = {
@@ -142,7 +142,7 @@ const Approvals = () => {
     transition: "all 0.25s ease",
     position: "relative",
     overflow: "hidden",
-    "&:hover": { borderColor: "rgba(168,85,247,0.30)", transform: "translateY(-2px)", boxShadow: "0 12px 32px rgba(124,58,237,0.10)" },
+    "&:hover": { borderColor: "rgba(17,24,39,0.30)", transform: "translateY(-2px)", boxShadow: "0 12px 32px rgba(17,24,39,0.10)" },
   };
 
   const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
@@ -152,8 +152,8 @@ const Approvals = () => {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
-            <CheckCircleRounded sx={{ color: "#A855F7" }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+            <CheckCircleRounded sx={{ color: "text.primary" }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Pending Authorizations</Typography>
@@ -183,7 +183,7 @@ const Approvals = () => {
 
           {ticketsLoading ? (
             <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "30vh" }}>
-              <CircularProgress sx={{ color: "#A855F7" }} />
+              <CircularProgress sx={{ color: "text.primary" }} />
             </Box>
           ) : tickets.length === 0 ? (
             <Paper sx={{ p: 5, textAlign: "center", borderRadius: "20px", border: "1px dashed", borderColor: "divider" }}>
@@ -200,7 +200,7 @@ const Approvals = () => {
                   <Paper key={item._id} sx={{ ...cardSx, pl: { xs: 2.5, md: 3.5 } }}>
                     <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: borderColor }} />
                     <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", width: "100%", flex: 1 }}>
-                      <Avatar sx={{ background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "#FFFFFF", width: 48, height: 48, fontWeight: 900, fontSize: "18px", flexShrink: 0 }}>
+                      <Avatar sx={{ background: "#111827", color: "#FFFFFF", width: 48, height: 48, fontWeight: 900, fontSize: "18px", flexShrink: 0 }}>
                         {item.raisedBy?.name?.charAt(0) || "S"}
                       </Avatar>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -230,7 +230,7 @@ const Approvals = () => {
                         Reject
                       </Button>
                       <Button variant="contained" startIcon={<CheckRounded />} disabled={isCompleted} onClick={() => handleTicketActionClick(item, "authorize")}
-                        sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, fontSize: 13, background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", boxShadow: "none" }}>
+                        sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, fontSize: 13, background: "#111827", color: "#fff", boxShadow: "none" }}>
                         Authorize
                       </Button>
                     </Box>
@@ -246,9 +246,9 @@ const Approvals = () => {
         slotProps={{ paper: { sx: { borderRadius: "20px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         {selectedApproval && (
           <>
-            <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: actionType === "authorize" ? "linear-gradient(135deg,#7C3AED,#A855F7)" : "#EF4444", display: "grid", placeItems: "center" }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: actionType === "authorize" ? "#111827" : "#EF4444", display: "grid", placeItems: "center" }}>
                   {actionType === "authorize" ? <CheckRounded sx={{ color: "#fff", fontSize: 22 }} /> : <CloseRounded sx={{ color: "#fff", fontSize: 22 }} />}
                 </Box>
                 <Box>
@@ -277,7 +277,7 @@ const Approvals = () => {
                 <Button onClick={() => setDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, px: 3, borderRadius: "10px" }}>Cancel</Button>
                 <Button variant="contained" disabled={processing} onClick={handleConfirmTicketAction}
                   startIcon={processing ? <CircularProgress size={18} color="inherit" /> : null}
-                  sx={{ background: actionType === "authorize" ? "linear-gradient(135deg,#7C3AED,#A855F7)" : "#EF4444", color: "#fff", fontWeight: 800, px: 3.5, borderRadius: "12px", boxShadow: "none" }}>
+                  sx={{ background: actionType === "authorize" ? "#111827" : "#EF4444", color: "#fff", fontWeight: 800, px: 3.5, borderRadius: "12px", boxShadow: "none" }}>
                   {processing ? "Processing..." : `Confirm ${actionType === "authorize" ? "Authorization" : "Rejection"}`}
                 </Button>
               </Box>

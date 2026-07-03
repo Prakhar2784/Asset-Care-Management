@@ -17,8 +17,8 @@ import {
 } from '@mui/icons-material';
 import api from '../../api/axios';
 
-const ACCENT = '#A855F7';
-const DARK = '#1A0B2E';
+const ACCENT = '#111827';
+const DARK = '#111827';
 
 const PLAN_COLORS = {
   Basic: { bg: '#1e3a5f', text: '#60a5fa', label: 'Basic' },
@@ -51,7 +51,7 @@ function PlanBadge({ plan }) {
   );
 }
 
-function UtilBar({ value, color = '#A855F7', label }) {
+function UtilBar({ value, color = '#111827', label }) {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
@@ -273,9 +273,9 @@ export default function SuperAdminPanel() {
         {[
           { icon: <BusinessRounded />, label: 'Total Companies', value: platform?.totalTenants || 0, color: ACCENT },
           { icon: <CheckCircleRounded />, label: 'Active Tenants', value: platform?.activeTenants || 0, color: '#4ade80' },
-          { icon: <PeopleRounded />, label: 'Total Users', value: platform?.totalUsers || 0, color: '#60a5fa' },
+          { icon: <PeopleRounded />, label: 'Total Users', value: platform?.totalUsers || 0, color: '#FBBF24' },
           { icon: <InventoryRounded />, label: 'Total Assets', value: platform?.totalAssets || 0, color: '#f59e0b' },
-          { icon: <ConfirmationNumberRounded />, label: 'Total Tickets', value: platform?.totalTickets || 0, color: '#a78bfa' },
+          { icon: <ConfirmationNumberRounded />, label: 'Total Tickets', value: platform?.totalTickets || 0, color: '#FBBF24' },
           { icon: <CancelRounded />, label: 'Suspended', value: platform?.suspendedTenants || 0, color: '#ef4444' },
         ].map(card => (
           <Grid key={card.label} size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
@@ -561,7 +561,7 @@ export default function SuperAdminPanel() {
                     <TableRow key={u._id} hover>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Avatar sx={{ width: 26, height: 26, fontSize: 11, fontWeight: 700, bgcolor: "rgba(124,58,237,0.12)", color: ACCENT }}>
+                          <Avatar sx={{ width: 26, height: 26, fontSize: 11, fontWeight: 700, bgcolor: "rgba(17,24,39,0.12)", color: ACCENT }}>
                             {u.name?.substring(0, 1)}
                           </Avatar>
                           <Typography fontSize={13} fontWeight={600}>{u.name}</Typography>

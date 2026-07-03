@@ -1,10 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+
 
 /* === ASSETCARE PRO — DARK + LIME DESIGN SYSTEM === */
 :root {
-  --bg-root: #F5F4F0;
-  --bg-panel: #ffffff;
-  --bg-card: #F9F8F5;
+  --bg-root: #000000;
+  --bg-panel: #0A0A0A;
+  --bg-card: #0A0A0A;
   --bg-hover: rgba(17,17,17,0.05);
 
   --primary: #111111;
@@ -35,7 +36,7 @@
 html, body, #root {
   width: 100%;
   min-height: 100vh;
-  font-family: "Inter", sans-serif;
+  font-family: "Poppins", sans-serif;
   background: var(--bg-root);
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;

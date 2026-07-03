@@ -19,7 +19,7 @@ const TYPE_CONFIG = {
   request_approved: { icon: <CheckCircleOutlineRounded />, color: '#4ADE80', bg: 'rgba(22,163,74,0.13)',  label: 'Approved' },
   request_rejected: { icon: <InfoOutlined />,              color: '#F87171', bg: 'rgba(220,38,38,0.13)',  label: 'Rejected' },
   asset_assigned:   { icon: <Inventory2Rounded />,         color: '#4ADE80', bg: 'rgba(22,163,74,0.13)',  label: 'Asset' },
-  asset_revoked:    { icon: <Inventory2Rounded />,         color: '#A78BFA', bg: 'rgba(124,58,237,0.13)', label: 'Asset' },
+  asset_revoked:    { icon: <Inventory2Rounded />,         color: '#A78BFA', bg: 'rgba(17,24,39,0.13)', label: 'Asset' },
   warranty_expiry:  { icon: <WarningAmberRounded />,       color: '#FBBF24', bg: 'rgba(217,119,6,0.13)',  label: 'Warranty' },
   system:           { icon: <InfoOutlined />,              color: '#94A3B8', bg: 'rgba(71,85,105,0.13)',  label: 'System' },
 };
@@ -95,9 +95,9 @@ export default function Notifications() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Box sx={{
             width: 44, height: 44, borderRadius: 2, display: 'grid', placeItems: 'center',
-            bgcolor: "rgba(124,58,237,0.12)"
+            bgcolor: "rgba(17,24,39,0.12)"
           }}>
-            <NotificationsRounded sx={{ color: '#A855F7' }} />
+            <NotificationsRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Notifications</Typography>

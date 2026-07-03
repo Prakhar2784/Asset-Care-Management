@@ -22,12 +22,11 @@ import {
 import api from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
-const ROLES = ['employee', 'hod', 'admin', 'it_support', 'technician'];
+const ROLES = ['employee', 'hod', 'admin', 'technician'];
 const ROLE_COLORS = {
-  admin:      { color: '#A855F7', bg: 'rgba(168,85,247,0.13)' },
-  hod:        { color: '#A78BFA', bg: 'rgba(124,58,237,0.13)' },
+  admin:      { color: 'text.primary', bg: 'rgba(17,24,39,0.13)' },
+  hod:        { color: '#A78BFA', bg: 'rgba(17,24,39,0.13)' },
   employee:   { color: '#60A5FA', bg: 'rgba(37,99,235,0.13)'  },
-  it_support: { color: '#22D3EE', bg: 'rgba(8,145,178,0.13)'  },
   technician: { color: '#fb923c', bg: 'rgba(249,115,22,0.13)'  },
 };
 const STATUS_COLORS = {
@@ -36,26 +35,26 @@ const STATUS_COLORS = {
 };
 const ACTION_COLORS = {
   CREATE: '#22C55E', UPDATE: '#3B82F6', DELETE: '#EF4444',
-  ASSIGN: '#A855F7', REVOKE: '#F97316', LOGIN: '#14B8A6', APPROVE: '#22C55E', REJECT: '#EF4444',
+  ASSIGN: '#111827', REVOKE: '#F97316', LOGIN: '#14B8A6', APPROVE: '#22C55E', REJECT: '#EF4444',
 };
 
 // ── Role Permissions Matrix ───────────────────────────────────────────────────
 const DEFAULT_PERMISSION_MATRIX = [
-  { feature: 'View Dashboard',          admin: true,  hod: true,  it_support: true,  employee: true,  technician: true  },
-  { feature: 'Register Assets',         admin: true,  hod: false, it_support: true,  employee: false, technician: false },
-  { feature: 'Edit / Delete Assets',    admin: true,  hod: false, it_support: false, employee: false, technician: false },
-  { feature: 'Assign Assets',           admin: true,  hod: false, it_support: true,  employee: false, technician: false },
-  { feature: 'View All Assets',         admin: true,  hod: true,  it_support: true,  employee: false, technician: true  },
-  { feature: 'Raise Tickets',           admin: true,  hod: true,  it_support: true,  employee: true,  technician: true  },
-  { feature: 'Manage All Tickets',      admin: true,  hod: false, it_support: true,  employee: false, technician: true  },
-  { feature: 'Approve Device Requests', admin: true,  hod: true,  it_support: false, employee: false, technician: false },
-  { feature: 'Manage Users',            admin: true,  hod: false, it_support: false, employee: false, technician: false },
-  { feature: 'View Reports',            admin: true,  hod: true,  it_support: false, employee: false, technician: false },
-  { feature: 'View Audit Logs',         admin: true,  hod: false, it_support: false, employee: false, technician: false },
-  { feature: 'Manage Departments',      admin: true,  hod: false, it_support: false, employee: false, technician: false },
-  { feature: 'Settings & Config',       admin: true,  hod: false, it_support: false, employee: false, technician: false },
-  { feature: 'Employee Portal',         admin: false, hod: false, it_support: false, employee: true,  technician: false },
-  { feature: 'Submit Device Requests',  admin: false, hod: true,  it_support: false, employee: true,  technician: false },
+  { feature: 'View Dashboard',          admin: true,  hod: true,  employee: true,  technician: true  },
+  { feature: 'Register Assets',         admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'Edit / Delete Assets',    admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'Assign Assets',           admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'View All Assets',         admin: true,  hod: true,  employee: false, technician: true  },
+  { feature: 'Raise Tickets',           admin: true,  hod: true,  employee: true,  technician: true  },
+  { feature: 'Manage All Tickets',      admin: true,  hod: false, employee: false, technician: true  },
+  { feature: 'Approve Device Requests', admin: true,  hod: true,  employee: false, technician: false },
+  { feature: 'Manage Users',            admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'View Reports',            admin: true,  hod: true,  employee: false, technician: false },
+  { feature: 'View Audit Logs',         admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'Manage Departments',      admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'Settings & Config',       admin: true,  hod: false, employee: false, technician: false },
+  { feature: 'Employee Portal',         admin: false, hod: false, employee: true,  technician: false },
+  { feature: 'Submit Device Requests',  admin: false, hod: true,  employee: true,  technician: false },
 ];
 
 const PERM_STORAGE_KEY = 'assetcare_permission_matrix';
@@ -71,7 +70,7 @@ function loadPermMatrix() {
 const defaultForm = { name: '', email: '', password: '', role: 'employee', department: '', phone: '' };
 
 function avatarColor(name = '') {
-  const colors = ['#7C3AED', '#2563EB', '#059669', '#D97706', '#DC2626', '#0891B2'];
+  const colors = ['#111827', '#2563EB', '#059669', '#D97706', '#DC2626', '#0891B2'];
   return colors[name.charCodeAt(0) % colors.length];
 }
 
@@ -114,7 +113,7 @@ const SortHead = ({ id, label, sort, onSort, sx = {} }) => (
   <TableCell sortDirection={sort.col === id ? sort.dir : false}
     sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...sx }}>
     <TableSortLabel active={sort.col === id} direction={sort.col === id ? sort.dir : 'asc'} onClick={() => onSort(id)}
-      sx={{ '& .MuiTableSortLabel-icon': { fontSize: 14 }, color: 'inherit !important', '&.Mui-active': { color: '#A855F7 !important' }, '& .MuiTableSortLabel-icon': { color: '#A855F7 !important', opacity: sort.col === id ? 1 : 0 } }}>
+      sx={{ '& .MuiTableSortLabel-icon': { fontSize: 14 }, color: 'inherit !important', '&.Mui-active': { color: '#111827 !important' }, '& .MuiTableSortLabel-icon': { color: '#111827 !important', opacity: sort.col === id ? 1 : 0 } }}>
       {label}
     </TableSortLabel>
   </TableCell>
@@ -266,7 +265,6 @@ export default function UserManagement() {
     all: null,
     admin: ['admin'],
     hod: ['hod'],
-    it_support: ['it_support'],
     technician: ['technician'],
     employee: ['employee']
   };
@@ -511,8 +509,8 @@ export default function UserManagement() {
       {/* ── Page header ─────────────────────────────────────────────────────── */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <PeopleRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <PeopleRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Portal Users</Typography>
@@ -528,7 +526,7 @@ export default function UserManagement() {
           </Button>
           <Button variant="contained" startIcon={<PersonAddRounded />}
             onClick={() => { setAddOpen(true); setFormError(''); setForm(defaultForm); setAddMode('invite'); }}
-            sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, '&:hover': { background: 'linear-gradient(135deg,#6D28D9,#9333EA)' } }}>
+            sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, '&:hover': { background: '#1F2937' } }}>
             Add User
           </Button>
         </Stack>
@@ -545,22 +543,21 @@ export default function UserManagement() {
       <Paper sx={{ borderRadius: '16px', border: 1, borderColor: 'divider', mb: 3, overflow: 'hidden' }}>
         <Tabs value={activeTab} onChange={(_, v) => { setActiveTab(v); clearSelection(); }} sx={{
           px: 1,
-          '& .MuiTabs-indicator': { bgcolor: '#A855F7', borderRadius: '2px', height: 3 },
+          '& .MuiTabs-indicator': { bgcolor: 'text.primary', borderRadius: '2px', height: 3 },
           '& .MuiTab-root': { fontWeight: 700, fontSize: 13, textTransform: 'none', minHeight: 48, color: 'text.secondary' },
-          '& .Mui-selected': { color: '#A855F7' },
+          '& .Mui-selected': { color: 'text.primary' },
         }}>
           {[
             { value: 'all', label: 'All Users' },
             { value: 'admin', label: 'Admins' },
             { value: 'hod', label: 'HODs' },
-            { value: 'it_support', label: 'IT Support' },
             { value: 'technician', label: 'Technicians' },
             { value: 'employee', label: 'Employees' }
           ].map(({ value, label }) => (
             <Tab key={value} value={value} label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {label}
-                <Box sx={{ px: 1, py: 0.1, borderRadius: '20px', fontSize: 11, fontWeight: 800, bgcolor: activeTab === value ? 'rgba(168,85,247,0.13)' : 'action.hover', color: activeTab === value ? '#A855F7' : 'text.disabled' }}>
+                <Box sx={{ px: 1, py: 0.1, borderRadius: '20px', fontSize: 11, fontWeight: 800, bgcolor: activeTab === value ? 'rgba(17,24,39,0.13)' : 'action.hover', color: activeTab === value ? '#111827' : 'text.disabled' }}>
                   {countFor(value)}
                 </Box>
               </Box>
@@ -571,12 +568,12 @@ export default function UserManagement() {
 
       {/* ── Bulk action toolbar ──────────────────────────────────────────────── */}
       {selected.size > 0 && (
-        <Paper sx={{ mb: 2, px: 2.5, py: 1.5, borderRadius: '14px', border: 1, borderColor: 'rgba(168,85,247,0.4)', bgcolor: 'rgba(168,85,247,0.06)', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          <Typography fontWeight={800} fontSize={14} color="#A855F7">{selected.size} selected</Typography>
+        <Paper sx={{ mb: 2, px: 2.5, py: 1.5, borderRadius: '14px', border: 1, borderColor: 'rgba(17,24,39,0.4)', bgcolor: 'rgba(17,24,39,0.06)', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Typography fontWeight={800} fontSize={14} color="#111827">{selected.size} selected</Typography>
           <Box sx={{ flex: 1 }} />
           <Tooltip title="Change role for selected">
             <Button size="small" startIcon={<ManageAccountsRounded />} onClick={() => setBulkRoleOpen(true)} disabled={bulkWorking}
-              sx={{ fontWeight: 700, borderRadius: '10px', color: '#7C3AED', bgcolor: 'rgba(124,58,237,0.1)', '&:hover': { bgcolor: 'rgba(124,58,237,0.18)' } }}>
+              sx={{ fontWeight: 700, borderRadius: '10px', color: 'text.primary', bgcolor: 'rgba(17,24,39,0.1)', '&:hover': { bgcolor: 'rgba(17,24,39,0.18)' } }}>
               Change Role
             </Button>
           </Tooltip>
@@ -617,7 +614,7 @@ export default function UserManagement() {
               <TableRow sx={{ bgcolor: 'background.default' }}>
                 <TableCell padding="checkbox" sx={{ pl: 1.5, borderBottom: 2, borderColor: 'divider' }}>
                   <Checkbox size="small" checked={allSelected} indeterminate={someSelected} onChange={toggleAll}
-                    sx={{ color: 'text.disabled', '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: '#A855F7' } }} />
+                    sx={{ color: 'text.disabled', '&.Mui-checked, &.MuiCheckbox-indeterminate': { color: 'text.primary' } }} />
                 </TableCell>
                 {[['USER',''], ['ROLE',''], ['MOBILE',''], ['LAST LOGIN',''], ['STATUS',''], ['ACTIONS','']].map(([label]) => (
                   <TableCell key={label} sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider' }}>{label}</TableCell>
@@ -632,10 +629,10 @@ export default function UserManagement() {
                 const isMe = me?._id === user._id || me?.email === user.email;
                 return (
                   <TableRow key={user._id} hover selected={isSelected}
-                    sx={{ '&:last-child td': { borderBottom: 0 }, opacity: user.isActive ? 1 : 0.55, bgcolor: isSelected ? 'rgba(168,85,247,0.05) !important' : undefined }}>
+                    sx={{ '&:last-child td': { borderBottom: 0 }, opacity: user.isActive ? 1 : 0.55, bgcolor: isSelected ? 'rgba(17,24,39,0.05) !important' : undefined }}>
                     <TableCell padding="checkbox" sx={{ pl: 1.5 }}>
                       <Checkbox size="small" checked={isSelected} onChange={() => toggleOne(user._id)}
-                        sx={{ color: 'text.disabled', '&.Mui-checked': { color: '#A855F7' } }} />
+                        sx={{ color: 'text.disabled', '&.Mui-checked': { color: 'text.primary' } }} />
                     </TableCell>
                     {/* USER cell — avatar + name + email + (you) */}
                     <TableCell sx={{ py: 1.5 }}>
@@ -645,11 +642,11 @@ export default function UserManagement() {
                         </Avatar>
                         <Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                            <Typography fontSize={13} fontWeight={700} sx={{ color: '#A855F7', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }} onClick={() => openProfile(user)}>
+                            <Typography fontSize={13} fontWeight={700} sx={{ color: 'text.primary', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }} onClick={() => openProfile(user)}>
                               {user.name}
                             </Typography>
                             {isMe && (
-                              <Box sx={{ px: 0.8, py: 0.1, borderRadius: '6px', fontSize: 10, fontWeight: 800, bgcolor: 'rgba(168,85,247,0.12)', color: '#A855F7' }}>you</Box>
+                              <Box sx={{ px: 0.8, py: 0.1, borderRadius: '6px', fontSize: 10, fontWeight: 800, bgcolor: 'rgba(17,24,39,0.12)', color: 'text.primary' }}>you</Box>
                             )}
                           </Box>
                           <Typography fontSize={12} color="text.secondary">{user.email}</Typography>
@@ -677,7 +674,7 @@ export default function UserManagement() {
                     <TableCell sx={{ py: 1.5 }}>
                       <Stack direction="row" gap={0.5}>
                         <Tooltip title="Edit"><IconButton size="small" onClick={() => openEdit(user)} sx={{ borderRadius: '8px' }}><EditRounded fontSize="small" /></IconButton></Tooltip>
-                        <Tooltip title="Custom Permissions"><IconButton size="small" onClick={() => openUserPerm(user)} sx={{ borderRadius: '8px', color: '#A855F7' }}><SecurityRounded fontSize="small" /></IconButton></Tooltip>
+                        <Tooltip title="Custom Permissions"><IconButton size="small" onClick={() => openUserPerm(user)} sx={{ borderRadius: '8px', color: 'text.primary' }}><SecurityRounded fontSize="small" /></IconButton></Tooltip>
                         <Tooltip title={user.isActive ? 'Deactivate' : 'Activate'}>
                           <IconButton size="small" onClick={() => toggleActive(user)} sx={{ borderRadius: '8px', color: user.isActive ? '#DC2626' : '#16A34A' }}>
                             {user.isActive ? <BlockRounded fontSize="small" /> : <CheckCircleRounded fontSize="small" />}
@@ -721,7 +718,7 @@ export default function UserManagement() {
         <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
           <Button onClick={() => setBulkRoleOpen(false)} sx={{ fontWeight: 700, color: 'text.secondary', borderRadius: '10px' }}>Cancel</Button>
           <Button variant="contained" onClick={bulkChangeRole} disabled={bulkWorking}
-            sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+            sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
             {bulkWorking ? 'Updating…' : 'Apply'}
           </Button>
         </DialogActions>
@@ -732,7 +729,7 @@ export default function UserManagement() {
           PaperProps={{ sx: { borderRadius: '20px' } }}>
           <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <SecurityRounded sx={{ color: '#A855F7' }} />
+              <SecurityRounded sx={{ color: 'text.primary' }} />
               <Box>
                 <Typography fontWeight={800} fontSize={17}>Permissions — {userPermTarget?.name}</Typography>
                 <Typography fontSize={12} color="text.secondary">
@@ -764,7 +761,7 @@ export default function UserManagement() {
                           borderColor: row.allowed ? '#22C55E' : 'divider',
                           bgcolor: row.allowed ? 'rgba(34,197,94,0.08)' : 'transparent',
                           transition: 'all 0.15s ease',
-                          '&:hover': { borderColor: row.allowed ? '#EF4444' : '#A855F7', bgcolor: row.allowed ? 'rgba(239,68,68,0.08)' : 'rgba(168,85,247,0.08)' },
+                          '&:hover': { borderColor: row.allowed ? '#EF4444' : '#111827', bgcolor: row.allowed ? 'rgba(239,68,68,0.08)' : 'rgba(17,24,39,0.08)' },
                         }}
                       >
                         {row.allowed
@@ -784,7 +781,7 @@ export default function UserManagement() {
             <Box sx={{ flex: 1 }} />
             {userPermSaved && <Typography fontSize={13} color="success.main" fontWeight={700}>Saved!</Typography>}
             <Button variant="contained" onClick={saveUserPerm}
-              sx={{ fontWeight: 800, borderRadius: '10px', px: 3, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff' }}>
+              sx={{ fontWeight: 800, borderRadius: '10px', px: 3, background: '#111827', color: '#fff' }}>
               Save Changes
             </Button>
           </DialogActions>
@@ -795,7 +792,7 @@ export default function UserManagement() {
         PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <SecurityRounded sx={{ color: '#A855F7' }} />
+            <SecurityRounded sx={{ color: 'text.primary' }} />
             <Box>
               <Typography fontWeight={800} fontSize={18}>Role Permissions Matrix</Typography>
               <Typography fontSize={12} color="text.secondary">Click any cell to toggle access for that role</Typography>
@@ -809,7 +806,7 @@ export default function UserManagement() {
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 800, fontSize: 12, bgcolor: 'background.paper', minWidth: 200 }}>Feature</TableCell>
-                  {['admin', 'hod', 'it_support', 'employee'].map(role => {
+                  {['admin', 'hod', 'employee', 'technician'].map(role => {
                     const rc = ROLE_COLORS[role] || { color: '#64748b', bg: '#f1f5f9' };
                     return (
                       <TableCell key={role} align="center" sx={{ fontWeight: 800, fontSize: 11, bgcolor: 'background.paper', textTransform: 'capitalize' }}>
@@ -825,7 +822,7 @@ export default function UserManagement() {
                 {DEFAULT_PERMISSION_MATRIX.map((row, i) => (
                   <TableRow key={row.feature} sx={{ bgcolor: i % 2 === 0 ? 'transparent' : 'action.hover', '&:last-child td': { borderBottom: 0 } }}>
                     <TableCell sx={{ fontWeight: 600, fontSize: 13, py: 1.2 }}>{row.feature}</TableCell>
-                    {['admin', 'hod', 'it_support', 'employee'].map(role => {
+                    {['admin', 'hod', 'employee', 'technician'].map(role => {
                       const allowed = row[role];
                       return (
                         <TableCell key={role} align="center" sx={{ py: 1.2 }}>
@@ -848,7 +845,7 @@ export default function UserManagement() {
         PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <UploadFileRounded sx={{ color: '#A855F7' }} />
+            <UploadFileRounded sx={{ color: 'text.primary' }} />
             <Box>
               <Typography fontWeight={800} fontSize={18}>Import Users from CSV</Typography>
               <Typography fontSize={12} color="text.secondary">Bulk-create employees and send invite links automatically</Typography>
@@ -865,7 +862,7 @@ export default function UserManagement() {
                 Download Template
               </Button>
               <Button component="label" variant="contained" startIcon={<UploadFileRounded />}
-                sx={{ borderRadius: '10px', fontWeight: 700, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff' }}>
+                sx={{ borderRadius: '10px', fontWeight: 700, background: '#111827', color: '#fff' }}>
                 Choose CSV File
                 <input ref={csvInputRef} type="file" hidden accept=".csv"
                   onChange={e => { e.target.files[0] && handleCsvFile(e.target.files[0]); if (csvInputRef.current) csvInputRef.current.value = ''; }} />
@@ -947,7 +944,7 @@ export default function UserManagement() {
           <Button onClick={() => setCsvOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>{csvResult ? 'Close' : 'Cancel'}</Button>
           {csvRows.length > 0 && !csvResult && (
             <Button variant="contained" onClick={handleCsvImport} disabled={csvImporting}
-              sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               {csvImporting ? 'Importing…' : `Import ${csvRows.length} Users`}
             </Button>
           )}
@@ -959,7 +956,7 @@ export default function UserManagement() {
         PaperProps={{ sx: { width: { xs: '100vw', sm: 500 }, bgcolor: 'background.default' } }}>
         {profileUser && (
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ p: 3, background: 'linear-gradient(135deg,rgba(124,58,237,0.12),rgba(168,85,247,0.06))', borderBottom: 1, borderColor: 'divider' }}>
+            <Box sx={{ p: 3, background: 'linear-gradient(135deg,rgba(17,24,39,0.12),rgba(17,24,39,0.06))', borderBottom: 1, borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box sx={{ position: 'relative', flexShrink: 0 }}>
@@ -969,7 +966,7 @@ export default function UserManagement() {
                     </Avatar>
                     <Tooltip title="Upload photo">
                       <IconButton size="small" component="label" disabled={avatarUploading}
-                        sx={{ position: 'absolute', bottom: -4, right: -4, width: 22, height: 22, bgcolor: '#A855F7', color: '#fff', '&:hover': { bgcolor: '#7C3AED' }, borderRadius: '50%', p: 0.4 }}>
+                        sx={{ position: 'absolute', bottom: -4, right: -4, width: 22, height: 22, bgcolor: 'text.primary', color: '#fff', '&:hover': { bgcolor: 'text.primary' }, borderRadius: '50%', p: 0.4 }}>
                         <CameraAltRounded sx={{ fontSize: 12 }} />
                         <input ref={avatarInputRef} type="file" hidden accept=".jpg,.jpeg,.png,.webp"
                           onChange={e => handleAvatarUpload(e.target.files[0], profileUser._id)} />
@@ -1009,9 +1006,9 @@ export default function UserManagement() {
 
             <Tabs value={profileTab} onChange={handleProfileTabChange} sx={{
               borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper',
-              '& .MuiTabs-indicator': { bgcolor: '#A855F7' },
+              '& .MuiTabs-indicator': { bgcolor: 'text.primary' },
               '& .MuiTab-root': { fontWeight: 700, fontSize: 12, textTransform: 'none', minHeight: 44 },
-              '& .Mui-selected': { color: '#A855F7' },
+              '& .Mui-selected': { color: 'text.primary' },
             }}>
               <Tab value="overview" label="Overview" icon={<LaptopRounded sx={{ fontSize: 15 }} />} iconPosition="start" />
               <Tab value="activity" label="Activity Log" icon={<HistoryRounded sx={{ fontSize: 15 }} />} iconPosition="start"
@@ -1028,9 +1025,9 @@ export default function UserManagement() {
                   <Stack spacing={3}>
                     <Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                        <LaptopRounded sx={{ fontSize: 18, color: '#A855F7' }} />
+                        <LaptopRounded sx={{ fontSize: 18, color: 'text.primary' }} />
                         <Typography fontWeight={800} fontSize={14}>Assigned Assets</Typography>
-                        <Box sx={{ ml: 'auto', px: 1, py: 0.2, borderRadius: '20px', bgcolor: 'rgba(168,85,247,0.12)', color: '#A855F7', fontSize: 11, fontWeight: 800 }}>{profileData.assignments.length}</Box>
+                        <Box sx={{ ml: 'auto', px: 1, py: 0.2, borderRadius: '20px', bgcolor: 'rgba(17,24,39,0.12)', color: 'text.primary', fontSize: 11, fontWeight: 800 }}>{profileData.assignments.length}</Box>
                       </Box>
                       {profileData.assignments.length === 0
                         ? <Typography fontSize={13} color="text.disabled" sx={{ pl: 1 }}>No assets assigned.</Typography>
@@ -1124,8 +1121,8 @@ export default function UserManagement() {
               {/* Onboarding checklist */}
               <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: 1, borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mb: 1 }}>
-                  <ChecklistRounded sx={{ fontSize: 15, color: '#A855F7' }} />
-                  <Typography fontSize={12} fontWeight={800} color="#A855F7">Onboarding Checklist</Typography>
+                  <ChecklistRounded sx={{ fontSize: 15, color: 'text.primary' }} />
+                  <Typography fontSize={12} fontWeight={800} color="#111827">Onboarding Checklist</Typography>
                 </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
                   {[
@@ -1184,10 +1181,10 @@ export default function UserManagement() {
         </DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           {/* Invite / Password toggle — kept for power users */}
-          <Box sx={{ mb: 2, p: 2, borderRadius: '14px', bgcolor: 'rgba(168,85,247,0.06)', border: 1, borderColor: 'rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <MailOutlineRounded sx={{ color: '#A855F7', fontSize: 20 }} />
+          <Box sx={{ mb: 2, p: 2, borderRadius: '14px', bgcolor: 'rgba(17,24,39,0.06)', border: 1, borderColor: 'rgba(17,24,39,0.2)', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <MailOutlineRounded sx={{ color: 'text.primary', fontSize: 20 }} />
             <Box sx={{ flex: 1 }}>
-              <Typography fontSize={13} fontWeight={700} color="#A855F7">Invite via email</Typography>
+              <Typography fontSize={13} fontWeight={700} color="#111827">Invite via email</Typography>
               <Typography fontSize={12} color="text.secondary">User receives an email to create their own password and log in.</Typography>
             </Box>
             <Button size="small" onClick={() => setAddMode(addMode === 'invite' ? 'password' : 'invite')}
@@ -1224,7 +1221,7 @@ export default function UserManagement() {
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={saving}
                 startIcon={addMode === 'invite' ? <EmailRounded /> : <PersonAddRounded />}
-                sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3, '&:hover': { background: 'linear-gradient(135deg,#6D28D9,#9333EA)' } }}>
+                sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3, '&:hover': { background: '#1F2937' } }}>
                 {saving ? 'Please wait…' : addMode === 'invite' ? 'Send Invite' : 'Create User'}
               </Button>
             </Box>
@@ -1267,7 +1264,7 @@ export default function UserManagement() {
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => setEditOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={editSaving}
-                sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                 {editSaving ? 'Saving...' : 'Save Changes'}
               </Button>
             </Box>

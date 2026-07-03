@@ -54,7 +54,7 @@ const Contact = () => {
   return (
     <>
       <style>{`
-        .contact-page { min-height: 100vh; background: #080812; }
+        .contact-page { min-height: 100vh; background: #0B0D12; }
         .contact-container { max-width: 1400px; margin: 0 auto; }
         .contact-hero { padding: 140px 24px 44px; }
 
@@ -65,8 +65,8 @@ const Contact = () => {
         }
 
         .contact-highlight-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 18px; padding: 18px;
           display: flex; align-items: center; gap: 14px;
           box-shadow: 0 4px 16px rgba(17,17,17,0.05);
@@ -75,7 +75,7 @@ const Contact = () => {
         .contact-highlight-icon {
           width: 44px; height: 44px; border-radius: 13px;
           display: grid; place-items: center;
-          color: #A855F7; background: linear-gradient(135deg, #7C3AED, #A855F7); flex-shrink: 0;
+          color: #FFFFFF; background: #111827; flex-shrink: 0;
         }
 
         .contact-highlight-title { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 3px; }
@@ -90,21 +90,21 @@ const Contact = () => {
         }
 
         .contact-form-wrapper {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 28px; padding: 10px;
           box-shadow: 0 8px 32px rgba(17,17,17,0.07);
         }
 
         .contact-form {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 22px; padding: 38px;
           display: flex; flex-direction: column; gap: 22px;
         }
 
         .form-title h3 { margin: 0 0 8px; color: #FFFFFF; font-size: 26px; font-weight: 950; letter-spacing: -0.8px; }
-        .form-title p { margin: 0; color: #8B8BAA; font-size: 14.5px; font-weight: 500; line-height: 1.6; }
+        .form-title p { margin: 0; color: #9CA3AF; font-size: 14.5px; font-weight: 500; line-height: 1.6; }
 
         .input-group { display: flex; flex-direction: column; gap: 7px; }
 
@@ -114,8 +114,8 @@ const Contact = () => {
         .contact-input {
           width: 100%; padding: 14px 16px;
           font-size: 14.5px; font-weight: 500;
-          background-color: rgba(30,20,60,0.5);
-          border: 1.5px solid rgba(168,85,247,0.2);
+          background-color: rgba(20,20,20,0.65);
+          border: 1.5px solid rgba(17,24,39,0.2);
           border-radius: 14px; color: #FFFFFF;
           outline: none; transition: all 0.25s ease;
           font-family: 'Inter', sans-serif;
@@ -123,33 +123,33 @@ const Contact = () => {
         }
 
         .contact-input::placeholder { color: #A0A09A; font-weight: 500; }
-        .contact-input:hover { border-color: rgba(168,85,247,0.24); background: rgba(15,10,40,0.55); }
-        .contact-input:focus { background-color: rgba(20,12,50,0.8); border-color: #A855F7; box-shadow: 0 0 0 3px rgba(168,85,247,0.15); }
+        .contact-input:hover { border-color: rgba(17,24,39,0.24); background: rgba(20,20,20,0.7); }
+        .contact-input:focus { background-color: rgba(25,25,25,0.85); border-color: #FFFFFF; box-shadow: 0 0 0 3px rgba(17,24,39,0.15); }
 
         select.contact-input {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23A855F7' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFFFFF' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
           background-repeat: no-repeat; background-position: right 14px center;
           padding-right: 40px; cursor: pointer;
         }
 
         .contact-btn {
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           padding: 16px; border-radius: 14px;
           font-weight: 900; font-size: 15px;
           border: none; cursor: pointer;
           transition: all 0.25s ease; margin-top: 4px;
           display: flex; align-items: center; justify-content: center; gap: 8px;
-          box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+          box-shadow: 0 4px 16px rgba(17,24,39,0.4);
         }
 
-        .contact-btn:hover:not(:disabled) { background: linear-gradient(135deg, #6D28D9, #9333EA); transform: translateY(-2px); box-shadow: 0 12px 28px rgba(124,58,237,0.55); }
+        .contact-btn:hover:not(:disabled) { background: #1F2937; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(17,24,39,0.55); }
         .contact-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         .contact-btn.success { background: #16A34A; color: #FFFFFF; }
 
         .contact-info { display: flex; flex-direction: column; gap: 18px; }
 
         .contact-side-card {
-          background: linear-gradient(135deg, #7C3AED, #A855F7); border-radius: 28px; padding: 32px;
+          background: #111827; border-radius: 28px; padding: 32px;
           color: #FFFFFF; position: relative; overflow: hidden;
         }
 
@@ -157,7 +157,7 @@ const Contact = () => {
           content: "";
           position: absolute; top: -70px; right: -70px;
           width: 200px; height: 200px;
-          background: radial-gradient(circle, rgba(168,85,247,0.14), transparent 70%);
+          background: radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -177,8 +177,8 @@ const Contact = () => {
         }
 
         .side-stat {
-          background: rgba(168,85,247,0.08);
-          border: 1px solid rgba(168,85,247,0.16);
+          background: rgba(17,24,39,0.08);
+          border: 1px solid rgba(17,24,39,0.16);
           border-radius: 16px; padding: 14px;
         }
 
@@ -186,27 +186,27 @@ const Contact = () => {
         .side-stat-label { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.6px; }
 
         .info-box {
-          padding: 22px; background: rgba(15,10,40,0.55);
-          border-radius: 20px; border: 1px solid rgba(168,85,247,0.15);
+          padding: 22px; background: rgba(20,20,20,0.7);
+          border-radius: 20px; border: 1px solid rgba(17,24,39,0.15);
           box-shadow: 0 4px 16px rgba(17,17,17,0.05);
           display: flex; align-items: flex-start; gap: 16px;
           transition: all 0.25s ease;
         }
 
-        .info-box:hover { transform: translateY(-4px); border-color: rgba(168,85,247,0.18); box-shadow: 0 16px 36px rgba(17,17,17,0.08); }
+        .info-box:hover { transform: translateY(-4px); border-color: rgba(17,24,39,0.18); box-shadow: 0 16px 36px rgba(17,17,17,0.08); }
 
         .info-icon {
           width: 48px; height: 48px; border-radius: 14px;
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           display: grid; place-items: center; flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(124,58,237,0.35);
+          box-shadow: 0 4px 12px rgba(17,24,39,0.35);
         }
 
         .info-label { font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
         .info-text { font-size: 15px; color: #FFFFFF; margin-top: 4px; font-weight: 800; line-height: 1.5; }
 
         .support-note {
-          background: rgba(15,10,40,0.55); border: 1.5px dashed rgba(168,85,247,0.25);
+          background: rgba(20,20,20,0.7); border: 1.5px dashed rgba(17,24,39,0.25);
           border-radius: 20px; padding: 22px;
           color: #CBD5E1; font-size: 14.5px; line-height: 1.7; font-weight: 500;
         }
@@ -228,7 +228,7 @@ const Contact = () => {
         <div className="contact-hero">
           <div className="contact-container">
             <div style={{ marginBottom: 32 }}>
-              <div style={{ color: '#A855F7', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>Contact Protocol</div>
+              <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>Contact Protocol</div>
               <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Request a system demo</h1>
               <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Share your requirements and our technical team will help you provision a complete asset service and warranty management architecture.</p>
             </div>

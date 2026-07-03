@@ -15,17 +15,17 @@ const wrapperSx = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   p: 3,
   background:
-    'radial-gradient(ellipse at 15% 0%, rgba(124,58,237,0.22) 0%, transparent 55%),' +
-    'radial-gradient(ellipse at 85% 100%, rgba(168,85,247,0.16) 0%, transparent 55%),' +
-    '#080812',
+    'radial-gradient(ellipse at 15% 0%, rgba(17,24,39,0.22) 0%, transparent 55%),' +
+    'radial-gradient(ellipse at 85% 100%, rgba(17,24,39,0.16) 0%, transparent 55%),' +
+    '#0B0D12',
   backgroundAttachment: 'fixed',
 };
 
 const cardSx = {
   width: '100%', maxWidth: 460,
-  bgcolor: 'rgba(15,10,40,0.70)',
+  bgcolor: 'rgba(255,255,255,0.70)',
   backdropFilter: 'blur(24px)',
-  border: '1px solid rgba(168,85,247,0.18)',
+  border: '1px solid rgba(17,24,39,0.18)',
   borderRadius: '32px',
   boxShadow: '0 30px 70px rgba(0,0,0,0.5)',
   p: { xs: 3.5, sm: 5 },
@@ -35,23 +35,23 @@ const darkInputSx = {
   mb: 3,
   '& .MuiOutlinedInput-root': {
     borderRadius: '16px',
-    bgcolor: 'rgba(15,10,40,0.6)',
+    bgcolor: 'rgba(20,20,20,0.75)',
     color: '#FFFFFF',
     fontWeight: 600,
-    '& fieldset': { borderColor: 'rgba(168,85,247,0.25)', borderWidth: '1.5px' },
-    '&:hover fieldset': { borderColor: 'rgba(168,85,247,0.4)' },
-    '&.Mui-focused fieldset': { borderColor: '#A855F7', boxShadow: '0 0 0 3px rgba(168,85,247,0.15)' },
+    '& fieldset': { borderColor: 'rgba(17,24,39,0.25)', borderWidth: '1.5px' },
+    '&:hover fieldset': { borderColor: 'rgba(17,24,39,0.4)' },
+    '&.Mui-focused fieldset': { borderColor: '#FFFFFF', boxShadow: '0 0 0 3px rgba(17,24,39,0.15)' },
   },
-  '& .MuiInputLabel-root': { color: '#8B8BAA', fontWeight: 600 },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#A855F7' },
+  '& .MuiInputLabel-root': { color: '#9CA3AF', fontWeight: 600 },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#FFFFFF' },
 };
 
 const gradientBtn = {
   py: 1.6, fontWeight: 900, borderRadius: '16px', textTransform: 'none', fontSize: 16,
-  background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#FFFFFF',
+  background: '#111827', color: '#FFFFFF',
   boxShadow: '0 14px 28px rgba(0,0,0,0.28)',
-  '&:hover': { background: 'linear-gradient(135deg,#6D28D9,#9333EA)', transform: 'translateY(-2px)', boxShadow: '0 20px 36px rgba(0,0,0,0.35)' },
-  '&.Mui-disabled': { background: 'rgba(168,85,247,0.25)', color: 'rgba(255,255,255,0.5)' },
+  '&:hover': { background: '#1F2937', transform: 'translateY(-2px)', boxShadow: '0 20px 36px rgba(0,0,0,0.35)' },
+  '&.Mui-disabled': { background: 'rgba(17,24,39,0.25)', color: 'rgba(20,20,20,0.65)' },
   transition: 'all 0.25s ease',
 };
 
@@ -101,13 +101,13 @@ function OtpInput({ value, onChange }) {
             textAlign: 'center', fontSize: 24, fontWeight: 800,
             fontFamily: 'monospace', letterSpacing: 0,
             border: '1.5px solid',
-            borderColor: value[idx] ? '#A855F7' : 'rgba(168,85,247,0.25)',
+            borderColor: value[idx] ? '#111827' : 'rgba(17,24,39,0.25)',
             borderRadius: '16px', outline: 'none',
-            bgcolor: 'rgba(15,10,40,0.6)',
+            bgcolor: 'rgba(20,20,20,0.75)',
             color: '#FFFFFF',
             transition: 'all 0.15s',
             cursor: 'text',
-            '&:focus': { borderColor: '#A855F7', boxShadow: '0 0 0 3px rgba(168,85,247,0.15)', bgcolor: 'rgba(20,12,50,0.8)' }
+            '&:focus': { borderColor: '#FFFFFF', boxShadow: '0 0 0 3px rgba(17,24,39,0.15)', bgcolor: 'rgba(25,25,25,0.85)' }
           }}
         />
       ))}
@@ -171,7 +171,7 @@ export default function ForgotPassword() {
       <Box sx={cardSx}>
         {/* Brand mark */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.4, mb: 4 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '14px', display: 'grid', placeItems: 'center', bgcolor: '#A855F7', boxShadow: '0 14px 28px rgba(168,85,247,0.28)' }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: '14px', display: 'grid', placeItems: 'center', bgcolor: '#FFFFFF', boxShadow: '0 14px 28px rgba(17,24,39,0.28)' }}>
             <Inventory2Rounded sx={{ color: '#fff', fontSize: 22 }} />
           </Box>
           <Typography sx={{ color: '#FFFFFF', fontWeight: 900, fontSize: 18, letterSpacing: '-0.4px' }}>AssetCare Pro</Typography>
@@ -181,7 +181,7 @@ export default function ForgotPassword() {
         <Box sx={{ textAlign: 'center', mb: 3.5 }}>
           <Box sx={{
             width: 60, height: 60, borderRadius: '18px', mx: 'auto', mb: 2.2,
-            background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.25)',
+            background: 'rgba(17,24,39,0.15)', border: '1px solid rgba(17,24,39,0.25)',
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             {step === 1
@@ -191,7 +191,7 @@ export default function ForgotPassword() {
           <Typography sx={{ fontSize: 26, fontWeight: 950, color: '#FFFFFF', letterSpacing: '-0.6px' }}>
             {step === 1 ? 'Forgot Password' : 'Enter OTP'}
           </Typography>
-          <Typography sx={{ fontSize: 14, color: '#8B8BAA', fontWeight: 600, mt: 0.8, lineHeight: 1.5 }}>
+          <Typography sx={{ fontSize: 14, color: '#9CA3AF', fontWeight: 600, mt: 0.8, lineHeight: 1.5 }}>
             {step === 1
               ? 'Enter your registered email to receive an OTP'
               : `We sent a 6-digit code to ${email}`}
@@ -211,10 +211,10 @@ export default function ForgotPassword() {
                     width: 30, height: 30, borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12, fontWeight: 800,
-                    bgcolor: isDone ? '#16a34a' : isActive ? '#A855F7' : 'rgba(255,255,255,0.06)',
-                    border: '1px solid', borderColor: isDone ? '#16a34a' : isActive ? '#A855F7' : 'rgba(255,255,255,0.14)',
-                    color: isDone || isActive ? '#fff' : '#8B8BAA',
-                    boxShadow: isActive ? '0 0 0 4px rgba(168,85,247,0.18)' : 'none',
+                    bgcolor: isDone ? '#16a34a' : isActive ? '#111827' : 'rgba(255,255,255,0.06)',
+                    border: '1px solid', borderColor: isDone ? '#16a34a' : isActive ? '#111827' : 'rgba(255,255,255,0.14)',
+                    color: isDone || isActive ? '#fff' : '#9CA3AF',
+                    boxShadow: isActive ? '0 0 0 4px rgba(17,24,39,0.18)' : 'none',
                     transition: 'all 0.2s'
                   }}>
                     {isDone ? <CheckCircleOutlined sx={{ fontSize: 16 }} /> : s}
@@ -242,7 +242,7 @@ export default function ForgotPassword() {
               onChange={(e) => setEmail(e.target.value)}
               fullWidth required autoFocus
               sx={darkInputSx}
-              slotProps={{ input: { startAdornment: <InputAdornment position="start"><EmailOutlined sx={{ color: '#8B8BAA', fontSize: 20 }} /></InputAdornment> } }}
+              slotProps={{ input: { startAdornment: <InputAdornment position="start"><EmailOutlined sx={{ color: '#9CA3AF', fontSize: 20 }} /></InputAdornment> } }}
             />
             <Button type="submit" variant="contained" fullWidth disabled={loading} sx={gradientBtn}>
               {loading ? <CircularProgress size={22} color="inherit" /> : 'Send OTP'}
@@ -275,7 +275,7 @@ export default function ForgotPassword() {
                 size="small"
                 startIcon={<ArrowBackRounded />}
                 onClick={() => { setStep(1); setOtp(''); setError(''); }}
-                sx={{ color: '#8B8BAA', fontWeight: 700, textTransform: 'none' }}
+                sx={{ color: '#9CA3AF', fontWeight: 700, textTransform: 'none' }}
               >
                 Change email
               </Button>

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { createTheme, ThemeProvider, CssBaseline } from "@mui/material";
@@ -14,10 +14,10 @@ const theme = createTheme({
     },
     primary: {
       main: "#111111",
-      contrastText: "#A855F7",
+      contrastText: "#111827",
     },
     secondary: {
-      main: "#A855F7",
+      main: "#111827",
       contrastText: "#111111",
     },
     text: {
@@ -40,7 +40,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Inter", sans-serif',
+    fontFamily: '"Poppins", sans-serif',
   },
   components: {
     MuiButton: {

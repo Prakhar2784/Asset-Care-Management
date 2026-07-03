@@ -25,7 +25,7 @@ const approvalWorkflowSchema = new mongoose.Schema({
     },
     role: {
       type: String,
-      enum: ['hod', 'admin', 'it_support', 'super_admin'],
+      enum: ['hod', 'admin', 'super_admin'],
       required: true
     }
   }],

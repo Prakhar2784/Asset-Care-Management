@@ -135,7 +135,7 @@ const EmployeePortal = () => {
             <Button
               variant="contained" startIcon={<AddRounded />}
               onClick={() => navigate("/tickets")}
-              sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)" } }}
+              sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "#1F2937" } }}
             >
               Report an Issue
             </Button>
@@ -171,7 +171,7 @@ const EmployeePortal = () => {
                 }}
               >
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 3 }}>
-                  <Box sx={{ width: 56, height: 56, borderRadius: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.18),rgba(168,85,247,0.12))", color: "#A855F7", display: "grid", placeItems: "center" }}>
+                  <Box sx={{ width: 56, height: 56, borderRadius: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.18),rgba(17,24,39,0.12))", color: "text.primary", display: "grid", placeItems: "center" }}>
                     {iconForCategory(asset.category)}
                   </Box>
                   <StatusChip label={asset.status} />
@@ -301,7 +301,7 @@ const EmployeePortal = () => {
         slotProps={{ paper: { sx: { borderRadius: "28px", overflow: "hidden", border: 1, borderColor: "divider", bgcolor: "background.paper" } }, backdrop: { sx: { backgroundColor: "rgba(15,23,42,0.55)", backdropFilter: "blur(6px)" } } }}>
         <DialogTitle sx={{ p: 0 }}>
           <Box sx={{ p: 3.5, display: "flex", alignItems: "flex-start", gap: 2 }}>
-            <Box sx={{ width: 48, height: 48, borderRadius: "14px", background: "linear-gradient(135deg,rgba(124,58,237,0.18),rgba(168,85,247,0.12))", color: "#A855F7", display: "grid", placeItems: "center", flexShrink: 0 }}>
+            <Box sx={{ width: 48, height: 48, borderRadius: "14px", background: "linear-gradient(135deg,rgba(17,24,39,0.18),rgba(17,24,39,0.12))", color: "text.primary", display: "grid", placeItems: "center", flexShrink: 0 }}>
               <DevicesRounded />
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -350,7 +350,7 @@ const EmployeePortal = () => {
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 5, pt: 3, borderTop: 1, borderColor: "divider" }}>
               <Button onClick={() => setRequestDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, textTransform: "none", px: 3 }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting} startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : null}
-                sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)" } }}>
+                sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { background: "#1F2937" } }}>
                 {submitting ? "Submitting..." : "Submit Request"}
               </Button>
             </Box>

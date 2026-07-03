@@ -69,8 +69,9 @@ const RegisterCompany = () => {
       localStorage.setItem("assetcare_user", JSON.stringify(user));
 
       setTimeout(() => {
-        // Redirect to admin dashboard with the query parameter to set context
-        navigate(`/admin/dashboard?tenant=${formData.slug}`);
+        // Send the new admin through the guided setup wizard (org profile →
+        // department → user → asset) before they reach the dashboard
+        navigate(`/onboarding`);
         // Reload to force axios interceptor and theme context to fetch company branding
         window.location.reload();
       }, 2000);
@@ -110,8 +111,8 @@ const RegisterCompany = () => {
           left: -10%;
           width: 380px;
           height: 380px;
-          background: radial-gradient(circle, rgba(168,85,247,0.12) 0%, rgba(0,0,0,0) 70%);
-          border: 1px dashed rgba(168,85,247,0.15);
+          background: radial-gradient(circle, rgba(17,24,39,0.12) 0%, rgba(0,0,0,0) 70%);
+          border: 1px dashed rgba(17,24,39,0.15);
           border-radius: 50%;
         }
 
@@ -126,7 +127,7 @@ const RegisterCompany = () => {
           width: 48px;
           height: 48px;
           border-radius: 12px;
-          background: #A855F7;
+          background: #111827;
           display: grid;
           place-items: center;
           color: #090909;
@@ -176,8 +177,8 @@ const RegisterCompany = () => {
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          background: rgba(168,85,247,0.1);
-          color: #A855F7;
+          background: rgba(17,24,39,0.1);
+          color: #FFFFFF;
           display: grid;
           place-items: center;
         }
@@ -249,9 +250,9 @@ const RegisterCompany = () => {
         }
 
         .auth-input:focus {
-          border-color: #A855F7;
+          border-color: #FFFFFF;
           background: #181818;
-          box-shadow: 0 0 0 4px rgba(168,85,247,0.1);
+          box-shadow: 0 0 0 4px rgba(17,24,39,0.1);
         }
 
         .input-suffix {
@@ -297,8 +298,8 @@ const RegisterCompany = () => {
 
         .submit-btn {
           width: 100%;
-          background: #A855F7;
-          color: #090909;
+          background: #FBBF24;
+          color: #111827;
           font-weight: 700;
           border: none;
           padding: 14px;
@@ -315,7 +316,7 @@ const RegisterCompany = () => {
 
         .submit-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(168,85,247,0.3);
+          box-shadow: 0 8px 20px rgba(17,24,39,0.3);
         }
 
         .submit-btn:disabled {
@@ -332,7 +333,7 @@ const RegisterCompany = () => {
         }
 
         .auth-link {
-          color: #A855F7;
+          color: #FFFFFF;
           text-decoration: none;
           font-weight: 600;
         }
@@ -351,8 +352,8 @@ const RegisterCompany = () => {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 6px 14px;
-          background: rgba(30,20,60,0.5);
-          border: 1.5px solid rgba(168,85,247,0.2);
+          background: rgba(20,20,20,0.65);
+          border: 1.5px solid rgba(17,24,39,0.2);
           border-radius: 14px;
           padding: 12px 16px;
           margin-top: 5px;

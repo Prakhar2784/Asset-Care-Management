@@ -79,7 +79,7 @@ const protect = async (req, res, next) => {
 };
 
 // Roles that have the same access level as 'admin'
-const ADMIN_TIER_ROLES = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+const ADMIN_TIER_ROLES = ['admin', 'super_admin', 'hod', 'manager'];
 
 // ─── Role authorization ───────────────────────────────────────────────────────
 const authorize = (...roles) => {

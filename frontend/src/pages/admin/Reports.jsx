@@ -18,7 +18,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const COLORS = ['#A855F7', '#60A5FA', '#4ADE80', '#FBBF24', '#F87171', '#A78BFA', '#22D3EE'];
+const COLORS = ['#111827', '#60A5FA', '#4ADE80', '#FBBF24', '#F87171', '#A78BFA', '#22D3EE'];
 
 export default function Reports() {
   const muiTheme = useTheme();
@@ -144,7 +144,7 @@ export default function Reports() {
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-      <CircularProgress sx={{ color: '#A855F7' }} />
+      <CircularProgress sx={{ color: 'text.primary' }} />
     </Box>
   );
 
@@ -156,10 +156,10 @@ export default function Reports() {
   const ticketPriorityData = summary.ticketsByPriority.map(d => ({ name: d._id || 'Unknown', count: d.count }));
 
   const kpiStats = [
-    { label: 'Total Assets', value: summary.totals.assets, color: '#A855F7', icon: <InventoryRounded fontSize="small" /> },
-    { label: 'Total Tickets', value: summary.totals.tickets, color: '#3B82F6', icon: <ConfirmationNumberRounded fontSize="small" /> },
-    { label: 'Total Users', value: summary.totals.users, color: '#22C55E', icon: <PeopleRounded fontSize="small" /> },
-    { label: 'Warranty Expiring (30d)', value: summary.warrantyExpiring30, color: '#F59E0B', icon: <WarningAmberRounded fontSize="small" /> },
+    { label: 'Total Assets', value: summary.totals.assets, color: 'text.primary', icon: <InventoryRounded fontSize="small" /> },
+    { label: 'Total Tickets', value: summary.totals.tickets, color: '#FBBF24', icon: <ConfirmationNumberRounded fontSize="small" /> },
+    { label: 'Total Users', value: summary.totals.users, color: '#FBBF24', icon: <PeopleRounded fontSize="small" /> },
+    { label: 'Warranty Expiring (30d)', value: summary.warrantyExpiring30, color: '#FBBF24', icon: <WarningAmberRounded fontSize="small" /> },
   ];
 
   const filteredDepts = summary.assetsByDept.filter(d =>
@@ -178,8 +178,8 @@ export default function Reports() {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <AssessmentRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <AssessmentRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Reports & Analytics</Typography>
@@ -201,7 +201,7 @@ export default function Reports() {
             startIcon={<PictureAsPdfRounded />}
             onClick={exportPDF}
             disabled={exporting}
-            sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
+            sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
           >
             {exporting ? 'Exporting...' : 'Export PDF'}
           </Button>
@@ -248,7 +248,7 @@ export default function Reports() {
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} />
                 <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
-                <Bar dataKey="count" fill="#A855F7" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#111827" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -298,8 +298,8 @@ export default function Reports() {
       <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5, flexWrap: 'wrap', gap: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(124,58,237,0.12)', display: 'grid', placeItems: 'center' }}>
-              <BusinessRounded sx={{ color: '#A855F7', fontSize: 18 }} />
+            <Box sx={{ width: 32, height: 32, borderRadius: '8px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center' }}>
+              <BusinessRounded sx={{ color: 'text.primary', fontSize: 18 }} />
             </Box>
             <Box>
               <Typography fontWeight={800} fontSize={15} color="text.primary" letterSpacing="-0.3px">Assets by Department</Typography>

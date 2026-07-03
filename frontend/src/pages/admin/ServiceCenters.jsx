@@ -115,7 +115,7 @@ export default function ServiceCenters() {
           <Typography fontSize={14} color="text.secondary">Manage service partners and track warranty assets</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "linear-gradient(135deg,#7C3AED,#A855F7)", boxShadow: "none" }}>
+          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "#111827", color: "#fff", boxShadow: "none" }}>
           Add Service Center
         </Button>
       </Box>
@@ -123,10 +123,10 @@ export default function ServiceCenters() {
       {/* KPI strip */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
-          { label: "Service Centers", value: centers.length, color: "#A855F7", icon: <StorefrontRounded /> },
-          { label: "Assets Under Warranty", value: warrantyAssets.length, color: "#22C55E", icon: <VerifiedRounded /> },
-          { label: "Expiring in 30 Days", value: expiringSoon, color: "#EF4444", icon: <WarningAmberRounded /> },
-          { label: "Categories Covered", value: new Set(centers.flatMap(c => c.categories)).size, color: "#F59E0B", icon: <CategoryRounded /> },
+          { label: "Service Centers", value: centers.length, color: "text.primary", icon: <StorefrontRounded /> },
+          { label: "Assets Under Warranty", value: warrantyAssets.length, color: "#FBBF24", icon: <VerifiedRounded /> },
+          { label: "Expiring in 30 Days", value: expiringSoon, color: "#FBBF24", icon: <WarningAmberRounded /> },
+          { label: "Categories Covered", value: new Set(centers.flatMap(c => c.categories)).size, color: "#FBBF24", icon: <CategoryRounded /> },
         ].map((k) => (
           <Grid size={{ xs: 6, md: 3 }} key={k.label}>
             <Paper sx={{ p: 2.5, borderRadius: "18px", border: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 2 }}>
@@ -158,7 +158,7 @@ export default function ServiceCenters() {
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ fontSize: 18, color: "text.disabled" }} /></InputAdornment> } }} />
 
             {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress sx={{ color: "#A855F7" }} /></Box>
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress sx={{ color: "text.primary" }} /></Box>
             ) : filteredCenters.length === 0 ? (
               <Box sx={{ textAlign: "center", py: 8 }}>
                 <StorefrontRounded sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
@@ -171,8 +171,8 @@ export default function ServiceCenters() {
                     <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "16px", height: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                          <Box sx={{ width: 38, height: 38, borderRadius: "10px", bgcolor: "rgba(124,58,237,0.1)", display: "grid", placeItems: "center" }}>
-                            <StorefrontRounded sx={{ color: "#A855F7", fontSize: 19 }} />
+                          <Box sx={{ width: 38, height: 38, borderRadius: "10px", bgcolor: "rgba(17,24,39,0.1)", display: "grid", placeItems: "center" }}>
+                            <StorefrontRounded sx={{ color: "text.primary", fontSize: 19 }} />
                           </Box>
                           <Box>
                             <Typography fontWeight={800} fontSize={14}>{c.name}</Typography>
@@ -241,7 +241,7 @@ export default function ServiceCenters() {
             </Box>
 
             {loading ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress sx={{ color: "#A855F7" }} /></Box>
+              <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}><CircularProgress sx={{ color: "text.primary" }} /></Box>
             ) : filteredAssets.length === 0 ? (
               <Box sx={{ textAlign: "center", py: 8 }}>
                 <VerifiedRounded sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
@@ -262,7 +262,7 @@ export default function ServiceCenters() {
                       const chip = warrantyChip(a.warrantyEnd);
                       return (
                         <TableRow key={a._id} hover>
-                          <TableCell sx={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, color: "#A855F7" }}>{a.assetId}</TableCell>
+                          <TableCell sx={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, color: "text.primary" }}>{a.assetId}</TableCell>
                           <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{a.name}</TableCell>
                           <TableCell><Chip label={a.category} size="small" sx={{ fontSize: 11, fontWeight: 600, bgcolor: "rgba(59,130,246,0.1)", color: "#3B82F6" }} /></TableCell>
                           <TableCell sx={{ fontSize: 12, fontFamily: "monospace" }}>{a.serialNumber}</TableCell>
@@ -331,7 +331,7 @@ export default function ServiceCenters() {
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => setOpen(false)} sx={{ fontWeight: 700, borderRadius: "10px", color: "text.secondary" }}>Cancel</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving || !form.name.trim()}
-            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "linear-gradient(135deg,#7C3AED,#A855F7)", boxShadow: "none" }}>
+            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#111827", color: "#fff", boxShadow: "none" }}>
             {saving ? <CircularProgress size={18} color="inherit" /> : editTarget ? "Save Changes" : "Add Center"}
           </Button>
         </DialogActions>

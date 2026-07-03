@@ -45,10 +45,8 @@ const Navbar = () => {
 
         .nav-pill {
           pointer-events: auto;
-          background: rgba(8, 8, 18, 0.85);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(168, 85, 247, 0.18);
+          background: #000000;
+          border: 1px solid rgba(255,255,255,0.15);
           border-radius: 100px;
           padding: 7px 7px 7px 22px;
           display: flex;
@@ -57,7 +55,7 @@ const Navbar = () => {
           max-width: 1100px;
           width: 100%;
           box-shadow: ${scrolled
-            ? "0 8px 32px -8px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,85,247,0.12)"
+            ? "0 8px 32px -8px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)"
             : "0 2px 16px -4px rgba(0,0,0,0.3)"};
           transition: all 0.35s ease;
           position: relative;
@@ -69,14 +67,13 @@ const Navbar = () => {
         }
 
         .brand-icon-box {
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
-          color: #FFFFFF;
+          background: #FFFFFF;
+          color: #000000;
           width: 34px; height: 34px;
           border-radius: 10px;
           display: grid; place-items: center;
           transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
           flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(124,58,237,0.45);
         }
 
         .brand-link:hover .brand-icon-box {
@@ -95,28 +92,30 @@ const Navbar = () => {
 
         .nav-link-item {
           padding: 9px 18px;
-          color: #8B8BAA;
+          color: #FFFFFF;
           text-decoration: none;
           font-weight: 600; font-size: 14px;
           border-radius: 100px;
           transition: all 0.2s ease;
           background: transparent;
+          opacity: 0.65;
         }
 
         .nav-link-item:hover {
-          background: rgba(168,85,247,0.10);
-          color: #C4B5FD;
+          background: rgba(255,255,255,0.1);
+          opacity: 1;
         }
 
         .nav-link-item.active {
-          background: rgba(168,85,247,0.18);
-          color: #A855F7;
+          background: #FFFFFF;
+          color: #000000;
           font-weight: 800;
+          opacity: 1;
         }
 
         .nav-cta {
-          background: linear-gradient(135deg, #7C3AED, #A855F7);
-          color: #FFFFFF;
+          background: #FFFFFF;
+          color: #000000;
           padding: 11px 22px;
           border-radius: 100px;
           font-weight: 800; font-size: 14px;
@@ -124,19 +123,17 @@ const Navbar = () => {
           display: flex; align-items: center; gap: 7px;
           transition: all 0.2s ease;
           letter-spacing: -0.2px;
-          box-shadow: 0 4px 16px rgba(124,58,237,0.4);
         }
 
         .nav-cta:hover {
-          background: linear-gradient(135deg, #6D28D9, #9333EA);
+          background: #E5E7EB;
           transform: translateY(-1px);
-          box-shadow: 0 8px 24px rgba(124,58,237,0.55);
         }
 
         .mobile-toggle {
           display: none;
           background: transparent;
-          color: #8B8BAA;
+          color: #FFFFFF;
           border: none;
           width: 42px; height: 42px;
           border-radius: 50%;
@@ -145,16 +142,14 @@ const Navbar = () => {
           place-items: center;
         }
 
-        .mobile-toggle:hover { background: rgba(168,85,247,0.10); color: #A855F7; }
+        .mobile-toggle:hover { background: rgba(255,255,255,0.1); }
 
         .mobile-menu-card {
           position: absolute;
           top: calc(100% + 12px);
           left: 0; right: 0;
-          background: rgba(8, 8, 18, 0.96);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(168,85,247,0.18);
+          background: #000000;
+          border: 1px solid rgba(255,255,255,0.15);
           border-radius: 24px;
           padding: 14px;
           box-shadow: 0 20px 40px -8px rgba(0,0,0,0.6);
@@ -176,17 +171,18 @@ const Navbar = () => {
           display: block;
           padding: 14px 20px;
           border-radius: 14px;
-          color: #8B8BAA;
+          color: #FFFFFF;
           text-decoration: none;
           font-weight: 700; font-size: 15px;
           transition: all 0.18s ease;
           margin-bottom: 3px;
+          opacity: 0.75;
         }
 
-        .mob-link-item:hover { background: rgba(168,85,247,0.10); color: #C4B5FD; }
-        .mob-link-item.active { background: rgba(168,85,247,0.18); color: #A855F7; }
+        .mob-link-item:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+        .mob-link-item.active { background: #FFFFFF; color: #000000; opacity: 1; }
 
-        .mob-divider { height: 1px; background: rgba(168,85,247,0.12); margin: 10px 0; }
+        .mob-divider { height: 1px; background: rgba(255,255,255,0.15); margin: 10px 0; }
 
         @media (max-width: 900px) {
           .nav-link-track, .nav-cta { display: none; }
@@ -241,7 +237,7 @@ const Navbar = () => {
             <Link
               to="/login"
               className="mob-link-item"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #A855F7)", color: "#FFFFFF", display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}
+              style={{ background: "#FFFFFF", color: "#000000", display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}
               onClick={() => setOpen(false)}
             >
               <ArrowForwardRoundedIcon fontSize="small" /> Access Portal

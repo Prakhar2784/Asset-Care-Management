@@ -112,13 +112,13 @@ export default function GlobalSearch() {
             display: 'flex', alignItems: 'center', gap: 1,
             bgcolor: 'action.hover',
             border: '1.5px solid',
-            borderColor: 'rgba(168,85,247,0.4)',
+            borderColor: 'rgba(17,24,39,0.4)',
             borderRadius: '12px',
             px: 1.5, py: 0.6,
             width: { xs: 200, sm: 280, md: 340 },
             transition: 'width 0.2s ease',
           }}>
-            <SearchRounded sx={{ fontSize: 18, color: '#A855F7', flexShrink: 0 }} />
+            <SearchRounded sx={{ fontSize: 18, color: '#111827', flexShrink: 0 }} />
             <InputBase
               ref={inputRef}
               value={query}
@@ -167,8 +167,8 @@ export default function GlobalSearch() {
                     {results.assets.map(a => (
                       <Box key={a._id} onClick={() => goTo(`/admin/assets?highlight=${a._id}`)}
                         sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' }, gap: 1.5 }}>
-                        <Box sx={{ width: 30, height: 30, borderRadius: '8px', bgcolor: 'rgba(168,85,247,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Inventory2Rounded sx={{ fontSize: 16, color: '#A855F7' }} />
+                        <Box sx={{ width: 30, height: 30, borderRadius: '8px', bgcolor: 'rgba(17,24,39,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Inventory2Rounded sx={{ fontSize: 16, color: '#111827' }} />
                         </Box>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography fontSize={13} fontWeight={600} noWrap>{a.name}</Typography>

@@ -98,10 +98,10 @@ export default function AssignedDevices() {
   const uniqueCategories = new Set(assignments.map(a => a.asset?.category).filter(Boolean)).size;
 
   const kpis = [
-    { label: 'Total Assigned', value: assignments.length, color: '#A855F7', icon: <DevicesRounded fontSize="small" /> },
-    { label: 'Employees',      value: uniqueEmployees,    color: '#3B82F6', icon: <GroupRounded fontSize="small" /> },
-    { label: 'Departments',    value: uniqueDepts,        color: '#22C55E', icon: <ApartmentRounded fontSize="small" /> },
-    { label: 'Categories',     value: uniqueCategories,   color: '#F59E0B', icon: <CategoryRounded fontSize="small" /> },
+    { label: 'Total Assigned', value: assignments.length, color: 'text.primary', icon: <DevicesRounded fontSize="small" /> },
+    { label: 'Employees',      value: uniqueEmployees,    color: '#FBBF24', icon: <GroupRounded fontSize="small" /> },
+    { label: 'Departments',    value: uniqueDepts,        color: '#FBBF24', icon: <ApartmentRounded fontSize="small" /> },
+    { label: 'Categories',     value: uniqueCategories,   color: '#FBBF24', icon: <CategoryRounded fontSize="small" /> },
   ];
 
   return (
@@ -109,8 +109,8 @@ export default function AssignedDevices() {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <AssignmentIndRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <AssignmentIndRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Assigned Devices</Typography>
@@ -176,8 +176,8 @@ export default function AssignedDevices() {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}><CircularProgress /></Box>
       ) : filtered.length === 0 ? (
         <Paper sx={{ p: 8, textAlign: 'center', borderRadius: '20px', border: '1px dashed', borderColor: 'divider' }}>
-          <Box sx={{ width: 72, height: 72, borderRadius: '20px', bgcolor: 'rgba(124,58,237,0.08)', display: 'grid', placeItems: 'center', mx: 'auto', mb: 2 }}>
-            <AssignmentIndRounded sx={{ fontSize: 36, color: '#A855F7' }} />
+          <Box sx={{ width: 72, height: 72, borderRadius: '20px', bgcolor: 'rgba(17,24,39,0.08)', display: 'grid', placeItems: 'center', mx: 'auto', mb: 2 }}>
+            <AssignmentIndRounded sx={{ fontSize: 36, color: 'text.primary' }} />
           </Box>
           <Typography variant="h6" fontWeight={800} color="text.primary">
             {assignments.length === 0 ? 'No devices assigned yet' : 'No results match your search'}
@@ -208,7 +208,7 @@ export default function AssignedDevices() {
                   <TableRow key={a._id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Box sx={{ width: 38, height: 38, borderRadius: '10px', bgcolor: 'rgba(124,58,237,0.08)', color: '#A855F7', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                        <Box sx={{ width: 38, height: 38, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.08)', color: 'text.primary', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                           {categoryIcon(a.asset?.category)}
                         </Box>
                         <Box>
@@ -220,7 +220,7 @@ export default function AssignedDevices() {
                     </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff' }}>
+                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: '#111827', color: '#fff' }}>
                           {a.employeeName?.[0]?.toUpperCase() || '?'}
                         </Avatar>
                         <Box>

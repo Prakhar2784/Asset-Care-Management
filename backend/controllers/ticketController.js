@@ -381,7 +381,7 @@ const confirmResolution = async (req, res) => {
     audit({ req, action: 'ticket_resolution_confirmed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId });
 
     // Notify all admin-tier reviewers that the user has closed out this ticket
-    const reviewerRoles = ['admin', 'super_admin', 'hod', 'it_support', 'manager'];
+    const reviewerRoles = ['admin', 'super_admin', 'hod', 'manager'];
     User.find({ role: { $in: reviewerRoles } }).then(admins => {
       admins.forEach(admin => {
         createNotification({
@@ -407,7 +407,7 @@ const deleteTicket = async (req, res) => {
     const ticket = await Ticket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
-    const adminTier = ['admin', 'super_admin', 'hod', 'it_support', 'manager'];
+    const adminTier = ['admin', 'super_admin', 'hod', 'manager'];
     const isOwner = ticket.raisedBy?.toString() === req.user._id.toString();
 
     if (!adminTier.includes(req.user.role) && !isOwner) {

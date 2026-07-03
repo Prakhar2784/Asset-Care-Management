@@ -34,7 +34,7 @@ const getStatusColor = (status) => {
     case 'Service Center Required': return { bg: 'rgba(239,68,68,0.13)',   color: '#F87171', border: '#EF4444' };
     case 'Sent to Service Center':  return { bg: 'rgba(59,130,246,0.13)', color: '#60A5FA', border: '#3B82F6' };
     case 'Vendor Assigned':         return { bg: 'rgba(59,130,246,0.13)', color: '#60A5FA', border: '#3B82F6' };
-    case 'Under Repair':            return { bg: 'rgba(147,51,234,0.13)', color: '#C084FC', border: '#A855F7' };
+    case 'Under Repair':            return { bg: 'rgba(147,51,234,0.13)', color: '#C084FC', border: '#111827' };
     case 'Resolved':                return { bg: 'rgba(22,163,74,0.13)',  color: '#4ADE80', border: '#22C55E' };
     case 'Rejected':                return { bg: 'rgba(220,38,38,0.13)',  color: '#F87171', border: '#EF4444' };
     default:                        return { bg: 'rgba(71,85,105,0.13)',  color: '#94A3B8', border: '#64748B' };
@@ -72,7 +72,7 @@ const Tickets = () => {
   const { currentUser } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const isAdminOrHod = ['admin', 'super_admin', 'hod', 'manager', 'it_support'].includes(currentUser?.role);
+  const isAdminOrHod = ['admin', 'super_admin', 'hod', 'manager'].includes(currentUser?.role);
   const isTechnician = currentUser?.role === 'technician';
 
   // Employee can withdraw their own ticket only while it's still Pending HOD or Pending Approval
@@ -339,10 +339,10 @@ const Tickets = () => {
   const repairCount  = tickets.filter(t => ['Under Repair', 'Assigned to Technician', 'Vendor Assigned'].includes(t.status)).length;
   const resolvedCount = tickets.filter(t => t.status === 'Resolved').length;
   const kpiStats = [
-    { label: 'Total Tickets',    value: totalCount,    color: '#A855F7', icon: <ConfirmationNumberRounded fontSize="small" /> },
-    { label: 'Pending Approval', value: pendingCount,  color: '#F59E0B', icon: <HourglassEmptyRounded fontSize="small" /> },
-    { label: 'Under Repair',     value: repairCount,   color: '#3B82F6', icon: <HandymanRounded fontSize="small" /> },
-    { label: 'Resolved',          value: resolvedCount, color: '#22C55E', icon: <TaskAltRounded fontSize="small" /> },
+    { label: 'Total Tickets',    value: totalCount,    color: 'text.primary', icon: <ConfirmationNumberRounded fontSize="small" /> },
+    { label: 'Pending Approval', value: pendingCount,  color: '#FBBF24', icon: <HourglassEmptyRounded fontSize="small" /> },
+    { label: 'Under Repair',     value: repairCount,   color: '#FBBF24', icon: <HandymanRounded fontSize="small" /> },
+    { label: 'Resolved',          value: resolvedCount, color: '#FBBF24', icon: <TaskAltRounded fontSize="small" /> },
   ];
 
   const inputStyles = { '& .MuiOutlinedInput-root': { borderRadius: '12px', fontWeight: 600 } };
@@ -355,8 +355,8 @@ const Tickets = () => {
       {/* Header */}
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <BuildRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <BuildRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Breakdown Tickets</Typography>
@@ -371,7 +371,7 @@ const Tickets = () => {
           </Tooltip>
           {!isTechnician && (
             <Button variant="contained" startIcon={<AddRounded />} onClick={() => setRaiseOpen(true)}
-              sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
+              sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
               Raise Ticket
             </Button>
           )}
@@ -469,7 +469,7 @@ const Tickets = () => {
                       '&:hover': {
                         transform: 'translateY(-4px)',
                         boxShadow: '0 20px 48px rgba(15,23,42,0.12)',
-                        borderColor: 'rgba(168,85,247,0.35)',
+                        borderColor: 'rgba(17,24,39,0.35)',
                         '& .arrow-icon': { opacity: 1, transform: 'translateX(0)' },
                         '& .delete-btn': { opacity: 1 },
                       },
@@ -525,7 +525,7 @@ const Tickets = () => {
                             <Typography sx={{ fontSize: 10, fontWeight: 800, color: slaBreached ? '#EF4444' : 'text.disabled' }}>{elapsed}h / {slaHours}h</Typography>
                           </Box>
                           <Box sx={{ height: 4, bgcolor: 'divider', borderRadius: 2, overflow: 'hidden' }}>
-                            <Box sx={{ height: '100%', width: `${slaPct}%`, bgcolor: slaBreached ? '#EF4444' : slaWarning ? '#F59E0B' : '#A855F7', borderRadius: 2 }} />
+                            <Box sx={{ height: '100%', width: `${slaPct}%`, bgcolor: slaBreached ? '#EF4444' : slaWarning ? '#F59E0B' : '#111827', borderRadius: 2 }} />
                           </Box>
                         </Box>
                       )}
@@ -549,9 +549,9 @@ const Tickets = () => {
                         <Typography fontSize={12} color="text.secondary" fontWeight={600}>
                           By <span style={{ fontWeight: 800 }}>{ticket.raisedBy?.name || 'System'}</span>
                         </Typography>
-                        <Box className="arrow-icon" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: '#A855F7', fontSize: 12, fontWeight: 800, opacity: 0, transform: 'translateX(-4px)', transition: 'all 0.2s' }}>
-                          <Typography fontSize={12} fontWeight={800} color="#A855F7">View Details</Typography>
-                          <ChevronRightRounded sx={{ fontSize: 16, color: '#A855F7' }} />
+                        <Box className="arrow-icon" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.primary', fontSize: 12, fontWeight: 800, opacity: 0, transform: 'translateX(-4px)', transition: 'all 0.2s' }}>
+                          <Typography fontSize={12} fontWeight={800} color="#111827">View Details</Typography>
+                          <ChevronRightRounded sx={{ fontSize: 16, color: 'text.primary' }} />
                         </Box>
                       </Box>
                     </Box>
@@ -587,10 +587,10 @@ const Tickets = () => {
           return (
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               {/* Drawer Header */}
-              <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', background: 'linear-gradient(135deg,rgba(124,58,237,0.08),rgba(168,85,247,0.04))' }}>
+              <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', background: 'linear-gradient(135deg,rgba(17,24,39,0.08),rgba(17,24,39,0.04))' }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg,#7C3AED,#A855F7)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: '#111827', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                       <BuildRounded sx={{ color: '#fff', fontSize: 22 }} />
                     </Box>
                     <Box>
@@ -739,10 +739,10 @@ const Tickets = () => {
               <Box sx={{ display: 'flex', borderBottom: '1px solid', borderColor: 'divider' }}>
                 {[['timeline', 'Timeline'], ['comments', 'Comments'], ['attachments', 'Attachments']].map(([id, label]) => (
                   <Button key={id} onClick={() => setActiveTab(id)}
-                    sx={{ flex: 1, py: 1.5, borderRadius: 0, fontWeight: 800, fontSize: 13, textTransform: 'none', color: activeTab === id ? '#A855F7' : 'text.secondary', borderBottom: activeTab === id ? '2px solid #A855F7' : '2px solid transparent', mb: '-1px', transition: 'all 0.2s' }}>
+                    sx={{ flex: 1, py: 1.5, borderRadius: 0, fontWeight: 800, fontSize: 13, textTransform: 'none', color: activeTab === id ? '#111827' : 'text.secondary', borderBottom: activeTab === id ? '2px solid #111827' : '2px solid transparent', mb: '-1px', transition: 'all 0.2s' }}>
                     {label}
                     {id === 'comments' && ticketDetail?.comments?.length > 0 && (
-                      <Box component="span" sx={{ ml: 1, px: 0.8, py: 0.1, borderRadius: '20px', bgcolor: 'rgba(168,85,247,0.12)', color: '#A855F7', fontSize: 10, fontWeight: 900 }}>
+                      <Box component="span" sx={{ ml: 1, px: 0.8, py: 0.1, borderRadius: '20px', bgcolor: 'rgba(17,24,39,0.12)', color: 'text.primary', fontSize: 10, fontWeight: 900 }}>
                         {ticketDetail.comments.length}
                       </Box>
                     )}
@@ -809,7 +809,7 @@ const Tickets = () => {
                       <Stack spacing={1.5} sx={{ mb: 3 }}>
                         {ticketDetail.comments.map(c => (
                           <Box key={c._id} sx={{ display: 'flex', gap: 1.5 }}>
-                            <Avatar sx={{ width: 34, height: 34, bgcolor: '#7C3AED', fontSize: 13, fontWeight: 900, flexShrink: 0 }}>
+                            <Avatar sx={{ width: 34, height: 34, bgcolor: 'text.primary', fontSize: 13, fontWeight: 900, flexShrink: 0 }}>
                               {(c.authorName || 'U').charAt(0).toUpperCase()}
                             </Avatar>
                             <Box sx={{ flex: 1 }}>
@@ -837,7 +837,7 @@ const Tickets = () => {
                         onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleAddComment(); }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
                       <Button variant="contained" onClick={handleAddComment} disabled={commentSubmitting || !commentText.trim()}
-                        sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, borderRadius: '12px', boxShadow: 'none', minWidth: 80, py: 1.1 }}>
+                        sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', boxShadow: 'none', minWidth: 80, py: 1.1 }}>
                         {commentSubmitting ? <CircularProgress size={18} color="inherit" /> : 'Send'}
                       </Button>
                     </Box>
@@ -850,7 +850,7 @@ const Tickets = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
                       <Button size="small" variant="outlined" startIcon={attachmentUploading ? <CircularProgress size={14} /> : <UploadFileRounded />}
                         component="label" disabled={attachmentUploading}
-                        sx={{ borderRadius: '10px', fontWeight: 700, textTransform: 'none', borderColor: '#A855F7', color: '#A855F7', '&:hover': { bgcolor: 'rgba(168,85,247,0.08)' } }}>
+                        sx={{ borderRadius: '10px', fontWeight: 700, textTransform: 'none', borderColor: '#111827', color: 'text.primary', '&:hover': { bgcolor: 'rgba(17,24,39,0.08)' } }}>
                         Upload Files
                         <input type="file" hidden multiple accept="image/*,.pdf,.doc,.docx,.txt,.log"
                           ref={attachFileRef} onChange={e => handleAttachFiles(e.target.files)} />
@@ -867,11 +867,11 @@ const Tickets = () => {
                       <Stack spacing={1.5}>
                         {ticketDetail.attachments.map(att => (
                           <Box key={att._id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, borderRadius: '12px', border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
-                            <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(168,85,247,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                            <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0, overflow: 'hidden' }}>
                               {['.jpg', '.jpeg', '.png', '.gif', '.webp'].some(ext => att.originalName.toLowerCase().endsWith(ext)) ? (
                                 <img src={`http://localhost:5000${att.url}`} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                               ) : (
-                                <AttachFileRounded sx={{ fontSize: 18, color: '#A855F7' }} />
+                                <AttachFileRounded sx={{ fontSize: 18, color: 'text.primary' }} />
                               )}
                             </Box>
                             <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -925,9 +925,9 @@ const Tickets = () => {
       {/* Raise Ticket Dialog */}
       <Dialog open={raiseOpen} onClose={() => setRaiseOpen(false)} fullWidth maxWidth="sm"
         slotProps={{ paper: { sx: { bgcolor: 'background.paper', border: 1, borderColor: 'divider', borderRadius: '20px', overflow: 'hidden' } }, backdrop: { sx: { backgroundColor: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(6px)' } } }}>
-        <Box sx={{ p: 3, background: 'linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ p: 3, background: 'linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))', borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg,#7C3AED,#A855F7)', display: 'grid', placeItems: 'center' }}>
+            <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: '#111827', display: 'grid', placeItems: 'center' }}>
               <AssignmentRounded sx={{ color: '#fff', fontSize: 22 }} />
             </Box>
             <Box>
@@ -978,12 +978,12 @@ const Tickets = () => {
                     width: "100%",
                     py: 1.5,
                     border: "1px dashed",
-                    borderColor: "rgba(124,58,237,0.4)",
+                    borderColor: "rgba(17,24,39,0.4)",
                     borderRadius: "12px",
                     textTransform: "none",
                     fontWeight: 700,
                     color: "text.primary",
-                    "&:hover": { borderColor: "#A855F7", bgcolor: "rgba(168,85,247,0.04)" }
+                    "&:hover": { borderColor: "#111827", bgcolor: "rgba(17,24,39,0.04)" }
                   }}
                 >
                   {imageFile ? imageFile.name : "Upload image or screenshot (Optional)"}
@@ -1012,7 +1012,7 @@ const Tickets = () => {
               <Button onClick={() => { setRaiseOpen(false); setImageFile(null); }} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting}
                 startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
-                sx={{ background: 'linear-gradient(135deg,#7C3AED,#A855F7)', color: '#fff', fontWeight: 800, px: 3.5, borderRadius: '12px', boxShadow: 'none' }}>
+                sx={{ background: '#111827', color: '#fff', fontWeight: 800, px: 3.5, borderRadius: '12px', boxShadow: 'none' }}>
                 {submitting ? 'Submitting…' : 'Submit Ticket'}
               </Button>
             </Box>

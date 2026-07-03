@@ -12,6 +12,7 @@ import {
   NotificationsActiveRounded, CalendarTodayRounded,
   CheckCircleRounded, AccessTimeRounded,
   ReceiptLongRounded, StorageRounded,
+  EventNoteRounded,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -19,14 +20,15 @@ import StatusChip from "../../components/StatusChip";
 import api from "../../api/axios";
 
 /* ─────────────────────── helpers ─────────────────────── */
-const ADMIN_TIER = ['admin', 'super_admin', 'hod', 'manager', 'it_support'];
+const ADMIN_TIER = ['admin', 'super_admin', 'hod', 'manager'];
 
-const PRIORITY_COLOR = { Critical: "#EF4444", High: "#F97316", Medium: "#F59E0B", Low: "#22C55E" };
+// Meaning is conveyed by the label text itself, not color — kept neutral gray for all states
+const PRIORITY_COLOR = { Critical: "#9CA3AF", High: "#9CA3AF", Medium: "#9CA3AF", Low: "#9CA3AF" };
 const STATUS_DOT = {
-  "Pending Approval": "#F59E0B",
-  "Under Repair":     "#8B5CF6",
-  Resolved:           "#22C55E",
-  Rejected:           "#EF4444",
+  "Pending Approval": "#9CA3AF",
+  "Under Repair":     "#9CA3AF",
+  Resolved:           "#9CA3AF",
+  Rejected:           "#9CA3AF",
 };
 const greet = () => {
   const h = new Date().getHours();
@@ -55,6 +57,71 @@ const KpiCard = ({ label, value, sub, icon, accent, onClick }) => (
     <Typography sx={{ fontSize: 12, color: "text.secondary" }}>{sub}</Typography>
   </Paper>
 );
+
+const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
+
+// Calendar sized for the purple hero banner (light text/cells on translucent glass)
+const HeroMiniCalendar = () => {
+  const today = new Date();
+  const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+
+  const monthLabel = viewDate.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+  const firstDayOfWeek = viewDate.getDay();
+  const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+  const isCurrentMonth = viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth();
+  const cells = [
+    ...Array.from({ length: firstDayOfWeek }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+
+  const changeMonth = (delta) =>
+    setViewDate(d => new Date(d.getFullYear(), d.getMonth() + delta, 1));
+
+  return (
+    <Box sx={{
+      width: 260, borderRadius: "18px", p: 2,
+      bgcolor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
+      backdropFilter: "blur(10px)",
+    }}>
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
+          <EventNoteRounded sx={{ fontSize: 15, color: "#fff" }} />
+          <Typography sx={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "0.1px", color: "#fff" }}>{monthLabel}</Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          <IconButton size="small" onClick={() => changeMonth(-1)}
+            sx={{ width: 22, height: 22, color: "#fff", bgcolor: "rgba(255,255,255,0.12)", "&:hover": { bgcolor: "rgba(255,255,255,0.22)" } }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1 }}>‹</Typography>
+          </IconButton>
+          <IconButton size="small" onClick={() => changeMonth(1)}
+            sx={{ width: 22, height: 22, color: "#fff", bgcolor: "rgba(255,255,255,0.12)", "&:hover": { bgcolor: "rgba(255,255,255,0.22)" } }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1 }}>›</Typography>
+          </IconButton>
+        </Box>
+      </Box>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px", mb: 0.5 }}>
+        {WEEKDAYS.map((d, i) => (
+          <Typography key={i} align="center" sx={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>{d}</Typography>
+        ))}
+      </Box>
+      <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px" }}>
+        {cells.map((day, i) => {
+          const isToday = isCurrentMonth && day === today.getDate();
+          return (
+            <Box key={i} sx={{
+              aspectRatio: "1", display: "grid", placeItems: "center", borderRadius: "8px",
+              fontSize: 12, fontWeight: isToday ? 700 : 500,
+              color: isToday ? "#111827" : day ? "rgba(255,255,255,0.88)" : "transparent",
+              bgcolor: isToday ? "#FBBF24" : "transparent",
+            }}>
+              {day || "-"}
+            </Box>
+          );
+        })}
+      </Box>
+    </Box>
+  );
+};
 
 const QuickAction = ({ label, icon, accent, onClick }) => (
   <Paper onClick={onClick} sx={{
@@ -139,7 +206,7 @@ const AdminDashboard = () => {
 
   const deptBreakdown = dashboardData?.departmentBreakdown || [];
   const deptTotal     = deptBreakdown.reduce((s, d) => s + d.count, 0) || 1;
-  const DEPT_COLORS   = ["#A855F7", "#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"];
+  const DEPT_COLORS   = ["#374151", "#4B5563", "#6B7280", "#9CA3AF", "#B0B7C3", "#D1D5DB"];
 
   const inWarranty   = Math.max(0, (dashboardData?.totalAssets || 0) - (dashboardData?.warrantyExpiringSoon || 0));
   const expiringSoon = dashboardData?.warrantyExpiringSoon || 0;
@@ -148,24 +215,24 @@ const AdminDashboard = () => {
 
   /* ── filtered KPIs ── */
   const allKpis = [
-    { label: "Total Assets",      value: dashboardData?.totalAssets,         sub: "Registered in system",      icon: <Inventory2Rounded />,          accent: "#A855F7", route: "/admin/assets",    show: canViewAssets },
-    { label: "Active Repairs",    value: dashboardData?.activeRepairs,        sub: "Currently under service",    icon: <BuildRounded />,               accent: "#EF4444", route: "/tickets",         show: canViewAssets },
-    { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#F59E0B", route: "/admin/approvals", show: canApprove },
-    { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#3B82F6", route: "/tickets",         show: canViewTickets || isAdminTier },
-    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within 30 days or overdue",       icon: <ShieldRounded />,               accent: "#EA580C", route: "/admin/assets",    show: canViewAssets },
-    { label: "Device Requests",   value: dashboardData?.pendingRequests,      sub: "Awaiting review",            icon: <DevicesRounded />,              accent: "#8B5CF6", route: "/admin/approvals", show: canApprove },
+    { label: "Total Assets",      value: dashboardData?.totalAssets,         sub: "Registered in system",      icon: <Inventory2Rounded />,          accent: "#FBBF24", route: "/admin/assets",    show: canViewAssets },
+    { label: "Active Repairs",    value: dashboardData?.activeRepairs,        sub: "Currently under service",    icon: <BuildRounded />,               accent: "#FBBF24", route: "/tickets",         show: canViewAssets },
+    { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#FBBF24", route: "/admin/approvals", show: canApprove },
+    { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#FBBF24", route: "/tickets",         show: canViewTickets || isAdminTier },
+    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within 30 days or overdue",       icon: <ShieldRounded />,               accent: "#FBBF24", route: "/admin/assets",    show: canViewAssets },
+    { label: "Device Requests",   value: dashboardData?.pendingRequests,      sub: "Awaiting review",            icon: <DevicesRounded />,              accent: "#FBBF24", route: "/admin/approvals", show: canApprove },
   ].filter(k => k.show);
 
   /* ── filtered quick actions ── */
   const allQuickActions = [
-    { label: "Add Asset",    icon: <AddRounded />,                accent: "#A855F7", route: "/admin/assets/add",  show: canRegister },
-    { label: "Approvals",    icon: <ApprovalRounded />,           accent: "#F59E0B", route: "/admin/approvals",   show: canApprove },
-    { label: "Tickets",      icon: <ConfirmationNumberRounded />, accent: "#22C55E", route: "/tickets",            show: (canViewTickets || isAdminTier) && !canRegister },
-    { label: "Reports",      icon: <StorageRounded />,            accent: "#8B5CF6", route: "/admin/reports",     show: canViewReports },
-    { label: "Users",        icon: <PeopleRounded />,             accent: "#06B6D4", route: "/admin/users",       show: canManageUsers },
-    { label: "Departments",  icon: <BusinessRounded />,           accent: "#EC4899", route: "/admin/departments", show: canManageUsers },
-    { label: "Invoices",     icon: <ReceiptLongRounded />,        accent: "#EA580C", route: "/admin/invoices",    show: isAdminTier },
-    { label: "Assets",       icon: <Inventory2Rounded />,         accent: "#A855F7", route: "/admin/assets",      show: canViewAssets && !canRegister },
+    { label: "Add Asset",    icon: <AddRounded />,                accent: "#FBBF24", route: "/admin/assets/add",  show: canRegister },
+    { label: "Approvals",    icon: <ApprovalRounded />,           accent: "#FBBF24", route: "/admin/approvals",   show: canApprove },
+    { label: "Tickets",      icon: <ConfirmationNumberRounded />, accent: "#FBBF24", route: "/tickets",            show: (canViewTickets || isAdminTier) && !canRegister },
+    { label: "Reports",      icon: <StorageRounded />,            accent: "#FBBF24", route: "/admin/reports",     show: canViewReports },
+    { label: "Users",        icon: <PeopleRounded />,             accent: "#FBBF24", route: "/admin/users",       show: canManageUsers },
+    { label: "Departments",  icon: <BusinessRounded />,           accent: "#FBBF24", route: "/admin/departments", show: canManageUsers },
+    { label: "Invoices",     icon: <ReceiptLongRounded />,        accent: "#FBBF24", route: "/admin/invoices",    show: isAdminTier },
+    { label: "Assets",       icon: <Inventory2Rounded />,         accent: "#FBBF24", route: "/admin/assets",      show: canViewAssets && !canRegister },
   ].filter(a => a.show);
 
   /* ── banner stat strip ── */
@@ -182,15 +249,15 @@ const AdminDashboard = () => {
       {/* ── Welcome Banner ─────────────────────────────────────── */}
       <Box sx={{
         mb: 4, borderRadius: "24px",
-        background: "linear-gradient(135deg,#4C1D95 0%,#7C3AED 45%,#A855F7 100%)",
+        background: "linear-gradient(135deg,#1F2937 0%,#111827 60%,#0B0D12 100%)",
         position: "relative", overflow: "hidden",
       }}>
         <Box sx={{ position: "absolute", right: -80, top: -80, width: 280, height: 280, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.05)", pointerEvents: "none" }} />
         <Box sx={{ position: "absolute", right: 80, bottom: -100, width: 200, height: 200, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
         <Box sx={{ position: "absolute", left: "40%", top: -40, width: 160, height: 160, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />
 
-        <Box sx={{ p: { xs: 3, md: "28px 32px 20px" }, position: "relative", display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
-          <Box>
+        <Box sx={{ p: { xs: 3, md: "24px 32px 16px" }, position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1 }}>
               <CalendarTodayRounded sx={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }} />
               <Typography sx={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.55)", letterSpacing: "0.3px" }}>
@@ -200,33 +267,99 @@ const AdminDashboard = () => {
             <Typography sx={{ fontSize: { xs: 22, md: 30 }, fontWeight: 900, color: "#fff", letterSpacing: "-1px", lineHeight: 1.15, mb: 0.8 }}>
               {greet()}, {user?.name?.split(" ")[0] || "there"}
             </Typography>
-            <Typography sx={{ fontSize: 13.5, color: "rgba(255,255,255,0.65)", fontWeight: 500, maxWidth: 480 }}>
+            <Typography sx={{ fontSize: 13.5, color: "rgba(255,255,255,0.65)", fontWeight: 500, maxWidth: 480, mb: 2.5 }}>
               {isAdminTier
                 ? "Here is your asset operations summary for today. Review pending items and stay ahead."
                 : "Here's a quick overview of your activity. Raise a ticket or check your requests below."}
             </Typography>
+
+            {/* Action buttons — only what the user is allowed to do */}
+            <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+              {canRegister && (
+                <Button variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
+                  sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
+                  Register Asset
+                </Button>
+              )}
+              {canApprove && (
+                <Button variant="contained" startIcon={<NotificationsActiveRounded />} onClick={() => navigate("/admin/approvals")}
+                  sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
+                  Approvals {dashboardData?.pendingTickets > 0 && `(${dashboardData.pendingTickets})`}
+                </Button>
+              )}
+              {!isAdminTier && !canRegister && !canApprove && canViewTickets && (
+                <Button variant="contained" startIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
+                  sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
+                  My Tickets
+                </Button>
+              )}
+            </Box>
           </Box>
 
-          {/* Action buttons — only what the user is allowed to do */}
-          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", alignSelf: "center" }}>
-            {canRegister && (
-              <Button variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
-                sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
-                Register Asset
-              </Button>
-            )}
-            {canApprove && (
-              <Button variant="contained" startIcon={<NotificationsActiveRounded />} onClick={() => navigate("/admin/approvals")}
-                sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
-                Approvals {dashboardData?.pendingTickets > 0 && `(${dashboardData.pendingTickets})`}
-              </Button>
-            )}
-            {!isAdminTier && !canRegister && !canApprove && canViewTickets && (
-              <Button variant="contained" startIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
-                sx={{ bgcolor: "rgba(255,255,255,0.15)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 2.5, py: 1, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.25)" }, boxShadow: "none", textTransform: "none" }}>
-                My Tickets
-              </Button>
-            )}
+          {/* SVG illustration + mini calendar — only on medium screens and up */}
+          <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+
+          <Box sx={{ display: { xs: "none", lg: "block" }, width: 160, height: 140, flexShrink: 0 }}>
+            <svg viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+              {/* Ground shadow */}
+              <ellipse cx="110" cy="148" rx="85" ry="7" fill="rgba(0,0,0,0.12)"/>
+
+              {/* Soft glow behind monitor */}
+              <circle cx="118" cy="70" r="52" fill="rgba(255,255,255,0.06)"/>
+
+              {/* Monitor stand */}
+              <rect x="108" y="112" width="10" height="16" rx="2" fill="rgba(255,255,255,0.35)"/>
+              <rect x="90" y="126" width="46" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>
+
+              {/* Monitor frame */}
+              <rect x="48" y="38" width="140" height="78" rx="10" fill="#1E1B3A" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
+              <rect x="58" y="48" width="120" height="58" rx="4" fill="#FFFFFF"/>
+
+              {/* Bar chart on screen */}
+              <rect x="68" y="80" width="10" height="18" rx="2" fill="#C4B5FD"/>
+              <rect x="84" y="68" width="10" height="30" rx="2" fill="#111827"/>
+              <rect x="100" y="74" width="10" height="24" rx="2" fill="#111827"/>
+              <rect x="116" y="60" width="10" height="38" rx="2" fill="#111827"/>
+              <rect x="132" y="70" width="10" height="28" rx="2" fill="#C4B5FD"/>
+              {/* Trend line */}
+              <path d="M68 76 L84 62 L100 70 L116 52 L132 64 L148 56" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              <circle cx="148" cy="56" r="3" fill="#9CA3AF"/>
+
+              {/* Notification badge on monitor */}
+              <circle cx="176" cy="46" r="7" fill="#FBBF24"/>
+              <path d="M173 46l2 2 4-4" stroke="#111827" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+
+              {/* Person — sitting, looking at screen */}
+              <path d="M18 148L18 132C18 118 30 108 46 108C62 108 74 118 74 132L74 148Z" fill="#111827"/>
+              <path d="M18 148L18 132C18 118 30 108 46 108C62 108 74 118 74 132L74 148Z" fill="url(#bodyGrad)" opacity="0.5"/>
+              <circle cx="46" cy="90" r="14" fill="#FDBA74"/>
+              {/* Hair */}
+              <path d="M32 88C32 74 38 66 46 66C54 66 60 72 60 82C60 84 59 86 58 88C56 82 50 84 46 78C42 84 34 84 32 88Z" fill="#292524"/>
+              {/* Arm resting toward keyboard */}
+              <path d="M60 118C68 116 76 118 80 124" stroke="#FDBA74" strokeWidth="7" strokeLinecap="round"/>
+
+              {/* Keyboard */}
+              <rect x="64" y="122" width="34" height="10" rx="3" fill="rgba(255,255,255,0.85)"/>
+
+              {/* Floating dashed accent */}
+              <circle cx="30" cy="46" r="10" fill="none" stroke="#FBBF24" strokeWidth="2" strokeDasharray="3 3"/>
+              <circle cx="30" cy="46" r="3.5" fill="#FBBF24"/>
+
+              {/* Speech/insight bubble */}
+              <path d="M186 78C186 72 190.5 68 196 68H208C213.5 68 218 72 218 78V82C218 87.5 213.5 92 208 92H198L189 99V92C187 90 186 85 186 78Z" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.25)"/>
+              <rect x="194" y="75" width="18" height="3" rx="1.5" fill="#6EE7B7"/>
+              <rect x="194" y="82" width="12" height="3" rx="1.5" fill="#6EE7B7"/>
+
+              <defs>
+                <linearGradient id="bodyGrad" x1="18" y1="108" x2="74" y2="148" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#111827"/>
+                  <stop offset="1" stopColor="#111827" stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </Box>
+
+            <HeroMiniCalendar />
           </Box>
         </Box>
 
@@ -263,7 +396,7 @@ const AdminDashboard = () => {
 
       {loading ? (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh", gap: 2 }}>
-          <CircularProgress size={44} sx={{ color: "#A855F7" }} />
+          <CircularProgress size={44} sx={{ color: "text.primary" }} />
           <Typography color="text.secondary" fontWeight={600}>Loading dashboard…</Typography>
         </Box>
       ) : (
@@ -291,7 +424,7 @@ const AdminDashboard = () => {
                     <Typography fontSize={12} color="text.secondary" fontWeight={500} mt={0.2}>Click a row to view full details</Typography>
                   </Box>
                   <Button size="small" endIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
-                    sx={{ fontWeight: 700, color: "#A855F7", fontSize: 13, "&:hover": { bgcolor: "rgba(168,85,247,0.08)" } }}>
+                    sx={{ fontWeight: 700, color: "text.primary", fontSize: 13, "&:hover": { bgcolor: "rgba(17,24,39,0.08)" } }}>
                     View All
                   </Button>
                 </Box>
@@ -324,14 +457,14 @@ const AdminDashboard = () => {
                 <Stack spacing={3}>
                   <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2.5 }}>
-                      <ShieldRounded sx={{ color: "#A855F7", fontSize: 20 }} />
+                      <ShieldRounded sx={{ color: "text.primary", fontSize: 20 }} />
                       <Typography fontWeight={900} fontSize={16}>Asset Health</Typography>
                     </Box>
 
                     <Box sx={{ textAlign: "center", mb: 2.5 }}>
                       <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 100, height: 100 }}>
                         <CircularProgress variant="determinate" value={healthPct} size={100} thickness={5}
-                          sx={{ color: healthPct > 70 ? "#22C55E" : healthPct > 40 ? "#F59E0B" : "#EF4444", position: "absolute" }} />
+                          sx={{ color: healthPct > 70 ? "#4B5563" : healthPct > 40 ? "#9CA3AF" : "#D1D5DB", position: "absolute" }} />
                         <CircularProgress variant="determinate" value={100} size={100} thickness={5}
                           sx={{ color: "action.selected", position: "absolute" }} />
                         <Box sx={{ position: "relative", textAlign: "center" }}>
@@ -343,9 +476,9 @@ const AdminDashboard = () => {
 
                     <Stack spacing={1.5}>
                       {[
-                        { label: "In Warranty",    value: inWarranty,   color: "#22C55E" },
-                        { label: "Expiring Soon",  value: expiringSoon, color: "#F59E0B" },
-                        { label: "Active Repairs", value: dashboardData?.activeRepairs || 0, color: "#EF4444" },
+                        { label: "In Warranty",    value: inWarranty,   color: "#4B5563" },
+                        { label: "Expiring Soon",  value: expiringSoon, color: "#9CA3AF" },
+                        { label: "Active Repairs", value: dashboardData?.activeRepairs || 0, color: "#D1D5DB" },
                       ].map(({ label, value, color }) => (
                         <Box key={label}>
                           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
@@ -366,7 +499,7 @@ const AdminDashboard = () => {
                     <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
                         <Typography fontWeight={900} fontSize={16}>Assets by Dept.</Typography>
-                        <Chip label={`${deptTotal} total`} size="small" sx={{ fontWeight: 800, fontSize: 11, bgcolor: "rgba(168,85,247,0.1)", color: "#A855F7" }} />
+                        <Chip label={`${deptTotal} total`} size="small" sx={{ fontWeight: 800, fontSize: 11, bgcolor: "rgba(17,24,39,0.1)", color: "text.primary" }} />
                       </Box>
                       <Stack spacing={1.8}>
                         {deptBreakdown.slice(0, 6).map((d, i) => {
@@ -407,7 +540,7 @@ const AdminDashboard = () => {
                         <Typography fontSize={12} color="text.secondary" mt={0.2}>Fleet warranty health across all registered assets</Typography>
                       </Box>
                       <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate("/admin/assets")}
-                        sx={{ fontWeight: 700, color: "#A855F7", "&:hover": { bgcolor: "rgba(168,85,247,0.08)" } }}>
+                        sx={{ fontWeight: 700, color: "text.primary", "&:hover": { bgcolor: "rgba(17,24,39,0.08)" } }}>
                         View Assets
                       </Button>
                     </Box>
@@ -415,15 +548,15 @@ const AdminDashboard = () => {
                     <Box sx={{ mb: 3 }}>
                       <Box sx={{ display: "flex", gap: 0.5, height: 12, borderRadius: 6, overflow: "hidden", bgcolor: "action.selected" }}>
                         {[
-                          { pct: Math.round((inWarranty / totalAssets) * 100),   color: "#22C55E" },
-                          { pct: Math.round((expiringSoon / totalAssets) * 100), color: "#F59E0B" },
-                          { pct: 100 - Math.round((inWarranty / totalAssets) * 100) - Math.round((expiringSoon / totalAssets) * 100), color: "#EF4444" },
+                          { pct: Math.round((inWarranty / totalAssets) * 100),   color: "#4B5563" },
+                          { pct: Math.round((expiringSoon / totalAssets) * 100), color: "#9CA3AF" },
+                          { pct: 100 - Math.round((inWarranty / totalAssets) * 100) - Math.round((expiringSoon / totalAssets) * 100), color: "#D1D5DB" },
                         ].filter(s => s.pct > 0).map((s, i) => (
                           <Box key={i} sx={{ width: `${s.pct}%`, bgcolor: s.color, borderRadius: 6 }} />
                         ))}
                       </Box>
                       <Box sx={{ display: "flex", gap: 2.5, mt: 1.5 }}>
-                        {[{ label: "In Warranty", color: "#22C55E" }, { label: "Expiring Soon", color: "#F59E0B" }, { label: "Expired / Unknown", color: "#EF4444" }].map(({ label, color }) => (
+                        {[{ label: "In Warranty", color: "#4B5563" }, { label: "Expiring Soon", color: "#9CA3AF" }, { label: "Expired / Unknown", color: "#D1D5DB" }].map(({ label, color }) => (
                           <Box key={label} sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
                             <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
                             <Typography fontSize={11} fontWeight={600} color="text.secondary">{label}</Typography>
@@ -434,9 +567,9 @@ const AdminDashboard = () => {
 
                     <Grid container spacing={2}>
                       {[
-                        { label: "In Warranty",         value: inWarranty,   color: "#22C55E", bg: "rgba(34,197,94,0.08)",   desc: "Assets under active warranty", icon: <CheckCircleRounded /> },
-                        { label: "Expiring in 30 days", value: expiringSoon, color: "#F59E0B", bg: "rgba(245,158,11,0.08)",  desc: "Renew before they lapse",       icon: <AccessTimeRounded /> },
-                        { label: "Active Repairs",       value: dashboardData?.activeRepairs || 0, color: "#EF4444", bg: "rgba(239,68,68,0.08)", desc: "Currently under service", icon: <BuildRounded /> },
+                        { label: "In Warranty",         value: inWarranty,   color: "#4B5563", bg: "rgba(75,85,99,0.1)",   desc: "Assets under active warranty", icon: <CheckCircleRounded /> },
+                        { label: "Expiring in 30 days", value: expiringSoon, color: "#9CA3AF", bg: "rgba(156,163,175,0.1)",  desc: "Renew before they lapse",       icon: <AccessTimeRounded /> },
+                        { label: "Active Repairs",       value: dashboardData?.activeRepairs || 0, color: "#D1D5DB", bg: "rgba(209,213,219,0.1)", desc: "Currently under service", icon: <BuildRounded /> },
                       ].map(({ label, value, color, bg, desc, icon }) => (
                         <Grid size={{ xs: 12, sm: 4 }} key={label}>
                           <Box onClick={() => navigate("/admin/assets")} sx={{ p: 2.5, borderRadius: "18px", bgcolor: bg, border: "1px solid", borderColor: `${color}33`, cursor: "pointer", transition: "all 0.2s", "&:hover": { transform: "translateY(-3px)", boxShadow: `0 12px 28px ${color}22` } }}>
@@ -473,9 +606,9 @@ const AdminDashboard = () => {
         PaperProps={{ sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider" } }}>
         {selectedTicket && (
           <>
-            <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(124,58,237,0.1),rgba(168,85,247,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "linear-gradient(135deg,#7C3AED,#A855F7)", display: "grid", placeItems: "center" }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
                   <ConfirmationNumberRounded sx={{ color: "#fff", fontSize: 22 }} />
                 </Box>
                 <Box>
@@ -501,7 +634,7 @@ const AdminDashboard = () => {
                 ))}
               </Box>
               <Button fullWidth variant="contained" onClick={() => { setSelectedTicket(null); navigate("/tickets"); }}
-                sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
+                sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
                 Open Full Ticket →
               </Button>
             </DialogContent>

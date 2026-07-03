@@ -40,52 +40,52 @@ const Home = () => {
   ];
 
   return (
-    <div style={{ backgroundColor: "#080812", overflowX: "hidden" }}>
+    <div style={{ backgroundColor: "#0B0D12", overflowX: "hidden" }}>
       <style>{`
         .h-container { max-width: 1200px; margin: 0 auto; }
 
         .h-badge {
           display: inline-flex; align-items: center; gap: 8px;
           padding: 8px 16px; border-radius: 999px;
-          background: rgba(168,85,247,0.15); color: #A855F7;
-          border: 1px solid rgba(168,85,247,0.25);
+          background: rgba(17,24,39,0.15); color: #FFFFFF;
+          border: 1px solid rgba(17,24,39,0.25);
           font-weight: 800; font-size: 13px; margin-bottom: 22px;
           letter-spacing: 0.2px;
         }
 
         .h-btn-primary {
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           padding: 15px 30px; border-radius: 999px;
           font-weight: 800; font-size: 15px;
           text-decoration: none;
           display: inline-flex; align-items: center; gap: 8px;
           transition: all 0.22s ease;
           letter-spacing: -0.2px;
-          box-shadow: 0 6px 20px rgba(124,58,237,0.4);
+          box-shadow: 0 6px 20px rgba(17,24,39,0.4);
         }
-        .h-btn-primary:hover { background: linear-gradient(135deg, #6D28D9, #9333EA); transform: translateY(-3px); box-shadow: 0 14px 32px rgba(124,58,237,0.55); }
+        .h-btn-primary:hover { background: #1F2937; transform: translateY(-3px); box-shadow: 0 14px 32px rgba(17,24,39,0.55); }
 
         .h-btn-outline {
           padding: 15px 30px; border-radius: 999px;
           font-weight: 800; font-size: 15px;
-          color: #C4B5FD; border: 1.5px solid rgba(168,85,247,0.3);
+          color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.3);
           text-decoration: none;
           display: inline-flex; align-items: center; gap: 8px;
           transition: all 0.22s ease;
-          background: rgba(168,85,247,0.06);
+          background: rgba(17,24,39,0.06);
         }
-        .h-btn-outline:hover { border-color: #A855F7; background: rgba(168,85,247,0.12); transform: translateY(-3px); }
+        .h-btn-outline:hover { border-color: #FFFFFF; background: rgba(17,24,39,0.12); transform: translateY(-3px); }
 
         .h-hero-visual {
           background: rgba(13, 8, 35, 0.85);
           backdrop-filter: blur(20px);
           -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(168,85,247,0.2);
+          border: 1px solid rgba(17,24,39,0.2);
           border-radius: 28px;
           padding: 28px;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(168,85,247,0.1);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(17,24,39,0.1);
         }
 
         .h-hero-visual::before {
@@ -93,7 +93,7 @@ const Home = () => {
           position: absolute;
           top: -60px; right: -60px;
           width: 220px; height: 220px;
-          background: radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%);
+          background: radial-gradient(circle, rgba(17,24,39,0.18), transparent 70%);
           border-radius: 50%;
           pointer-events: none;
         }
@@ -113,8 +113,8 @@ const Home = () => {
         }
 
         .h-feature-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           padding: 30px 28px;
           border-radius: 24px;
           transition: all 0.3s ease;
@@ -124,22 +124,22 @@ const Home = () => {
         .h-feature-card:hover {
           transform: translateY(-8px);
           box-shadow: 0 24px 48px rgba(17,17,17,0.10);
-          border-color: rgba(168,85,247,0.16);
+          border-color: rgba(17,24,39,0.16);
         }
 
         .h-feature-icon {
           width: 54px; height: 54px;
-          background: linear-gradient(135deg, #7C3AED, #A855F7); color: #FFFFFF;
+          background: #111827; color: #FFFFFF;
           border-radius: 15px;
           display: grid; place-items: center;
           margin-bottom: 20px;
-          box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+          box-shadow: 0 4px 16px rgba(17,24,39,0.4);
         }
 
         .h-check-circle {
           width: 24px; height: 24px; border-radius: "50%";
-          background: rgba(168,85,247,0.15);
-          color: #A855F7;
+          background: rgba(17,24,39,0.15);
+          color: #FFFFFF;
           display: grid; place-items: center;
           font-weight: 900; font-size: 12px;
           flex-shrink: 0; border-radius: 50%;
@@ -151,8 +151,8 @@ const Home = () => {
         }
 
         .h-info-panel {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 28px;
           padding: 32px;
           box-shadow: 0 20px 48px rgba(17,17,17,0.06);
@@ -160,21 +160,21 @@ const Home = () => {
 
         .h-asset-row {
           padding: 16px; border-radius: 16px;
-          background: rgba(30,20,60,0.5); border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.65); border: 1px solid rgba(17,24,39,0.15);
           margin-bottom: 12px;
           display: flex; justify-content: space-between; gap: 12px; align-items: center;
         }
 
         .h-workflow-card {
-          background: rgba(15,10,40,0.55);
-          border: 1px solid rgba(168,85,247,0.15);
+          background: rgba(20,20,20,0.7);
+          border: 1px solid rgba(17,24,39,0.15);
           border-radius: 20px; padding: 22px;
           margin-bottom: 12px;
           box-shadow: 0 4px 16px rgba(17,17,17,0.04);
         }
 
         .h-section-label {
-          color: #A855F7; font-weight: 900;
+          color: #FFFFFF; font-weight: 900;
           text-transform: uppercase; letter-spacing: 1.8px; font-size: 12px;
         }
 
@@ -201,11 +201,11 @@ const Home = () => {
               Manage Assets, Warranty &amp; Service{" "}
               <span style={{ color: "#FFFFFF", position: "relative" }}>
                 in One System.
-                <span style={{ position: "absolute", bottom: -6, left: 0, right: 0, height: 6, background: "#A855F7", borderRadius: 4 }} />
+                <span style={{ position: "absolute", bottom: -6, left: 0, right: 0, height: 6, background: "#111827", borderRadius: 4 }} />
               </span>
             </motion.h1>
 
-            <motion.p variants={fadeUp} style={{ fontSize: 18, color: "#8B8BAA", lineHeight: 1.72, marginBottom: 34, maxWidth: 520, fontWeight: 500 }}>
+            <motion.p variants={fadeUp} style={{ fontSize: 18, color: "#9CA3AF", lineHeight: 1.72, marginBottom: 34, maxWidth: 520, fontWeight: 500 }}>
               A smart platform to track company assets, warranty status, breakdown tickets, vendor complaints, approvals and complete service history.
             </motion.p>
 
@@ -218,7 +218,7 @@ const Home = () => {
 
             <motion.div variants={fadeUp} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginTop: 40, maxWidth: 520 }}>
               {stats.map((item) => (
-                <div key={item.label} style={{ background: "rgba(15,10,40,0.6)", border: "1px solid rgba(168,85,247,0.15)", borderRadius: 16, padding: "14px 12px", boxShadow: "0 4px 16px rgba(17,17,17,0.05)" }}>
+                <div key={item.label} style={{ background: "rgba(20,20,20,0.75)", border: "1px solid rgba(17,24,39,0.15)", borderRadius: 16, padding: "14px 12px", boxShadow: "0 4px 16px rgba(17,17,17,0.05)" }}>
                   <div style={{ fontSize: 22, fontWeight: 950, color: "#FFFFFF", marginBottom: 3, letterSpacing: "-0.8px" }}>{item.value}</div>
                   <div style={{ fontSize: 11, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px" }}>{item.label}</div>
                 </div>
@@ -232,29 +232,29 @@ const Home = () => {
                 <div style={{ fontWeight: 900, color: "#FFFFFF", fontSize: 17, letterSpacing: "-0.4px" }}>AssetCare Dashboard</div>
                 <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, marginTop: 2 }}>Live asset health overview</div>
               </div>
-              <div style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(168,85,247,0.12)", color: "#A855F7", fontWeight: 900, fontSize: 11, border: "1px solid rgba(168,85,247,0.22)", letterSpacing: "1px" }}>LIVE</div>
+              <div style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(17,24,39,0.12)", color: "#FFFFFF", fontWeight: 900, fontSize: 11, border: "1px solid rgba(17,24,39,0.22)", letterSpacing: "1px" }}>LIVE</div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
               <div className="h-mini-stat">
-                <Inventory2RoundedIcon sx={{ color: "#A855F7", fontSize: 20, mb: 0.8 }} />
+                <Inventory2RoundedIcon sx={{ color: "#FFFFFF", fontSize: 20, mb: 0.8 }} />
                 <div style={{ fontSize: 28, fontWeight: 950, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1 }}>1,248</div>
-                <div style={{ fontSize: 12, color: "#8B8BAA", marginTop: 4, fontWeight: 600 }}>Total Assets</div>
+                <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 4, fontWeight: 600 }}>Total Assets</div>
               </div>
               <div className="h-mini-stat">
-                <BuildIcon sx={{ color: "#A855F7", fontSize: 20, mb: 0.8 }} />
+                <BuildIcon sx={{ color: "#FFFFFF", fontSize: 20, mb: 0.8 }} />
                 <div style={{ fontSize: 28, fontWeight: 950, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1 }}>24</div>
-                <div style={{ fontSize: 12, color: "#8B8BAA", marginTop: 4, fontWeight: 600 }}>Active Tickets</div>
+                <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 4, fontWeight: 600 }}>Active Tickets</div>
               </div>
             </div>
 
             {[
-              { name: "IT Assets", val: "82%", width: "82%", color: "#A855F7" },
+              { name: "IT Assets", val: "82%", width: "82%", color: "#FFFFFF" },
               { name: "Electrical", val: "58%", width: "58%", color: "#A8E03A" },
               { name: "Under Service", val: "34%", width: "34%", color: "#F59E0B" },
             ].map((bar) => (
               <div key={bar.name} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 800, marginBottom: 7, color: "#A855F7" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 800, marginBottom: 7, color: "#FFFFFF" }}>
                   <span style={{ color: "#A0A09A" }}>{bar.name}</span>
                   <span>{bar.val}</span>
                 </div>
@@ -264,7 +264,7 @@ const Home = () => {
               </div>
             ))}
 
-            <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(168,85,247,0.08)", borderRadius: 14, border: "1px solid rgba(168,85,247,0.16)", display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(17,24,39,0.08)", borderRadius: 14, border: "1px solid rgba(17,24,39,0.16)", display: "flex", gap: 12, alignItems: "center" }}>
               <WarningAmberRoundedIcon sx={{ color: "#F59E0B", fontSize: 20, flexShrink: 0 }} />
               <div>
                 <div style={{ fontWeight: 800, color: "#FFFFFF", fontSize: 13 }}>Warranty Alert</div>
@@ -276,11 +276,11 @@ const Home = () => {
       </section>
 
       {/* TRUST STRIP */}
-      <section style={{ background: "rgba(124,58,237,0.12)", padding: "28px 24px" }}>
+      <section style={{ background: "rgba(17,24,39,0.12)", padding: "28px 24px" }}>
         <div className="h-container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 18 }}>
           {["Centralized Asset Register", "Warranty & AMC Alerts", "Ticket Lifecycle Tracking", "Vendor Service Records"].map((item) => (
             <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 800, color: "#FFFFFF", fontSize: 14 }}>
-              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#A855F7", color: "#FFFFFF", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 11, flexShrink: 0 }}>✓</span>
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#111827", color: "#FFFFFF", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 11, flexShrink: 0 }}>✓</span>
               {item}
             </div>
           ))}
@@ -295,7 +295,7 @@ const Home = () => {
             <h2 className="h-section-title" style={{ fontSize: 44, fontWeight: 950, color: "#FFFFFF", lineHeight: 1.14, letterSpacing: "-1.4px", margin: "14px 0 20px" }}>
               Stop managing company assets in spreadsheets.
             </h2>
-            <p style={{ fontSize: 17, color: "#8B8BAA", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
+            <p style={{ fontSize: 17, color: "#9CA3AF", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
               AssetCare Pro gives your company a complete digital record of IT, electrical, electronic, furniture and other movable or immovable assets.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -341,7 +341,7 @@ const Home = () => {
             ].map((item) => (
               <div key={item.step} className="h-workflow-card">
                 <div style={{ display: "flex", gap: 14 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(124,58,237,0.12)", color: "#A855F7", display: "grid", placeItems: "center", fontWeight: 950, fontSize: 13, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(17,24,39,0.12)", color: "#FFFFFF", display: "grid", placeItems: "center", fontWeight: 950, fontSize: 13, flexShrink: 0 }}>
                     {item.step}
                   </div>
                   <div>
@@ -358,7 +358,7 @@ const Home = () => {
             <h2 className="h-section-title" style={{ fontSize: 44, fontWeight: 950, color: "#FFFFFF", lineHeight: 1.14, letterSpacing: "-1.4px", margin: "14px 0 20px" }}>
               Track every complaint from breakdown to closure.
             </h2>
-            <p style={{ fontSize: 17, color: "#8B8BAA", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
+            <p style={{ fontSize: 17, color: "#9CA3AF", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
               No more missing complaint numbers, technician details, pending approvals or service history. Every action is tracked clearly.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -373,10 +373,10 @@ const Home = () => {
       </section>
 
       {/* FEATURES GRID */}
-      <section style={{ padding: "100px 24px", background: "rgba(124,58,237,0.12)" }}>
+      <section style={{ padding: "100px 24px", background: "rgba(17,24,39,0.12)" }}>
         <div className="h-container">
           <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 60px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 999, background: "rgba(168,85,247,0.10)", border: "1px solid rgba(168,85,247,0.20)", color: "#A855F7", fontWeight: 800, fontSize: 12, marginBottom: 18, letterSpacing: "1.2px", textTransform: "uppercase" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 999, background: "rgba(17,24,39,0.10)", border: "1px solid rgba(17,24,39,0.20)", color: "#FFFFFF", fontWeight: 800, fontSize: 12, marginBottom: 18, letterSpacing: "1.2px", textTransform: "uppercase" }}>
               Core Modules
             </div>
             <h2 style={{ fontSize: 46, fontWeight: 950, color: "#FFFFFF", margin: "0 0 16px", letterSpacing: "-1.6px", lineHeight: 1.1 }}>
@@ -391,9 +391,9 @@ const Home = () => {
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={stagger}>
             {features.map((item) => (
               <motion.div key={item.title} variants={fadeUp} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, padding: "28px 24px", transition: "all 0.3s ease", cursor: "default" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(168,85,247,0.06)"; e.currentTarget.style.borderColor = "rgba(168,85,247,0.20)"; }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(17,24,39,0.06)"; e.currentTarget.style.borderColor = "rgba(17,24,39,0.20)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
-                <div style={{ width: 50, height: 50, background: "#A855F7", color: "#FFFFFF", borderRadius: 14, display: "grid", placeItems: "center", marginBottom: 18 }}>
+                <div style={{ width: 50, height: 50, background: "#111827", color: "#FFFFFF", borderRadius: 14, display: "grid", placeItems: "center", marginBottom: 18 }}>
                   {item.icon}
                 </div>
                 <h3 style={{ fontSize: 18, fontWeight: 900, color: "#FFFFFF", marginBottom: 10, letterSpacing: "-0.3px" }}>{item.title}</h3>
@@ -405,10 +405,10 @@ const Home = () => {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "100px 24px", background: "#080812" }}>
+      <section style={{ padding: "100px 24px", background: "#0B0D12" }}>
         <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
-          style={{ maxWidth: 1200, margin: "0 auto", background: "rgba(124,58,237,0.12)", borderRadius: 32, padding: "68px 56px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 36, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -80, right: -80, width: 280, height: 280, background: "radial-gradient(circle, rgba(168,85,247,0.14), transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+          style={{ maxWidth: 1200, margin: "0 auto", background: "rgba(17,24,39,0.12)", borderRadius: 32, padding: "68px 56px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 36, position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", top: -80, right: -80, width: 280, height: 280, background: "radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
           <div style={{ maxWidth: 600, position: "relative", zIndex: 1 }}>
             <h2 style={{ fontSize: 40, fontWeight: 950, color: "#FFFFFF", marginBottom: 14, letterSpacing: "-1.2px", lineHeight: 1.18 }}>
               Ready to digitize your company asset management?
@@ -417,8 +417,8 @@ const Home = () => {
               Start managing assets, warranty, breakdown tickets, vendor complaints and approval workflow from one clean dashboard.
             </p>
           </div>
-          <Link to="/register-company" style={{ background: "#A855F7", color: "#FFFFFF", padding: "18px 34px", borderRadius: 999, fontWeight: 900, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, transition: "all 0.22s ease", letterSpacing: "-0.3px" }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 28px rgba(168,85,247,0.3)"; }}
+          <Link to="/register-company" style={{ background: "#111827", color: "#FFFFFF", padding: "18px 34px", borderRadius: 999, fontWeight: 900, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, transition: "all 0.22s ease", letterSpacing: "-0.3px" }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 28px rgba(17,24,39,0.3)"; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
             Start Free Trial <AutoGraphRoundedIcon fontSize="small" />
           </Link>

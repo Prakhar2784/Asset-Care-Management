@@ -9,7 +9,7 @@ import api from '../../api/axios';
 
 const ACTION_META = {
   ticket_created:        { label: 'Ticket Created',        color: '#60A5FA', bg: 'rgba(37,99,235,0.12)' },
-  ticket_status_changed: { label: 'Status Changed',        color: '#A78BFA', bg: 'rgba(124,58,237,0.12)' },
+  ticket_status_changed: { label: 'Status Changed',        color: '#A78BFA', bg: 'rgba(17,24,39,0.12)' },
   ticket_deleted:        { label: 'Ticket Deleted',        color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
   asset_created:         { label: 'Asset Created',         color: '#4ADE80', bg: 'rgba(22,163,74,0.12)' },
   asset_updated:         { label: 'Asset Updated',         color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
@@ -25,7 +25,7 @@ const ACTION_META = {
 const ENTITY_COLORS = {
   ticket:         { color: '#60A5FA', bg: 'rgba(37,99,235,0.10)' },
   asset:          { color: '#4ADE80', bg: 'rgba(22,163,74,0.10)' },
-  device_request: { color: '#A78BFA', bg: 'rgba(124,58,237,0.10)' },
+  device_request: { color: '#A78BFA', bg: 'rgba(17,24,39,0.10)' },
   user:           { color: '#22D3EE', bg: 'rgba(8,145,178,0.10)' },
 };
 
@@ -74,7 +74,7 @@ const formatChanges = (changes) => {
   );
 };
 
-const ROLE_COLORS = { admin: '#A855F7', hod: '#A78BFA', employee: '#60A5FA', it_support: '#22D3EE', vendor: '#FBBF24' };
+const ROLE_COLORS = { admin: '#111827', hod: '#A78BFA', employee: '#60A5FA', vendor: '#FBBF24' };
 
 export default function AuditLogs() {
   const [logs, setLogs] = useState([]);
@@ -115,8 +115,8 @@ export default function AuditLogs() {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(124,58,237,0.12)' }}>
-            <HistoryRounded sx={{ color: '#A855F7' }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)' }}>
+            <HistoryRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Audit Logs</Typography>
@@ -188,8 +188,8 @@ export default function AuditLogs() {
         </Paper>
       ) : logs.length === 0 ? (
         <Paper sx={{ p: 8, textAlign: 'center', borderRadius: '20px', border: '1px dashed', borderColor: 'divider' }}>
-          <Box sx={{ width: 72, height: 72, borderRadius: '20px', bgcolor: 'rgba(124,58,237,0.08)', display: 'grid', placeItems: 'center', mx: 'auto', mb: 2 }}>
-            <HistoryRounded sx={{ fontSize: 36, color: '#A855F7' }} />
+          <Box sx={{ width: 72, height: 72, borderRadius: '20px', bgcolor: 'rgba(17,24,39,0.08)', display: 'grid', placeItems: 'center', mx: 'auto', mb: 2 }}>
+            <HistoryRounded sx={{ fontSize: 36, color: 'text.primary' }} />
           </Box>
           <Typography variant="h6" fontWeight={800} color="text.primary">No audit logs found</Typography>
           <Typography fontSize={14} color="text.secondary" mt={0.5}>Try changing the filters or refreshing.</Typography>
@@ -270,7 +270,7 @@ export default function AuditLogs() {
                 count={totalPages} page={page} onChange={handlePageChange}
                 sx={{
                   '& .MuiPaginationItem-root': { fontWeight: 700, borderRadius: '10px' },
-                  '& .Mui-selected': { background: 'linear-gradient(135deg,#7C3AED,#A855F7) !important', color: '#FFFFFF !important' }
+                  '& .Mui-selected': { background: '#111827 !important', color: '#FFFFFF !important' }
                 }}
               />
             </Box>

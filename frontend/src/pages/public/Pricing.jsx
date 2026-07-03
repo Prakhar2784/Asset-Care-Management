@@ -10,8 +10,8 @@ import {
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
-const ACCENT = '#A855F7';
-const DARK = '#1A0B2E';
+const ACCENT = '#FFFFFF';
+const DARK = '#000000';
 
 const plans = [
   {
@@ -20,7 +20,7 @@ const plans = [
     icon: <RocketLaunchRounded sx={{ fontSize: 28 }} />,
     monthlyPrice: 0,
     yearlyPrice: 0,
-    color: '#60a5fa',
+    color: '#FFFFFF',
     description: 'Perfect for small teams getting started with asset management.',
     badge: null,
     features: [
@@ -68,7 +68,7 @@ const plans = [
     icon: <ShieldRounded sx={{ fontSize: 28 }} />,
     monthlyPrice: null,
     yearlyPrice: null,
-    color: '#a78bfa',
+    color: '#FFFFFF',
     description: 'Unlimited scale, full customization, and dedicated enterprise support.',
     badge: null,
     features: [
@@ -128,10 +128,10 @@ function PricingCard({ plan, yearly, highlight }) {
         sx={{
           height: '100%',
           borderRadius: '24px',
-          border: `1px solid ${highlight ? plan.color : 'rgba(168,85,247,0.12)'}`,
-          bgcolor: highlight ? 'rgba(124,58,237,0.12)' : 'rgba(15,10,40,0.6)',
+          border: `1px solid ${highlight ? plan.color : 'rgba(17,24,39,0.12)'}`,
+          bgcolor: highlight ? 'rgba(17,24,39,0.12)' : 'rgba(20,20,20,0.75)',
           backdropFilter: 'blur(20px)',
-          boxShadow: highlight ? `0 12px 40px rgba(168,85,247,0.2)` : '0 4px 24px rgba(0,0,0,0.3)',
+          boxShadow: highlight ? `0 12px 40px rgba(17,24,39,0.2)` : '0 4px 24px rgba(0,0,0,0.3)',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
@@ -152,8 +152,8 @@ function PricingCard({ plan, yearly, highlight }) {
             icon={<FlashOnRounded sx={{ fontSize: 12, color: DARK }} />}
             sx={{
               position: 'absolute', top: 24, right: 24,
-              bgcolor: ACCENT, color: '#FFFFFF', fontWeight: 900, fontSize: 11,
-              '& .MuiChip-icon': { color: '#FFFFFF' }
+              bgcolor: ACCENT, color: DARK, fontWeight: 900, fontSize: 11,
+              '& .MuiChip-icon': { color: DARK }
             }}
           />
         )}
@@ -204,7 +204,7 @@ function PricingCard({ plan, yearly, highlight }) {
           )}
         </Box>
 
-        <Divider sx={{ mb: 3.5, borderColor: 'rgba(168,85,247,0.15)' }} />
+        <Divider sx={{ mb: 3.5, borderColor: 'rgba(17,24,39,0.15)' }} />
 
         {/* Features */}
         <List disablePadding dense sx={{ flex: 1 }}>
@@ -213,7 +213,7 @@ function PricingCard({ plan, yearly, highlight }) {
               <ListItemIcon sx={{ minWidth: 28 }}>
                 {feat.included
                   ? <CheckRounded sx={{ fontSize: 18, color: '#4ade80' }} />
-                  : <CloseRounded sx={{ fontSize: 18, color: 'rgba(168,85,247,0.3)' }} />
+                  : <CloseRounded sx={{ fontSize: 18, color: 'rgba(17,24,39,0.3)' }} />
                 }
               </ListItemIcon>
               <ListItemText
@@ -243,10 +243,10 @@ function PricingCard({ plan, yearly, highlight }) {
             mt: 4, py: 1.6, fontWeight: 900, fontSize: 14,
             borderRadius: '14px',
             bgcolor: highlight ? plan.color : 'transparent',
-            color: '#FFFFFF',
+            color: highlight ? DARK : '#FFFFFF',
             borderColor: plan.color,
             '&:hover': {
-              bgcolor: highlight ? `${plan.color}cc` : `${plan.color}18`,
+              bgcolor: highlight ? '#E5E7EB' : `${plan.color}18`,
               borderColor: plan.color,
             }
           }}
@@ -264,11 +264,11 @@ function FAQItem({ faq }) {
     <Paper
       onClick={() => setOpen(o => !o)}
       sx={{
-        p: 3, borderRadius: '16px', border: '1px solid rgba(168,85,247,0.15)',
-        bgcolor: 'rgba(15,10,40,0.6)',
+        p: 3, borderRadius: '16px', border: '1px solid rgba(17,24,39,0.15)',
+        bgcolor: 'rgba(20,20,20,0.75)',
         backdropFilter: 'blur(12px)',
         cursor: 'pointer', mb: 2,
-        '&:hover': { borderColor: ACCENT, bgcolor: 'rgba(124,58,237,0.1)' },
+        '&:hover': { borderColor: ACCENT, bgcolor: 'rgba(17,24,39,0.1)' },
         transition: 'all 0.2s ease'
       }}
     >
@@ -287,7 +287,7 @@ export default function Pricing() {
   const [yearly, setYearly] = useState(false);
 
   return (
-    <Box sx={{ bgcolor: '#080812', minHeight: '100vh', backgroundImage: 'radial-gradient(ellipse at 15% 0%, rgba(124,58,237,0.18) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(168,85,247,0.12) 0%, transparent 50%)' }}>
+    <Box sx={{ bgcolor: '#0B0D12', minHeight: '100vh', backgroundImage: 'radial-gradient(ellipse at 15% 0%, rgba(17,24,39,0.18) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(17,24,39,0.12) 0%, transparent 50%)' }}>
       {/* Hero */}
       <Box sx={{ pt: { xs: 10, md: 14 }, pb: 8, textAlign: 'center', px: 2 }}>
         <Chip
@@ -305,7 +305,7 @@ export default function Pricing() {
           <Box component="span" sx={{ color: ACCENT }}>your business</Box>
         </Typography>
         <Typography
-          sx={{ color: '#8B8BAA', fontSize: 18, maxWidth: 540, mx: 'auto', lineHeight: 1.7, mb: 4 }}
+          sx={{ color: '#9CA3AF', fontSize: 18, maxWidth: 540, mx: 'auto', lineHeight: 1.7, mb: 4 }}
         >
           Start free, scale as you grow. No hidden fees. Cancel anytime.
           Every plan includes physical database isolation for your company's data.
@@ -320,7 +320,7 @@ export default function Pricing() {
             onChange={e => setYearly(e.target.checked)}
             sx={{
               '& .MuiSwitch-thumb': { bgcolor: yearly ? ACCENT : '#9CA3AF' },
-              '& .MuiSwitch-track': { bgcolor: yearly ? `${ACCENT}60` : 'rgba(168,85,247,0.25) !important' }
+              '& .MuiSwitch-track': { bgcolor: yearly ? `${ACCENT}60` : 'rgba(17,24,39,0.25) !important' }
             }}
           />
           <Typography fontWeight={700} sx={{ color: yearly ? '#FFFFFF' : '#9CA3AF', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -349,7 +349,7 @@ export default function Pricing() {
       </Box>
 
       {/* Trust Bar */}
-      <Box sx={{ borderTop: '1px solid rgba(168,85,247,0.2)', borderBottom: '1px solid rgba(168,85,247,0.2)', py: 7, px: { xs: 2, md: 8 }, background: 'rgba(124,58,237,0.08)' }}>
+      <Box sx={{ borderTop: '1px solid rgba(17,24,39,0.2)', borderBottom: '1px solid rgba(17,24,39,0.2)', py: 7, px: { xs: 2, md: 8 }, background: 'rgba(17,24,39,0.08)' }}>
         <Grid container spacing={4} justifyContent="center" textAlign="center">
           {[
             { stat: '99.9%', label: 'Uptime SLA' },
@@ -359,7 +359,7 @@ export default function Pricing() {
           ].map(({ stat, label }) => (
             <Grid key={label} size={{ xs: 6, md: 3 }}>
               <Typography variant="h4" fontWeight={900} sx={{ color: ACCENT, letterSpacing: '-1px' }}>{stat}</Typography>
-              <Typography sx={{ color: '#C4B5FD', fontSize: 13, fontWeight: 700, mt: 0.5 }}>{label}</Typography>
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, fontWeight: 700, mt: 0.5 }}>{label}</Typography>
             </Grid>
           ))}
         </Grid>
@@ -398,10 +398,10 @@ export default function Pricing() {
             endIcon={<ArrowForwardRounded />}
             href="/register-company"
             sx={{
-              background: 'linear-gradient(135deg, #7C3AED, #A855F7)', color: '#FFFFFF', fontWeight: 900,
+              background: '#111827', color: '#FFFFFF', fontWeight: 900,
               px: 4, py: 1.5, borderRadius: '12px', fontSize: 15,
-              boxShadow: '0 4px 16px rgba(124,58,237,0.4)',
-              '&:hover': { background: 'linear-gradient(135deg, #6D28D9, #9333EA)', boxShadow: '0 6px 24px rgba(124,58,237,0.55)' }
+              boxShadow: '0 4px 16px rgba(17,24,39,0.4)',
+              '&:hover': { background: '#1F2937', boxShadow: '0 6px 24px rgba(17,24,39,0.55)' }
             }}
           >
             Start Free Trial

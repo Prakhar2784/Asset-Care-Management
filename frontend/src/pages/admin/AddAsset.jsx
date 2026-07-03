@@ -12,15 +12,16 @@ import {
   AutoAwesomeRounded, CloseRounded, ShoppingCartRounded,
   Inventory2Rounded, ArrowBackRounded,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { createWorker } from "tesseract.js";
 import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
 const SectionLabel = ({ number, title, subtitle }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3, mt: 0.5 }}>
     <Box sx={{
       width: 34, height: 34, borderRadius: "10px",
-      background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+      background: "#111827",
       color: "#fff",
       display: "grid", placeItems: "center",
       fontWeight: 900, fontSize: 14, flexShrink: 0,
@@ -50,6 +51,9 @@ const DOC_TYPES = [
 
 const AddAsset = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { refreshUser } = useAuth();
+  const isOnboarding = new URLSearchParams(location.search).get("onboarding") === "1";
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -490,7 +494,13 @@ const AddAsset = () => {
       }
 
       setOpen(true);
-      setTimeout(() => navigate("/admin/assets"), 1500);
+      if (isOnboarding) {
+        await api.patch('/auth/complete-onboarding');
+        await refreshUser();
+        setTimeout(() => navigate("/admin/dashboard"), 1500);
+      } else {
+        setTimeout(() => navigate("/admin/assets"), 1500);
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to provision asset. Please ensure the serial number is unique.");
     } finally {
@@ -501,14 +511,14 @@ const AddAsset = () => {
   const inputSx = (fieldName) => ({
     "& .MuiOutlinedInput-root": {
       borderRadius: "12px",
-      bgcolor: ocrFilled.includes(fieldName) ? "rgba(124,58,237,0.06)" : "background.paper",
+      bgcolor: ocrFilled.includes(fieldName) ? "rgba(17,24,39,0.06)" : "background.paper",
       ...(ocrFilled.includes(fieldName) && {
-        "& fieldset": { borderColor: "#A855F7 !important", borderWidth: "2px !important" },
+        "& fieldset": { borderColor: "#111827 !important", borderWidth: "2px !important" },
       }),
     },
     "& .MuiInputLabel-root": {
       fontWeight: 600,
-      ...(ocrFilled.includes(fieldName) && { color: "#7C3AED" }),
+      ...(ocrFilled.includes(fieldName) && { color: "text.primary" }),
     },
   });
 
@@ -519,8 +529,8 @@ const AddAsset = () => {
       {/* Page Header */}
       <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(124,58,237,0.12)" }}>
-            <Inventory2Rounded sx={{ color: "#A855F7" }} />
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+            <Inventory2Rounded sx={{ color: "text.primary" }} />
           </Box>
           <Box>
             <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Register New Asset</Typography>
@@ -539,7 +549,7 @@ const AddAsset = () => {
         </Button>
       </Box>
 
-      {loading && <LinearProgress sx={{ borderRadius: 2, mb: 2, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "#A855F7" } }} />}
+      {loading && <LinearProgress sx={{ borderRadius: 2, mb: 2, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "text.primary" } }} />}
 
       {error && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }} onClose={() => setError(null)}>
@@ -562,10 +572,10 @@ const AddAsset = () => {
             <LinearProgress
               variant="determinate"
               value={getCompletionPercentage()}
-              sx={{ height: 10, borderRadius: 5, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "#A855F7" } }}
+              sx={{ height: 10, borderRadius: 5, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "text.primary" } }}
             />
           </Box>
-          <Typography fontSize={14} fontWeight={900} color="#A855F7">
+          <Typography fontSize={14} fontWeight={900} color="#111827">
             {getCompletionPercentage()}%
           </Typography>
         </Paper>
@@ -573,15 +583,15 @@ const AddAsset = () => {
         {/* OCR Invoice Scanner */}
         <Paper sx={{
           p: { xs: 2.5, md: 3 }, borderRadius: "20px",
-          background: "linear-gradient(135deg, rgba(124,58,237,0.07) 0%, rgba(168,85,247,0.04) 100%)",
+          background: "linear-gradient(135deg, rgba(17,24,39,0.07) 0%, rgba(17,24,39,0.04) 100%)",
           border: "1.5px dashed",
-          borderColor: ocrFilled.length > 0 ? "#7C3AED" : "rgba(124,58,237,0.3)",
+          borderColor: ocrFilled.length > 0 ? "#111827" : "rgba(17,24,39,0.3)",
           position: "relative", overflow: "hidden",
         }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
             <Box sx={{
               width: 44, height: 44, borderRadius: "14px", flexShrink: 0,
-              background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+              background: "#111827",
               display: "grid", placeItems: "center",
             }}>
               <DocumentScannerRounded sx={{ color: "#fff", fontSize: 22 }} />
@@ -617,9 +627,9 @@ const AddAsset = () => {
                 disabled={ocrLoading}
                 startIcon={ocrLoading ? <CircularProgress size={15} color="inherit" /> : <UploadFileRounded sx={{ fontSize: 17 }} />}
                 sx={{
-                  background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff",
+                  background: "#111827", color: "#fff",
                   fontWeight: 800, borderRadius: "12px", px: 3, py: 1.1, fontSize: 13.5, boxShadow: "none",
-                  "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" },
+                  "&:hover": { background: "#1F2937", boxShadow: "none" },
                   whiteSpace: "nowrap",
                 }}>
                 {ocrLoading ? "Scanning…" : ocrFilled.length > 0 ? "Scan Again" : "Upload Invoice"}
@@ -635,8 +645,8 @@ const AddAsset = () => {
           {ocrLoading && (
             <Fade in={ocrLoading}>
               <Box sx={{ mt: 2 }}>
-                <LinearProgress sx={{ borderRadius: 2, bgcolor: "rgba(124,58,237,0.12)", "& .MuiLinearProgress-bar": { background: "linear-gradient(90deg,#7C3AED,#A855F7)" } }} />
-                <Typography sx={{ fontSize: 12, color: "#A855F7", fontWeight: 600, mt: 0.8, textAlign: "center" }}>
+                <LinearProgress sx={{ borderRadius: 2, bgcolor: "rgba(17,24,39,0.12)", "& .MuiLinearProgress-bar": { background: "#111827" } }} />
+                <Typography sx={{ fontSize: 12, color: "text.primary", fontWeight: 600, mt: 0.8, textAlign: "center" }}>
                   Reading invoice — this may take 10–20 seconds…
                 </Typography>
               </Box>
@@ -796,7 +806,7 @@ const AddAsset = () => {
                           variant="text"
                           size="small"
                           onClick={() => setScDialogOpen(true)}
-                          sx={{ fontSize: 11, fontWeight: 800, textTransform: "none", color: "#A855F7", minWidth: 0, p: 0.5 }}
+                          sx={{ fontSize: 11, fontWeight: 800, textTransform: "none", color: "text.primary", minWidth: 0, p: 0.5 }}
                         >
                           Select Registered
                         </Button>
@@ -905,7 +915,7 @@ const AddAsset = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Box sx={{
                 width: 34, height: 34, borderRadius: "10px",
-                background: "linear-gradient(135deg,#7C3AED,#A855F7)",
+                background: "#111827",
                 color: "#fff", display: "grid", placeItems: "center",
                 fontWeight: 900, fontSize: 14, flexShrink: 0,
               }}>
@@ -922,7 +932,7 @@ const AddAsset = () => {
             </Box>
             {docCount > 0 && (
               <Chip label={`${docCount} file${docCount > 1 ? "s" : ""} attached`}
-                size="small" sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#FFFFFF", fontWeight: 800, fontSize: 11 }} />
+                size="small" sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 800, fontSize: 11 }} />
             )}
           </Box>
 
@@ -933,18 +943,18 @@ const AddAsset = () => {
                 <Box key={key}
                   sx={{
                     p: 2, borderRadius: "14px", border: "1.5px dashed",
-                    borderColor: file ? "#7C3AED" : "divider",
-                    bgcolor: file ? "rgba(124,58,237,0.04)" : "background.default",
+                    borderColor: file ? "#111827" : "divider",
+                    bgcolor: file ? "rgba(17,24,39,0.04)" : "background.default",
                     display: "flex", flexDirection: "column", gap: 1,
                     transition: "all 0.2s ease",
                   }}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: file ? "#A855F7" : "text.secondary" }}>
+                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: file ? "#111827" : "text.secondary" }}>
                       {label}
                     </Typography>
                     {file && (
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                        <CheckCircleRounded sx={{ fontSize: 14, color: "#A855F7" }} />
+                        <CheckCircleRounded sx={{ fontSize: 14, color: "text.primary" }} />
                         <Button size="small" onClick={() => handleRemoveDoc(key)}
                           sx={{ minWidth: 0, p: 0.3, color: "#EF4444" }}>
                           <DeleteRounded sx={{ fontSize: 14 }} />
@@ -990,7 +1000,7 @@ const AddAsset = () => {
 
           <Button type="submit" variant="contained" disabled={loading}
             startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SaveRounded />}
-            sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "linear-gradient(135deg,#6D28D9,#9333EA)", boxShadow: "none" } }}>
+            sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "#1F2937", boxShadow: "none" } }}>
             {loading ? "Registering…" : "Register Asset"}
           </Button>
         </Box>
@@ -1002,7 +1012,7 @@ const AddAsset = () => {
         PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper" } }}>
         <DialogTitle component="div" sx={{ fontWeight: 800, fontSize: 18, pb: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <ShoppingCartRounded sx={{ color: "#A855F7" }} />
+            <ShoppingCartRounded sx={{ color: "text.primary" }} />
             Multiple Items Found
           </Box>
           <Typography component="div" sx={{ fontSize: 13, color: "text.secondary", fontWeight: 500, mt: 0.5 }}>
@@ -1015,7 +1025,7 @@ const AddAsset = () => {
               <React.Fragment key={i}>
                 {i > 0 && <Divider />}
                 <ListItemButton onClick={() => applyOcrItem(item, item.sharedData)}
-                  sx={{ px: 3, py: 2, "&:hover": { bgcolor: "rgba(124,58,237,0.06)" } }}>
+                  sx={{ px: 3, py: 2, "&:hover": { bgcolor: "rgba(17,24,39,0.06)" } }}>
                   <ListItemText
                     primary={
                       <Typography sx={{ fontWeight: 700, fontSize: 14, color: "text.primary" }}>
@@ -1026,7 +1036,7 @@ const AddAsset = () => {
                       <Box sx={{ display: "flex", gap: 1, mt: 0.5, flexWrap: "wrap" }}>
                         {item.serialNumber && (
                           <Chip label={`S/N: ${item.serialNumber}`} size="small"
-                            sx={{ fontSize: 11, height: 20, bgcolor: "rgba(124,58,237,0.1)", color: "#A855F7" }} />
+                            sx={{ fontSize: 11, height: 20, bgcolor: "rgba(17,24,39,0.1)", color: "text.primary" }} />
                         )}
                         {item.purchaseCost && (
                           <Chip label={`₹${parseFloat(item.purchaseCost).toLocaleString("en-IN")}`} size="small"
@@ -1039,8 +1049,8 @@ const AddAsset = () => {
                   />
                   <ListItemSecondaryAction>
                     <Button size="small" variant="outlined"
-                      sx={{ borderRadius: "8px", fontWeight: 700, fontSize: 12, borderColor: "#A855F7", color: "#A855F7",
-                        "&:hover": { bgcolor: "rgba(124,58,237,0.08)" } }}>
+                      sx={{ borderRadius: "8px", fontWeight: 700, fontSize: 12, borderColor: "#111827", color: "text.primary",
+                        "&:hover": { bgcolor: "rgba(17,24,39,0.08)" } }}>
                       Select
                     </Button>
                   </ListItemSecondaryAction>
@@ -1077,7 +1087,7 @@ const AddAsset = () => {
           }}>
             {blankOptionals.map((field, idx) => (
               <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 1, mb: idx === blankOptionals.length - 1 ? 0 : 1 }}>
-                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#A855F7" }} />
+                <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "text.primary" }} />
                 <Typography fontSize={12} color="text.primary" fontWeight={700}>
                   {field}
                 </Typography>
@@ -1089,7 +1099,7 @@ const AddAsset = () => {
           <Button onClick={() => setEmptyFieldsDialog(false)} variant="outlined" sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "10px", flex: 1, textTransform: "none" }}>
             Fill Them
           </Button>
-          <Button onClick={() => { setEmptyFieldsDialog(false); handleSubmit(null, true); }} variant="contained" sx={{ background: "linear-gradient(135deg,#7C3AED,#A855F7)", color: "#fff", fontWeight: 800, borderRadius: "10px", flex: 1, boxShadow: "none", textTransform: "none" }}>
+          <Button onClick={() => { setEmptyFieldsDialog(false); handleSubmit(null, true); }} variant="contained" sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "10px", flex: 1, boxShadow: "none", textTransform: "none" }}>
             Register Anyway
           </Button>
         </DialogActions>

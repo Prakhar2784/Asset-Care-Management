@@ -15,8 +15,8 @@ import {
 import * as XLSX from 'xlsx';
 import api from '../api/axios';
 
-const ACCENT = '#A855F7';
-const DARK = '#1A0B2E';
+const ACCENT = '#111827';
+const DARK = '#111827';
 
 const STEPS = ['Download Template', 'Upload File', 'Preview & Validate', 'Import'];
 

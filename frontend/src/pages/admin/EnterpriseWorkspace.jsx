@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box, Button, Card, CardContent, Grid, Tab, Tabs, Typography, Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton,
@@ -274,7 +274,7 @@ const EnterpriseWorkspace = () => {
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-        <CircularProgress sx={{ color: "#A855F7" }} />
+        <CircularProgress sx={{ color: "text.primary" }} />
       </Box>
     );
   }
@@ -296,8 +296,8 @@ const EnterpriseWorkspace = () => {
             borderBottom: "1px solid",
             borderColor: isDark ? "#222" : "#DDD8CE",
             "& .MuiTab-root": { fontWeight: 700, fontSize: 13, textTransform: "none", color: "text.secondary" },
-            "& .Mui-selected": { color: "#A855F7 !important" },
-            "& .MuiTabs-indicator": { bgcolor: "#A855F7" }
+            "& .Mui-selected": { color: "#111827 !important" },
+            "& .MuiTabs-indicator": { bgcolor: "text.primary" }
           }}
         >
           <Tab icon={<BusinessRounded sx={{ fontSize: 18 }} />} iconPosition="start" label="Warehousing" />
@@ -317,7 +317,7 @@ const EnterpriseWorkspace = () => {
                 <Button variant="outlined" onClick={() => setWhTransferModal(true)} startIcon={<SwapHorizRounded />} sx={{ fontWeight: 700, borderRadius: "8px" }}>
                   Store Asset in Warehouse
                 </Button>
-                <Button variant="contained" onClick={() => setWhModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
+                <Button variant="contained" onClick={() => setWhModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
                   Add Warehouse
                 </Button>
               </Box>
@@ -362,7 +362,7 @@ const EnterpriseWorkspace = () => {
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Software & Subscriptions</Typography>
-              <Button variant="contained" onClick={() => setLicModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
+              <Button variant="contained" onClick={() => setLicModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
                 Purchase Software License
               </Button>
             </Box>
@@ -418,7 +418,7 @@ const EnterpriseWorkspace = () => {
                 <Button variant="outlined" onClick={() => setClaimModal(true)} startIcon={<AddRounded />} sx={{ fontWeight: 700, borderRadius: "8px" }}>
                   File Warranty Claim
                 </Button>
-                <Button variant="contained" onClick={() => setAmcModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
+                <Button variant="contained" onClick={() => setAmcModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
                   New AMC Contract
                 </Button>
               </Box>
@@ -510,7 +510,7 @@ const EnterpriseWorkspace = () => {
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Preventive Maintenance Schedules</Typography>
-              <Button variant="contained" onClick={() => setMaintModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
+              <Button variant="contained" onClick={() => setMaintModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
                 Schedule Inspection Task
               </Button>
             </Box>
@@ -566,7 +566,7 @@ const EnterpriseWorkspace = () => {
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Asset Handover Workflows</Typography>
-              <Button variant="contained" onClick={() => setTransferModal(true)} startIcon={<SwapHorizRounded />} sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
+              <Button variant="contained" onClick={() => setTransferModal(true)} startIcon={<SwapHorizRounded />} sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
                 Request Asset Transfer
               </Button>
             </Box>
@@ -625,7 +625,7 @@ const EnterpriseWorkspace = () => {
                 disabled={selectedAssetsQR.length === 0}
                 onClick={handlePrintQRCodes}
                 startIcon={<PrintRounded />}
-                sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}
+                sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}
               >
                 Print Selected Sticker Labels ({selectedAssetsQR.length})
               </Button>
@@ -695,7 +695,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setWhModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Add Warehouse</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Add Warehouse</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -736,7 +736,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setWhTransferModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Confirm Storage</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Confirm Storage</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -764,7 +764,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setLicModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Add License</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Add License</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -788,7 +788,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setAssignLicModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Allocate Seat</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Allocate Seat</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -822,7 +822,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setAmcModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Save Contract</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Save Contract</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -855,7 +855,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setClaimModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Submit Ticket</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Submit Ticket</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -889,7 +889,7 @@ const EnterpriseWorkspace = () => {
               <FormControl fullWidth>
                 <InputLabel>Assigned IT Engineer</InputLabel>
                 <Select value={maintForm.assignedEngineerId} label="Assigned IT Engineer" onChange={(e) => setMaintForm({ ...maintForm, assignedEngineerId: e.target.value })}>
-                  {users.filter(u => ['admin', 'it_support'].includes(u.role)).map(u => (
+                  {users.filter(u => ['admin', 'technician'].includes(u.role)).map(u => (
                     <MenuItem key={u._id} value={u._id}>{u.name}</MenuItem>
                   ))}
                 </Select>
@@ -898,7 +898,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setMaintModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Set Schedule</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Set Schedule</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -930,7 +930,7 @@ const EnterpriseWorkspace = () => {
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setTransferModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "#A855F7", color: "#000", fontWeight: 700 }}>Raise Request</Button>
+            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Raise Request</Button>
           </DialogActions>
         </form>
       </Dialog>
