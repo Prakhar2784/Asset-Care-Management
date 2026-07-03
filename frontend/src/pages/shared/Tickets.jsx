@@ -201,9 +201,12 @@ const Tickets = () => {
   );
 
   const handleSubmitTicket = async (e) => {
-    e.preventDefault(); setSubmitting(true); setError(null);
+    e.preventDefault(); setError(null);
+    const { selectedItem, issue, priority } = formData;
+    if (!selectedItem) { setError('Please select an asset or device.'); return; }
+    if (!issue.trim()) { setError('Please describe the issue.'); return; }
+    setSubmitting(true);
     try {
-      const { selectedItem, issue, priority } = formData;
       let payload = { issue, priority };
       if (selectedItem.startsWith('asset:')) payload.assetId = selectedItem.replace('asset:', '');
       else if (selectedItem.startsWith('dreq:')) {
@@ -294,7 +297,8 @@ const Tickets = () => {
     setCommentSubmitting(true);
     try {
       const { data } = await api.post(`/tickets/${selectedTicket._id}/comments`, { text: commentText });
-      setTicketDetail(prev => ({ ...prev, comments: [...(prev?.comments || []), data] }));
+      // API returns the full refreshed comments array, not a single comment
+      setTicketDetail(prev => ({ ...prev, comments: Array.isArray(data) ? data : [...(prev?.comments || []), data] }));
       setCommentText('');
     } catch { setSnackbar('Failed to add comment.'); }
     finally { setCommentSubmitting(false); }
@@ -938,7 +942,10 @@ const Tickets = () => {
           <IconButton onClick={() => setRaiseOpen(false)} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
         </Box>
         <DialogContent sx={{ p: 3 }}>
-          <form onSubmit={handleSubmitTicket}>
+          {/* noValidate: native validation can't show its bubble on MUI's hidden
+              select input, silently blocking submit — JS validation handles it */}
+          <form onSubmit={handleSubmitTicket} noValidate>
+            {error && <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2.5, borderRadius: '12px', fontWeight: 600 }}>{error}</Alert>}
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', mb: 1, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.6px' }}>Select Asset / Device</Typography>

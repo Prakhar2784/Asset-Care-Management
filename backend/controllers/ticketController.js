@@ -376,7 +376,14 @@ const confirmResolution = async (req, res) => {
     if (remarks?.trim()) {
       ticket.comments.push({ text: `Resolution confirmed: ${remarks.trim()}`, author: req.user._id, authorName: req.user.name });
     }
-    const updated = await ticket.save();
+    await ticket.save();
+
+    // Return the ticket with the same populations the list/detail views use,
+    // since the frontend replaces its state with this response
+    const updated = await Ticket.findById(ticket._id)
+      .populate('asset', 'name serialNumber department')
+      .populate('deviceRequestRef', 'requestId itemRequested requestType')
+      .populate('raisedBy', 'name email department');
 
     audit({ req, action: 'ticket_resolution_confirmed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId });
 
