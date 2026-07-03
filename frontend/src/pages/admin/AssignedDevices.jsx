@@ -220,7 +220,7 @@ export default function AssignedDevices() {
                     </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: '#111827', color: '#fff' }}>
+                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: '#FBBF24', color: '#111827' }}>
                           {a.employeeName?.[0]?.toUpperCase() || '?'}
                         </Avatar>
                         <Box>

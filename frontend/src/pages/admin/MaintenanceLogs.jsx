@@ -291,8 +291,8 @@ export default function MaintenanceLogs() {
                     startIcon={<AddRounded />}
                     onClick={openAdd}
                     sx={{
-                      background: "#111827",
-                      color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
+                      background: "#FBBF24",
+                      color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
                     }}
                   >
                     Add Log
@@ -609,8 +609,8 @@ export default function MaintenanceLogs() {
             onClick={handleSave}
             disabled={saving}
             sx={{
-              background: "#111827",
-              color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
+              background: "#FBBF24",
+              color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
               minWidth: 120,
             }}
           >

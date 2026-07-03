@@ -132,7 +132,7 @@ const QuickAction = ({ label, icon, accent, onClick }) => (
     <Box sx={{ width: 44, height: 44, borderRadius: "14px", bgcolor: `${accent}15`, display: "grid", placeItems: "center", mx: "auto", mb: 1.2 }}>
       <Box sx={{ color: accent, "& svg": { fontSize: 22 } }}>{icon}</Box>
     </Box>
-    <Typography fontSize={12} fontWeight={700} color="text.primary" lineHeight={1.3}>{label}</Typography>
+    <Typography fontSize={12} fontWeight={700} color="text.primary" sx={{ lineHeight: 1.3 }}>{label}</Typography>
   </Paper>
 );
 
@@ -468,7 +468,7 @@ const AdminDashboard = () => {
                         <CircularProgress variant="determinate" value={100} size={100} thickness={5}
                           sx={{ color: "action.selected", position: "absolute" }} />
                         <Box sx={{ position: "relative", textAlign: "center" }}>
-                          <Typography fontSize={22} fontWeight={950} color="text.primary" lineHeight={1}>{healthPct}%</Typography>
+                          <Typography fontSize={22} fontWeight={950} color="text.primary" sx={{ lineHeight: 1 }}>{healthPct}%</Typography>
                           <Typography fontSize={10} color="text.secondary" fontWeight={700}>healthy</Typography>
                         </Box>
                       </Box>
@@ -529,7 +529,7 @@ const AdminDashboard = () => {
 
           {/* ── Warranty Overview + Quick Actions ──────────────── */}
           {(canViewAssets || allQuickActions.length > 0) && (
-            <Grid container spacing={3} alignItems="flex-start">
+            <Grid container spacing={3} sx={{ alignItems: "flex-start" }}>
 
               {canViewAssets && (
                 <Grid size={{ xs: 12, lg: allQuickActions.length > 0 ? 8 : 12 }}>
@@ -574,7 +574,7 @@ const AdminDashboard = () => {
                         <Grid size={{ xs: 12, sm: 4 }} key={label}>
                           <Box onClick={() => navigate("/admin/assets")} sx={{ p: 2.5, borderRadius: "18px", bgcolor: bg, border: "1px solid", borderColor: `${color}33`, cursor: "pointer", transition: "all 0.2s", "&:hover": { transform: "translateY(-3px)", boxShadow: `0 12px 28px ${color}22` } }}>
                             <Box sx={{ color, mb: 1, "& svg": { fontSize: 20 } }}>{icon}</Box>
-                            <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{value}</Typography>
+                            <Typography fontSize={28} fontWeight={950} color="text.primary" sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{value}</Typography>
                             <Typography fontSize={12} fontWeight={800} color={color} mt={0.5}>{label}</Typography>
                             <Typography fontSize={11} color="text.secondary" mt={0.3}>{desc}</Typography>
                           </Box>
@@ -634,7 +634,7 @@ const AdminDashboard = () => {
                 ))}
               </Box>
               <Button fullWidth variant="contained" onClick={() => { setSelectedTicket(null); navigate("/tickets"); }}
-                sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
+                sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
                 Open Full Ticket →
               </Button>
             </DialogContent>

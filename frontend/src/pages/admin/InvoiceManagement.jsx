@@ -128,7 +128,7 @@ export default function InvoiceManagement() {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
+          sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
           Add Invoice
         </Button>
       </Box>
@@ -276,7 +276,7 @@ export default function InvoiceManagement() {
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={saving}
-                sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                 {saving ? 'Saving…' : editTarget ? 'Save Changes' : 'Add Invoice'}
               </Button>
             </Box>

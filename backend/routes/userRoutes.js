@@ -52,10 +52,9 @@ router.post('/', protect, authorize('admin', 'super_admin'), checkUserLimit, asy
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: 'A user with this email already exists.' });
 
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(password, salt);
-
-    const user = await User.create({ name, email, password: hashed, role: role || 'employee', department, phone });
+    // Pass the plaintext password — the User model's pre('save') hook hashes it.
+    // Hashing here as well would double-hash and make login impossible.
+    const user = await User.create({ name, email, password, role: role || 'employee', department, phone });
     sendWelcomeEmail(user, password).catch(() => {});
 
     res.status(201).json({ _id: user._id, name: user.name, email: user.email, role: user.role, department: user.department, phone: user.phone, isActive: user.isActive, createdAt: user.createdAt });
@@ -193,14 +192,14 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
         const inviteToken = crypto.randomBytes(32).toString('hex');
         const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
         const placeholder = crypto.randomBytes(32).toString('hex');
-        const salt = await bcrypt.genSalt(10);
-        const hashed = await bcrypt.hash(placeholder, salt);
 
         const user = await User.create({
           name: name.trim(), email: email.toLowerCase().trim(),
-          password: hashed, role: role?.trim() || 'employee',
+          password: placeholder, role: role?.trim() || 'employee',
           department: department.trim(), phone: phone?.trim() || '',
-          passwordResetToken: inviteToken, passwordResetExpiry: inviteExpiry,
+          // Store the SHA-256 of the token — reset-password compares hashes
+          passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
+          passwordResetExpiry: inviteExpiry,
           isActive: false,
         });
 
@@ -232,16 +231,15 @@ router.post('/invite', protect, authorize('admin', 'super_admin'), checkUserLimi
 
     // Create user with random placeholder password + invite token
     const placeholder = crypto.randomBytes(32).toString('hex');
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(placeholder, salt);
     const inviteToken = crypto.randomBytes(32).toString('hex');
     const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48h
 
     const user = await User.create({
-      name, email, password: hashed, role: role || 'employee', department, phone,
-      passwordResetToken: inviteToken,
+      name, email, password: placeholder, role: role || 'employee', department, phone,
+      // Store the SHA-256 of the token — reset-password compares hashes
+      passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
       passwordResetExpiry: inviteExpiry,
-      isActive: false, // activated on first login after setting password
+      isActive: false, // activated when the invite link password is set
     });
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';

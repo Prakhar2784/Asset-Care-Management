@@ -113,7 +113,7 @@ const SortHead = ({ id, label, sort, onSort, sx = {} }) => (
   <TableCell sortDirection={sort.col === id ? sort.dir : false}
     sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...sx }}>
     <TableSortLabel active={sort.col === id} direction={sort.col === id ? sort.dir : 'asc'} onClick={() => onSort(id)}
-      sx={{ '& .MuiTableSortLabel-icon': { fontSize: 14 }, color: 'inherit !important', '&.Mui-active': { color: '#111827 !important' }, '& .MuiTableSortLabel-icon': { color: '#111827 !important', opacity: sort.col === id ? 1 : 0 } }}>
+      sx={{ '& .MuiTableSortLabel-icon': { fontSize: 14 }, color: 'inherit !important', '&.Mui-active': { color: '#FBBF24 !important' }, '& .MuiTableSortLabel-icon': { color: '#FBBF24 !important', opacity: sort.col === id ? 1 : 0 } }}>
       {label}
     </TableSortLabel>
   </TableCell>
@@ -517,7 +517,7 @@ export default function UserManagement() {
             <Typography variant="body2" color="text.secondary" fontWeight={600}>Manage who can log in and what they can do</Typography>
           </Box>
         </Box>
-        <Stack direction="row" gap={1.5} alignItems="center" flexWrap="wrap">
+        <Stack direction="row" sx={{ alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
 
           <Button variant="outlined" startIcon={<UploadFileRounded />}
             onClick={() => { setCsvOpen(true); setCsvRows([]); setCsvError(''); setCsvResult(null); }}
@@ -526,7 +526,7 @@ export default function UserManagement() {
           </Button>
           <Button variant="contained" startIcon={<PersonAddRounded />}
             onClick={() => { setAddOpen(true); setFormError(''); setForm(defaultForm); setAddMode('invite'); }}
-            sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, '&:hover': { background: '#1F2937' } }}>
+            sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', px: 2.5, '&:hover': { background: '#F5A623' } }}>
             Add User
           </Button>
         </Stack>
@@ -557,7 +557,7 @@ export default function UserManagement() {
             <Tab key={value} value={value} label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 {label}
-                <Box sx={{ px: 1, py: 0.1, borderRadius: '20px', fontSize: 11, fontWeight: 800, bgcolor: activeTab === value ? 'rgba(17,24,39,0.13)' : 'action.hover', color: activeTab === value ? '#111827' : 'text.disabled' }}>
+                <Box sx={{ px: 1, py: 0.1, borderRadius: '20px', fontSize: 11, fontWeight: 800, bgcolor: activeTab === value ? '#FBBF24' : 'action.hover', color: activeTab === value ? '#111827' : 'text.disabled' }}>
                   {countFor(value)}
                 </Box>
               </Box>
@@ -569,7 +569,7 @@ export default function UserManagement() {
       {/* ── Bulk action toolbar ──────────────────────────────────────────────── */}
       {selected.size > 0 && (
         <Paper sx={{ mb: 2, px: 2.5, py: 1.5, borderRadius: '14px', border: 1, borderColor: 'rgba(17,24,39,0.4)', bgcolor: 'rgba(17,24,39,0.06)', display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          <Typography fontWeight={800} fontSize={14} color="#111827">{selected.size} selected</Typography>
+          <Typography fontWeight={800} fontSize={14} color="text.primary">{selected.size} selected</Typography>
           <Box sx={{ flex: 1 }} />
           <Tooltip title="Change role for selected">
             <Button size="small" startIcon={<ManageAccountsRounded />} onClick={() => setBulkRoleOpen(true)} disabled={bulkWorking}
@@ -718,7 +718,7 @@ export default function UserManagement() {
         <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
           <Button onClick={() => setBulkRoleOpen(false)} sx={{ fontWeight: 700, color: 'text.secondary', borderRadius: '10px' }}>Cancel</Button>
           <Button variant="contained" onClick={bulkChangeRole} disabled={bulkWorking}
-            sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+            sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
             {bulkWorking ? 'Updating…' : 'Apply'}
           </Button>
         </DialogActions>
@@ -781,7 +781,7 @@ export default function UserManagement() {
             <Box sx={{ flex: 1 }} />
             {userPermSaved && <Typography fontSize={13} color="success.main" fontWeight={700}>Saved!</Typography>}
             <Button variant="contained" onClick={saveUserPerm}
-              sx={{ fontWeight: 800, borderRadius: '10px', px: 3, background: '#111827', color: '#fff' }}>
+              sx={{ fontWeight: 800, borderRadius: '10px', px: 3, background: '#FBBF24', color: '#111827' }}>
               Save Changes
             </Button>
           </DialogActions>
@@ -862,7 +862,7 @@ export default function UserManagement() {
                 Download Template
               </Button>
               <Button component="label" variant="contained" startIcon={<UploadFileRounded />}
-                sx={{ borderRadius: '10px', fontWeight: 700, background: '#111827', color: '#fff' }}>
+                sx={{ borderRadius: '10px', fontWeight: 700, background: '#FBBF24', color: '#111827' }}>
                 Choose CSV File
                 <input ref={csvInputRef} type="file" hidden accept=".csv"
                   onChange={e => { e.target.files[0] && handleCsvFile(e.target.files[0]); if (csvInputRef.current) csvInputRef.current.value = ''; }} />
@@ -944,7 +944,7 @@ export default function UserManagement() {
           <Button onClick={() => setCsvOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>{csvResult ? 'Close' : 'Cancel'}</Button>
           {csvRows.length > 0 && !csvResult && (
             <Button variant="contained" onClick={handleCsvImport} disabled={csvImporting}
-              sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               {csvImporting ? 'Importing…' : `Import ${csvRows.length} Users`}
             </Button>
           )}
@@ -1122,7 +1122,7 @@ export default function UserManagement() {
               <Box sx={{ px: 2.5, pt: 2, pb: 1.5, borderBottom: 1, borderColor: 'divider' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mb: 1 }}>
                   <ChecklistRounded sx={{ fontSize: 15, color: 'text.primary' }} />
-                  <Typography fontSize={12} fontWeight={800} color="#111827">Onboarding Checklist</Typography>
+                  <Typography fontSize={12} fontWeight={800} color="text.primary">Onboarding Checklist</Typography>
                 </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5 }}>
                   {[
@@ -1184,7 +1184,7 @@ export default function UserManagement() {
           <Box sx={{ mb: 2, p: 2, borderRadius: '14px', bgcolor: 'rgba(17,24,39,0.06)', border: 1, borderColor: 'rgba(17,24,39,0.2)', display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <MailOutlineRounded sx={{ color: 'text.primary', fontSize: 20 }} />
             <Box sx={{ flex: 1 }}>
-              <Typography fontSize={13} fontWeight={700} color="#111827">Invite via email</Typography>
+              <Typography fontSize={13} fontWeight={700} color="text.primary">Invite via email</Typography>
               <Typography fontSize={12} color="text.secondary">User receives an email to create their own password and log in.</Typography>
             </Box>
             <Button size="small" onClick={() => setAddMode(addMode === 'invite' ? 'password' : 'invite')}
@@ -1221,7 +1221,7 @@ export default function UserManagement() {
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={saving}
                 startIcon={addMode === 'invite' ? <EmailRounded /> : <PersonAddRounded />}
-                sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3, '&:hover': { background: '#1F2937' } }}>
+                sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3, '&:hover': { background: '#F5A623' } }}>
                 {saving ? 'Please wait…' : addMode === 'invite' ? 'Send Invite' : 'Create User'}
               </Button>
             </Box>
@@ -1264,7 +1264,7 @@ export default function UserManagement() {
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => setEditOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={editSaving}
-                sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                 {editSaving ? 'Saving...' : 'Save Changes'}
               </Button>
             </Box>

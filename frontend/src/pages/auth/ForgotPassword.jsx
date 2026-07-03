@@ -48,9 +48,9 @@ const darkInputSx = {
 
 const gradientBtn = {
   py: 1.6, fontWeight: 900, borderRadius: '16px', textTransform: 'none', fontSize: 16,
-  background: '#111827', color: '#FFFFFF',
+  background: '#FBBF24', color: '#111827',
   boxShadow: '0 14px 28px rgba(0,0,0,0.28)',
-  '&:hover': { background: '#1F2937', transform: 'translateY(-2px)', boxShadow: '0 20px 36px rgba(0,0,0,0.35)' },
+  '&:hover': { background: '#F5A623', transform: 'translateY(-2px)', boxShadow: '0 20px 36px rgba(0,0,0,0.35)' },
   '&.Mui-disabled': { background: 'rgba(17,24,39,0.25)', color: 'rgba(20,20,20,0.65)' },
   transition: 'all 0.25s ease',
 };

@@ -426,7 +426,7 @@ const Assets = () => {
               variant="contained"
               startIcon={<AddRounded />}
               onClick={() => navigate("/admin/assets/add")}
-              sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "#1F2937", boxShadow: "none" } }}
+              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "#F5A623", boxShadow: "none" } }}
             >
               Add Asset
             </Button>
@@ -443,7 +443,7 @@ const Assets = () => {
               <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: `${kpi.color}18`, display: "grid", placeItems: "center", mb: 1.5 }}>
                 <Box sx={{ color: kpi.color }}>{kpi.icon}</Box>
               </Box>
-              <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{kpi.value}</Typography>
+              <Typography fontSize={28} fontWeight={950} color="text.primary" sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{kpi.value}</Typography>
               <Typography fontSize={13} fontWeight={700} color="text.primary" mt={0.3}>{kpi.label}</Typography>
             </Paper>
           </Grid>
@@ -474,7 +474,7 @@ const Assets = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ flex: 1, minWidth: 200, "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: "text.disabled" }} /></InputAdornment> }}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: "text.disabled" }} /></InputAdornment> } }}
         />
         <Select
           size="small"
@@ -685,7 +685,7 @@ const Assets = () => {
                 </Button>
                 {selected.assignedStatus !== 'Assigned' ? (
                   <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
-                    sx={{ flex: 1, py: 1.4, background: "#111827", color: "#FFFFFF", fontWeight: 900, borderRadius: "12px", boxShadow: "none", "&:hover": { background: "#1F2937", boxShadow: "none" } }}>
+                    sx={{ flex: 1, py: 1.4, background: "#FBBF24", color: "#111827", fontWeight: 900, borderRadius: "12px", boxShadow: "none", "&:hover": { background: "#F5A623", boxShadow: "none" } }}>
                     Assign
                   </Button>
                 ) : (
@@ -803,7 +803,7 @@ const Assets = () => {
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
             <Button onClick={() => setEditDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, px: 3 }}>Cancel</Button>
             <Button variant="contained" disabled={saving} onClick={handleEditSave} startIcon={saving ? <CircularProgress size={18} color="inherit" /> : null}
-              sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.2 }}>
+              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.2 }}>
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </Box>
@@ -880,7 +880,7 @@ const Assets = () => {
             <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>Cancel</Button>
             <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
               startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
-              sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
               {assigning ? "Assigning..." : "Confirm Assignment"}
             </Button>
           </Box>

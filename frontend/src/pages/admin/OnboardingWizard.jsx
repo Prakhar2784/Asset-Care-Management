@@ -239,55 +239,55 @@ const OnboardingWizard = () => {
             <StepHeader icon={<BusinessRounded sx={{ color: "#FBBF24" }} />} title="Tell us about your organization"
               subtitle="This information appears on invoices, reports and the tenant profile." />
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Company Name" sx={inputSx} value={org.name}
                   onChange={e => setOrg({ ...org, name: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Industry" sx={inputSx} value={org.industry}
                   onChange={e => setOrg({ ...org, industry: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth type="number" label="Employee Count" sx={inputSx} value={org.employeeCount}
                   onChange={e => setOrg({ ...org, employeeCount: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Website" sx={inputSx} value={org.website}
                   onChange={e => setOrg({ ...org, website: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Phone" sx={inputSx} value={org.phone}
                   onChange={e => setOrg({ ...org, phone: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Contact Email" sx={inputSx} value={org.contactEmail}
                   onChange={e => setOrg({ ...org, contactEmail: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="GST Number" sx={inputSx} value={org.gstNumber}
                   onChange={e => setOrg({ ...org, gstNumber: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="PAN Number" sx={inputSx} value={org.panNumber}
                   onChange={e => setOrg({ ...org, panNumber: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Address Line" sx={inputSx} value={org.addressLine}
                   onChange={e => setOrg({ ...org, addressLine: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid size={{ xs: 12, sm: 3 }}>
                 <TextField fullWidth label="City" sx={inputSx} value={org.city}
                   onChange={e => setOrg({ ...org, city: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid size={{ xs: 12, sm: 3 }}>
                 <TextField fullWidth label="State" sx={inputSx} value={org.state}
                   onChange={e => setOrg({ ...org, state: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid size={{ xs: 12, sm: 3 }}>
                 <TextField fullWidth label="PIN Code" sx={inputSx} value={org.pin}
                   onChange={e => setOrg({ ...org, pin: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={3}>
+              <Grid size={{ xs: 12, sm: 3 }}>
                 <TextField fullWidth label="Country" sx={inputSx} value={org.country}
                   onChange={e => setOrg({ ...org, country: e.target.value })} />
               </Grid>
@@ -310,27 +310,27 @@ const OnboardingWizard = () => {
             )}
 
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="Department Name" sx={inputSx} value={dept.name}
                   onChange={e => setDept({ ...dept, name: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="Department Code" sx={inputSx} value={dept.code}
                   onChange={e => setDept({ ...dept, code: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="HOD Name" sx={inputSx} value={dept.hodName}
                   onChange={e => setDept({ ...dept, hodName: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="HOD Email" sx={inputSx} value={dept.hodEmail}
                   onChange={e => setDept({ ...dept, hodEmail: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="HOD Phone" sx={inputSx} value={dept.hodPhone}
                   onChange={e => setDept({ ...dept, hodPhone: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Location / Floor" sx={inputSx} value={dept.location}
                   onChange={e => setDept({ ...dept, location: e.target.value })} />
               </Grid>
@@ -358,15 +358,15 @@ const OnboardingWizard = () => {
             )}
 
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="Full Name" sx={inputSx} value={user.name}
                   onChange={e => setUser({ ...user, name: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="Email Address" type="email" sx={inputSx} value={user.email}
                   onChange={e => setUser({ ...user, email: e.target.value })} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth required label="Temporary Password" type={showPass ? "text" : "password"} sx={inputSx} value={user.password}
                   onChange={e => setUser({ ...user, password: e.target.value })}
                   helperText="User can change this after first login"
@@ -378,12 +378,12 @@ const OnboardingWizard = () => {
                     </InputAdornment>
                   ) } }} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Employee ID" sx={inputSx} value={user.employeeId}
                   onChange={e => setUser({ ...user, employeeId: e.target.value })}
                   slotProps={{ input: { startAdornment: <InputAdornment position="start"><BadgeRounded sx={{ fontSize: 18, color: "text.disabled" }} /></InputAdornment> } }} />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth sx={inputSx}>
                   <InputLabel>Department</InputLabel>
                   <Select label="Department" value={user.department} onChange={e => setUser({ ...user, department: e.target.value })}>
@@ -392,7 +392,7 @@ const OnboardingWizard = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth sx={inputSx}>
                   <InputLabel>Role</InputLabel>
                   <Select label="Role" value={user.role} onChange={e => setUser({ ...user, role: e.target.value })}>
@@ -400,7 +400,7 @@ const OnboardingWizard = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Phone" sx={inputSx} value={user.phone}
                   onChange={e => setUser({ ...user, phone: e.target.value })} />
               </Grid>

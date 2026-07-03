@@ -27,9 +27,9 @@ export default function NotFound() {
         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
           <Button component={Link} to="/" variant="contained" startIcon={<HomeRounded />}
             sx={{
-              background: "#111827", color: "#fff", fontWeight: 800,
+              background: "#FBBF24", color: "#111827", fontWeight: 800,
               px: 3.5, py: 1.4, borderRadius: "12px", boxShadow: "0 4px 16px rgba(17,24,39,0.4)",
-              "&:hover": { background: "#1F2937" },
+              "&:hover": { background: "#F5A623" },
             }}>
             Back to Home
           </Button>

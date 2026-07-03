@@ -170,7 +170,7 @@ const Departments = () => {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm}
-          sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
+          sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
           Add Department
         </Button>
       </Box>
@@ -206,7 +206,7 @@ const Departments = () => {
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             Add departments to manage approvals and asset ownership.
           </Typography>
-          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
             Add First Department
           </Button>
         </Paper>
@@ -343,7 +343,7 @@ const Departments = () => {
           </Button>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSaveDepartment} disabled={saving}
-            sx={{ background: "#111827", color: "#fff", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
+            sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
             {saving ? "Saving..." : mode === "add" ? "Save Department" : "Update Department"}
           </Button>
         </DialogActions>

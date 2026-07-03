@@ -174,7 +174,7 @@ const Approvals = () => {
                   <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: `${k.color}18`, display: "grid", placeItems: "center", mb: 1.5 }}>
                     <Box sx={{ color: k.color }}>{k.icon}</Box>
                   </Box>
-                  <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{k.value}</Typography>
+                  <Typography fontSize={28} fontWeight={950} color="text.primary" sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{k.value}</Typography>
                   <Typography fontSize={13} fontWeight={700} color="text.primary" mt={0.3}>{k.label}</Typography>
                 </Paper>
               </Grid>
@@ -200,7 +200,7 @@ const Approvals = () => {
                   <Paper key={item._id} sx={{ ...cardSx, pl: { xs: 2.5, md: 3.5 } }}>
                     <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: borderColor }} />
                     <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", width: "100%", flex: 1 }}>
-                      <Avatar sx={{ background: "#111827", color: "#FFFFFF", width: 48, height: 48, fontWeight: 900, fontSize: "18px", flexShrink: 0 }}>
+                      <Avatar sx={{ background: "#FBBF24", color: "#111827", width: 48, height: 48, fontWeight: 900, fontSize: "18px", flexShrink: 0 }}>
                         {item.raisedBy?.name?.charAt(0) || "S"}
                       </Avatar>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -230,7 +230,7 @@ const Approvals = () => {
                         Reject
                       </Button>
                       <Button variant="contained" startIcon={<CheckRounded />} disabled={isCompleted} onClick={() => handleTicketActionClick(item, "authorize")}
-                        sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, fontSize: 13, background: "#111827", color: "#fff", boxShadow: "none" }}>
+                        sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, fontSize: 13, background: "#FBBF24", color: "#111827", boxShadow: "none" }}>
                         Authorize
                       </Button>
                     </Box>

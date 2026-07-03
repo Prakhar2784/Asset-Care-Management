@@ -201,7 +201,7 @@ export default function Reports() {
             startIcon={<PictureAsPdfRounded />}
             onClick={exportPDF}
             disabled={exporting}
-            sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
+            sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
           >
             {exporting ? 'Exporting...' : 'Export PDF'}
           </Button>
@@ -217,7 +217,7 @@ export default function Reports() {
               <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: `${k.color}18`, display: 'grid', placeItems: 'center', mb: 1.5 }}>
                 <Box sx={{ color: k.color }}>{k.icon}</Box>
               </Box>
-              <Typography fontSize={28} fontWeight={950} color="text.primary" lineHeight={1} letterSpacing="-1px">{k.value}</Typography>
+              <Typography fontSize={28} fontWeight={950} color="text.primary" sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{k.value}</Typography>
               <Typography fontSize={13} fontWeight={700} color="text.primary" mt={0.3}>{k.label}</Typography>
             </Paper>
           </Grid>
@@ -312,7 +312,7 @@ export default function Reports() {
             value={deptSearch}
             onChange={(e) => setDeptSearch(e.target.value)}
             sx={{ minWidth: 200, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-            InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 18 }} /></InputAdornment> }}
+            slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 18 }} /></InputAdornment> } }}
           />
         </Box>
         <TableContainer sx={{ borderRadius: '14px', border: 1, borderColor: 'divider', overflow: 'hidden' }}>

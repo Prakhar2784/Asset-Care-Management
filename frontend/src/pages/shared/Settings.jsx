@@ -87,7 +87,7 @@ function ProfileTab({ currentUser }) {
           {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{msg}</Alert>}
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSave} disabled={saving}
-            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#111827', color: '#fff', boxShadow: 'none' }}>
+            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
             Save Changes
           </Button>
         </Paper>
@@ -122,7 +122,7 @@ function ProfileTab({ currentUser }) {
           {passMsg && <Alert severity={passMsg.startsWith('✓') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{passMsg}</Alert>}
           <Button variant="contained" startIcon={passLoading ? <CircularProgress size={16} color="inherit" /> : <LockRounded />}
             onClick={handleChangePass} disabled={passLoading || !current || !newPass || !confirm}
-            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#111827', color: '#fff', boxShadow: 'none' }}>
+            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
             Change Password
           </Button>
         </Paper>
@@ -152,22 +152,20 @@ function AppearanceTab() {
                   sx={{
                     flex: 1, border: '2px solid', borderRadius: 3, p: 2.5,
                     cursor: !isActive ? 'pointer' : 'default',
-                    borderColor: isActive ? '#111827' : 'divider',
-                    bgcolor: isActive
-                      ? (isDark ? 'rgba(17,24,39,0.08)' : 'rgba(17,24,39,0.06)')
-                      : 'transparent',
+                    borderColor: isActive ? '#FBBF24' : 'divider',
+                    bgcolor: isActive ? 'rgba(251,191,36,0.08)' : 'transparent',
                     textAlign: 'center', transition: 'all 0.2s',
-                    '&:hover': !isActive ? { borderColor: 'rgba(17,24,39,0.4)' } : {}
+                    '&:hover': !isActive ? { borderColor: 'rgba(251,191,36,0.5)' } : {}
                   }}
                 >
                   {m === 'light'
-                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#111827' : 'text.disabled' }} />
-                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#111827' : 'text.disabled' }} />}
-                  <Typography fontWeight={700} fontSize={14} sx={{ color: isActive ? (isDark ? '#111827' : '#111827') : undefined, mt: 1 }}
+                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#FBBF24' : 'text.disabled' }} />
+                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#FBBF24' : 'text.disabled' }} />}
+                  <Typography fontWeight={700} fontSize={14} sx={{ color: isActive ? 'text.primary' : undefined, mt: 1 }}
                     color={!isActive ? 'text.secondary' : undefined}>
                     {m === 'light' ? 'Light Mode' : 'Dark Mode'}
                   </Typography>
-                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: "rgba(17,24,39,0.12)", color: isDark ? '#111827' : '#111827', fontWeight: 700, height: 20, fontSize: 11 }} />}
+                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: "#FBBF24", color: '#111827', fontWeight: 700, height: 20, fontSize: 11 }} />}
                 </Box>
               );
             })}
@@ -288,7 +286,7 @@ function CompanySettingsTab({ isAdmin = true }) {
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress sx={{ color: 'text.primary' }} /></Box>;
 
-  const planColor = tenant?.plan === 'Enterprise' ? '#F59E0B' : tenant?.plan === 'Pro' ? '#111827' : '#6B7280';
+  const planColor = tenant?.plan === 'Enterprise' ? '#F59E0B' : tenant?.plan === 'Pro' ? '#FBBF24' : '#6B7280';
 
   return (
     <Stack spacing={3}>
@@ -323,7 +321,7 @@ function CompanySettingsTab({ isAdmin = true }) {
             </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Chip label={tenant?.plan || 'Basic'} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: planColor, color: '#fff', px: 0.5 }} />
+            <Chip label={tenant?.plan || 'Basic'} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: planColor, color: '#111827', px: 0.5 }} />
             <Chip label="ACTIVE" size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: 12, borderColor: '#10B981', color: '#10B981' }} />
             {isAdmin && <Button size="small" sx={{ fontWeight: 700, color: 'text.primary', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
           </Box>
@@ -469,7 +467,7 @@ function CompanySettingsTab({ isAdmin = true }) {
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSave} disabled={saving}
-            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: '#111827', color: '#fff', boxShadow: 'none' }}>
+            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
             {saving ? 'Saving…' : 'Save Changes'}
           </Button>
         </Box>
@@ -600,7 +598,7 @@ function CustomFieldsTab() {
 
             <Button type="submit" variant="contained" fullWidth disabled={saving || !name.trim()}
               startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
-              sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', py: 1.2, background: '#111827', color: '#fff', boxShadow: 'none' }}>
+              sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', py: 1.2, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
               {saving ? 'Adding…' : 'Add Custom Field'}
             </Button>
           </Box>
@@ -635,7 +633,7 @@ function CustomFieldsTab() {
                   bgcolor: 'background.paper', '&:hover': { bgcolor: 'action.hover' }, transition: 'all 0.15s'
                 }}>
                   <Box>
-                    <Box display="flex" alignItems="center" gap={1}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Typography fontWeight={700} fontSize={13}>{f.name}</Typography>
                       {f.isRequired && (
                         <Box sx={{ px: 0.8, py: 0.1, borderRadius: '6px', fontSize: 10, fontWeight: 800, bgcolor: 'rgba(239,68,68,0.12)', color: '#EF4444' }}>Required</Box>

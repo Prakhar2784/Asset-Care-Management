@@ -395,9 +395,9 @@ const AuthPage = () => {
         .auth-btn {
           width: 100%;
           padding: 18px;
-          background: #111827;
-          color: #FFFFFF !important;
-          -webkit-text-fill-color: #FFFFFF;
+          background: #FBBF24;
+          color: #111827 !important;
+          -webkit-text-fill-color: #111827;
           border: none;
           border-radius: 16px;
           font-size: 16px;
@@ -406,13 +406,13 @@ const AuthPage = () => {
           cursor: pointer;
           margin-bottom: 24px;
           transition: all 0.3s ease;
-          box-shadow: 0 14px 28px rgba(17,17,17,0.22);
+          box-shadow: 0 14px 28px rgba(251,191,36,0.22);
         }
 
         .auth-btn:hover {
           transform: translateY(-3px);
-          box-shadow: 0 22px 42px rgba(17,17,17,0.32);
-          background: #1F2937;
+          box-shadow: 0 22px 42px rgba(251,191,36,0.32);
+          background: #F5A623;
         }
 
         .auth-btn:disabled {

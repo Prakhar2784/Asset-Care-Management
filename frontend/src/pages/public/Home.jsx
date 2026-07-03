@@ -54,7 +54,7 @@ const Home = () => {
         }
 
         .h-btn-primary {
-          background: #111827; color: #FFFFFF;
+          background: #FBBF24; color: #111827;
           padding: 15px 30px; border-radius: 999px;
           font-weight: 800; font-size: 15px;
           text-decoration: none;
@@ -63,7 +63,7 @@ const Home = () => {
           letter-spacing: -0.2px;
           box-shadow: 0 6px 20px rgba(17,24,39,0.4);
         }
-        .h-btn-primary:hover { background: #1F2937; transform: translateY(-3px); box-shadow: 0 14px 32px rgba(17,24,39,0.55); }
+        .h-btn-primary:hover { background: #F5A623; transform: translateY(-3px); box-shadow: 0 14px 32px rgba(251,191,36,0.4); }
 
         .h-btn-outline {
           padding: 15px 30px; border-radius: 999px;
@@ -280,7 +280,7 @@ const Home = () => {
         <div className="h-container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 18 }}>
           {["Centralized Asset Register", "Warranty & AMC Alerts", "Ticket Lifecycle Tracking", "Vendor Service Records"].map((item) => (
             <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 800, color: "#FFFFFF", fontSize: 14 }}>
-              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#111827", color: "#FFFFFF", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 11, flexShrink: 0 }}>✓</span>
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#FBBF24", color: "#111827", display: "grid", placeItems: "center", fontWeight: 900, fontSize: 11, flexShrink: 0 }}>✓</span>
               {item}
             </div>
           ))}
@@ -393,7 +393,7 @@ const Home = () => {
               <motion.div key={item.title} variants={fadeUp} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, padding: "28px 24px", transition: "all 0.3s ease", cursor: "default" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(17,24,39,0.06)"; e.currentTarget.style.borderColor = "rgba(17,24,39,0.20)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
-                <div style={{ width: 50, height: 50, background: "#111827", color: "#FFFFFF", borderRadius: 14, display: "grid", placeItems: "center", marginBottom: 18 }}>
+                <div style={{ width: 50, height: 50, background: "#FBBF24", color: "#111827", borderRadius: 14, display: "grid", placeItems: "center", marginBottom: 18 }}>
                   {item.icon}
                 </div>
                 <h3 style={{ fontSize: 18, fontWeight: 900, color: "#FFFFFF", marginBottom: 10, letterSpacing: "-0.3px" }}>{item.title}</h3>
@@ -417,7 +417,7 @@ const Home = () => {
               Start managing assets, warranty, breakdown tickets, vendor complaints and approval workflow from one clean dashboard.
             </p>
           </div>
-          <Link to="/register-company" style={{ background: "#111827", color: "#FFFFFF", padding: "18px 34px", borderRadius: 999, fontWeight: 900, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, transition: "all 0.22s ease", letterSpacing: "-0.3px" }}
+          <Link to="/register-company" style={{ background: "#FBBF24", color: "#111827", padding: "18px 34px", borderRadius: 999, fontWeight: 900, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, transition: "all 0.22s ease", letterSpacing: "-0.3px" }}
             onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 28px rgba(17,24,39,0.3)"; }}
             onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
             Start Free Trial <AutoGraphRoundedIcon fontSize="small" />

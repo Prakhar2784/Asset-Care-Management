@@ -65,7 +65,7 @@ const WebsiteLayout = ({ children }) => (
 
 const RouteFallback = () => (
   <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-    <CircularProgress sx={{ color: "#111827" }} />
+    <CircularProgress sx={{ color: "#FBBF24" }} />
   </Box>
 );
 

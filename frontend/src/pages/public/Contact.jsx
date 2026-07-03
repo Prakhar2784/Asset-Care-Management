@@ -133,7 +133,7 @@ const Contact = () => {
         }
 
         .contact-btn {
-          background: #111827; color: #FFFFFF;
+          background: #FBBF24; color: #111827;
           padding: 16px; border-radius: 14px;
           font-weight: 900; font-size: 15px;
           border: none; cursor: pointer;
@@ -142,7 +142,7 @@ const Contact = () => {
           box-shadow: 0 4px 16px rgba(17,24,39,0.4);
         }
 
-        .contact-btn:hover:not(:disabled) { background: #1F2937; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(17,24,39,0.55); }
+        .contact-btn:hover:not(:disabled) { background: #F5A623; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(251,191,36,0.4); }
         .contact-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         .contact-btn.success { background: #16A34A; color: #FFFFFF; }
 

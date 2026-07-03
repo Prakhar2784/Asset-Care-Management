@@ -115,7 +115,7 @@ export default function ServiceCenters() {
           <Typography fontSize={14} color="text.secondary">Manage service partners and track warranty assets</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "#111827", color: "#fff", boxShadow: "none" }}>
+          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "#FBBF24", color: "#111827", boxShadow: "none" }}>
           Add Service Center
         </Button>
       </Box>
@@ -331,7 +331,7 @@ export default function ServiceCenters() {
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => setOpen(false)} sx={{ fontWeight: 700, borderRadius: "10px", color: "text.secondary" }}>Cancel</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving || !form.name.trim()}
-            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#111827", color: "#fff", boxShadow: "none" }}>
+            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#FBBF24", color: "#111827", boxShadow: "none" }}>
             {saving ? <CircularProgress size={18} color="inherit" /> : editTarget ? "Save Changes" : "Add Center"}
           </Button>
         </DialogActions>

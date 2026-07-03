@@ -105,7 +105,7 @@ const TechnicianPortal = () => {
               <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: `${k.color}15`, display: 'grid', placeItems: 'center', mb: 2, color: k.color }}>
                 {k.icon}
               </Box>
-              <Typography fontSize={32} fontWeight={950} lineHeight={1}>{k.value}</Typography>
+              <Typography fontSize={32} fontWeight={950} sx={{ lineHeight: 1 }}>{k.value}</Typography>
               <Typography fontSize={13} fontWeight={700} color="text.secondary" mt={0.5}>{k.label}</Typography>
             </Paper>
           </Grid>

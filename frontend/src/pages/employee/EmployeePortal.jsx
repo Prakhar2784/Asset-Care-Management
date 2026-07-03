@@ -135,7 +135,7 @@ const EmployeePortal = () => {
             <Button
               variant="contained" startIcon={<AddRounded />}
               onClick={() => navigate("/tickets")}
-              sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "#1F2937" } }}
+              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "#F5A623" } }}
             >
               Report an Issue
             </Button>
@@ -350,7 +350,7 @@ const EmployeePortal = () => {
             <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 5, pt: 3, borderTop: 1, borderColor: "divider" }}>
               <Button onClick={() => setRequestDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, textTransform: "none", px: 3 }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting} startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : null}
-                sx={{ background: "#111827", color: "#FFFFFF", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { background: "#1F2937" } }}>
+                sx={{ background: "#FBBF24", color: "#111827", fontWeight: 900, px: 4, py: 1.2, borderRadius: "12px", "&:hover": { background: "#F5A623" } }}>
                 {submitting ? "Submitting..." : "Submit Request"}
               </Button>
             </Box>

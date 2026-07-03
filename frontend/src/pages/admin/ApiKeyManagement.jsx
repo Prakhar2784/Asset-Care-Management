@@ -105,7 +105,7 @@ export default function ApiKeyManagement() {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={() => { setNewKey(null); setAddOpen(true); }}
-          sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
+          sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
           Generate Key
         </Button>
       </Box>
@@ -144,7 +144,7 @@ export default function ApiKeyManagement() {
                     </Box>
                   </TableCell>
                   <TableCell sx={{ py: 1.5 }}>
-                    <Stack direction="row" gap={0.5} flexWrap="wrap">
+                    <Stack direction="row" sx={{ gap: 0.5, flexWrap: "wrap" }}>
                       {key.scopes?.map(s => (
                         <Box key={s} sx={{ px: 1, py: 0.2, borderRadius: '8px', fontSize: 11, fontWeight: 800, bgcolor: s === 'admin' ? 'rgba(239,68,68,0.12)' : s === 'write' ? 'rgba(245,158,11,0.12)' : 'rgba(34,197,94,0.12)', color: s === 'admin' ? '#DC2626' : s === 'write' ? '#D97706' : '#16A34A' }}>{s}</Box>
                       ))}
@@ -213,7 +213,7 @@ export default function ApiKeyManagement() {
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
                 <Button type="submit" variant="contained" disabled={saving}
-                  sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                  sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                   {saving ? 'Generating…' : 'Generate Key'}
                 </Button>
               </Box>
@@ -223,7 +223,7 @@ export default function ApiKeyManagement() {
         {newKey && (
           <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
             <Button variant="contained" onClick={() => { setAddOpen(false); setNewKey(null); }}
-              sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               Done
             </Button>
           </DialogActions>

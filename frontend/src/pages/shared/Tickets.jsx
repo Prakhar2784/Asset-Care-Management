@@ -371,7 +371,7 @@ const Tickets = () => {
           </Tooltip>
           {!isTechnician && (
             <Button variant="contained" startIcon={<AddRounded />} onClick={() => setRaiseOpen(true)}
-              sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
+              sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
               Raise Ticket
             </Button>
           )}
@@ -389,7 +389,7 @@ const Tickets = () => {
               <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: `${k.color}18`, display: 'grid', placeItems: 'center', mb: 1.5 }}>
                 <Box sx={{ color: k.color }}>{k.icon}</Box>
               </Box>
-              <Typography fontSize={28} fontWeight={950} lineHeight={1} letterSpacing="-1px">{k.value}</Typography>
+              <Typography fontSize={28} fontWeight={950} sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{k.value}</Typography>
               <Typography fontSize={13} fontWeight={700} color="text.secondary" mt={0.3}>{k.label}</Typography>
             </Paper>
           </Grid>
@@ -401,7 +401,7 @@ const Tickets = () => {
         <TextField placeholder="Search by Ticket ID or Asset Name..." size="small"
           value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
           sx={{ flex: 1, minWidth: 200, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 20 }} /></InputAdornment> }}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ color: 'text.disabled', fontSize: 20 }} /></InputAdornment> } }}
         />
         <TextField select size="small" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
           sx={{ minWidth: 190, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}>
@@ -550,7 +550,7 @@ const Tickets = () => {
                           By <span style={{ fontWeight: 800 }}>{ticket.raisedBy?.name || 'System'}</span>
                         </Typography>
                         <Box className="arrow-icon" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.primary', fontSize: 12, fontWeight: 800, opacity: 0, transform: 'translateX(-4px)', transition: 'all 0.2s' }}>
-                          <Typography fontSize={12} fontWeight={800} color="#111827">View Details</Typography>
+                          <Typography fontSize={12} fontWeight={800} color="text.primary">View Details</Typography>
                           <ChevronRightRounded sx={{ fontSize: 16, color: 'text.primary' }} />
                         </Box>
                       </Box>
@@ -594,7 +594,7 @@ const Tickets = () => {
                       <BuildRounded sx={{ color: '#fff', fontSize: 22 }} />
                     </Box>
                     <Box>
-                      <Typography fontWeight={900} fontSize={17} lineHeight={1.2}>
+                      <Typography fontWeight={900} fontSize={17} sx={{ lineHeight: 1.2 }}>
                         {selectedTicket.asset?.name || selectedTicket.itemLabel || 'Unknown Asset'}
                       </Typography>
                       <Typography fontSize={12} color="text.disabled" fontWeight={700} sx={{ fontFamily: 'monospace' }}>
@@ -837,7 +837,7 @@ const Tickets = () => {
                         onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) handleAddComment(); }}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px' } }} />
                       <Button variant="contained" onClick={handleAddComment} disabled={commentSubmitting || !commentText.trim()}
-                        sx={{ background: '#111827', color: '#fff', fontWeight: 800, borderRadius: '12px', boxShadow: 'none', minWidth: 80, py: 1.1 }}>
+                        sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', boxShadow: 'none', minWidth: 80, py: 1.1 }}>
                         {commentSubmitting ? <CircularProgress size={18} color="inherit" /> : 'Send'}
                       </Button>
                     </Box>
@@ -1012,7 +1012,7 @@ const Tickets = () => {
               <Button onClick={() => { setRaiseOpen(false); setImageFile(null); }} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting}
                 startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
-                sx={{ background: '#111827', color: '#fff', fontWeight: 800, px: 3.5, borderRadius: '12px', boxShadow: 'none' }}>
+                sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, px: 3.5, borderRadius: '12px', boxShadow: 'none' }}>
                 {submitting ? 'Submitting…' : 'Submit Ticket'}
               </Button>
             </Box>
@@ -1036,7 +1036,7 @@ const Tickets = () => {
           <IconButton onClick={() => { setDeleteDialogOpen(false); setTicketToDelete(null); }} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
         </Box>
         <DialogContent sx={{ p: 3 }}>
-          <Typography color="text.secondary" fontWeight={600} fontSize={14} lineHeight={1.7}>
+          <Typography color="text.secondary" fontWeight={600} fontSize={14} sx={{ lineHeight: 1.7 }}>
             Are you sure you want to permanently delete ticket <strong>{ticketToDelete?.ticketId}</strong>? This action cannot be undone.
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>

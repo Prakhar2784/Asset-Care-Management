@@ -332,7 +332,7 @@ export default function Pricing() {
 
       {/* Pricing Cards */}
       <Box sx={{ px: { xs: 2, md: 6, lg: 10 }, pb: 10 }}>
-        <Grid container spacing={3} alignItems="stretch">
+        <Grid container spacing={3} sx={{ alignItems: "stretch" }}>
           {plans.map(plan => (
             <Grid key={plan.id} size={{ xs: 12, md: 4 }}>
               <PricingCard plan={plan} yearly={yearly} highlight={plan.id === 'pro'} />
@@ -398,10 +398,10 @@ export default function Pricing() {
             endIcon={<ArrowForwardRounded />}
             href="/register-company"
             sx={{
-              background: '#111827', color: '#FFFFFF', fontWeight: 900,
+              background: '#FBBF24', color: '#111827', fontWeight: 900,
               px: 4, py: 1.5, borderRadius: '12px', fontSize: 15,
               boxShadow: '0 4px 16px rgba(17,24,39,0.4)',
-              '&:hover': { background: '#1F2937', boxShadow: '0 6px 24px rgba(17,24,39,0.55)' }
+              '&:hover': { background: '#F5A623', boxShadow: '0 6px 24px rgba(17,24,39,0.55)' }
             }}
           >
             Start Free Trial
