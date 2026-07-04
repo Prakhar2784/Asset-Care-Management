@@ -204,7 +204,8 @@ const AddAsset = () => {
     if (modelKnown) {
       const family = modelKnown[1];
       const next = modelKnown[2];
-      updates.modelNumber = (/^\d{4}$/.test(next) ? family : `${family} ${next}`).trim().substring(0, 30);
+      // Drop the trailing token only if it looks like a year, not a model number
+      updates.modelNumber = (/^(19|20)\d{2}$/.test(next) ? family : `${family} ${next}`).trim().substring(0, 30);
     } else {
       const modelLabeled = full.match(/(?:model\s*(?:no\.?|number|#)?)[:\s]+([A-Z0-9][\w\-\/]{3,24})/i);
       if (modelLabeled) updates.modelNumber = modelLabeled[1].trim();
@@ -268,7 +269,11 @@ const AddAsset = () => {
       const lineStart = full.lastIndexOf("\n", productMatch.index) + 1;
       const lineEnd = full.indexOf("\n", productMatch.index);
       const rawLine = full.substring(lineStart, lineEnd > 0 ? lineEnd : lineStart + 120);
-      const trimmed = rawLine.replace(/\s+\d{4}\s.*$/, "").replace(/[\|\[\]].*/g, "").replace(/\s+SN[-:]\S+/i, "");
+      const trimmed = rawLine
+        .replace(/^\s*(?:item|product|description|desc|goods)\s*[:\-]\s*/i, "") // strip label prefixes
+        .replace(/\s+(?:19|20)\d{2}\s.*$/, "") // strip from a year onward (keep model numbers like 5420)
+        .replace(/\s+[\d,]+\.\d{2}\b.*$/, "")  // strip trailing amounts (e.g. 45,000.00)
+        .replace(/[\|\[\]].*/g, "").replace(/\s+SN[-:]\S+/i, "");
       updates.name = trimmed.replace(/[^\x20-\x7E]/g, " ").replace(/\s+/g, " ").trim().substring(0, 60);
     } else {
       const skip = /^(invoice|bill|tax|gst|pan|cin|date|total|amount|page|flat|block|plot|no\.|s\.no|hsn|qty|rate|terms|place|state|buyer)/i;
@@ -289,7 +294,10 @@ const AddAsset = () => {
     }
 
     // --- Invoice number → notes ---
-    const invMatch = full.match(/invoice\s*(?:no\.?|#|number)?[:\s]+([A-Z0-9][A-Z0-9\/\-]{3,20})/i);
+    // The capture must contain a digit *within the pattern* — a plain
+    // [A-Z0-9]+ capture lets "TAX INVOICE\nInvoice No: X" swallow the word
+    // "Invoice" as the token, consuming the real match
+    const invMatch = full.match(/invoice\s*(?:no\.?|#|number)?[:\s]+([A-Z]{0,6}[-\/]?\d[A-Z0-9\/\-]{2,19})/i);
     if (invMatch) updates.notes = `Invoice: ${invMatch[1].trim()}`;
 
     return updates;
@@ -373,6 +381,7 @@ const AddAsset = () => {
       const worker = await createWorker("eng");
       const { data: { text } } = await worker.recognize(file);
       await worker.terminate();
+      if (import.meta.env.DEV) window.__lastOcrText = text; // debug aid for OCR tuning
 
       const shared = parseInvoiceText(text);
       const sharedOnly = { ...shared };
