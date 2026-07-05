@@ -130,7 +130,7 @@ const createTenant = async (req, res) => {
     const TenantUser = tenantConn.model('User');
 
     const bcrypt = require('bcryptjs');
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(adminPassword, salt);
 
     await TenantUser.create({

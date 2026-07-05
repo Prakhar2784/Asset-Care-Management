@@ -142,8 +142,8 @@ const AuthPage = () => {
         navigate(landingRouteFor(session));
       } 
       else if (view === "forgot") {
-        await api.post('/auth/forgot-password', { email: formData.email });
-        alert("If that email is registered, a reset link has been sent. Check your inbox.");
+        const { data } = await api.post('/auth/forgot-password', { email: formData.email });
+        alert(data?.message || "If that email is registered, you'll receive a one-time code to reset your password.");
         handleViewChange("login");
       }
     } catch (err) {

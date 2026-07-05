@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema({
 
   lastLogin: { type: Date, default: null },
 
+  // Brute-force protection: consecutive failed logins + lockout window
+  failedLoginAttempts: { type: Number, default: 0 },
+  lockUntil: { type: Date, default: null },
+
   // Per-user custom permissions (overrides role defaults when set)
   customPermissions: [{
     feature: { type: String },
@@ -54,16 +58,20 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Pre-save middleware to hash the password before saving to the DB
+// Pre-save middleware to hash the password before saving to the DB.
+// bcrypt embeds a per-hash random salt; work factor 12 per current OWASP
+// guidance. Never MD5/SHA-1. The plaintext is never logged.
+const BCRYPT_WORK_FACTOR = 12;
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(BCRYPT_WORK_FACTOR);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method to compare entered password with the hashed password in the DB
+// Compare entered password with the stored hash. bcrypt.compare is
+// constant-time, so it does not leak how much of the hash matched.
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

@@ -1,8 +1,44 @@
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Tenant = require('../models/Tenant');
 const jwt = require('jsonwebtoken');
 const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail } = require('../services/emailService');
+
+// ─── Brute-force / timing constants ───────────────────────────────────────────
+const GENERIC_LOGIN_ERROR = 'Incorrect email or password.';
+const MAX_FAILED_ATTEMPTS = 5;          // lock the account after this many
+const LOCK_MINUTES = 15;
+const CAPTCHA_AFTER_ATTEMPTS = 3;       // require CAPTCHA from this failure count
+// Compared against when the email is unknown, so both branches cost one bcrypt
+const DUMMY_HASH = bcrypt.hashSync('timing-equalizer-dummy-password', 12);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Update a user document found via findUserAcrossTenants. Must bypass the
+// tenant filter: pre-login requests run in the 'default' context, which would
+// otherwise inject tenantId='default' into the query and silently no-op
+// against a tenant database.
+const updateUserById = (user, updates) =>
+  user.constructor.findByIdAndUpdate(user._id, updates, { bypassTenantFilter: true });
+
+// Google reCAPTCHA verification — active only when a secret key is configured.
+// Without RECAPTCHA_SECRET_KEY the check is skipped (flag still returned so the
+// frontend can show a CAPTCHA once keys are provisioned).
+const verifyCaptcha = async (token, ip) => {
+  if (!process.env.RECAPTCHA_SECRET_KEY) return true;
+  if (!token) return false;
+  try {
+    const resp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret: process.env.RECAPTCHA_SECRET_KEY, response: token, remoteip: ip || '' }),
+    });
+    const data = await resp.json();
+    return data.success === true;
+  } catch {
+    return false;
+  }
+};
 
 const generateToken = (id, tenantId) => jwt.sign({ id, tenantId }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
@@ -35,13 +71,17 @@ const findUserAcrossTenants = async (query) => {
 // POST /api/auth/register
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role, department, tenantId } = req.body;
+    const { name, email, password, department } = req.body;
     // Check globally to avoid duplicate emails across tenants
     const userExists = await findUserAcrossTenants({ email });
     if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-    const activeTenantId = tenantId || req.tenantId || 'default';
-    const user = await User.create({ name, email, password, role, department, tenantId: activeTenantId });
+    // SECURITY: role and tenantId are assigned by the server, never taken from
+    // the request body — otherwise anyone could self-register as an admin of
+    // an arbitrary tenant. Public self-signup only creates default-tenant
+    // employees; company admins are created via /register-company, and tenant
+    // members via the authenticated invite/user-management flows.
+    const user = await User.create({ name, email, password, role: 'employee', department, tenantId: 'default' });
     if (user) {
       res.status(201).json({
         _id: user._id, name: user.name, email: user.email,
@@ -59,46 +99,96 @@ const registerUser = async (req, res) => {
 // POST /api/auth/login
 const loginUser = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password, role, captchaToken } = req.body;
     // Look up the user globally (control-plane DB + every tenant DB) to
     // identify which tenant they belong to
     const user = await findUserAcrossTenants({ email });
-    if (user && (await user.matchPassword(password))) {
-      // Deactivated (offboarded / not-yet-activated invite) accounts cannot log in
-      if (user.isActive === false) {
-        return res.status(403).json({ message: 'This account is deactivated. Contact your administrator, or complete your invite link to activate it.' });
-      }
-      // Validate role mapping to match selected portal tab
-      if (role) {
-        const adminRoles = ['admin', 'super_admin', 'hod', 'manager'];
-        if (role === 'admin' && !adminRoles.includes(user.role)) {
-          return res.status(403).json({ message: 'Access Denied: This portal requires administrator permissions.' });
-        }
-        if (role === 'employee' && adminRoles.includes(user.role)) {
-          return res.status(403).json({ message: 'This account has admin access. Please switch to the Admin Access portal to log in.' });
-        }
-      }
 
-      // Stamp last login time (fire-and-forget) — via the model the user doc
-      // was found on, so it updates the correct tenant database
-      user.constructor.findByIdAndUpdate(user._id, { lastLogin: new Date() }).catch(() => {});
-
-      const tenant = await Tenant.findOne({ slug: user.tenantId });
-
-      res.json({
-        _id: user._id, name: user.name, email: user.email,
-        role: user.role, department: user.department, tenantId: user.tenantId,
-        customPermissions: user.customPermissions || [],
-        onboardingDone: user.onboardingDone,
-        plan: tenant?.plan || 'Basic',
-        features: tenant?.features || {},
-        token: generateToken(user._id, user.tenantId)
-      });
-    } else {
-      res.status(401).json({ message: 'Invalid email or password' });
+    // Unknown email: burn one bcrypt comparison anyway so the response time
+    // does not distinguish "no such account" from "wrong password"
+    if (!user) {
+      await bcrypt.compare(password, DUMMY_HASH);
+      return res.status(401).json({ message: GENERIC_LOGIN_ERROR });
     }
+
+    const UserModel = user.constructor; // bound to the user's own tenant DB
+
+    // Account lockout window
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      const minutesLeft = Math.max(1, Math.ceil((user.lockUntil - Date.now()) / 60000));
+      return res.status(429).json({
+        message: `Too many failed attempts. Account is locked — try again in ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''}.`,
+        lockedUntil: user.lockUntil,
+      });
+    }
+    // Expired lock: start a fresh window
+    if (user.lockUntil) {
+      await updateUserById(user, { failedLoginAttempts: 0, lockUntil: null });
+      user.failedLoginAttempts = 0;
+    }
+
+    // CAPTCHA gate after repeated failures (enforced when keys are configured)
+    const captchaRequired = user.failedLoginAttempts >= CAPTCHA_AFTER_ATTEMPTS;
+    if (captchaRequired && !(await verifyCaptcha(captchaToken, req.ip))) {
+      return res.status(400).json({ message: 'CAPTCHA verification required.', captchaRequired: true });
+    }
+
+    if (!(await user.matchPassword(password))) {
+      const attempts = user.failedLoginAttempts + 1;
+      const updates = { failedLoginAttempts: attempts };
+      if (attempts >= MAX_FAILED_ATTEMPTS) {
+        updates.lockUntil = new Date(Date.now() + LOCK_MINUTES * 60 * 1000);
+      }
+      await updateUserById(user, updates);
+
+      // Progressive delay: each consecutive failure responds a little slower
+      await sleep(Math.min(attempts * 400, 3000));
+
+      if (updates.lockUntil) {
+        return res.status(429).json({
+          message: `Too many failed attempts. Account is locked — try again in ${LOCK_MINUTES} minutes.`,
+          lockedUntil: updates.lockUntil,
+        });
+      }
+      return res.status(401).json({
+        message: GENERIC_LOGIN_ERROR,
+        ...(attempts >= CAPTCHA_AFTER_ATTEMPTS ? { captchaRequired: true } : {}),
+      });
+    }
+
+    // ── Authenticated beyond this point ──────────────────────────────────────
+    // Deactivated (offboarded / not-yet-activated invite) accounts cannot log in
+    if (user.isActive === false) {
+      return res.status(403).json({ message: 'This account is deactivated. Contact your administrator, or complete your invite link to activate it.' });
+    }
+    // Validate role mapping to match selected portal tab
+    if (role) {
+      const adminRoles = ['admin', 'super_admin', 'hod', 'manager'];
+      if (role === 'admin' && !adminRoles.includes(user.role)) {
+        return res.status(403).json({ message: 'Access Denied: This portal requires administrator permissions.' });
+      }
+      if (role === 'employee' && adminRoles.includes(user.role)) {
+        return res.status(403).json({ message: 'This account has admin access. Please switch to the Admin Access portal to log in.' });
+      }
+    }
+
+    // Stamp last login + clear brute-force counters (fire-and-forget)
+    updateUserById(user, { lastLogin: new Date(), failedLoginAttempts: 0, lockUntil: null }).catch(() => {});
+
+    const tenant = await Tenant.findOne({ slug: user.tenantId });
+
+    res.json({
+      _id: user._id, name: user.name, email: user.email,
+      role: user.role, department: user.department, tenantId: user.tenantId,
+      customPermissions: user.customPermissions || [],
+      onboardingDone: user.onboardingDone,
+      plan: tenant?.plan || 'Basic',
+      features: tenant?.features || {},
+      token: generateToken(user._id, user.tenantId)
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[Auth] Login error:', error.message); // never log credentials
+    res.status(500).json({ message: 'Login failed. Please try again.' });
   }
 };
 
@@ -132,26 +222,31 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: 'Email is required' });
 
-    const user = await findUserAcrossTenants({ email });
-    // Always return success to prevent email enumeration
-    if (!user) {
-      return res.status(200).json({ message: 'If an account with that email exists, an OTP has been sent.' });
-    }
+    // ANTI-ENUMERATION: respond immediately with one identical message whether
+    // or not the account exists. The lookup + OTP + email all happen after the
+    // response, so neither the message nor the response time reveals anything.
+    res.status(200).json({ message: "If that email is registered, you'll receive a one-time code to reset your password." });
 
-    // Generate a 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+    setImmediate(async () => {
+      try {
+        const user = await findUserAcrossTenants({ email });
+        if (!user) return;
 
-    await user.constructor.findByIdAndUpdate(user._id, {
-      otpHash,
-      otpExpiry: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+        await updateUserById(user, {
+          otpHash,
+          otpExpiry: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+        });
+
+        await sendOtpEmail(user, otp);
+      } catch (err) {
+        console.error('[Auth] Forgot-password background task failed:', err.message);
+      }
     });
-
-    await sendOtpEmail(user, otp);
-
-    res.status(200).json({ message: 'OTP sent to your registered email address.' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Request failed. Please try again.' });
   }
 };
 
@@ -177,7 +272,7 @@ const verifyOtp = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
-    await user.constructor.findByIdAndUpdate(user._id, {
+    await updateUserById(user, {
       otpHash: null,
       otpExpiry: null,
       passwordResetToken: hashedToken,
@@ -196,8 +291,9 @@ const resetPassword = async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password || password.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    // Defense-in-depth: the Zod schema enforces the full policy before this runs
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     // Hash the incoming token to compare with stored hash
@@ -214,15 +310,18 @@ const resetPassword = async (req, res) => {
 
     // Hash password manually (bypassing pre-save hook since we use findByIdAndUpdate)
     const bcrypt = require('bcryptjs');
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(12);
     const hashed = await bcrypt.hash(password, salt);
 
-    await user.constructor.findByIdAndUpdate(user._id, {
+    await updateUserById(user, {
       password: hashed,
       passwordResetToken: null,
       passwordResetExpiry: null,
       // Invited accounts are created deactivated; setting a password activates them
-      isActive: true
+      isActive: true,
+      // A successful reset also clears any brute-force lockout
+      failedLoginAttempts: 0,
+      lockUntil: null
     });
 
     sendPasswordChangedEmail(user).catch(err => console.error('[EMAIL] Password changed email failed:', err.message));
