@@ -324,7 +324,7 @@ const Layout = () => {
               </Tooltip>
               <GlobalSearch />
               <IconButton onClick={() => navigate("/notifications")}
-                sx={{ color: "text.secondary", "&:hover": { bgcolor: isDark ? "rgba(17,24,39,0.1)" : "rgba(17,24,39,0.08)", color: "#111827" } }}>
+                sx={{ color: "text.secondary", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
                 <Badge badgeContent={unreadCount || null} color="error"
                   sx={{ "& .MuiBadge-badge": { fontSize: 10, minWidth: 16, height: 16 } }}>
                   <NotificationsRounded />
