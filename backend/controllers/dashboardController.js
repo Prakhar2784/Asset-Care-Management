@@ -1,6 +1,7 @@
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
 const DeviceRequest = require('../models/DeviceRequest');
+const MaintenanceLog = require('../models/MaintenanceLog');
 
 // @route   GET /api/dashboard/stats
 // @access  Admin / HOD
@@ -57,4 +58,44 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-module.exports = { getDashboardStats };
+// @route   GET /api/dashboard/date-history
+// @access  Protected
+const getDateHistory = async (req, res) => {
+  try {
+    const { date } = req.query; // YYYY-MM-DD format
+    if (!date) {
+      return res.status(400).json({ message: 'Date parameter is required.' });
+    }
+
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const [assets, tickets, maintenance] = await Promise.all([
+      Asset.find({
+        isDeleted: { $ne: true },
+        procurementDate: { $gte: startOfDay, $lte: endOfDay }
+      }).select('name serialNumber category department'),
+      Ticket.find({
+        createdAt: { $gte: startOfDay, $lte: endOfDay }
+      }).select('ticketId issue status priority')
+        .populate('asset', 'name'),
+      MaintenanceLog.find({
+        serviceDate: { $gte: startOfDay, $lte: endOfDay }
+      }).select('type description status cost')
+        .populate('asset', 'name')
+    ]);
+
+    res.status(200).json({
+      assets,
+      tickets,
+      maintenance
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getDashboardStats, getDateHistory };

@@ -63,7 +63,7 @@ const ThemeProviderInner = ({ children }) => {
       ...(isDark ? {
         primary: { main: '#FBBF24', contrastText: '#111827' },
         secondary: { main: '#9CA3AF' },
-        background: { default: '#000000', paper: '#0A0A0A' },
+        background: { default: '#000000', paper: '#111827' },
         text: { primary: '#FFFFFF', secondary: '#9CA3AF' },
         divider: 'rgba(255,255,255,0.12)',
         action: { hover: 'rgba(255,255,255,0.05)', selected: 'rgba(251,191,36,0.12)' },
@@ -109,7 +109,7 @@ const ThemeProviderInner = ({ children }) => {
           root: {
             backgroundImage: 'none',
             ...(isDark ? {
-              background: '#0A0A0A',
+              background: '#111827',
               border: '1px solid rgba(255,255,255,0.1)',
               boxShadow: 'none',
             } : {
@@ -136,6 +136,42 @@ const ThemeProviderInner = ({ children }) => {
         }
       },
       MuiChip: { styleOverrides: { root: { fontWeight: 700 } } },
+      // Force every Select/TextField-select menu to always open directly
+      // below its field. Without this, MUI's default behavior tries to
+      // align the currently-selected item with the field instead, which can
+      // push the menu upward past the viewport top (overlapping the navbar)
+      // once a later option in the list is selected.
+      // Capping the menu's height (with internal scroll) is just as
+      // important: MUI's Popover still repositions the whole panel upward
+      // whenever it doesn't fit in the remaining space below the field, so a
+      // tall, uncapped list (e.g. 8 department options) reliably triggered
+      // that upward jump on any field in the lower half of the page.
+      MuiMenu: {
+        defaultProps: {
+          variant: 'menu',
+          anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+          transformOrigin: { vertical: 'top', horizontal: 'left' },
+          transitionDuration: { enter: 300, exit: 450 },
+          slotProps: {
+            paper: { style: { maxHeight: 300, overflowY: 'auto' } },
+          },
+        },
+      },
+
+      MuiSelect: {
+        defaultProps: {
+          MenuProps: {
+            variant: 'menu',
+            anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+            transformOrigin: { vertical: 'top', horizontal: 'left' },
+            transitionDuration: { enter: 300, exit: 450 },
+            slotProps: {
+              paper: { style: { maxHeight: 300, overflowY: 'auto' } },
+            },
+          },
+        },
+      },
+
       MuiTextField: {
         styleOverrides: {
           root: {
@@ -152,7 +188,7 @@ const ThemeProviderInner = ({ children }) => {
         styleOverrides: {
           root: {
             '& .MuiTableCell-root': {
-              background: isDark ? '#0A0A0A' : '#F9FAFB',
+              background: isDark ? '#111827' : '#F9FAFB',
               borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
               color: isDark ? '#9CA3AF' : '#6B7280',
               fontWeight: 700,
@@ -185,7 +221,7 @@ const ThemeProviderInner = ({ children }) => {
             borderRadius: '16px',
             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #EEF0F3',
             overflow: 'hidden',
-            background: isDark ? '#0A0A0A' : '#FFFFFF',
+            background: isDark ? '#111827' : '#FFFFFF',
             boxShadow: 'none',
           }
         }

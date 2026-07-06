@@ -66,15 +66,6 @@ const loginSchema = z.object({
   captchaToken: z.string().max(2048).optional(),
 });
 
-const registerSchema = z.object({
-  name: freeText('Name', 2, 80),
-  email,
-  password: newPassword,
-  department: freeText('Department', 1, 60).optional().or(z.literal('')),
-  // role / tenantId are intentionally NOT accepted here — the server assigns
-  // them (privilege escalation fix; see authController.registerUser)
-});
-
 const registerCompanySchema = z.object({
   companyName: freeText('Company name', 2, 80),
   slug,
@@ -109,7 +100,6 @@ const validate = (schema) => (req, res, next) => {
 module.exports = {
   validate,
   loginSchema,
-  registerSchema,
   registerCompanySchema,
   forgotPasswordSchema,
   verifyOtpSchema,

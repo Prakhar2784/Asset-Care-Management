@@ -6,11 +6,9 @@ import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
-import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import { useAuth } from "../../context/AuthContext";
 
 const ADMIN_TIER_ROLES = ["admin", "super_admin", "hod", "manager"];
@@ -28,13 +26,12 @@ const landingRouteFor = (session) => {
 
 const AuthPage = () => {
   const navigate = useNavigate();
-  const { login, register } = useAuth();
+  const { login } = useAuth();
   
   // UI State
   const [view, setView] = useState("login");
   const [role, setRole] = useState("employee"); 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -42,11 +39,8 @@ const AuthPage = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-    department: ""
   });
 
   // Load remembered email when role tab changes
@@ -61,14 +55,6 @@ const AuthPage = () => {
     }
   }, [role]);
 
-  const pwRules = [
-    { label: '8+ chars',  pass: formData.password.length >= 8 },
-    { label: 'Uppercase', pass: /[A-Z]/.test(formData.password) },
-    { label: 'Lowercase', pass: /[a-z]/.test(formData.password) },
-    { label: 'Number',    pass: /[0-9]/.test(formData.password) },
-    { label: 'Symbol',    pass: /[^A-Za-z0-9]/.test(formData.password) },
-  ];
-
   // Dynamic Content based on selected role
   const pageContent = {
     employee: {
@@ -79,7 +65,6 @@ const AuthPage = () => {
       feature2Title: "Real-Time Tracking",
       feature2Desc: "See exactly when your repair request is approved and assigned.",
       rightLoginSub: "Enter your credentials to access your employee portal.",
-      rightRegSub: "Register to track and manage your assigned company assets."
     },
     admin: {
       leftTitle: "Intelligent Asset Management.",
@@ -89,7 +74,6 @@ const AuthPage = () => {
       feature2Title: "Vendor Escalation",
       feature2Desc: "Directly escalate approved repairs to your network of OEM partners.",
       rightLoginSub: "Enter your root credentials to access the system dashboard.",
-      rightRegSub: "Create an administrative profile to manage enterprise assets."
     }
   };
 
@@ -101,17 +85,15 @@ const AuthPage = () => {
   const handleViewChange = (newView) => {
     setView(newView);
     setError("");
-    setFormData({ name: "", email: "", password: "", confirmPassword: "", department: "" });
+    setFormData({ email: "", password: "" });
     setShowPassword(false);
-    setShowConfirmPassword(false);
   };
 
   const handleRoleChange = (newRole) => {
     setRole(newRole);
     setError("");
-    setFormData({ name: "", email: "", password: "", confirmPassword: "", department: "" });
+    setFormData({ email: "", password: "" });
     setShowPassword(false);
-    setShowConfirmPassword(false);
   };
 
   const handleSubmit = async (e) => {
@@ -130,17 +112,6 @@ const AuthPage = () => {
         const session = await login(formData.email, formData.password, role);
         navigate(landingRouteFor(session));
       }
-      else if (view === "register") {
-        if (formData.password !== formData.confirmPassword) {
-          throw new Error("Passwords do not match.");
-        }
-        if (!pwRules.every(r => r.pass)) {
-          throw new Error("Password must be 8+ chars with uppercase, lowercase, number, and symbol.");
-        }
-        // ADDED: Passing formData.department to the register function
-        const session = await register(formData.name, formData.email, formData.password, role, formData.department);
-        navigate(landingRouteFor(session));
-      } 
       else if (view === "forgot") {
         const { data } = await api.post('/auth/forgot-password', { email: formData.email });
         alert(data?.message || "If that email is registered, you'll receive a one-time code to reset your password.");
@@ -438,35 +409,6 @@ const AuthPage = () => {
           color: #333333;
         }
 
-        .pw-rules {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 6px 14px;
-          background: rgba(20,20,20,0.65);
-          border: 1.5px solid rgba(17,24,39,0.2);
-          border-radius: 14px;
-          padding: 12px 16px;
-          margin-bottom: 16px;
-        }
-
-        .pw-rule {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 13px;
-          font-weight: 700;
-        }
-
-        .pw-rule.pass { color: #16A34A; }
-        .pw-rule.fail { color: #DC2626; }
-
-        .pw-dot {
-          width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-        }
-
-        .pw-rule.pass .pw-dot { background: #16A34A; }
-        .pw-rule.fail .pw-dot { background: #DC2626; }
-
         .error-message { 
           background: #FEE2E2; 
           border: 1px solid #FCA5A5; 
@@ -583,16 +525,14 @@ const AuthPage = () => {
           <div className="auth-form-container">
             <h2 style={{ fontSize: "30px", fontWeight: "950", color: "var(--text-main)", marginBottom: "8px", letterSpacing: "-0.8px" }}>
               {view === "login" && "Welcome Back"}
-              {view === "register" && "Create Workspace"}
               {view === "forgot" && "Reset Credentials"}
             </h2>
             <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "32px", lineHeight: 1.6, fontWeight: 600 }}>
               {view === "login" && pageContent[role].rightLoginSub}
-              {view === "register" && pageContent[role].rightRegSub}
               {view === "forgot" && "Enter your registered email to receive recovery instructions."}
             </p>
 
-            {view !== "forgot" && (
+            {view === "login" && (
               <div className="role-toggle">
                 <button 
                   type="button" 
@@ -614,65 +554,17 @@ const AuthPage = () => {
             <form onSubmit={handleSubmit} style={{ width: "100%" }}>
               {error && <div className="error-message">{error}</div>}
 
-              {view === "register" && (
-                <>
-                  <div className="input-wrapper">
-                    <PersonRoundedIcon className="input-icon" fontSize="small" />
-                    <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Full Name" required className="auth-input" />
-                  </div>
-                  
-                  {/* ADDED: Department Dropdown */}
-                  <div className="input-wrapper">
-                    <ApartmentRoundedIcon className="input-icon" fontSize="small" />
-                    <select
-                      name="department"
-                      value={formData.department}
-                      onChange={handleInputChange}
-                      required
-                      className="auth-input"
-                    >
-                      <option value="" disabled>Select Department</option>
-                      <option value="Information Technology">Information Technology</option>
-                      <option value="Administration">Administration</option>
-                      <option value="Finance & Accounts">Finance & Accounts</option>
-                      <option value="Operations">Operations</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
               <div className="input-wrapper">
                 <EmailRoundedIcon className="input-icon" fontSize="small" />
                 <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Work Email Address" type="email" required className="auth-input" />
               </div>
 
-              {(view === "login" || view === "register") && (
-                <div className="input-wrapper" style={{ marginBottom: view === "login" ? "12px" : "16px" }}>
+              {view === "login" && (
+                <div className="input-wrapper" style={{ marginBottom: "12px" }}>
                   <LockRoundedIcon className="input-icon" fontSize="small" />
                   <input name="password" value={formData.password} onChange={handleInputChange} placeholder="Password" type={showPassword ? "text" : "password"} required className="auth-input" />
                   <button type="button" className="input-icon-right" onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
-                  </button>
-                </div>
-              )}
-
-              {view === "register" && formData.password.length > 0 && (
-                <div className="pw-rules">
-                  {pwRules.map(r => (
-                    <div key={r.label} className={`pw-rule ${r.pass ? 'pass' : 'fail'}`}>
-                      <span className="pw-dot" />
-                      {r.label}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {view === "register" && (
-                <div className="input-wrapper" style={{ marginBottom: "32px" }}>
-                  <LockRoundedIcon className="input-icon" fontSize="small" />
-                  <input name="confirmPassword" value={formData.confirmPassword} onChange={handleInputChange} placeholder="Confirm Password" type={showConfirmPassword ? "text" : "password"} required className="auth-input" />
-                  <button type="button" className="input-icon-right" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    {showConfirmPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
                   </button>
                 </div>
               )}
@@ -687,17 +579,17 @@ const AuthPage = () => {
               )}
 
               <button type="submit" className="auth-btn" disabled={loading}>
-                {loading ? "Processing..." : view === "login" ? "Secure Login" : view === "register" ? "Complete Registration" : "Send Recovery Link"}
+                {loading ? "Processing..." : view === "login" ? "Secure Login" : "Send Recovery Link"}
               </button>
             </form>
 
-            <div style={{ color: "var(--text-muted)", fontSize: "14px", fontWeight: "600", textAlign: "center" }}>
-              {view === "login" && <>Don't have an account? <button type="button" className="auth-link" onClick={() => handleViewChange("register")}>Register Here</button></>}
-              {view === "register" && <>Already have an account? <button type="button" className="auth-link" onClick={() => handleViewChange("login")}>Sign In</button></>}
-              {view === "forgot" && <button type="button" className="auth-link" onClick={() => handleViewChange("login")}>← Back to Login</button>}
-            </div>
+            {view === "forgot" && (
+              <div style={{ color: "var(--text-muted)", fontSize: "14px", fontWeight: "600", textAlign: "center" }}>
+                <button type="button" className="auth-link" onClick={() => handleViewChange("login")}>← Back to Login</button>
+              </div>
+            )}
 
-            {view !== "forgot" && (
+            {view === "login" && (
               <div style={{
                 marginTop: "20px", paddingTop: "20px", borderTop: "1px solid var(--border-color, rgba(17,24,39,0.15))",
                 textAlign: "center", fontSize: "14px", fontWeight: 600, color: "var(--text-muted)"

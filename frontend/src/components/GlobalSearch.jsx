@@ -77,20 +77,24 @@ export default function GlobalSearch() {
 
   const hasResults = results && (results.assets?.length || results.tickets?.length || results.users?.length);
 
-  // Compute dropdown position from anchor
+  // Compute dropdown position from anchor, clamped so it can never spill
+  // past the right (or left) edge of the viewport regardless of where the
+  // search bar sits in the toolbar.
   const getDropdownStyle = () => {
     if (!anchorEl) return {};
     const rect = anchorEl.getBoundingClientRect();
+    const margin = 16;
+    const width = Math.max(rect.width, 320);
+    const maxLeft = window.innerWidth - margin - width;
+    const left = Math.min(rect.left, Math.max(margin, maxLeft));
     return {
       position: 'fixed',
       top: rect.bottom + 8,
-      left: rect.left,
-      width: rect.width,
+      left,
+      width,
       zIndex: 2100,
     };
   };
-
-  const showDropdown = open && (query.length >= 2 || !query);
 
   return (
     <ClickAwayListener onClickAway={handleClose}>
@@ -137,8 +141,8 @@ export default function GlobalSearch() {
           </Box>
         )}
 
-        {/* Dropdown results via portal */}
-        {open && createPortal(
+        {/* Dropdown results via portal — only once the user has typed enough to search */}
+        {open && query.length >= 2 && createPortal(
           <Paper
             elevation={16}
             sx={{
@@ -150,10 +154,9 @@ export default function GlobalSearch() {
               minWidth: 320,
             }}
           >
-            {query.length >= 2 && (
-              <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
-                {!hasResults && !loading && (
-                  <Box sx={{ py: 4, textAlign: 'center' }}>
+            <Box sx={{ maxHeight: 400, overflowY: 'auto' }}>
+              {!hasResults && !loading && (
+                <Box sx={{ py: 4, textAlign: 'center' }}>
                     <Typography color="text.secondary" fontSize={13}>No results for "{query}"</Typography>
                   </Box>
                 )}
@@ -225,16 +228,7 @@ export default function GlobalSearch() {
                     ))}
                   </Box>
                 )}
-              </Box>
-            )}
-
-            {!query && (
-              <Box sx={{ px: 2, py: 1.5 }}>
-                <Typography fontSize={12} color="text.secondary">
-                  Type to search assets, tickets{isAdmin ? ', and users' : ''}…
-                </Typography>
-              </Box>
-            )}
+            </Box>
           </Paper>,
           document.body
         )}

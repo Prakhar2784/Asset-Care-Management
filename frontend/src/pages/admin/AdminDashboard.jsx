@@ -3,6 +3,7 @@ import {
   Alert, Box, Button, Chip, CircularProgress, Dialog,
   DialogContent, Grid, IconButton,
   LinearProgress, Paper, Snackbar, Stack, Typography,
+  TextField,
 } from "@mui/material";
 import {
   Inventory2Rounded, ConfirmationNumberRounded, ApprovalRounded,
@@ -61,7 +62,8 @@ const KpiCard = ({ label, value, sub, icon, accent, onClick }) => (
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 // Calendar sized for the purple hero banner (light text/cells on translucent glass)
-const HeroMiniCalendar = () => {
+const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
+  const { currentUser } = useAuth();
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
@@ -80,7 +82,7 @@ const HeroMiniCalendar = () => {
   return (
     <Box sx={{
       width: 260, borderRadius: "18px", p: 2,
-      bgcolor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)",
+      bgcolor: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.08)",
       backdropFilter: "blur(10px)",
     }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.2 }}>
@@ -107,14 +109,38 @@ const HeroMiniCalendar = () => {
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px" }}>
         {cells.map((day, i) => {
           const isToday = isCurrentMonth && day === today.getDate();
+          
+          // Check for active reminder in local storage
+          let hasReminder = false;
+          if (day) {
+            const dayStr = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const reminderKey = `reminder_${currentUser?._id || 'global'}_${dayStr}`;
+            hasReminder = !!localStorage.getItem(reminderKey);
+          }
+
           return (
-            <Box key={i} sx={{
+            <Box key={i} onClick={() => day && onDayClick && onDayClick(new Date(viewDate.getFullYear(), viewDate.getMonth(), day))} sx={{
               aspectRatio: "1", display: "grid", placeItems: "center", borderRadius: "8px",
               fontSize: 12, fontWeight: isToday ? 700 : 500,
               color: isToday ? "#111827" : day ? "rgba(255,255,255,0.88)" : "transparent",
               bgcolor: isToday ? "#FBBF24" : "transparent",
+              cursor: day ? "pointer" : "default",
+              position: "relative",
+              transition: "all 0.15s",
+              "&:hover": day ? {
+                bgcolor: isToday ? "#FBBF24" : "rgba(255,255,255,0.12)",
+                transform: "scale(1.08)"
+              } : {},
             }}>
-              {day || "-"}
+              <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+                <span>{day || "-"}</span>
+                {day && hasReminder && (
+                  <Box sx={{
+                    position: "absolute", bottom: -4, width: 4, height: 4, borderRadius: "50%",
+                    bgcolor: isToday ? "#111827" : "#FBBF24"
+                  }} />
+                )}
+              </Box>
             </Box>
           );
         })}
@@ -170,6 +196,43 @@ const AdminDashboard = () => {
   const [error, setError]                 = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [snackbar, setSnackbar]           = useState({ open: false, message: "", severity: "success" });
+
+  // Calendar event planner states
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [reminderText, setReminderText] = useState("");
+  const [dateHistory, setDateHistory]   = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [remindersUpdated, setRemindersUpdated] = useState(0);
+
+  const handleDayClick = (date) => {
+    setSelectedDate(date);
+    const dayStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const reminderKey = `reminder_${user?._id || 'global'}_${dayStr}`;
+    setReminderText(localStorage.getItem(reminderKey) || "");
+
+    setHistoryLoading(true);
+    setDateHistory(null);
+    api.get(`/dashboard/date-history?date=${dayStr}`)
+      .then(res => setDateHistory(res.data))
+      .catch(() => setDateHistory({ assets: [], tickets: [], maintenance: [] }))
+      .finally(() => setHistoryLoading(false));
+  };
+
+  const handleSaveReminder = () => {
+    if (!selectedDate) return;
+    const dayStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+    const reminderKey = `reminder_${user?._id || 'global'}_${dayStr}`;
+    
+    if (reminderText.trim()) {
+      localStorage.setItem(reminderKey, reminderText.trim());
+      setSnackbar({ open: true, message: "Reminder saved successfully!", severity: "success" });
+    } else {
+      localStorage.removeItem(reminderKey);
+      setSnackbar({ open: true, message: "Reminder cleared.", severity: "info" });
+    }
+    setRemindersUpdated(prev => prev + 1);
+    setSelectedDate(null);
+  };
 
   /* ── permission helpers ── */
   const isAdminTier = ADMIN_TIER.includes(user?.role);
@@ -359,7 +422,7 @@ const AdminDashboard = () => {
             </svg>
           </Box>
 
-            <HeroMiniCalendar />
+            <HeroMiniCalendar onDayClick={handleDayClick} remindersUpdated={remindersUpdated} />
           </Box>
         </Box>
 
@@ -637,6 +700,124 @@ const AdminDashboard = () => {
                 sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
                 Open Full Ticket →
               </Button>
+            </DialogContent>
+          </>
+        )}
+      </Dialog>
+
+      {/* ── Calendar Event Planner Dialog ──────────────────────── */}
+      <Dialog open={!!selectedDate} onClose={() => setSelectedDate(null)} fullWidth maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        {selectedDate && (
+          <>
+            <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "primary.main", display: "grid", placeItems: "center", color: "primary.contrastText" }}>
+                  <EventNoteRounded />
+                </Box>
+                <Box>
+                  <Typography fontWeight={900} fontSize={17} color="text.primary">Date Planner</Typography>
+                  <Typography fontSize={12} color="text.secondary">
+                    {selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </Typography>
+                </Box>
+              </Box>
+              <IconButton onClick={() => setSelectedDate(null)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
+            </Box>
+
+            <DialogContent sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3.5 }}>
+              {/* Reminders/Notes input */}
+              <Box>
+                <Typography fontSize={13} fontWeight={800} color="text.primary" mb={1.2} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  Reminders & Notes
+                </Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  variant="outlined"
+                  placeholder="Type a reminder or task note for this date..."
+                  value={reminderText}
+                  onChange={(e) => setReminderText(e.target.value)}
+                  slotProps={{
+                    input: {
+                      sx: {
+                        fontSize: 13.5,
+                        fontWeight: 600,
+                      }
+                    }
+                  }}
+                  sx={{ mb: 1.5 }}
+                />
+                <Box sx={{ display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
+                  <Button size="small" variant="outlined" onClick={() => setReminderText("")} sx={{ borderRadius: "10px", fontWeight: 700, textTransform: "none" }}>
+                    Clear
+                  </Button>
+                  <Button size="small" variant="contained" onClick={handleSaveReminder} sx={{ bgcolor: "primary.main", color: "primary.contrastText", borderRadius: "10px", fontWeight: 800, textTransform: "none", boxShadow: "none", "&:hover": { bgcolor: "primary.main", opacity: 0.9 } }}>
+                    Save Note
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Past History / System Logs */}
+              <Box>
+                <Typography fontSize={13} fontWeight={800} color="text.primary" mb={1.5} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                  System Events & History
+                </Typography>
+
+                {historyLoading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : dateHistory && (
+                  <Stack spacing={1.2}>
+                    {/* Assets Procured */}
+                    {dateHistory.assets?.map((a) => (
+                      <Box key={a._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(251,191,36,0.12)", color: "#FBBF24", display: "grid", placeItems: "center" }}>
+                          <Inventory2Rounded sx={{ fontSize: 16 }} />
+                        </Box>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{a.name}</Typography>
+                          <Typography fontSize={11} color="text.secondary" noWrap>Asset Registered · SN: {a.serialNumber || "N/A"} · {a.department}</Typography>
+                        </Box>
+                      </Box>
+                    ))}
+
+                    {/* Tickets Raised */}
+                    {dateHistory.tickets?.map((t) => (
+                      <Box key={t._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(156,163,175,0.12)", color: "#9CA3AF", display: "grid", placeItems: "center" }}>
+                          <ConfirmationNumberRounded sx={{ fontSize: 16 }} />
+                        </Box>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{t.issue}</Typography>
+                          <Typography fontSize={11} color="text.secondary" noWrap>Ticket #{t.ticketId} · Status: {t.status} · Priority: {t.priority}</Typography>
+                        </Box>
+                      </Box>
+                    ))}
+
+                    {/* Maintenance logs */}
+                    {dateHistory.maintenance?.map((m) => (
+                      <Box key={m._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(239,68,68,0.12)", color: "#EF4444", display: "grid", placeItems: "center" }}>
+                          <BuildRounded sx={{ fontSize: 16 }} />
+                        </Box>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{m.description}</Typography>
+                          <Typography fontSize={11} color="text.secondary" noWrap>{m.type} Maintenance · Status: {m.status} · Cost: ₹{m.cost || 0}</Typography>
+                        </Box>
+                      </Box>
+                    ))}
+
+                    {(!dateHistory.assets?.length && !dateHistory.tickets?.length && !dateHistory.maintenance?.length) && (
+                      <Typography fontSize={12} fontWeight={600} color="text.secondary" sx={{ fontStyle: "italic", textAlign: "center", py: 2 }}>
+                        No system events recorded on this date.
+                      </Typography>
+                    )}
+                  </Stack>
+                )}
+              </Box>
             </DialogContent>
           </>
         )}

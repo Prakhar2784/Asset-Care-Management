@@ -68,34 +68,6 @@ const findUserAcrossTenants = async (query) => {
   return null;
 };
 
-// POST /api/auth/register
-const registerUser = async (req, res) => {
-  try {
-    const { name, email, password, department } = req.body;
-    // Check globally to avoid duplicate emails across tenants
-    const userExists = await findUserAcrossTenants({ email });
-    if (userExists) return res.status(400).json({ message: 'User already exists' });
-
-    // SECURITY: role and tenantId are assigned by the server, never taken from
-    // the request body — otherwise anyone could self-register as an admin of
-    // an arbitrary tenant. Public self-signup only creates default-tenant
-    // employees; company admins are created via /register-company, and tenant
-    // members via the authenticated invite/user-management flows.
-    const user = await User.create({ name, email, password, role: 'employee', department, tenantId: 'default' });
-    if (user) {
-      res.status(201).json({
-        _id: user._id, name: user.name, email: user.email,
-        role: user.role, department: user.department, tenantId: user.tenantId,
-        token: generateToken(user._id, user.tenantId)
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 // POST /api/auth/login
 const loginUser = async (req, res) => {
   try {
@@ -461,9 +433,8 @@ const getTenantBranding = async (req, res) => {
   }
 };
 
-module.exports = { 
-  registerUser, 
-  loginUser, 
+module.exports = {
+  loginUser,
   getMe, 
   forgotPassword, 
   verifyOtp, 

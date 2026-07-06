@@ -53,26 +53,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password, role, department) => {
-    setError(null);
-    try {
-      // Make POST request to your real backend
-      const response = await api.post('/auth/register', {
-        name, email, password, role, department
-      });
-      
-      const user = response.data;
-      setCurrentUser(user);
-      localStorage.setItem("assetcare_user", JSON.stringify(user));
-      
-      return user;
-    } catch (err) {
-      const message = err.response?.data?.message || "Registration failed.";
-      setError(message);
-      throw new Error(message);
-    }
-  };
-
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem("assetcare_user");
@@ -94,7 +74,6 @@ export const AuthProvider = ({ children }) => {
   const value = {
     currentUser,
     login,
-    register,
     logout,
     refreshUser,
     error,
