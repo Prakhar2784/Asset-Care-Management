@@ -163,6 +163,9 @@ export default function UserManagement() {
   const [offboardTarget, setOffboardTarget] = useState(null);
   const [offboarding, setOffboarding]       = useState(false);
 
+  // Delete confirmation
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
   // Profile drawer
   const [profileOpen, setProfileOpen]           = useState(false);
   const [profileUser, setProfileUser]           = useState(null);
@@ -343,9 +346,9 @@ export default function UserManagement() {
     } finally { setBulkWorking(false); }
   };
 
-  const bulkDelete = async () => {
-    if (!window.confirm(`Permanently delete ${selected.size} user(s)?`)) return;
+  const executeBulkDelete = async () => {
     setBulkWorking(true);
+    setDeleteConfirmOpen(false);
     try {
       await Promise.all([...selected].map(id => api.delete(`/users/${id}`)));
       setUsers(prev => prev.filter(u => !selected.has(u._id)));
@@ -584,7 +587,7 @@ export default function UserManagement() {
             </Button>
           </Tooltip>
           <Tooltip title="Delete selected">
-            <Button size="small" startIcon={<DeleteRounded />} onClick={bulkDelete} disabled={bulkWorking}
+            <Button size="small" startIcon={<DeleteRounded />} onClick={() => setDeleteConfirmOpen(true)} disabled={bulkWorking}
               sx={{ fontWeight: 700, borderRadius: '10px', color: '#DC2626', bgcolor: 'rgba(220,38,38,0.08)', '&:hover': { bgcolor: 'rgba(220,38,38,0.15)' } }}>
               Delete
             </Button>
@@ -1300,6 +1303,32 @@ export default function UserManagement() {
           <Button variant="contained" onClick={handleOffboard} disabled={offboarding}
             sx={{ bgcolor: '#DC2626', '&:hover': { bgcolor: '#B91C1C' }, fontWeight: 800, borderRadius: '10px', px: 3 }}>
             {offboarding ? 'Processing…' : `Offboard ${offboardTarget?.name?.split(' ')[0]}`}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Permanent Delete confirmation dialog */}
+      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        <DialogTitle component="div" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DeleteRounded sx={{ color: '#DC2626' }} />
+            <Typography fontWeight={800} fontSize={17}>Delete User(s)?</Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2.5 }}>
+          <Typography color="text.secondary">
+            Are you sure you want to permanently delete the selected <strong>{selected.size}</strong> user(s)?
+          </Typography>
+          <Alert severity="error" sx={{ mt: 2.5, borderRadius: '10px', fontSize: 12 }}>
+            This will permanently remove their records from the database. This action cannot be undone.
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Button onClick={() => setDeleteConfirmOpen(false)} sx={{ fontWeight: 700, color: 'text.secondary', borderRadius: '10px' }}>Cancel</Button>
+          <Button variant="contained" onClick={executeBulkDelete} disabled={bulkWorking}
+            sx={{ bgcolor: '#DC2626', '&:hover': { bgcolor: '#B91C1C' }, fontWeight: 800, borderRadius: '10px', px: 3 }}>
+            {bulkWorking ? 'Deleting…' : 'Delete Permanently'}
           </Button>
         </DialogActions>
       </Dialog>
