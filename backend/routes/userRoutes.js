@@ -112,12 +112,12 @@ router.put('/:id/permissions', protect, authorize('admin', 'super_admin'), async
   }
 });
 
-// DELETE /api/users/:id — deactivate (soft delete)
+// DELETE /api/users/:id — permanently delete user
 router.delete('/:id', protect, authorize('admin', 'super_admin'), async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    const user = await User.findByIdAndDelete(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
-    res.json({ message: 'User deactivated.' });
+    res.json({ message: 'User permanently deleted.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

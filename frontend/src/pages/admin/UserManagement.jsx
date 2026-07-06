@@ -344,12 +344,12 @@ export default function UserManagement() {
   };
 
   const bulkDelete = async () => {
-    if (!window.confirm(`Permanently deactivate ${selected.size} user(s)?`)) return;
+    if (!window.confirm(`Permanently delete ${selected.size} user(s)?`)) return;
     setBulkWorking(true);
     try {
       await Promise.all([...selected].map(id => api.delete(`/users/${id}`)));
-      setUsers(prev => prev.map(u => selected.has(u._id) ? { ...u, isActive: false } : u));
-      setSnackbar({ open: true, message: `${selected.size} user(s) removed.`, severity: 'success' });
+      setUsers(prev => prev.filter(u => !selected.has(u._id)));
+      setSnackbar({ open: true, message: `${selected.size} user(s) permanently deleted.`, severity: 'success' });
       clearSelection();
     } catch {
       setSnackbar({ open: true, message: 'Some deletions failed.', severity: 'error' });
