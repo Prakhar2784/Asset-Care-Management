@@ -47,6 +47,7 @@ const getTenantConnection = (tenantId) => {
   connection.model('AssetAssignment', require('../models/AssetAssignment').schema);
   connection.model('Notification', require('../models/Notification').schema);
   connection.model('AuditLog', require('../models/AuditLog').schema);
+  connection.model('MaintenanceLog', require('../models/MaintenanceLog').schema);
   
   // Version 1.5 Enterprise models
   connection.model('Warehouse', require('../models/Warehouse').schema);

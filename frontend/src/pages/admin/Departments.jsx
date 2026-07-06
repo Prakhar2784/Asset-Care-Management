@@ -15,6 +15,8 @@ import {
   Snackbar,
   TextField,
   Typography,
+  InputAdornment,
+  Tooltip,
 } from "@mui/material";
 import {
   AddRounded,
@@ -26,9 +28,11 @@ import {
   EmailRounded,
   LocationOnRounded,
   PhoneRounded,
+  PeopleRounded,
   SaveRounded,
   VisibilityRounded,
   WarningAmberRounded,
+  HelpOutlineRounded,
 } from "@mui/icons-material";
 import api from "../../api/axios";
 
@@ -247,6 +251,7 @@ const Departments = () => {
                 <InfoRow icon={<EmailRounded fontSize="small" />} text={dept.hodEmail || "—"} />
                 <InfoRow icon={<PhoneRounded fontSize="small" />} text={dept.hodPhone || "—"} />
                 <InfoRow icon={<LocationOnRounded fontSize="small" />} text={dept.location || "—"} />
+                <InfoRow icon={<PeopleRounded fontSize="small" />} text={`Employees: ${dept.employeeCount || 0}`} />
 
                 <Divider sx={{ my: 2 }} />
 
@@ -294,16 +299,64 @@ const Departments = () => {
           <FormBlock title="Department Details">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth required autoFocus label="Department Name" value={formData.name} onChange={e => handleChange("name", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth required autoFocus label="Department Name" value={formData.name} onChange={e => handleChange("name", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Full name of the department" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth required label="Department Code" value={formData.code} onChange={e => handleChange("code", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth required label="Department Code" value={formData.code} onChange={e => handleChange("code", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Unique short code (e.g., FIN, IT)" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth label="Location" value={formData.location} onChange={e => handleChange("location", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth label="Location" value={formData.location} onChange={e => handleChange("location", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Office campus or branch location" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth label="Floor / Building" value={formData.floor} onChange={e => handleChange("floor", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth label="Floor / Building" value={formData.floor} onChange={e => handleChange("floor", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Floor number or building name" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
           </FormBlock>
@@ -311,13 +364,49 @@ const Departments = () => {
           <FormBlock title="HOD / Approval Owner">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth required label="HOD Name" value={formData.hodName} onChange={e => handleChange("hodName", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth required label="HOD Name" value={formData.hodName} onChange={e => handleChange("hodName", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Head of Department name" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth required label="HOD Email" value={formData.hodEmail} onChange={e => handleChange("hodEmail", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth required label="HOD Email" value={formData.hodEmail} onChange={e => handleChange("hodEmail", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Head of Department email" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth label="HOD Phone" value={formData.hodPhone} onChange={e => handleChange("hodPhone", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth label="HOD Phone" value={formData.hodPhone} onChange={e => handleChange("hodPhone", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Head of Department phone number" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
           </FormBlock>
@@ -325,13 +414,37 @@ const Departments = () => {
           <FormBlock title="Status">
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField select fullWidth label="Status" value={formData.status} onChange={e => handleChange("status", e.target.value)} sx={inputStyles}>
+                <TextField select fullWidth label="Status" value={formData.status} onChange={e => handleChange("status", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end" sx={{ mr: 2 }}>
+                          <Tooltip title="Active status of the department" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                >
                   <MenuItem value="Active">Active</MenuItem>
                   <MenuItem value="Inactive">Inactive</MenuItem>
                 </TextField>
               </Grid>
               <Grid size={12}>
-                <TextField fullWidth multiline minRows={3} label="Description / Notes" value={formData.description} onChange={e => handleChange("description", e.target.value)} sx={inputStyles} />
+                <TextField fullWidth multiline minRows={3} label="Description / Notes" value={formData.description} onChange={e => handleChange("description", e.target.value)} sx={inputStyles}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Tooltip title="Brief details or purpose of this department" arrow>
+                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    }
+                  }}
+                />
               </Grid>
             </Grid>
           </FormBlock>
@@ -378,6 +491,7 @@ const Departments = () => {
               <DetailRow label="HOD Phone" value={selectedDept.hodPhone} />
               <DetailRow label="Location" value={selectedDept.location} />
               <DetailRow label="Floor / Building" value={selectedDept.floor} />
+              <DetailRow label="Total Employees" value={String(selectedDept.employeeCount || 0)} />
               <DetailRow label="Status" value={selectedDept.status} />
               <DetailRow label="Description" value={selectedDept.description} />
             </Box>

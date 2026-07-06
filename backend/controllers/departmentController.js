@@ -3,7 +3,22 @@ const Department = require("../models/Department");
 const getDepartments = async (req, res) => {
   try {
     const departments = await Department.find({}).sort({ createdAt: -1 });
-    res.status(200).json(departments);
+    const User = require("../models/User");
+
+    const departmentsWithCounts = await Promise.all(
+      departments.map(async (dept) => {
+        const employeeCount = await User.countDocuments({
+          department: { $regex: new RegExp(`^${dept.name}$`, "i") },
+          isActive: true,
+        });
+        return {
+          ...dept.toObject(),
+          employeeCount,
+        };
+      })
+    );
+
+    res.status(200).json(departmentsWithCounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -17,7 +32,16 @@ const getDepartmentById = async (req, res) => {
       return res.status(404).json({ message: "Department not found" });
     }
 
-    res.status(200).json(department);
+    const User = require("../models/User");
+    const employeeCount = await User.countDocuments({
+      department: { $regex: new RegExp(`^${department.name}$`, "i") },
+      isActive: true,
+    });
+
+    res.status(200).json({
+      ...department.toObject(),
+      employeeCount,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

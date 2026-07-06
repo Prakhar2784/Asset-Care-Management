@@ -9,7 +9,7 @@ import {
   BuildRounded, SearchRounded, AddRounded, EditRounded, DeleteRounded,
   CloseRounded, EngineeringRounded, CalendarTodayRounded, AttachMoneyRounded,
   EventRepeatRounded, PersonRounded, PhoneRounded, StorefrontRounded,
-  NotesRounded, InventoryRounded,
+  NotesRounded, InventoryRounded, HelpOutlineRounded
 } from "@mui/icons-material";
 import api from "../../api/axios";
 
@@ -526,7 +526,18 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Service Date" type="date" sx={inputSx}
                 value={form.serviceDate}
                 onChange={e => setForm(f => ({ ...f, serviceDate: e.target.value }))}
-                slotProps={{ inputLabel: { shrink: true } }}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Date on which the service is conducted" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  },
+                  inputLabel: { shrink: true }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -534,7 +545,18 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Next Service Date (optional)" type="date" sx={inputSx}
                 value={form.nextServiceDate}
                 onChange={e => setForm(f => ({ ...f, nextServiceDate: e.target.value }))}
-                slotProps={{ inputLabel: { shrink: true } }}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Optional next scheduled checkup date" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  },
+                  inputLabel: { shrink: true }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
@@ -542,6 +564,17 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Description" multiline rows={2} sx={inputSx}
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Describe what is being inspected or repaired" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -549,6 +582,17 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Technician Name" sx={inputSx}
                 value={form.technicianName}
                 onChange={e => setForm(f => ({ ...f, technicianName: e.target.value }))}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Name of the service engineer" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -556,7 +600,18 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Technician Contact" sx={inputSx}
                 value={form.technicianContact}
                 onChange={e => setForm(f => ({ ...f, technicianContact: e.target.value.replace(/[^0-9]/g, '').slice(0, 15) }))}
-                slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+                slotProps={{
+                  htmlInput: { inputMode: 'numeric' },
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Phone number of the technician" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -567,7 +622,7 @@ export default function MaintenanceLogs() {
                 slotProps={{
                   input: {
                     endAdornment: (
-                      <InputAdornment position="end">
+                      <InputAdornment position="end" sx={{ gap: 1 }}>
                         <Button
                           variant="text"
                           size="small"
@@ -576,6 +631,9 @@ export default function MaintenanceLogs() {
                         >
                           Select Registered
                         </Button>
+                        <Tooltip title="Company providing the service or select from registered" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
                       </InputAdornment>
                     )
                   }
@@ -587,7 +645,18 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Cost (₹)" type="number" sx={inputSx}
                 value={form.cost}
                 onChange={e => setForm(f => ({ ...f, cost: e.target.value }))}
-                slotProps={{ input: { startAdornment: <InputAdornment position="start">₹</InputAdornment> } }}
+                slotProps={{
+                  input: {
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Total maintenance cost in INR" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
@@ -595,6 +664,17 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Notes (optional)" multiline rows={2} sx={inputSx}
                 value={form.notes}
                 onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Any additional service details or comments" arrow>
+                          <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
+                        </Tooltip>
+                      </InputAdornment>
+                    )
+                  }
+                }}
               />
             </Grid>
           </Grid>
