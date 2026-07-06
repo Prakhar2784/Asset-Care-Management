@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Box, Typography, Paper, Tabs, Tab, TextField, Button, Alert, Switch, Stack,
   FormControlLabel, CircularProgress, Divider, Chip, Grid, MenuItem, Select,
-  FormControl, InputLabel, InputAdornment, IconButton, Snackbar, LinearProgress
+  FormControl, InputLabel, InputAdornment, IconButton, Snackbar, LinearProgress,
+  Avatar
 } from '@mui/material';
 import {
   PersonRounded, PaletteRounded, AssessmentRounded, SecurityRounded,
@@ -27,10 +28,35 @@ function TabPanel({ value, index, children }) {
 
 // ─── Profile Tab ───────────────────────────────────────────────────────────────
 function ProfileTab({ currentUser }) {
+  const { refreshUser } = useAuth();
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+
+  // Avatar upload
+  const avatarInputRef = useRef(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const handleAvatarUpload = async (file) => {
+    if (!file) return;
+    setAvatarUploading(true);
+    setMsg('');
+    try {
+      const fd = new FormData();
+      fd.append('avatar', file);
+      const { data } = await api.post(`/users/${currentUser._id}/avatar`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      await refreshUser();
+      setMsg('Profile photo updated successfully.');
+    } catch (err) {
+      setMsg(err.response?.data?.message || 'Failed to upload photo.');
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
 
   // Change password
   const [current, setCurrent] = useState('');
@@ -76,6 +102,48 @@ function ProfileTab({ currentUser }) {
               <PersonRounded sx={{ color: 'text.primary', fontSize: 18 }} />
             </Box>
             <Typography fontWeight={800} fontSize={16} color="text.primary">Personal Information</Typography>
+          </Box>
+          
+          {/* Avatar Upload Section */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, mb: 4 }}>
+            <Box sx={{ position: 'relative' }}>
+              <Avatar
+                src={currentUser?.avatar ? `http://localhost:5000${currentUser.avatar}` : undefined}
+                sx={{
+                  width: 90, height: 90,
+                  fontSize: 32, fontWeight: 900,
+                  bgcolor: '#FBBF24', color: '#111827',
+                  border: '3px solid', borderColor: 'background.paper',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
+                }}
+              >
+                {(currentUser?.name || 'U').substring(0, 2).toUpperCase()}
+              </Avatar>
+              <IconButton
+                component="label"
+                disabled={avatarUploading}
+                sx={{
+                  position: 'absolute', bottom: 0, right: 0,
+                  bgcolor: '#FBBF24', color: '#111827',
+                  width: 32, height: 32,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  '&:hover': { bgcolor: '#FBBF24', opacity: 0.9 },
+                  '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
+                }}
+              >
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  hidden
+                  accept=".jpg,.jpeg,.png,.webp"
+                  onChange={e => handleAvatarUpload(e.target.files[0])}
+                />
+                {avatarUploading ? <CircularProgress size={16} color="inherit" /> : <CameraAltRounded sx={{ fontSize: 16 }} />}
+              </IconButton>
+            </Box>
+            <Typography fontSize={12} color="text.secondary" fontWeight={600}>
+              Click the camera icon to upload profile photo
+            </Typography>
           </Box>
           <Stack spacing={2}>
             <TextField label="Full Name" value={name} onChange={e => setName(e.target.value)} fullWidth size="small" sx={inputSx} />

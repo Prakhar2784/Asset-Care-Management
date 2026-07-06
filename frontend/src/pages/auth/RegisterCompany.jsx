@@ -83,16 +83,35 @@ const RegisterCompany = () => {
   };
 
   return (
-    <div className="auth-container">
-      <style>{`
-        .auth-container {
-          display: flex;
-          min-height: 100vh;
-          background: #090909;
-          font-family: 'Inter', sans-serif;
-          color: #ffffff;
-          overflow: hidden;
-        }
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <style>{`
+          .auth-wrapper {
+            min-height: 100vh;
+            padding: 120px 24px 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0B0D12;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+          }
+
+          .auth-container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(17,24,39,0.18);
+            border-radius: 36px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(17,24,39,0.15);
+            color: #ffffff;
+          }
 
         .auth-info {
           flex: 1.2;
@@ -559,6 +578,7 @@ const RegisterCompany = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };

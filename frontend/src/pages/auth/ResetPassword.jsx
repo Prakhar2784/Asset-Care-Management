@@ -1,14 +1,14 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
-import {
-  Box, Paper, Typography, TextField, Button, Alert,
-  CircularProgress, InputAdornment, IconButton, Grid
-} from '@mui/material';
-import {
-  LockResetRounded, Visibility, VisibilityOff,
-  CheckCircleOutlined, ErrorOutlined, CheckCircleRounded, CancelRounded
-} from '@mui/icons-material';
 import api from '../../api/axios';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
+import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 
 const rules = [
   { key: 'length',    label: '8+ chars',   test: (p) => p.length >= 8 },
@@ -73,128 +73,523 @@ export default function ResetPassword() {
     }
   };
 
-  const containerSx = {
-    minHeight: '100vh',
-    background: "rgba(17,24,39,0.12)",
-    display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2
-  };
+  const cssStyles = `
+    .auth-wrapper {
+      min-height: 100vh;
+      padding: 120px 24px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0B0D12;
+      background-attachment: fixed;
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+    }
+
+    .auth-container {
+      display: flex;
+      width: 100%;
+      max-width: 1200px;
+      background: rgba(255, 255, 255, 0.70);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(17,24,39,0.18);
+      border-radius: 36px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 1px solid rgba(17,24,39,0.15);
+      color: #ffffff;
+    }
+
+    .auth-info {
+      flex: 1.2;
+      background: linear-gradient(135deg, #111111 0%, #050505 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px;
+      position: relative;
+    }
+
+    .auth-info::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(17,24,39,0.12) 0%, rgba(0,0,0,0) 70%);
+      border: 1px dashed rgba(17,24,39,0.15);
+      border-radius: 50%;
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 2;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #111827;
+      display: grid;
+      place-items: center;
+      color: #FFFFFF;
+    }
+
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .info-content {
+      max-width: 500px;
+      z-index: 2;
+      margin: auto 0;
+    }
+
+    .info-title {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #FFFFFF 0%, #888888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .info-desc {
+      color: #909090;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .feature-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 16px;
+    }
+
+    .feature-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(17,24,39,0.1);
+      color: #FFFFFF;
+      display: grid;
+      place-items: center;
+    }
+
+    .feature-details h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+    }
+
+    .feature-details p {
+      font-size: 13px;
+      color: #808080;
+      margin: 0;
+    }
+
+    .auth-form-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: #090909;
+      z-index: 2;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .form-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .form-sub {
+      color: #888888;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #555555;
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-input {
+      width: 100%;
+      background: #141414;
+      border: 1px solid #222222;
+      padding: 14px 14px 14px 44px;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 14px;
+      transition: all 0.3s;
+      outline: none;
+    }
+
+    .auth-input:focus {
+      border-color: #FFFFFF;
+      background: #181818;
+      box-shadow: 0 0 0 4px rgba(17,24,39,0.1);
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #555555;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-suffix:hover {
+      color: #ffffff;
+    }
+
+    .error-banner {
+      background: rgba(244,67,54,0.1);
+      border: 1px solid rgba(244,67,54,0.2);
+      color: #f44336;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .success-banner {
+      background: rgba(76,175,80,0.1);
+      border: 1px solid rgba(76,175,80,0.2);
+      color: #4caf50;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: #FBBF24;
+      color: #111827;
+      font-weight: 700;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.3s;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(17,24,39,0.3);
+    }
+
+    .submit-btn:disabled {
+      background: #444444;
+      color: #888888;
+      cursor: not-allowed;
+    }
+
+    .auth-footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #666666;
+    }
+
+    .auth-link {
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+
+    .pw-rules {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 14px;
+      background: rgba(20,20,20,0.65);
+      border: 1.5px solid rgba(17,24,39,0.2);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+    }
+
+    .pw-rule {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pw-rule.pass { color: #16A34A; }
+    .pw-rule.fail { color: #DC2626; }
+
+    .pw-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    .pw-rule.pass .pw-dot { background: #16A34A; }
+    .pw-rule.fail .pw-dot { background: #DC2626; }
+
+    .loading-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #090909;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .auth-info {
+        display: none;
+      }
+    }
+  `;
 
   if (tokenValid === null) {
     return (
-      <Box sx={containerSx}>
-        <CircularProgress sx={{ color: 'white' }} />
-      </Box>
+      <div className="loading-center">
+        <style>{cssStyles}</style>
+        <CircularProgress sx={{ color: '#FBBF24' }} />
+        <span style={{ fontWeight: 700, fontSize: '14px', color: '#888888' }}>Verifying security token...</span>
+      </div>
     );
   }
 
   if (tokenValid === false) {
     return (
-      <Box sx={containerSx}>
-        <Paper elevation={8} sx={{ p: 4, maxWidth: 440, width: '100%', borderRadius: 3, textAlign: 'center' }}>
-          <ErrorOutlined sx={{ fontSize: 56, color: '#dc2626', mb: 2 }} />
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Link Expired or Invalid
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            This password reset link is invalid or has expired. Please request a new one.
-          </Typography>
-          <Button component={Link} to="/forgot-password" variant="contained" fullWidth
-            sx={{ background: "rgba(17,24,39,0.12)", color: '#FFFFFF', fontWeight: 700, py: 1.4, '&:hover': { background: '#222222' } }}>
-            Request New Link
-          </Button>
-        </Paper>
-      </Box>
+      <div className="auth-wrapper">
+        <div className="auth-container">
+          <style>{cssStyles}</style>
+          {/* LEFT DESIGN SIDE */}
+          <div className="auth-info">
+            <div className="brand-header">
+              <div className="brand-logo">
+                <Inventory2Icon />
+              </div>
+              <span className="brand-name">AssetCare</span>
+            </div>
+            <div className="info-content">
+              <h1 className="info-title">Security Link Expired.</h1>
+              <p className="info-desc">
+                For security reasons, verification tokens expire quickly. Please request a new recovery link.
+              </p>
+            </div>
+            <div style={{ color: '#444444', fontSize: '12px', zIndex: 2 }}>
+              &copy; 2026 AssetCare PaaS. All rights reserved.
+            </div>
+          </div>
+
+          {/* RIGHT FORM SIDE */}
+          <div className="auth-form-side">
+            <div className="form-card" style={{ textAlign: 'center' }}>
+              <ErrorOutlineRoundedIcon sx={{ fontSize: 56, color: '#dc2626', mb: 2 }} />
+              <h2 className="form-title" style={{ fontSize: '24px' }}>Link Expired or Invalid</h2>
+              <p className="form-sub" style={{ marginBottom: '24px' }}>
+                This password reset link is invalid or has expired. Please request a new one.
+              </p>
+              <Link to="/forgot-password" className="submit-btn" style={{ textDecoration: 'none' }}>
+                Request New Link
+              </Link>
+              <div className="auth-footer">
+                Back to{' '}
+                <Link to="/login" className="auth-link">
+                  Log In
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={containerSx}>
-      <Paper elevation={8} sx={{ p: 4, maxWidth: 460, width: '100%', borderRadius: 3 }}>
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Box sx={{
-            width: 56, height: 56, borderRadius: 2, mx: 'auto', mb: 2,
-            background: "rgba(17,24,39,0.12)",
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <LockResetRounded sx={{ color: '#FFFFFF', fontSize: 28 }} />
-          </Box>
-          <Typography variant="h5" fontWeight={700}>{isInvite ? 'Activate Your Account' : 'Reset Password'}</Typography>
-          <Typography variant="body2" color="text.secondary" mt={0.5}>
-            {isInvite ? 'Set a password to activate your AssetCare Pro account' : 'Choose a new secure password'}
-          </Typography>
-        </Box>
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <style>{cssStyles}</style>
 
-        {success ? (
-          <Box sx={{ textAlign: 'center', py: 2 }}>
-            <CheckCircleOutlined sx={{ fontSize: 56, color: '#16a34a', mb: 2 }} />
-            <Typography variant="h6" fontWeight={600} gutterBottom>{isInvite ? 'Account Activated!' : 'Password Reset!'}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {isInvite ? 'Your account is ready. Redirecting to login...' : 'Your password has been updated. A confirmation email has been sent. Redirecting to login...'}
-            </Typography>
-          </Box>
-        ) : (
-          <Box component="form" onSubmit={handleSubmit}>
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {/* LEFT DESIGN SIDE */}
+      <div className="auth-info">
+        <div className="brand-header">
+          <div className="brand-logo">
+            <Inventory2Icon />
+          </div>
+          <span className="brand-name">AssetCare</span>
+        </div>
 
-            <TextField
-              label="New Password"
-              type={showPass ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth required autoFocus
-              sx={{ mb: 1.5 }}
-              slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowPass(!showPass)} edge="end">{showPass ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
-            />
+        <div className="info-content">
+          <h1 className="info-title">{isInvite ? 'Configure Your Workspace.' : 'Choose A Strong Password.'}</h1>
+          <p className="info-desc">
+            {isInvite 
+              ? 'Complete your account activation and configure your private login password details.' 
+              : 'Setup your new password to restore access to your company assets partition.'}
+          </p>
 
-            {/* Password rules */}
-            {password.length > 0 && (
-              <Box sx={{ mb: 2, p: 1.5, borderRadius: 2, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' }}>
-                <Grid container spacing={0.5}>
+          <div className="feature-card">
+            <div className="feature-icon-wrapper">
+              <ShieldOutlinedIcon fontSize="small" />
+            </div>
+            <div className="feature-details">
+              <h4>Password Complexity Rules</h4>
+              <p>Corporate guidelines require passwords to have upper, lower, numbers, and symbol characters.</p>
+            </div>
+          </div>
+
+          <div className="feature-card">
+            <div className="feature-icon-wrapper">
+              <LockRoundedIcon fontSize="small" />
+            </div>
+            <div className="feature-details">
+              <h4>Asset Security Shield</h4>
+              <p>Strong passwords protect ticket databases, hardware serial records, and HOD workflows.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ color: '#444444', fontSize: '12px', zIndex: 2 }}>
+          &copy; 2026 AssetCare PaaS. All rights reserved.
+        </div>
+      </div>
+
+      {/* RIGHT FORM SIDE */}
+      <div className="auth-form-side">
+        <div className="form-card">
+          <h2 className="form-title">{isInvite ? 'Activate Account' : 'Reset Password'}</h2>
+          <p className="form-sub">
+            {isInvite ? 'Set your password to activate your workspace profile' : 'Enter your new secure account password'}
+          </p>
+
+          {error && <div className="error-banner">{error}</div>}
+
+          {success ? (
+            <div className="success-banner">
+              <CheckCircleOutlineRoundedIcon sx={{ fontSize: 40, color: '#4caf50' }} />
+              <div>
+                <strong>{isInvite ? 'Account Activated!' : 'Password Updated!'}</strong>
+                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#888888" }}>
+                  Redirecting to login portal shortly...
+                </p>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div className="input-group">
+                <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
+                <input
+                  type={showPass ? "text" : "password"}
+                  placeholder="New Password"
+                  className="auth-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoFocus
+                />
+                <span 
+                  className="input-suffix"
+                  onClick={() => setShowPass(!showPass)}
+                >
+                  {showPass ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
+                </span>
+              </div>
+
+              {/* Password rules */}
+              {password.length > 0 && (
+                <div className="pw-rules">
                   {ruleResults.map(r => (
-                    <Grid size={{ xs: 6 }} key={r.key}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-                        {r.passed
-                          ? <CheckCircleRounded sx={{ fontSize: 14, color: '#16a34a' }} />
-                          : <CancelRounded sx={{ fontSize: 14, color: '#dc2626' }} />
-                        }
-                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: r.passed ? '#16a34a' : '#dc2626' }}>
-                          {r.label}
-                        </Typography>
-                      </Box>
-                    </Grid>
+                    <div key={r.key} className={`pw-rule ${r.passed ? 'pass' : 'fail'}`}>
+                      <span className="pw-dot" />
+                      {r.label}
+                    </div>
                   ))}
-                </Grid>
-              </Box>
-            )}
+                </div>
+              )}
 
-            <TextField
-              label="Confirm Password"
-              type={showConfirm ? 'text' : 'password'}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              fullWidth required
-              sx={{ mb: 3 }}
-              error={confirm.length > 0 && password !== confirm}
-              helperText={confirm.length > 0 && password !== confirm ? 'Passwords do not match' : ''}
-              slotProps={{ input: { endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowConfirm(!showConfirm)} edge="end">{showConfirm ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> } }}
-            />
+              <div className="input-group">
+                <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Confirm Password"
+                  className="auth-input"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  required
+                />
+                <span 
+                  className="input-suffix"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                >
+                  {showConfirm ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
+                </span>
+              </div>
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={loading}
-              sx={{
-                py: 1.4, fontWeight: 700,
-                background: "rgba(17,24,39,0.12)", color: '#FFFFFF',
-                '&:hover': { background: '#222222' }
-              }}
-            >
-              {loading ? <CircularProgress size={22} color="inherit" /> : 'Set New Password'}
-            </Button>
-          </Box>
-        )}
-      </Paper>
-    </Box>
+              <button type="submit" className="submit-btn" disabled={loading}>
+                {loading ? 'Processing...' : isInvite ? 'Set Password & Activate' : 'Set New Password'}
+              </button>
+            </form>
+          )}
+
+          <div className="auth-footer">
+            Back to{' '}
+            <Link to="/login" className="auth-link">
+              Log In
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
   );
 }

@@ -13,6 +13,28 @@ import {
 } from "@mui/icons-material";
 import api from "../../api/axios";
 
+const RupeeIcon = (props) => (
+  <Box
+    component="svg"
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="0 0 320 512"
+    sx={{
+      fontSize: props.sx?.fontSize || 20,
+      width: '1em',
+      height: '1em',
+      display: 'inline-block',
+      userSelect: 'none',
+      flexShrink: 0,
+      ...props.sx
+    }}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M308 96c6.627 0 12-5.373 12-12V44c0-6.627-5.373-12-12-12H12C5.373 32 0 37.373 0 44v40c0 6.627 5.373 12 12 12h58.757c49.537 0 91.73 37.159 95.834 86H12c-6.627 0-12 5.373-12 12v40c0 6.627 5.373 12 12 12h159.9c-14.78 48.728-60.05 84-113.14 84H12c-6.627 0-12 5.373-12 12v36.879c0 3.18 1.265 6.229 3.515 8.479l168 168c4.686 4.686 12.284 4.686 16.971 0l28.284-28.284c4.686-4.686 4.686-12.284 0-16.971L74.828 336H112c85.186 0 156.09-59.544 172.9-138H308c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-21.73C277.587 114.715 245.894 96 208 96h100z"></path>
+  </Box>
+);
+
 const TYPE_OPTIONS = ["Preventive", "Corrective", "Inspection", "Upgrade", "Other"];
 const STATUS_OPTIONS = ["Scheduled", "In Progress", "Completed", "Cancelled"];
 
@@ -33,7 +55,7 @@ const STATUS_COLOR = {
 
 const KPI_DEFS = [
   { key: "total",    label: "Total Services", color: "text.primary", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
-  { key: "cost",     label: "Total Cost",     color: "#FBBF24", icon: <AttachMoneyRounded sx={{ fontSize: 20 }} /> },
+  { key: "cost",     label: "Total Cost",     color: "#FBBF24", icon: <RupeeIcon sx={{ fontSize: 20 }} /> },
   { key: "last",     label: "Last Serviced",  color: "#FBBF24", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
   { key: "next",     label: "Next Due",       color: "#FBBF24", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
 ];
@@ -415,7 +437,6 @@ export default function MaintenanceLogs() {
                                 )}
                                 {log.cost !== undefined && log.cost !== "" && (
                                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                                    <AttachMoneyRounded sx={{ fontSize: 13, color: "text.secondary" }} />
                                     <Typography variant="caption" color="text.secondary" fontWeight={700}>
                                       {fmtCurrency(log.cost)}
                                     </Typography>

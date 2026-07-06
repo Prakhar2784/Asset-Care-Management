@@ -198,7 +198,7 @@ const Sidebar = ({ onClose }) => {
       {/* User Row */}
       <Box sx={{ borderTop: "1px solid rgba(17,24,39,0.1)", px: 2, py: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Avatar sx={{
+          <Avatar src={currentUser?.avatar ? `http://localhost:5000${currentUser.avatar}` : undefined} sx={{
             width: 34, height: 34,
             background: "#111827",
             color: "#FFFFFF", fontWeight: 900, fontSize: 12,
@@ -332,6 +332,7 @@ const Layout = () => {
               </IconButton>
               <Avatar
                 onClick={() => navigate("/settings")}
+                src={currentUser?.avatar ? `http://localhost:5000${currentUser.avatar}` : undefined}
                 sx={{
                   width: 34, height: 34, ml: 0.5, cursor: "pointer",
                   background: "#111827",

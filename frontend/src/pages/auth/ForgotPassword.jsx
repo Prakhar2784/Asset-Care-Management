@@ -1,59 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  Box, Typography, TextField, Button, Alert, CircularProgress,
-  InputAdornment
-} from '@mui/material';
-import {
-  EmailOutlined, ArrowBackRounded,
-  ShieldOutlined, CheckCircleOutlined, Inventory2Rounded
-} from '@mui/icons-material';
 import api from '../../api/axios';
-
-const wrapperSx = {
-  minHeight: '100vh',
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  p: 3,
-  background:
-    'radial-gradient(ellipse at 15% 0%, rgba(17,24,39,0.22) 0%, transparent 55%),' +
-    'radial-gradient(ellipse at 85% 100%, rgba(17,24,39,0.16) 0%, transparent 55%),' +
-    '#0B0D12',
-  backgroundAttachment: 'fixed',
-};
-
-const cardSx = {
-  width: '100%', maxWidth: 460,
-  bgcolor: 'rgba(255,255,255,0.70)',
-  backdropFilter: 'blur(24px)',
-  border: '1px solid rgba(17,24,39,0.18)',
-  borderRadius: '32px',
-  boxShadow: '0 30px 70px rgba(0,0,0,0.5)',
-  p: { xs: 3.5, sm: 5 },
-};
-
-const darkInputSx = {
-  mb: 3,
-  '& .MuiOutlinedInput-root': {
-    borderRadius: '16px',
-    bgcolor: 'rgba(20,20,20,0.75)',
-    color: '#FFFFFF',
-    fontWeight: 600,
-    '& fieldset': { borderColor: 'rgba(17,24,39,0.25)', borderWidth: '1.5px' },
-    '&:hover fieldset': { borderColor: 'rgba(17,24,39,0.4)' },
-    '&.Mui-focused fieldset': { borderColor: '#FFFFFF', boxShadow: '0 0 0 3px rgba(17,24,39,0.15)' },
-  },
-  '& .MuiInputLabel-root': { color: '#9CA3AF', fontWeight: 600 },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#FFFFFF' },
-};
-
-const gradientBtn = {
-  py: 1.6, fontWeight: 900, borderRadius: '16px', textTransform: 'none', fontSize: 16,
-  background: '#FBBF24', color: '#111827',
-  boxShadow: '0 14px 28px rgba(0,0,0,0.28)',
-  '&:hover': { background: '#F5A623', transform: 'translateY(-2px)', boxShadow: '0 20px 36px rgba(0,0,0,0.35)' },
-  '&.Mui-disabled': { background: 'rgba(17,24,39,0.25)', color: 'rgba(20,20,20,0.65)' },
-  transition: 'all 0.25s ease',
-};
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
+import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
+import LockRoundedIcon from '@mui/icons-material/LockRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 
 // ─── OTP Box: 6 individual digit inputs ────────────────────────────────────────
 function OtpInput({ value, onChange }) {
@@ -84,11 +37,10 @@ function OtpInput({ value, onChange }) {
   };
 
   return (
-    <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'center', my: 3 }}>
+    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '24px 0' }}>
       {Array.from({ length: 6 }).map((_, idx) => (
-        <Box
+        <input
           key={idx}
-          component="input"
           ref={el => { inputs.current[idx] = el; }}
           inputMode="numeric"
           maxLength={1}
@@ -96,22 +48,31 @@ function OtpInput({ value, onChange }) {
           onChange={(e) => handleChange(idx, e)}
           onKeyDown={(e) => handleKeyDown(idx, e)}
           onPaste={handlePaste}
-          sx={{
-            width: 48, height: 56,
-            textAlign: 'center', fontSize: 24, fontWeight: 800,
-            fontFamily: 'monospace', letterSpacing: 0,
-            border: '1.5px solid',
-            borderColor: value[idx] ? '#111827' : 'rgba(17,24,39,0.25)',
-            borderRadius: '16px', outline: 'none',
-            bgcolor: 'rgba(20,20,20,0.75)',
+          style={{
+            width: '48px',
+            height: '56px',
+            textAlign: 'center',
+            fontSize: '24px',
+            fontWeight: '800',
+            fontFamily: 'monospace',
+            border: '1.5px solid #222222',
+            borderRadius: '12px',
+            outline: 'none',
+            background: '#141414',
             color: '#FFFFFF',
             transition: 'all 0.15s',
-            cursor: 'text',
-            '&:focus': { borderColor: '#FFFFFF', boxShadow: '0 0 0 3px rgba(17,24,39,0.15)', bgcolor: 'rgba(25,25,25,0.85)' }
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#FFFFFF';
+            e.target.style.background = '#181818';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = '#222222';
+            e.target.style.background = '#141414';
           }}
         />
       ))}
-    </Box>
+    </div>
   );
 }
 
@@ -167,130 +128,472 @@ export default function ForgotPassword() {
   };
 
   return (
-    <Box sx={wrapperSx}>
-      <Box sx={cardSx}>
-        {/* Brand mark */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.4, mb: 4 }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '14px', display: 'grid', placeItems: 'center', bgcolor: '#FFFFFF', boxShadow: '0 14px 28px rgba(17,24,39,0.28)' }}>
-            <Inventory2Rounded sx={{ color: '#fff', fontSize: 22 }} />
-          </Box>
-          <Typography sx={{ color: '#FFFFFF', fontWeight: 900, fontSize: 18, letterSpacing: '-0.4px' }}>AssetCare Pro</Typography>
-        </Box>
+    <div className="auth-wrapper">
+      <div className="auth-container">
+        <style>{`
+          .auth-wrapper {
+            min-height: 100vh;
+            padding: 120px 24px 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0B0D12;
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            width: 100%;
+          }
 
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 3.5 }}>
-          <Box sx={{
-            width: 60, height: 60, borderRadius: '18px', mx: 'auto', mb: 2.2,
-            background: 'rgba(17,24,39,0.15)', border: '1px solid rgba(17,24,39,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            {step === 1
-              ? <EmailOutlined sx={{ color: '#C084FC', fontSize: 28 }} />
-              : <ShieldOutlined sx={{ color: '#C084FC', fontSize: 28 }} />}
-          </Box>
-          <Typography sx={{ fontSize: 26, fontWeight: 950, color: '#FFFFFF', letterSpacing: '-0.6px' }}>
-            {step === 1 ? 'Forgot Password' : 'Enter OTP'}
-          </Typography>
-          <Typography sx={{ fontSize: 14, color: '#9CA3AF', fontWeight: 600, mt: 0.8, lineHeight: 1.5 }}>
-            {step === 1
-              ? 'Enter your registered email to receive an OTP'
+          .auth-container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(17,24,39,0.18);
+            border-radius: 36px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid rgba(17,24,39,0.15);
+            color: #ffffff;
+          }
+
+        .auth-info {
+          flex: 1.2;
+          background: linear-gradient(135deg, #111111 0%, #050505 100%);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          padding: 60px;
+          position: relative;
+        }
+
+        .auth-info::before {
+          content: '';
+          position: absolute;
+          top: -10%;
+          left: -10%;
+          width: 380px;
+          height: 380px;
+          background: radial-gradient(circle, rgba(17,24,39,0.12) 0%, rgba(0,0,0,0) 70%);
+          border: 1px dashed rgba(17,24,39,0.15);
+          border-radius: 50%;
+        }
+
+        .brand-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          z-index: 2;
+        }
+
+        .brand-logo {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: #111827;
+          display: grid;
+          place-items: center;
+          color: #FFFFFF;
+        }
+
+        .brand-name {
+          font-size: 22px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+        }
+
+        .info-content {
+          max-width: 500px;
+          z-index: 2;
+          margin: auto 0;
+        }
+
+        .info-title {
+          font-size: 40px;
+          font-weight: 800;
+          line-height: 1.2;
+          margin-bottom: 20px;
+          background: linear-gradient(90deg, #FFFFFF 0%, #888888 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .info-desc {
+          color: #909090;
+          line-height: 1.6;
+          margin-bottom: 40px;
+        }
+
+        .feature-card {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 20px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 16px;
+          backdrop-filter: blur(10px);
+          margin-bottom: 16px;
+        }
+
+        .feature-icon-wrapper {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          background: rgba(17,24,39,0.1);
+          color: #FFFFFF;
+          display: grid;
+          place-items: center;
+        }
+
+        .feature-details h4 {
+          font-size: 16px;
+          font-weight: 700;
+          margin: 0 0 4px 0;
+        }
+
+        .feature-details p {
+          font-size: 13px;
+          color: #808080;
+          margin: 0;
+        }
+
+        .auth-form-side {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px;
+          background: #090909;
+          z-index: 2;
+        }
+
+        .form-card {
+          width: 100%;
+          max-width: 440px;
+        }
+
+        .form-title {
+          font-size: 28px;
+          font-weight: 800;
+          margin-bottom: 8px;
+        }
+
+        .form-sub {
+          color: #888888;
+          font-size: 14px;
+          margin-bottom: 30px;
+        }
+
+        .input-group {
+          position: relative;
+          margin-bottom: 20px;
+        }
+
+        .input-icon {
+          position: absolute;
+          left: 14px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #555555;
+          display: flex;
+          align-items: center;
+        }
+
+        .auth-input {
+          width: 100%;
+          background: #141414;
+          border: 1px solid #222222;
+          padding: 14px 14px 14px 44px;
+          border-radius: 12px;
+          color: #ffffff;
+          font-size: 14px;
+          transition: all 0.3s;
+          outline: none;
+        }
+
+        .auth-input:focus {
+          border-color: #FFFFFF;
+          background: #181818;
+          box-shadow: 0 0 0 4px rgba(17,24,39,0.1);
+        }
+
+        .error-banner {
+          background: rgba(244,67,54,0.1);
+          border: 1px solid rgba(244,67,54,0.2);
+          color: #f44336;
+          padding: 12px;
+          border-radius: 10px;
+          font-size: 13px;
+          margin-bottom: 20px;
+          text-align: center;
+        }
+
+        .submit-btn {
+          width: 100%;
+          background: #FBBF24;
+          color: #111827;
+          font-weight: 700;
+          border: none;
+          padding: 14px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 15px;
+          transition: all 0.3s;
+          margin-top: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(17,24,39,0.3);
+        }
+
+        .submit-btn:disabled {
+          background: #444444;
+          color: #888888;
+          cursor: not-allowed;
+        }
+
+        .auth-footer {
+          margin-top: 24px;
+          text-align: center;
+          font-size: 13px;
+          color: #666666;
+        }
+
+        .auth-link {
+          color: #FFFFFF;
+          text-decoration: none;
+          font-weight: 600;
+        }
+
+        .auth-link:hover {
+          text-decoration: underline;
+        }
+
+        .stepper-container {
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          margin-bottom: 30px;
+        }
+
+        .step-item {
+          display: flex;
+          align-items: center;
+        }
+
+        .step-node {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          width: 72px;
+        }
+
+        .step-circle {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 800;
+          transition: all 0.2s;
+        }
+
+        .step-circle.done {
+          background: #16a34a;
+          border: 1px solid #16a34a;
+          color: #ffffff;
+        }
+
+        .step-circle.active {
+          background: #111827;
+          border: 1px solid #111827;
+          color: #ffffff;
+          box-shadow: 0 0 0 4px rgba(17,24,39,0.18);
+        }
+
+        .step-circle.upcoming {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.14);
+          color: #9CA3AF;
+        }
+
+        .step-label {
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .step-label.active { color: #FBBF24; }
+        .step-label.done { color: #4ADE80; }
+        .step-label.upcoming { color: #5B5B75; }
+
+        .step-line {
+          width: 40px;
+          height: 2px;
+          margin-bottom: 24px;
+          transition: all 0.3s;
+        }
+
+        .step-line.done { background: #16a34a; }
+        .step-line.upcoming { background: rgba(255,255,255,0.12); }
+
+        @media (max-width: 900px) {
+          .auth-info {
+            display: none;
+          }
+        }
+      `}</style>
+
+      {/* LEFT DESIGN SIDE */}
+      <div className="auth-info">
+        <div className="brand-header">
+          <div className="brand-logo">
+            <Inventory2Icon />
+          </div>
+          <span className="brand-name">AssetCare</span>
+        </div>
+
+        <div className="info-content">
+          <h1 className="info-title">Recover Your Workspace Access.</h1>
+          <p className="info-desc">
+            Verify your identity and configure a secure new password to log back into your tenant organization dashboard partition.
+          </p>
+
+          <div className="feature-card">
+            <div className="feature-icon-wrapper">
+              <ShieldOutlinedIcon fontSize="small" />
+            </div>
+            <div className="feature-details">
+              <h4>Secure OTP Verification</h4>
+              <p>We send a one-time verification code to confirm ownership of your registered email address.</p>
+            </div>
+          </div>
+
+          <div className="feature-card">
+            <div className="feature-icon-wrapper">
+              <LockRoundedIcon fontSize="small" />
+            </div>
+            <div className="feature-details">
+              <h4>Password Protection</h4>
+              <p>Ensure your credentials meet organization security strength guidelines to keep records safe.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ color: '#444444', fontSize: '12px', zIndex: 2 }}>
+          &copy; 2026 AssetCare PaaS. All rights reserved.
+        </div>
+      </div>
+
+      {/* RIGHT FORM SIDE */}
+      <div className="auth-form-side">
+        <div className="form-card">
+          <h2 className="form-title">{step === 1 ? 'Forgot Password' : 'Verify OTP'}</h2>
+          <p className="form-sub">
+            {step === 1 
+              ? 'Enter your registered email to receive an OTP' 
               : `We sent a 6-digit code to ${email}`}
-          </Typography>
-        </Box>
+          </p>
 
-        {/* Step indicator */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', mb: 4 }}>
-          {['Email', 'OTP', 'Password'].map((label, i) => {
-            const s = i + 1;
-            const isDone = step > s;
-            const isActive = step === s;
-            return (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', flex: s < 3 ? '0 1 auto' : '0 0 auto' }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.8, width: 72 }}>
-                  <Box sx={{
-                    width: 30, height: 30, borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 800,
-                    bgcolor: isDone ? '#16a34a' : isActive ? '#111827' : 'rgba(255,255,255,0.06)',
-                    border: '1px solid', borderColor: isDone ? '#16a34a' : isActive ? '#111827' : 'rgba(255,255,255,0.14)',
-                    color: isDone || isActive ? '#fff' : '#9CA3AF',
-                    boxShadow: isActive ? '0 0 0 4px rgba(17,24,39,0.18)' : 'none',
-                    transition: 'all 0.2s'
-                  }}>
-                    {isDone ? <CheckCircleOutlined sx={{ fontSize: 16 }} /> : s}
-                  </Box>
-                  <Typography fontSize={11} fontWeight={700}
-                    color={isActive ? '#C084FC' : isDone ? '#4ADE80' : '#5B5B75'}>
-                    {label}
-                  </Typography>
-                </Box>
-                {s < 3 && <Box sx={{ width: 40, height: 2, mb: 2.4, bgcolor: isDone ? '#16a34a' : 'rgba(255,255,255,0.12)', transition: 'all 0.3s' }} />}
-              </Box>
-            );
-          })}
-        </Box>
+          {/* Step indicator */}
+          <div className="stepper-container">
+            {['Email', 'OTP', 'Password'].map((label, i) => {
+              const s = i + 1;
+              const isDone = step > s;
+              const isActive = step === s;
+              return (
+                <div key={label} className="step-item">
+                  <div className="step-node">
+                    <div className={`step-circle ${isDone ? 'done' : isActive ? 'active' : 'upcoming'}`}>
+                      {isDone ? <CheckCircleOutlineRoundedIcon sx={{ fontSize: 16 }} /> : s}
+                    </div>
+                    <span className={`step-label ${isActive ? 'active' : isDone ? 'done' : 'upcoming'}`}>
+                      {label}
+                    </span>
+                  </div>
+                  {s < 3 && (
+                    <div className={`step-line ${isDone ? 'done' : 'upcoming'}`} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>{error}</Alert>}
+          {error && <div className="error-banner">{error}</div>}
 
-        {/* Step 1: Email input */}
-        {step === 1 && (
-          <Box component="form" onSubmit={handleSendOtp}>
-            <TextField
-              label="Email Address"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              fullWidth required autoFocus
-              sx={darkInputSx}
-              slotProps={{ input: { startAdornment: <InputAdornment position="start"><EmailOutlined sx={{ color: '#9CA3AF', fontSize: 20 }} /></InputAdornment> } }}
-            />
-            <Button type="submit" variant="contained" fullWidth disabled={loading} sx={gradientBtn}>
-              {loading ? <CircularProgress size={22} color="inherit" /> : 'Send OTP'}
-            </Button>
-            <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.08)', mt: 3, pt: 2.5, textAlign: 'center' }}>
-              <Link to="/login" style={{ color: '#C084FC', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
-                ← Back to Login
-              </Link>
-            </Box>
-          </Box>
-        )}
+          {/* Step 1: Email Input */}
+          {step === 1 && (
+            <form onSubmit={handleSendOtp}>
+              <div className="input-group">
+                <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  className="auth-input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </div>
+              <button type="submit" className="submit-btn" disabled={loading}>
+                {loading ? 'Sending OTP...' : 'Send OTP'}
+              </button>
+            </form>
+          )}
 
-        {/* Step 2: OTP input */}
-        {step === 2 && (
-          <Box component="form" onSubmit={handleVerifyOtp}>
-            <OtpInput value={otp} onChange={setOtp} />
+          {/* Step 2: OTP Input */}
+          {step === 2 && (
+            <form onSubmit={handleVerifyOtp}>
+              <OtpInput value={otp} onChange={setOtp} />
+              <button type="submit" className="submit-btn" disabled={loading || otp.length < 6}>
+                {loading ? 'Verifying...' : 'Verify OTP'}
+              </button>
 
-            <Button
-              type="submit"
-              variant="contained"
-              fullWidth
-              disabled={loading || otp.length < 6}
-              sx={gradientBtn}
-            >
-              {loading ? <CircularProgress size={22} color="inherit" /> : 'Verify OTP'}
-            </Button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px' }}>
+                <button
+                  type="button"
+                  onClick={() => { setStep(1); setOtp(''); setError(''); }}
+                  style={{
+                    background: 'none', border: 'none', color: '#9CA3AF',
+                    fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                  }}
+                >
+                  <ArrowBackRoundedIcon sx={{ fontSize: 14 }} /> Change email
+                </button>
+                <button
+                  type="button"
+                  disabled={resendCooldown > 0 || loading}
+                  onClick={handleSendOtp}
+                  style={{
+                    background: 'none', border: 'none', color: resendCooldown > 0 ? '#5B5B75' : '#FBBF24',
+                    fontWeight: 700, cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                </button>
+              </div>
+            </form>
+          )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2.5 }}>
-              <Button
-                size="small"
-                startIcon={<ArrowBackRounded />}
-                onClick={() => { setStep(1); setOtp(''); setError(''); }}
-                sx={{ color: '#9CA3AF', fontWeight: 700, textTransform: 'none' }}
-              >
-                Change email
-              </Button>
-              <Button
-                size="small"
-                disabled={resendCooldown > 0 || loading}
-                onClick={handleSendOtp}
-                sx={{ color: '#C084FC', fontWeight: 700, textTransform: 'none', '&.Mui-disabled': { color: '#5B5B75' } }}
-              >
-                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
-              </Button>
-            </Box>
-          </Box>
-        )}
-      </Box>
-    </Box>
+          <div className="auth-footer">
+            Back to{' '}
+            <Link to="/login" className="auth-link">
+              Log In
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
   );
 }

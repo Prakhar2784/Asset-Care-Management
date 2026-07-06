@@ -85,9 +85,9 @@ function App() {
         <Route path="/terms" element={<WebsiteLayout><TermsAndConditions /></WebsiteLayout>} />
         <Route path="/pricing" element={<WebsiteLayout><Pricing /></WebsiteLayout>} />
         <Route path="/login" element={<WebsiteLayout><AuthPage /></WebsiteLayout>} />
-        <Route path="/register-company" element={<RegisterCompany />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/register-company" element={<WebsiteLayout><RegisterCompany /></WebsiteLayout>} />
+        <Route path="/forgot-password" element={<WebsiteLayout><ForgotPassword /></WebsiteLayout>} />
+        <Route path="/reset-password/:token" element={<WebsiteLayout><ResetPassword /></WebsiteLayout>} />
 
         {/* SECURE ROUTES - Must be logged in */}
         <Route element={<ProtectedRoute />}>

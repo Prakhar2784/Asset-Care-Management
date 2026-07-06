@@ -361,7 +361,12 @@ export default function UserManagement() {
 
   // ── Add user ─────────────────────────────────────────────────────────────────
   const handleAdd = async (e) => {
-    e.preventDefault(); setFormError(''); setSaving(true);
+    e.preventDefault(); setFormError('');
+    if (form.phone && form.phone.length !== 10) {
+      setFormError('Phone number must be exactly 10 digits.');
+      return;
+    }
+    setSaving(true);
     try {
       if (addMode === 'invite') {
         await api.post('/users/invite', { name: form.name, email: form.email, role: form.role, department: form.department, phone: form.phone });
@@ -420,7 +425,12 @@ export default function UserManagement() {
   const { refreshUser } = useAuth();
 
   const handleEdit = async (e) => {
-    e.preventDefault(); setEditSaving(true);
+    e.preventDefault();
+    if (editForm.phone && editForm.phone.length !== 10) {
+      setSnackbar({ open: true, message: 'Phone number must be exactly 10 digits.', severity: 'error' });
+      return;
+    }
+    setEditSaving(true);
     try {
       const { data } = await api.put(`/users/${editTarget._id}`, editForm);
       setUsers(prev => prev.map(u => u._id === data._id ? data : u));
@@ -640,7 +650,9 @@ export default function UserManagement() {
                     {/* USER cell — avatar + name + email + (you) */}
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 36, height: 36, fontSize: 14, fontWeight: 800, bgcolor: avatarColor(user.name), flexShrink: 0 }}>
+                        <Avatar
+                          src={user.avatar ? `http://localhost:5000${user.avatar}` : undefined}
+                          sx={{ width: 36, height: 36, fontSize: 14, fontWeight: 800, bgcolor: avatarColor(user.name), flexShrink: 0 }}>
                           {user.name?.charAt(0).toUpperCase()}
                         </Avatar>
                         <Box>
@@ -962,19 +974,11 @@ export default function UserManagement() {
             <Box sx={{ p: 3, background: 'linear-gradient(135deg,rgba(17,24,39,0.12),rgba(17,24,39,0.06))', borderBottom: 1, borderColor: 'divider' }}>
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                  <Box sx={{ flexShrink: 0 }}>
                     <Avatar src={profileUser.avatar ? `http://localhost:5000${profileUser.avatar}` : undefined}
                       sx={{ width: 52, height: 52, fontSize: 22, fontWeight: 800, bgcolor: avatarColor(profileUser.name) }}>
                       {profileUser.name?.charAt(0).toUpperCase()}
                     </Avatar>
-                    <Tooltip title="Upload photo">
-                      <IconButton size="small" component="label" disabled={avatarUploading}
-                        sx={{ position: 'absolute', bottom: -4, right: -4, width: 22, height: 22, bgcolor: 'text.primary', color: '#fff', '&:hover': { bgcolor: 'text.primary' }, borderRadius: '50%', p: 0.4 }}>
-                        <CameraAltRounded sx={{ fontSize: 12 }} />
-                        <input ref={avatarInputRef} type="file" hidden accept=".jpg,.jpeg,.png,.webp"
-                          onChange={e => handleAvatarUpload(e.target.files[0], profileUser._id)} />
-                      </IconButton>
-                    </Tooltip>
                   </Box>
                   <Box>
                     <Typography fontWeight={800} fontSize={18}>{profileUser.name}</Typography>
@@ -1218,7 +1222,10 @@ export default function UserManagement() {
                   {ROLES.map(r => <MenuItem key={r} value={r} sx={{ textTransform: 'capitalize' }}>{r.replace(/_/g, ' ')}</MenuItem>)}
                 </Select>
               </FormControl>
-              <TextField fullWidth label="Phone (optional)" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} sx={inputSx} />
+              <TextField fullWidth label="Phone (optional)" value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                sx={inputSx}
+                slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
             </Stack>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
@@ -1258,7 +1265,10 @@ export default function UserManagement() {
                 </Select>
               </FormControl>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                <TextField fullWidth label="Phone" value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} sx={inputSx} />
+                <TextField fullWidth label="Phone" value={editForm.phone}
+                  onChange={e => setEditForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                  sx={inputSx}
+                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
                 <TextField fullWidth label="Employee ID" value={editForm.employeeId}
                   onChange={e => setEditForm(f => ({ ...f, employeeId: e.target.value }))} sx={inputSx}
                   slotProps={{ input: { startAdornment: <BadgeRounded sx={{ fontSize: 16, mr: 0.8, color: 'text.disabled' }} /> } }} />

@@ -743,10 +743,17 @@ const Tickets = () => {
               <Box sx={{ display: 'flex', borderBottom: '1px solid', borderColor: 'divider' }}>
                 {[['timeline', 'Timeline'], ['comments', 'Comments'], ['attachments', 'Attachments']].map(([id, label]) => (
                   <Button key={id} onClick={() => setActiveTab(id)}
-                    sx={{ flex: 1, py: 1.5, borderRadius: 0, fontWeight: 800, fontSize: 13, textTransform: 'none', color: activeTab === id ? '#111827' : 'text.secondary', borderBottom: activeTab === id ? '2px solid #111827' : '2px solid transparent', mb: '-1px', transition: 'all 0.2s' }}>
+                    sx={{
+                      flex: 1, py: 1.5, borderRadius: 0, fontWeight: 800, fontSize: 13, textTransform: 'none',
+                      color: activeTab === id ? 'text.primary' : 'text.secondary',
+                      borderBottom: activeTab === id ? '2px solid' : '2px solid transparent',
+                      borderColor: activeTab === id ? 'text.primary' : 'transparent',
+                      mb: '-1px', transition: 'all 0.2s',
+                      '&:hover': { color: 'text.primary', bgcolor: 'rgba(255,255,255,0.03)' }
+                    }}>
                     {label}
                     {id === 'comments' && ticketDetail?.comments?.length > 0 && (
-                      <Box component="span" sx={{ ml: 1, px: 0.8, py: 0.1, borderRadius: '20px', bgcolor: 'rgba(17,24,39,0.12)', color: 'text.primary', fontSize: 10, fontWeight: 900 }}>
+                      <Box component="span" sx={{ ml: 1, px: 0.8, py: 0.1, borderRadius: '20px', bgcolor: 'rgba(255,255,255,0.1)', color: 'text.primary', fontSize: 10, fontWeight: 900 }}>
                         {ticketDetail.comments.length}
                       </Box>
                     )}

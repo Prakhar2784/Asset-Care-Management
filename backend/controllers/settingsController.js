@@ -40,8 +40,7 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'Current password is incorrect.' });
     }
 
-    const salt = await bcrypt.genSalt(12);
-    user.password = await bcrypt.hash(newPassword, salt);
+    user.password = newPassword;
     await user.save({ validateBeforeSave: false });
 
     res.json({ message: 'Password changed successfully.' });

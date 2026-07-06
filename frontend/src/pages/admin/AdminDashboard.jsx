@@ -67,7 +67,6 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
 
-  const monthLabel = viewDate.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
   const firstDayOfWeek = viewDate.getDay();
   const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
   const isCurrentMonth = viewDate.getFullYear() === today.getFullYear() && viewDate.getMonth() === today.getMonth();
@@ -79,6 +78,31 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
   const changeMonth = (delta) =>
     setViewDate(d => new Date(d.getFullYear(), d.getMonth() + delta, 1));
 
+  const MONTHS = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const currentYear = viewDate.getFullYear();
+  const currentMonth = viewDate.getMonth();
+
+  const years = [];
+  const startYear = today.getFullYear() - 10;
+  const endYear = today.getFullYear() + 10;
+  for (let y = startYear; y <= endYear; y++) {
+    years.push(y);
+  }
+
+  const handleMonthChange = (e) => {
+    const m = parseInt(e.target.value, 10);
+    setViewDate(new Date(viewDate.getFullYear(), m, 1));
+  };
+
+  const handleYearChange = (e) => {
+    const y = parseInt(e.target.value, 10);
+    setViewDate(new Date(y, viewDate.getMonth(), 1));
+  };
+
   return (
     <Box sx={{
       width: 260, borderRadius: "18px", p: 2,
@@ -86,9 +110,47 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
       backdropFilter: "blur(10px)",
     }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.2 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-          <EventNoteRounded sx={{ fontSize: 15, color: "#fff" }} />
-          <Typography sx={{ fontSize: 13.5, fontWeight: 600, letterSpacing: "0.1px", color: "#fff" }}>{monthLabel}</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <EventNoteRounded sx={{ fontSize: 14, color: "#fff", mr: 0.2 }} />
+          <select
+            value={currentMonth}
+            onChange={handleMonthChange}
+            style={{
+              background: "transparent",
+              color: "#ffffff",
+              border: "none",
+              fontSize: "13px",
+              fontWeight: 700,
+              outline: "none",
+              cursor: "pointer",
+              paddingRight: "2px",
+            }}
+          >
+            {MONTHS.map((m, idx) => (
+              <option key={m} value={idx} style={{ background: "#111827", color: "#fff" }}>
+                {m}
+              </option>
+            ))}
+          </select>
+          <select
+            value={currentYear}
+            onChange={handleYearChange}
+            style={{
+              background: "transparent",
+              color: "rgba(255,255,255,0.8)",
+              border: "none",
+              fontSize: "13px",
+              fontWeight: 700,
+              outline: "none",
+              cursor: "pointer",
+            }}
+          >
+            {years.map((y) => (
+              <option key={y} value={y} style={{ background: "#111827", color: "#fff" }}>
+                {y}
+              </option>
+            ))}
+          </select>
         </Box>
         <Box sx={{ display: "flex", gap: 0.5 }}>
           <IconButton size="small" onClick={() => changeMonth(-1)}

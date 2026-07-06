@@ -18,7 +18,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const COLORS = ['#111827', '#60A5FA', '#4ADE80', '#FBBF24', '#F87171', '#A78BFA', '#22D3EE'];
+const COLORS = ['#3B82F6', '#60A5FA', '#4ADE80', '#FBBF24', '#F87171', '#A78BFA', '#22D3EE'];
 
 export default function Reports() {
   const muiTheme = useTheme();
@@ -245,10 +245,10 @@ export default function Reports() {
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={assetCategoryData}>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                <XAxis dataKey="name" fontSize={12} />
-                <YAxis fontSize={12} />
+                <XAxis dataKey="name" tick={{ fill: muiTheme.palette.text.secondary, fontSize: 11, fontWeight: 700 }} stroke={muiTheme.palette.divider} />
+                <YAxis tick={{ fill: muiTheme.palette.text.secondary, fontSize: 11, fontWeight: 700 }} stroke={muiTheme.palette.divider} />
                 <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
-                <Bar dataKey="count" fill="#111827" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#3B82F6" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
@@ -263,8 +263,8 @@ export default function Reports() {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ticketStatusData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                <XAxis type="number" fontSize={12} />
-                <YAxis dataKey="name" type="category" fontSize={11} width={110} />
+                <XAxis type="number" tick={{ fill: muiTheme.palette.text.secondary, fontSize: 11, fontWeight: 700 }} stroke={muiTheme.palette.divider} />
+                <YAxis dataKey="name" type="category" width={110} tick={{ fill: muiTheme.palette.text.secondary, fontSize: 11, fontWeight: 700 }} stroke={muiTheme.palette.divider} />
                 <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
                 <Bar dataKey="count" fill="#3B82F6" radius={[0, 6, 6, 0]} />
               </BarChart>
@@ -277,8 +277,8 @@ export default function Reports() {
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ticketPriorityData}>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                <XAxis dataKey="name" fontSize={12} />
-                <YAxis fontSize={12} />
+                <XAxis dataKey="name" tick={{ fill: muiTheme.palette.text.secondary, fontSize: 11, fontWeight: 700 }} stroke={muiTheme.palette.divider} />
+                <YAxis tick={{ fill: muiTheme.palette.text.secondary, fontSize: 11, fontWeight: 700 }} stroke={muiTheme.palette.divider} />
                 <Tooltip contentStyle={{ borderRadius: '10px', fontWeight: 700 }} />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {ticketPriorityData.map((entry, i) => (
