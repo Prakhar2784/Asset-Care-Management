@@ -5,7 +5,7 @@ import {
   TextField, Select, MenuItem, FormControl, InputLabel,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, Tooltip, Alert, Snackbar, CircularProgress,
-  Tabs, Tab, Divider, Avatar, Badge
+  Tabs, Tab, Divider, Avatar, Switch, FormControlLabel, Badge
 } from '@mui/material';
 import {
   BusinessRounded, AddRounded, PowerSettingsNewRounded,
@@ -125,7 +125,11 @@ export default function SuperAdminPanel() {
     adminName: '', adminEmail: '', adminPassword: '',
     maxAssets: '', maxUsers: ''
   });
-  const [planForm, setPlanForm] = useState({ plan: 'Basic', maxAssets: '', maxUsers: '' });
+  const [planForm, setPlanForm] = useState({
+    plan: 'Basic', maxAssets: '', maxUsers: '',
+    features: { procurement: false, vendorPortal: false, enterpriseHub: false, customBranding: false, advancedReports: false },
+    planExpiry: '',
+  });
   const [saving, setSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
@@ -194,8 +198,10 @@ export default function SuperAdminPanel() {
       setSaving(true);
       await api.patch(`/super-admin/tenants/${selectedTenant._id}/plan`, {
         plan: planForm.plan,
-        maxAssets: planForm.maxAssets ? Number(planForm.maxAssets) : undefined,
-        maxUsers: planForm.maxUsers ? Number(planForm.maxUsers) : undefined,
+        maxAssets: planForm.maxAssets !== '' ? Number(planForm.maxAssets) : -1,
+        maxUsers: planForm.maxUsers !== '' ? Number(planForm.maxUsers) : -1,
+        features: planForm.features,
+        planExpiry: planForm.planExpiry || null,
       });
       showSnack('Plan updated successfully!');
       setPlanOpen(false);
@@ -392,7 +398,19 @@ export default function SuperAdminPanel() {
                       <Tooltip title="Change Plan">
                         <IconButton size="small" onClick={() => {
                           setSelectedTenant(t);
-                          setPlanForm({ plan: t.plan, maxAssets: t.limits.maxAssets, maxUsers: t.limits.maxUsers });
+                          setPlanForm({
+                            plan: t.plan,
+                            maxAssets: t.limits.maxAssets === -1 ? '' : t.limits.maxAssets,
+                            maxUsers: t.limits.maxUsers === -1 ? '' : t.limits.maxUsers,
+                            features: {
+                              procurement: !!t.features?.procurement,
+                              vendorPortal: !!t.features?.vendorPortal,
+                              enterpriseHub: !!t.features?.enterpriseHub,
+                              customBranding: !!t.features?.customBranding,
+                              advancedReports: !!t.features?.advancedReports,
+                            },
+                            planExpiry: t.planExpiry ? new Date(t.planExpiry).toISOString().split('T')[0] : '',
+                          });
                           setPlanOpen(true);
                         }} sx={{ color: '#a78bfa' }}>
                           <UpgradeRounded sx={{ fontSize: 17 }} />
@@ -503,36 +521,100 @@ export default function SuperAdminPanel() {
       </Dialog>
 
       {/* ─── Plan Update Dialog ─── */}
-      <Dialog open={planOpen} onClose={() => setPlanOpen(false)} maxWidth="xs" fullWidth
+      <Dialog open={planOpen} onClose={() => setPlanOpen(false)} maxWidth="sm" fullWidth
         PaperProps={{ sx: { borderRadius: '16px' } }}>
-        <DialogTitle fontWeight={900}>
-          Update Plan — {selectedTenant?.name}
+        <DialogTitle fontWeight={900} sx={{ pb: 0 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 34, height: 34, borderRadius: '9px', bgcolor: '#3b1f6e', display: 'grid', placeItems: 'center' }}>
+              <UpgradeRounded sx={{ fontSize: 18, color: '#a78bfa' }} />
+            </Box>
+            Configure Plan — {selectedTenant?.name}
+          </Box>
         </DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth size="small" sx={{ mt: 1, mb: 2 }}>
-            <InputLabel>Plan</InputLabel>
-            <Select value={planForm.plan} label="Plan" onChange={e => setPlanForm(f => ({ ...f, plan: e.target.value }))}>
-              <MenuItem value="Basic">Basic</MenuItem>
-              <MenuItem value="Pro">Pro</MenuItem>
-              <MenuItem value="Enterprise">Enterprise</MenuItem>
-            </Select>
-          </FormControl>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 6 }}>
-              <TextField fullWidth label="Max Assets" type="number" size="small"
-                value={planForm.maxAssets} onChange={e => setPlanForm(f => ({ ...f, maxAssets: e.target.value }))} />
+        <Divider sx={{ mt: 2 }} />
+        <DialogContent sx={{ pt: 2.5 }}>
+          {/* Tier + Limits */}
+          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1.5} textTransform="uppercase" letterSpacing="0.7px" fontSize={11}>
+            Plan Tier &amp; Limits
+          </Typography>
+          <Grid container spacing={2} sx={{ mb: 3 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Plan Tier</InputLabel>
+                <Select value={planForm.plan} label="Plan Tier"
+                  onChange={e => {
+                    const defaults = { Basic: { maxAssets: 50, maxUsers: 10 }, Pro: { maxAssets: 500, maxUsers: 50 }, Enterprise: { maxAssets: '', maxUsers: '' } };
+                    const d = defaults[e.target.value];
+                    setPlanForm(f => ({ ...f, plan: e.target.value, maxAssets: d.maxAssets, maxUsers: d.maxUsers }));
+                  }}>
+                  <MenuItem value="Basic">Basic</MenuItem>
+                  <MenuItem value="Pro">Pro</MenuItem>
+                  <MenuItem value="Enterprise">Enterprise (Custom)</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
-            <Grid size={{ xs: 6 }}>
+            <Grid size={{ xs: 12, sm: 4 }}>
+              <TextField fullWidth label="Max Assets" type="number" size="small"
+                value={planForm.maxAssets}
+                helperText="Leave blank for unlimited"
+                onChange={e => setPlanForm(f => ({ ...f, maxAssets: e.target.value }))} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4 }}>
               <TextField fullWidth label="Max Users" type="number" size="small"
-                value={planForm.maxUsers} onChange={e => setPlanForm(f => ({ ...f, maxUsers: e.target.value }))} />
+                value={planForm.maxUsers}
+                helperText="Leave blank for unlimited"
+                onChange={e => setPlanForm(f => ({ ...f, maxUsers: e.target.value }))} />
             </Grid>
           </Grid>
+
+          <Divider sx={{ mb: 2.5 }} />
+
+          {/* Feature Flags */}
+          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1} textTransform="uppercase" letterSpacing="0.7px" fontSize={11}>
+            Feature Access (Custom Overrides)
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5, mb: 2.5 }}>
+            {[
+              { key: 'procurement', label: 'Procurement Module (PR / PO / GRN)' },
+              { key: 'vendorPortal', label: 'Vendor Portal' },
+              { key: 'enterpriseHub', label: 'Enterprise Hub (Warehouse, AMC)' },
+              { key: 'customBranding', label: 'Custom Branding & SMTP' },
+              { key: 'advancedReports', label: 'Advanced Reports & Excel Export' },
+            ].map(({ key, label }) => (
+              <FormControlLabel
+                key={key}
+                control={
+                  <Switch
+                    size="small"
+                    checked={!!planForm.features?.[key]}
+                    onChange={e => setPlanForm(f => ({ ...f, features: { ...f.features, [key]: e.target.checked } }))}
+                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#a78bfa' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#a78bfa' } }}
+                  />
+                }
+                label={<Typography fontSize={13} fontWeight={500}>{label}</Typography>}
+              />
+            ))}
+          </Box>
+
+          <Divider sx={{ mb: 2.5 }} />
+
+          {/* Plan Expiry */}
+          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1.5} textTransform="uppercase" letterSpacing="0.7px" fontSize={11}>
+            Subscription Expiry
+          </Typography>
+          <TextField
+            fullWidth size="small" type="date" label="Plan Expiry Date"
+            InputLabelProps={{ shrink: true }}
+            value={planForm.planExpiry}
+            helperText="Leave blank for no expiry"
+            onChange={e => setPlanForm(f => ({ ...f, planExpiry: e.target.value }))}
+          />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions sx={{ p: 2.5, pt: 1 }}>
           <Button onClick={() => setPlanOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700 }}>Cancel</Button>
           <Button variant="contained" onClick={handlePlanSave} disabled={saving}
-            sx={{ bgcolor: ACCENT, color: DARK, fontWeight: 900, borderRadius: '8px' }}>
-            {saving ? 'Saving...' : 'Save Plan'}
+            sx={{ bgcolor: '#a78bfa', color: '#1a0533', fontWeight: 900, borderRadius: '8px', px: 3 }}>
+            {saving ? 'Saving...' : 'Save Configuration'}
           </Button>
         </DialogActions>
       </Dialog>

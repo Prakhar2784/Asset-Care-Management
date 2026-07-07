@@ -47,6 +47,8 @@ const getPlatformStats = async (req, res) => {
             isActive: tenant.isActive,
             branding: tenant.branding,
             limits: tenant.limits,
+            features: tenant.features,
+            planExpiry: tenant.planExpiry,
             createdAt: tenant.createdAt,
             usage: {
               assets: assetCount,
@@ -69,6 +71,8 @@ const getPlatformStats = async (req, res) => {
             isActive: tenant.isActive,
             branding: tenant.branding,
             limits: tenant.limits,
+            features: tenant.features,
+            planExpiry: tenant.planExpiry,
             createdAt: tenant.createdAt,
             usage: { assets: 0, users: 0, tickets: 0, assetUtilization: 0, userUtilization: 0 },
           };
@@ -169,7 +173,7 @@ const toggleTenantStatus = async (req, res) => {
 // ─── PATCH /api/super-admin/tenants/:id/plan ───────────────────────────────
 const updateTenantPlan = async (req, res) => {
   try {
-    const { plan, maxAssets, maxUsers, features } = req.body;
+    const { plan, maxAssets, maxUsers, features, planExpiry } = req.body;
     const tenant = await Tenant.findById(req.params.id);
     if (!tenant) return res.status(404).json({ message: 'Tenant not found.' });
 
@@ -185,6 +189,7 @@ const updateTenantPlan = async (req, res) => {
     if (maxAssets !== undefined) tenant.limits.maxAssets = maxAssets;
     if (maxUsers !== undefined) tenant.limits.maxUsers = maxUsers;
     if (features) tenant.features = { ...tenant.features, ...features };
+    if (planExpiry !== undefined) tenant.planExpiry = planExpiry ? new Date(planExpiry) : null;
 
     await tenant.save();
     res.json({ message: `Plan updated for "${tenant.name}".`, tenant });
