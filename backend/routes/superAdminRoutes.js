@@ -14,7 +14,7 @@ const ContactLead = require('../models/ContactLead');
 
 // Super Admin guard - must be logged in and have role 'superadmin'
 const superAdminGuard = (req, res, next) => {
-  if (!req.user || req.user.role !== 'superadmin') {
+  if (!req.user || req.user.role !== 'super_admin') {
     return res.status(403).json({ message: 'Access denied: Super Admin only.' });
   }
   next();
