@@ -19,7 +19,7 @@ import {
   AccessTimeRounded, BadgeRounded, CameraAltRounded, ExitToAppRounded,
   ChecklistRounded
 } from '@mui/icons-material';
-import api from '../../api/axios';
+import api, { getFileUrl } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
 const ROLES = ['employee', 'hod', 'admin', 'technician'];
@@ -654,7 +654,7 @@ export default function UserManagement() {
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Avatar
-                          src={user.avatar ? `http://localhost:5000${user.avatar}` : undefined}
+                          src={getFileUrl(user.avatar) || undefined}
                           sx={{ width: 36, height: 36, fontSize: 14, fontWeight: 800, bgcolor: avatarColor(user.name), flexShrink: 0 }}>
                           {user.name?.charAt(0).toUpperCase()}
                         </Avatar>
@@ -978,7 +978,7 @@ export default function UserManagement() {
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box sx={{ flexShrink: 0 }}>
-                    <Avatar src={profileUser.avatar ? `http://localhost:5000${profileUser.avatar}` : undefined}
+                    <Avatar src={getFileUrl(profileUser.avatar) || undefined}
                       sx={{ width: 52, height: 52, fontSize: 22, fontWeight: 800, bgcolor: avatarColor(profileUser.name) }}>
                       {profileUser.name?.charAt(0).toUpperCase()}
                     </Avatar>

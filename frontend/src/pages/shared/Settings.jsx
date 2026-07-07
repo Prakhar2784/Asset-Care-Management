@@ -18,7 +18,7 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { saveAs } from 'file-saver';
-import api from '../../api/axios';
+import api, { getFileUrl } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
 
@@ -27,8 +27,8 @@ function TabPanel({ value, index, children }) {
 }
 
 // ─── Profile Tab ───────────────────────────────────────────────────────────────
-function ProfileTab({ currentUser }) {
-  const { refreshUser } = useAuth();
+function ProfileTab() {
+  const { currentUser, refreshUser } = useAuth();
   const [name, setName] = useState(currentUser?.name || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [saving, setSaving] = useState(false);
@@ -108,7 +108,7 @@ function ProfileTab({ currentUser }) {
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5, mb: 4 }}>
             <Box sx={{ position: 'relative' }}>
               <Avatar
-                src={currentUser?.avatar ? `http://localhost:5000${currentUser.avatar}` : undefined}
+                src={getFileUrl(currentUser?.avatar) || undefined}
                 sx={{
                   width: 90, height: 90,
                   fontSize: 32, fontWeight: 900,
@@ -1126,7 +1126,7 @@ export default function Settings() {
         </Tabs>
 
         <Box sx={{ p: { xs: 2.5, md: 4 } }}>
-          <TabPanel value={tab} index={0}><ProfileTab currentUser={currentUser} /></TabPanel>
+          <TabPanel value={tab} index={0}><ProfileTab /></TabPanel>
           {!isSuperAdmin && <TabPanel value={tab} index={1}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>}
           {isAdmin && <TabPanel value={tab} index={2}><ReportsTab /></TabPanel>}
         </Box>

@@ -51,4 +51,13 @@ api.interceptors.request.use(
   }
 );
 
+// Converts a relative avatar/logo path like "/uploads/avatars/photo.jpg"
+// into the full backend URL using the configured base URL.
+export const getFileUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http')) return path;
+  const base = api.defaults.baseURL?.replace(/\/api\/?$/, '') || 'http://localhost:5000';
+  return `${base}${path}`;
+};
+
 export default api;
