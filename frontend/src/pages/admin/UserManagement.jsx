@@ -38,6 +38,9 @@ const ACTION_COLORS = {
   ASSIGN: '#111827', REVOKE: '#F97316', LOGIN: '#14B8A6', APPROVE: '#22C55E', REJECT: '#EF4444',
 };
 
+const formatAction = (action) =>
+  action.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
 // ── Role Permissions Matrix ───────────────────────────────────────────────────
 const DEFAULT_PERMISSION_MATRIX = [
   { feature: 'View Dashboard',          admin: true,  hod: true,  employee: true,  technician: true  },
@@ -1107,7 +1110,7 @@ export default function UserManagement() {
                           </Box>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                              <Box sx={{ px: 1, py: 0.2, borderRadius: '6px', fontSize: 10, fontWeight: 800, bgcolor: `${color}22`, color }}>{log.action}</Box>
+                              <Box sx={{ px: 1, py: 0.2, borderRadius: '6px', fontSize: 10, fontWeight: 800, bgcolor: `${color}22`, color }}>{formatAction(log.action)}</Box>
                               <Typography fontSize={12} color="text.secondary" sx={{ textTransform: 'capitalize' }}>{log.entity?.replace(/_/g, ' ')}</Typography>
                               {log.entityLabel && <Typography fontSize={12} fontWeight={600} color="text.primary" noWrap>— {log.entityLabel}</Typography>}
                             </Box>
