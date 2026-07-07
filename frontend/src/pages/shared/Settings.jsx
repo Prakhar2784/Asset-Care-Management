@@ -1083,19 +1083,19 @@ function DataTab({ currentUser }) {
 // ─── Main Settings Page ─────────────────────────────────────────────────────────
 export default function Settings() {
   const { currentUser } = useAuth();
-  const isAdmin = currentUser?.role === 'admin' || currentUser?.role === 'super_admin';
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const isAdmin = currentUser?.role === 'admin';
   const [searchParams] = useSearchParams();
   const [tab, setTab] = useState(searchParams.get('tab') === 'org' ? 2 : 0);
 
   const tabs = [
     { label: 'Profile', icon: <PersonRounded fontSize="small" /> },
-    { label: 'Appearance', icon: <PaletteRounded fontSize="small" /> },
-    { label: 'Organisation Profile', icon: <BusinessRounded fontSize="small" /> },
+    ...(!isSuperAdmin ? [
+      { label: 'Organisation Profile', icon: <BusinessRounded fontSize="small" /> },
+    ] : []),
     ...(isAdmin ? [
-      { label: 'Custom Fields', icon: <PaletteRounded fontSize="small" /> },
       { label: 'Reports', icon: <AssessmentRounded fontSize="small" /> }
     ] : []),
-    { label: 'Data & Privacy', icon: <SecurityRounded fontSize="small" /> },
   ];
 
   return (
@@ -1125,11 +1125,8 @@ export default function Settings() {
 
         <Box sx={{ p: { xs: 2.5, md: 4 } }}>
           <TabPanel value={tab} index={0}><ProfileTab currentUser={currentUser} /></TabPanel>
-          <TabPanel value={tab} index={1}><AppearanceTab /></TabPanel>
-          <TabPanel value={tab} index={2}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>
-          {isAdmin && <TabPanel value={tab} index={3}><CustomFieldsTab /></TabPanel>}
-          {isAdmin && <TabPanel value={tab} index={4}><ReportsTab /></TabPanel>}
-          <TabPanel value={tab} index={isAdmin ? 5 : 3}><DataTab currentUser={currentUser} /></TabPanel>
+          {!isSuperAdmin && <TabPanel value={tab} index={1}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>}
+          {isAdmin && <TabPanel value={tab} index={2}><ReportsTab /></TabPanel>}
         </Box>
       </Paper>
     </Box>
