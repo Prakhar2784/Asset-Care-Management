@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Tabs, Tab, TextField, Button, Alert, Switch, Stack,
   FormControlLabel, CircularProgress, Divider, Chip, Grid, MenuItem, Select,
@@ -248,6 +248,7 @@ function AppearanceTab() {
 const INDUSTRIES = ['Technology', 'Manufacturing', 'Healthcare', 'Education', 'Finance', 'Retail', 'Construction', 'Logistics', 'Hospitality', 'Other'];
 
 function CompanySettingsTab({ isAdmin = true }) {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     name: '', industry: '', employeeCount: '', phone: '', website: '', contactEmail: '',
     gstNumber: '', panNumber: '',
@@ -391,7 +392,7 @@ function CompanySettingsTab({ isAdmin = true }) {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Chip label={tenant?.plan || 'Basic'} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: planColor, color: '#111827', px: 0.5 }} />
             <Chip label="ACTIVE" size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: 12, borderColor: '#10B981', color: '#10B981' }} />
-            {isAdmin && <Button size="small" sx={{ fontWeight: 700, color: 'text.primary', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
+            {isAdmin && <Button size="small" onClick={() => navigate('/contact')} sx={{ fontWeight: 700, color: 'text.primary', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
           </Box>
         </Box>
       </Paper>
