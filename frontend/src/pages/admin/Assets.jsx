@@ -231,7 +231,7 @@ const Assets = () => {
         asset.serialNumber?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category === "All" || asset.category === category;
       const matchesStatus = statusFilter === "All" || asset.status === statusFilter;
-      const matchesDept = deptFilter === "All" || asset.department === deptFilter;
+      const matchesDept = deptFilter === "All" || asset.department?.trim().toLowerCase() === deptFilter.trim().toLowerCase();
       const matchesTab = activeTab === "all" || isIncomplete(asset);
       const matchesWarranty = !warrantyFilter || (asset.warrantyEnd && new Date(asset.warrantyEnd) <= in30Days);
       return matchesSearch && matchesCategory && matchesStatus && matchesDept && matchesTab && matchesWarranty;
