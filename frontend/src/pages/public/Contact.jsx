@@ -276,7 +276,10 @@ const Contact = () => {
                   </div>
                   <div className="input-group">
                     <label className="input-label">Phone Number<span className="required-mark">*</span></label>
-                    <input name="phone" placeholder="+91 00000 00000" className="contact-input" type="tel" required />
+                    <input name="phone" placeholder="10-digit mobile number" className="contact-input" type="tel" required
+                      maxLength={10} pattern="[0-9]{10}"
+                      onInput={e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); }}
+                      title="Please enter a valid 10-digit phone number" />
                   </div>
                 </div>
 
