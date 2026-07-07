@@ -328,13 +328,10 @@ export default function SuperAdminPanel() {
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
         {[
           { icon: <BusinessRounded />, label: 'Total Companies', value: platform?.totalTenants || 0, color: ACCENT },
-          { icon: <CheckCircleRounded />, label: 'Active Tenants', value: platform?.activeTenants || 0, color: '#4ade80' },
-          { icon: <PeopleRounded />, label: 'Total Users', value: platform?.totalUsers || 0, color: '#FBBF24' },
-          { icon: <InventoryRounded />, label: 'Total Assets', value: platform?.totalAssets || 0, color: '#f59e0b' },
-          { icon: <ConfirmationNumberRounded />, label: 'Total Tickets', value: platform?.totalTickets || 0, color: '#FBBF24' },
+          { icon: <CheckCircleRounded />, label: 'Active', value: platform?.activeTenants || 0, color: '#4ade80' },
           { icon: <CancelRounded />, label: 'Suspended', value: platform?.suspendedTenants || 0, color: '#ef4444' },
         ].map(card => (
-          <Grid key={card.label} size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+          <Grid key={card.label} size={{ xs: 12, sm: 4 }}>
             <PlatformStatCard {...card} />
           </Grid>
         ))}
@@ -395,7 +392,7 @@ export default function SuperAdminPanel() {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: 'action.hover' }}>
-                {['Company', 'Plan', 'Status', 'Assets', 'Users', 'Tickets', 'Asset Utilization', 'User Utilization', 'Joined', 'Actions'].map(h => (
+                {['Company', 'Plan', 'Status', 'Asset Limit', 'User Limit', 'Plan Expiry', 'Joined', 'Actions'].map(h => (
                   <TableCell key={h} sx={{ fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.7px', py: 1.5, color: 'text.secondary', whiteSpace: 'nowrap' }}>
                     {h}
                   </TableCell>
@@ -429,19 +426,19 @@ export default function SuperAdminPanel() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography fontWeight={700}>{t.usage.assets}</Typography>
-                    <Typography fontSize={11} color="text.disabled">/ {t.limits.maxAssets}</Typography>
+                    <Typography fontWeight={700} fontSize={13}>
+                      {t.limits.maxAssets === -1 ? 'Unlimited' : t.limits.maxAssets}
+                    </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography fontWeight={700}>{t.usage.users}</Typography>
-                    <Typography fontSize={11} color="text.disabled">/ {t.limits.maxUsers}</Typography>
+                    <Typography fontWeight={700} fontSize={13}>
+                      {t.limits.maxUsers === -1 ? 'Unlimited' : t.limits.maxUsers}
+                    </Typography>
                   </TableCell>
-                  <TableCell><Typography fontWeight={600}>{t.usage.tickets}</Typography></TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <UtilBar value={t.usage.assetUtilization} label="" />
-                  </TableCell>
-                  <TableCell sx={{ minWidth: 120 }}>
-                    <UtilBar value={t.usage.userUtilization} color="#60a5fa" label="" />
+                  <TableCell>
+                    <Typography fontSize={12} color={t.planExpiry && new Date(t.planExpiry) < new Date() ? '#ef4444' : 'text.secondary'} whiteSpace="nowrap">
+                      {t.planExpiry ? new Date(t.planExpiry).toLocaleDateString('en-IN') : '—'}
+                    </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography fontSize={12} color="text.secondary" whiteSpace="nowrap">
@@ -450,11 +447,6 @@ export default function SuperAdminPanel() {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title="View Users">
-                        <IconButton size="small" onClick={() => handleViewUsers(t)} sx={{ color: '#60a5fa' }}>
-                          <PeopleRounded sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Tooltip>
                       <Tooltip title="Change Plan">
                         <IconButton size="small" onClick={() => {
                           setSelectedTenant(t);
@@ -492,7 +484,7 @@ export default function SuperAdminPanel() {
               ))}
               {(tab === 0 ? tenants : tab === 1 ? activeTenants : suspendedTenants)?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} sx={{ textAlign: 'center', py: 6, color: 'text.disabled' }}>
+                  <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6, color: 'text.disabled' }}>
                     No companies found.
                   </TableCell>
                 </TableRow>
