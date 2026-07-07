@@ -482,13 +482,13 @@ const Assets = () => {
         />
         <Select
           size="small"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          sx={{ minWidth: 150, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
+          value={deptFilter}
+          onChange={(e) => setDeptFilter(e.target.value)}
+          sx={{ minWidth: 160, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
           displayEmpty
         >
-          <MenuItem value="All">All Categories</MenuItem>
-          {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+          <MenuItem value="All">All Departments</MenuItem>
+          {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
         </Select>
         <Select
           size="small"
@@ -500,18 +500,6 @@ const Assets = () => {
           <MenuItem value="All">All Statuses</MenuItem>
           {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
         </Select>
-        {departments.length > 0 && (
-          <Select
-            size="small"
-            value={deptFilter}
-            onChange={(e) => setDeptFilter(e.target.value)}
-            sx={{ minWidth: 160, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
-            displayEmpty
-          >
-            <MenuItem value="All">All Departments</MenuItem>
-            {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
-          </Select>
-        )}
         {(search || category !== "All" || statusFilter !== "All" || deptFilter !== "All") && (
           <Button
             size="small"
