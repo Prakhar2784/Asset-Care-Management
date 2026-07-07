@@ -138,7 +138,7 @@ export default function SuperAdminPanel() {
   });
   const [planForm, setPlanForm] = useState({
     plan: 'Basic', maxAssets: '', maxUsers: '',
-    features: { procurement: false, vendorPortal: false, enterpriseHub: false, customBranding: false, advancedReports: false },
+    features: { procurement: false, enterpriseHub: false, customBranding: false, advancedReports: false },
     planExpiry: '',
   });
   const [saving, setSaving] = useState(false);
@@ -456,7 +456,6 @@ export default function SuperAdminPanel() {
                             maxUsers: t.limits.maxUsers === -1 ? '' : t.limits.maxUsers,
                             features: {
                               procurement: !!t.features?.procurement,
-                              vendorPortal: !!t.features?.vendorPortal,
                               enterpriseHub: !!t.features?.enterpriseHub,
                               customBranding: !!t.features?.customBranding,
                               advancedReports: !!t.features?.advancedReports,
@@ -761,7 +760,6 @@ export default function SuperAdminPanel() {
           <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5, mb: 2.5 }}>
             {[
               { key: 'procurement', label: 'Procurement Module (PR / PO / GRN)' },
-              { key: 'vendorPortal', label: 'Vendor Portal' },
               { key: 'enterpriseHub', label: 'Enterprise Hub (Warehouse, AMC)' },
               { key: 'customBranding', label: 'Custom Branding & SMTP' },
               { key: 'advancedReports', label: 'Advanced Reports & Excel Export' },
@@ -788,8 +786,7 @@ export default function SuperAdminPanel() {
             Subscription Expiry
           </Typography>
           <TextField
-            fullWidth size="small" type="date" label="Plan Expiry Date"
-            InputLabelProps={{ shrink: true }}
+            fullWidth size="small" type="date"
             value={planForm.planExpiry}
             helperText="Leave blank for no expiry"
             onChange={e => setPlanForm(f => ({ ...f, planExpiry: e.target.value }))}

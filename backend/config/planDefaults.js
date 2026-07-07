@@ -6,7 +6,6 @@ const PLAN_DEFAULTS = {
     maxUsers: 10,
     features: {
       procurement: false,
-      vendorPortal: false,
       enterpriseHub: false,
       customBranding: false,
       advancedReports: false,
@@ -17,7 +16,6 @@ const PLAN_DEFAULTS = {
     maxUsers: 50,
     features: {
       procurement: true,
-      vendorPortal: true,
       enterpriseHub: true,
       customBranding: false,
       advancedReports: true,
@@ -28,7 +26,6 @@ const PLAN_DEFAULTS = {
     maxUsers: -1,
     features: {
       procurement: true,
-      vendorPortal: true,
       enterpriseHub: true,
       customBranding: true,
       advancedReports: true,
