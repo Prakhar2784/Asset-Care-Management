@@ -298,7 +298,7 @@ export default function ServiceCenters() {
                 <TextField label="Contact Person" value={form.contactPerson} onChange={set("contactPerson")} fullWidth size="small" sx={inputSx} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField label="Phone" value={form.phone} onChange={set("phone")} fullWidth size="small" sx={inputSx} />
+                <TextField label="Phone" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))} fullWidth size="small" sx={inputSx} inputProps={{ inputMode: 'numeric', maxLength: 10 }} />
               </Grid>
             </Grid>
             <TextField label="Email" value={form.email} onChange={set("email")} fullWidth size="small" sx={inputSx} />

@@ -257,7 +257,8 @@ const OnboardingWizard = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Phone" sx={inputSx} value={org.phone}
-                  onChange={e => setOrg({ ...org, phone: e.target.value })} />
+                  onChange={e => setOrg({ ...org, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) })}
+                  inputProps={{ inputMode: 'numeric', maxLength: 10 }} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Contact Email" sx={inputSx} value={org.contactEmail}
@@ -402,7 +403,8 @@ const OnboardingWizard = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Phone" sx={inputSx} value={user.phone}
-                  onChange={e => setUser({ ...user, phone: e.target.value })} />
+                  onChange={e => setUser({ ...user, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) })}
+                  inputProps={{ inputMode: 'numeric', maxLength: 10 }} />
               </Grid>
             </Grid>
 

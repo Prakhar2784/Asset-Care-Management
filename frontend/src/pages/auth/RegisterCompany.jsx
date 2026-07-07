@@ -44,6 +44,9 @@ const RegisterCompany = () => {
     if (name === "slug") {
       value = value.toLowerCase().replace(/[^a-z0-9.-]/g, "");
     }
+    if (name === "adminPhone") {
+      value = value.replace(/[^0-9]/g, '').slice(0, 10);
+    }
     setFormData({ ...formData, [name]: value });
     setError("");
   };
@@ -521,12 +524,14 @@ const RegisterCompany = () => {
               <div className="input-group">
                 <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
                 <input
-                  type="text"
+                  type="tel"
                   name="adminPhone"
-                  placeholder="Admin Phone Number"
+                  placeholder="10-digit mobile number"
                   className="auth-input"
                   value={formData.adminPhone}
                   onChange={handleInputChange}
+                  inputMode="numeric"
+                  maxLength={10}
                 />
               </div>
 

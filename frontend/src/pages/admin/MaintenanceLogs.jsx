@@ -620,7 +620,7 @@ export default function MaintenanceLogs() {
               <TextField
                 fullWidth size="small" label="Technician Contact" sx={inputSx}
                 value={form.technicianContact}
-                onChange={e => setForm(f => ({ ...f, technicianContact: e.target.value.replace(/[^0-9]/g, '').slice(0, 15) }))}
+                onChange={e => setForm(f => ({ ...f, technicianContact: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
                 slotProps={{
                   htmlInput: { inputMode: 'numeric' },
                   input: {
