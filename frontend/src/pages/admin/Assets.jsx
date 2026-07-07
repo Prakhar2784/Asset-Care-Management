@@ -86,6 +86,8 @@ const Assets = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [deptFilter, setDeptFilter] = useState("All");
+  const [departments, setDepartments] = useState([]);
   const [selected, setSelected] = useState(null);
 
   const [assets, setAssets] = useState([]);
@@ -163,6 +165,7 @@ const Assets = () => {
   useEffect(() => {
     fetchAssets();
     fetchEmployees();
+    api.get('/departments').then(({ data }) => setDepartments(data || [])).catch(() => {});
   }, []);
 
   // Deep-link support: open an asset's detail drawer directly (e.g. from Global Search)
@@ -177,7 +180,7 @@ const Assets = () => {
   }, [assets, searchParams]);
 
   // Reset page when filters change
-  useEffect(() => { setPage(0); }, [search, category, statusFilter]);
+  useEffect(() => { setPage(0); }, [search, category, statusFilter, deptFilter]);
 
   const fetchEmployees = async () => {
     try {
@@ -228,15 +231,16 @@ const Assets = () => {
         asset.serialNumber?.toLowerCase().includes(search.toLowerCase());
       const matchesCategory = category === "All" || asset.category === category;
       const matchesStatus = statusFilter === "All" || asset.status === statusFilter;
+      const matchesDept = deptFilter === "All" || asset.department === deptFilter;
       const matchesTab = activeTab === "all" || isIncomplete(asset);
       const matchesWarranty = !warrantyFilter || (asset.warrantyEnd && new Date(asset.warrantyEnd) <= in30Days);
-      return matchesSearch && matchesCategory && matchesStatus && matchesTab && matchesWarranty;
+      return matchesSearch && matchesCategory && matchesStatus && matchesDept && matchesTab && matchesWarranty;
     });
     if (warrantyFilter) {
       list = [...list].sort((a, b) => new Date(a.warrantyEnd) - new Date(b.warrantyEnd));
     }
     return list;
-  }, [search, category, statusFilter, activeTab, assets, warrantyFilter]);
+  }, [search, category, statusFilter, deptFilter, activeTab, assets, warrantyFilter]);
 
   const paginatedAssets = useMemo(
     () => filteredAssets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -496,10 +500,22 @@ const Assets = () => {
           <MenuItem value="All">All Statuses</MenuItem>
           {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
         </Select>
-        {(search || category !== "All" || statusFilter !== "All") && (
+        {departments.length > 0 && (
+          <Select
+            size="small"
+            value={deptFilter}
+            onChange={(e) => setDeptFilter(e.target.value)}
+            sx={{ minWidth: 160, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
+            displayEmpty
+          >
+            <MenuItem value="All">All Departments</MenuItem>
+            {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
+          </Select>
+        )}
+        {(search || category !== "All" || statusFilter !== "All" || deptFilter !== "All") && (
           <Button
             size="small"
-            onClick={() => { setSearch(""); setCategory("All"); setStatusFilter("All"); }}
+            onClick={() => { setSearch(""); setCategory("All"); setStatusFilter("All"); setDeptFilter("All"); }}
             sx={{ color: "text.secondary", fontWeight: 700, borderRadius: "8px", px: 2, border: 1, borderColor: "divider" }}
           >
             Clear
@@ -735,7 +751,10 @@ const Assets = () => {
             </Grid>
             <Grid container spacing={2}>
               <Grid size={6}>
-                <TextField label="Department" fullWidth sx={inputStyles} value={editForm.department || ""} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })} />
+                <TextField label="Department" fullWidth select sx={inputStyles} value={editForm.department || ""} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
+                  <MenuItem value="">— None —</MenuItem>
+                  {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
+                </TextField>
               </Grid>
               <Grid size={6}>
                 <TextField label="Location" fullWidth sx={inputStyles} value={editForm.location || ""} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
