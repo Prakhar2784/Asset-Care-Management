@@ -69,8 +69,13 @@ const Sidebar = ({ onClose }) => {
   const location       = useLocation();
   const { currentUser } = useAuth();
   const { branding }    = useAppTheme();
-  const logoSrc = branding?.logoUrl
-    ? (branding.logoUrl.startsWith("http") ? branding.logoUrl : `${api.defaults.baseURL?.replace(/\/api\/?$/, "")}${branding.logoUrl}`)
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  // Super admin always shows platform identity — never a customer's branding
+  const effectiveBranding = isSuperAdmin
+    ? { name: 'AssetCare Pro', logoUrl: null }
+    : branding;
+  const logoSrc = effectiveBranding?.logoUrl
+    ? (effectiveBranding.logoUrl.startsWith("http") ? effectiveBranding.logoUrl : `${api.defaults.baseURL?.replace(/\/api\/?$/, "")}${effectiveBranding.logoUrl}`)
     : null;
 
   const adminRoles = ["admin", "super_admin", "hod", "manager", "technician"];
@@ -137,13 +142,13 @@ const Sidebar = ({ onClose }) => {
             boxShadow: logoSrc ? "none" : "0 4px 16px rgba(17,24,39,0.5)",
           }}>
             {logoSrc
-              ? <Box component="img" src={logoSrc} alt={branding?.name} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ? <Box component="img" src={logoSrc} alt={effectiveBranding?.name} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
               : <Inventory2Rounded sx={{ fontSize: 19, color: "#FFFFFF" }} />
             }
           </Box>
           <Box>
             <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#FFFFFF", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
-              {branding?.name || "AssetCare Pro"}
+              {effectiveBranding?.name || "AssetCare Pro"}
             </Typography>
             <Typography sx={{ fontSize: 10, fontWeight: 600, color: ACCENT_DIM, textTransform: "uppercase", letterSpacing: "0.9px" }}>
               {brandLabel}
