@@ -452,10 +452,38 @@ const sendOtpEmail = async (user, otp) => {
   });
 };
 
+const sendContactAutoReply = async ({ name, email, company, inquiryType }) => {
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      Hi ${name},
+    </p>
+    <p style="font-size:14px;color:#334155;line-height:1.7;margin-bottom:16px;">
+      Thank you for reaching out to <strong>AssetCare Pro</strong>. We have received your <strong>${inquiryType}</strong> request from <strong>${company}</strong> and our team will get back to you within <strong>1 business day</strong>.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Inquiry Type</span><span class="info-val">${inquiryType}</span></div>
+      <div class="info-row"><span class="info-key">Company</span><span class="info-val">${company}</span></div>
+    </div>
+    <p style="font-size:14px;color:#334155;line-height:1.7;margin-top:20px;">
+      In the meantime, you can explore our product at <strong>assetcarepro.com</strong> or reach us directly:
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val">support@assetcarepro.com</span></div>
+      <div class="info-row"><span class="info-key">Phone</span><span class="info-val">+91 800-456-7890</span></div>
+    </div>`;
+  await sendEmail({
+    to: email,
+    subject: `We received your request — AssetCare Pro`,
+    text: `Hi ${name}, thank you for contacting AssetCare Pro. We have received your ${inquiryType} request from ${company} and will get back to you within 1 business day.`,
+    html: baseTemplate('Thank You for Reaching Out', body, 'You are receiving this because you submitted a contact form on assetcarepro.com.')
+  });
+};
+
 module.exports = {
   sendPasswordResetEmail,
   sendPasswordChangedEmail,
   sendContactEmail,
+  sendContactAutoReply,
   sendOtpEmail,
   sendTicketCreatedEmail,
   sendTicketStatusEmail,

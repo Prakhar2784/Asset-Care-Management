@@ -13,7 +13,9 @@ import {
   CheckCircleRounded, CancelRounded, UpgradeRounded,
   InventoryRounded, ConfirmationNumberRounded, PersonRounded,
   ShieldRounded, RocketLaunchRounded, StarRounded,
-  VisibilityRounded, TrendingUpRounded, DnsRounded
+  VisibilityRounded, TrendingUpRounded, DnsRounded,
+  InboxRounded, EmailRounded, PhoneRounded, BusinessCenterRounded,
+  EditNoteRounded, OpenInNewRounded
 } from '@mui/icons-material';
 import api from '../../api/axios';
 
@@ -111,6 +113,15 @@ export default function SuperAdminPanel() {
   const [tab, setTab] = useState(0);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
+  // Leads tab
+  const [mainTab, setMainTab] = useState(0);
+  const [leads, setLeads] = useState([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
+  const [leadDetail, setLeadDetail] = useState(null);
+  const [leadNotes, setLeadNotes] = useState('');
+  const [leadStatus, setLeadStatus] = useState('New');
+  const [leadSaving, setLeadSaving] = useState(false);
+
   // Dialogs
   const [createOpen, setCreateOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
@@ -144,9 +155,48 @@ export default function SuperAdminPanel() {
     }
   }, []);
 
+  const fetchLeads = useCallback(async () => {
+    setLeadsLoading(true);
+    try {
+      const { data } = await api.get('/super-admin/leads');
+      setLeads(data);
+    } catch { setLeads([]); }
+    finally { setLeadsLoading(false); }
+  }, []);
+
   useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { if (mainTab === 1) fetchLeads(); }, [mainTab, fetchLeads]);
 
   const showSnack = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
+
+  const handleLeadSave = async () => {
+    setLeadSaving(true);
+    try {
+      const { data } = await api.patch(`/super-admin/leads/${leadDetail._id}`, { status: leadStatus, notes: leadNotes });
+      setLeads(prev => prev.map(l => l._id === data._id ? data : l));
+      setLeadDetail(data);
+      showSnack('Lead updated.');
+    } catch { showSnack('Failed to update lead.', 'error'); }
+    finally { setLeadSaving(false); }
+  };
+
+  const handleLeadDelete = async (lead) => {
+    if (!window.confirm(`Delete lead from ${lead.company}?`)) return;
+    try {
+      await api.delete(`/super-admin/leads/${lead._id}`);
+      setLeads(prev => prev.filter(l => l._id !== lead._id));
+      if (leadDetail?._id === lead._id) setLeadDetail(null);
+      showSnack('Lead deleted.', 'info');
+    } catch { showSnack('Failed to delete.', 'error'); }
+  };
+
+  const LEAD_STATUS_COLORS = {
+    'New': { bg: '#1e3a5f', text: '#60a5fa' },
+    'Contacted': { bg: '#3b2a00', text: '#fbbf24' },
+    'Demo Scheduled': { bg: '#1a3a2a', text: '#4ade80' },
+    'Converted': { bg: '#14532d', text: '#86efac' },
+    'Not Interested': { bg: '#3b0a0a', text: '#f87171' },
+  };
 
   const handleCreateCompany = async () => {
     try {
@@ -318,19 +368,29 @@ export default function SuperAdminPanel() {
         })}
       </Grid>
 
-      {/* Tabs */}
+      {/* Main Tabs — Companies / Leads */}
       <Tabs
-        value={tab}
-        onChange={(_, v) => setTab(v)}
+        value={mainTab}
+        onChange={(_, v) => setMainTab(v)}
         sx={{ mb: 3, '& .MuiTab-root': { fontWeight: 700, fontSize: 13, textTransform: 'none' }, '& .MuiTabs-indicator': { bgcolor: ACCENT } }}
       >
-        <Tab id="tab-all" label={`All Companies (${tenants?.length || 0})`} />
-        <Tab id="tab-active" label={`Active (${activeTenants.length})`} />
-        <Tab id="tab-suspended" label={`Suspended (${suspendedTenants.length})`} />
+        <Tab label="Companies" icon={<BusinessRounded sx={{ fontSize: 16 }} />} iconPosition="start" />
+        <Tab label={`Sales Leads ${leads.length > 0 ? `(${leads.filter(l => l.status === 'New').length} new)` : ''}`} icon={<InboxRounded sx={{ fontSize: 16 }} />} iconPosition="start" />
       </Tabs>
 
+      {/* Companies sub-tabs */}
+      {mainTab === 0 && <Tabs
+        value={tab}
+        onChange={(_, v) => setTab(v)}
+        sx={{ mb: 3, '& .MuiTab-root': { fontWeight: 600, fontSize: 12, textTransform: 'none' }, '& .MuiTabs-indicator': { bgcolor: '#60a5fa' } }}
+      >
+        <Tab id="tab-all" label={`All (${tenants?.length || 0})`} />
+        <Tab id="tab-active" label={`Active (${activeTenants.length})`} />
+        <Tab id="tab-suspended" label={`Suspended (${suspendedTenants.length})`} />
+      </Tabs>}
+
       {/* Company Table */}
-      <Paper sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+      {mainTab === 0 && <Paper sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
         <TableContainer>
           <Table>
             <TableHead>
@@ -440,7 +500,140 @@ export default function SuperAdminPanel() {
             </TableBody>
           </Table>
         </TableContainer>
-      </Paper>
+      </Paper>}
+
+      {/* ─── Sales Leads Panel ─── */}
+      {mainTab === 1 && (
+        <Box sx={{ display: 'flex', gap: 2.5, alignItems: 'flex-start' }}>
+          {/* Lead list */}
+          <Box sx={{ flex: '0 0 380px', minWidth: 0 }}>
+            {leadsLoading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
+            ) : leads.length === 0 ? (
+              <Paper sx={{ p: 5, textAlign: 'center', borderRadius: 3 }}>
+                <InboxRounded sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                <Typography color="text.disabled" fontWeight={600}>No leads yet</Typography>
+                <Typography variant="caption" color="text.disabled">Submissions from the Contact page will appear here</Typography>
+              </Paper>
+            ) : leads.map(lead => {
+              const sc = LEAD_STATUS_COLORS[lead.status] || LEAD_STATUS_COLORS['New'];
+              const isSelected = leadDetail?._id === lead._id;
+              return (
+                <Paper
+                  key={lead._id}
+                  onClick={() => { setLeadDetail(lead); setLeadNotes(lead.notes || ''); setLeadStatus(lead.status); }}
+                  sx={{
+                    p: 2, mb: 1.5, borderRadius: 2.5, cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: isSelected ? '#a78bfa' : 'divider',
+                    bgcolor: isSelected ? 'rgba(167,139,250,0.07)' : 'background.paper',
+                    transition: 'all 0.15s',
+                    '&:hover': { borderColor: '#a78bfa' },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
+                    <Typography fontWeight={800} fontSize={14} noWrap sx={{ flex: 1 }}>{lead.company}</Typography>
+                    <Chip label={lead.status} size="small"
+                      sx={{ bgcolor: sc.bg, color: sc.text, fontWeight: 700, fontSize: 10, height: 20, ml: 1, flexShrink: 0 }} />
+                  </Box>
+                  <Typography fontSize={12} color="text.secondary" noWrap>{lead.name} · {lead.email}</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                    <Typography fontSize={11} color="text.disabled">{lead.inquiryType}</Typography>
+                    <Typography fontSize={11} color="text.disabled">{new Date(lead.createdAt).toLocaleDateString('en-IN')}</Typography>
+                  </Box>
+                </Paper>
+              );
+            })}
+          </Box>
+
+          {/* Lead detail pane */}
+          {leadDetail ? (
+            <Paper sx={{ flex: 1, borderRadius: 3, p: 3, border: '1px solid', borderColor: 'divider', minWidth: 0 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+                <Box>
+                  <Typography variant="h6" fontWeight={900}>{leadDetail.company}</Typography>
+                  <Typography variant="caption" color="text.disabled">
+                    Received {new Date(leadDetail.createdAt).toLocaleString('en-IN')}
+                  </Typography>
+                </Box>
+                <Tooltip title="Delete Lead">
+                  <IconButton size="small" onClick={() => handleLeadDelete(leadDetail)} sx={{ color: '#ef4444' }}>
+                    <DeleteRounded sx={{ fontSize: 17 }} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+
+              <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
+                {[
+                  { icon: <PersonRounded sx={{ fontSize: 15 }} />, label: 'Contact', val: leadDetail.name },
+                  { icon: <EmailRounded sx={{ fontSize: 15 }} />, label: 'Email', val: leadDetail.email },
+                  { icon: <PhoneRounded sx={{ fontSize: 15 }} />, label: 'Phone', val: leadDetail.phone || '—' },
+                  { icon: <PeopleRounded sx={{ fontSize: 15 }} />, label: 'Org Size', val: leadDetail.orgSize || '—' },
+                  { icon: <BusinessCenterRounded sx={{ fontSize: 15 }} />, label: 'Inquiry', val: leadDetail.inquiryType },
+                ].map(({ icon, label, val }) => (
+                  <Grid key={label} size={{ xs: 12, sm: 6 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
+                      <Box sx={{ color: 'text.secondary', flexShrink: 0 }}>{icon}</Box>
+                      <Box sx={{ minWidth: 0 }}>
+                        <Typography fontSize={10} fontWeight={700} color="text.disabled" textTransform="uppercase" letterSpacing="0.5px">{label}</Typography>
+                        <Typography fontSize={13} fontWeight={600} noWrap>{val}</Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+
+              <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', mb: 2.5 }}>
+                <Typography fontSize={10} fontWeight={700} color="text.disabled" textTransform="uppercase" letterSpacing="0.5px" mb={0.5}>Message</Typography>
+                <Typography fontSize={13} color="text.primary" sx={{ lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{leadDetail.message}</Typography>
+              </Box>
+
+              <Divider sx={{ mb: 2.5 }} />
+
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid size={{ xs: 12, sm: 5 }}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Status</InputLabel>
+                    <Select value={leadStatus} label="Status" onChange={e => setLeadStatus(e.target.value)}>
+                      {['New', 'Contacted', 'Demo Scheduled', 'Converted', 'Not Interested'].map(s => (
+                        <MenuItem key={s} value={s}>{s}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 7 }}>
+                  <TextField fullWidth size="small" label="Internal Notes" multiline rows={2}
+                    value={leadNotes} onChange={e => setLeadNotes(e.target.value)}
+                    placeholder="e.g. Called on 5 Jul, scheduling demo next week..." />
+                </Grid>
+              </Grid>
+
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                <Button variant="contained" onClick={handleLeadSave} disabled={leadSaving}
+                  startIcon={<EditNoteRounded />}
+                  sx={{ bgcolor: '#a78bfa', color: '#1a0533', fontWeight: 800, borderRadius: '8px' }}>
+                  {leadSaving ? 'Saving...' : 'Save Update'}
+                </Button>
+                <Button variant="outlined" startIcon={<OpenInNewRounded />}
+                  onClick={() => { setCreateOpen(true); }}
+                  sx={{ fontWeight: 700, borderRadius: '8px', borderColor: '#4ade80', color: '#4ade80', '&:hover': { borderColor: '#4ade80', bgcolor: 'rgba(74,222,128,0.08)' } }}>
+                  Provision as Company
+                </Button>
+                <Button variant="text" startIcon={<EmailRounded />}
+                  href={`mailto:${leadDetail.email}?subject=AssetCare Pro Demo — ${leadDetail.company}`}
+                  sx={{ fontWeight: 700, borderRadius: '8px', color: '#60a5fa' }}>
+                  Reply via Email
+                </Button>
+              </Box>
+            </Paper>
+          ) : (
+            <Paper sx={{ flex: 1, borderRadius: 3, p: 6, border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1 }}>
+              <InboxRounded sx={{ fontSize: 48, color: 'text.disabled' }} />
+              <Typography color="text.disabled" fontWeight={600}>Select a lead to view details</Typography>
+            </Paper>
+          )}
+        </Box>
+      )}
 
       {/* ─── Create Company Dialog ─── */}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth
