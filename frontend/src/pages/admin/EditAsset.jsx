@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 
 const SectionLabel = ({ number, title, subtitle }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3, mt: 0.5 }}>
@@ -54,6 +55,7 @@ const inputSx = {
 const EditAsset = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -397,9 +399,20 @@ const EditAsset = () => {
           <SectionLabel number="4" title="Deployment" subtitle="Assign to a department." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField required fullWidth select name="department" value={formData.department}
-                onChange={handleChange} sx={inputSx} label="Target Department *">
-                {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
+              <TextField
+                required
+                fullWidth
+                select={currentUser?.role !== 'hod'}
+                disabled={currentUser?.role === 'hod'}
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                sx={inputSx}
+                label="Target Department *"
+              >
+                {currentUser?.role !== 'hod' ? (
+                  departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)
+                ) : null}
               </TextField>
             </Grid>
             <Grid size={12}>

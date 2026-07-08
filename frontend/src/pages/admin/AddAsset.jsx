@@ -52,7 +52,7 @@ const DOC_TYPES = [
 const AddAsset = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshUser } = useAuth();
+  const { refreshUser, currentUser } = useAuth();
   const isOnboarding = new URLSearchParams(location.search).get("onboarding") === "1";
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -173,6 +173,15 @@ const AddAsset = () => {
     };
     fetchCustomFieldConfigs();
   }, [formData.category]);
+
+  React.useEffect(() => {
+    if (currentUser?.role === 'hod' && currentUser?.department) {
+      setFormData(prev => ({
+        ...prev,
+        department: currentUser.department
+      }));
+    }
+  }, [currentUser]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -451,7 +460,6 @@ const AddAsset = () => {
         servicePartnerContact: "Service Partner Contact Person",
         supportPhone: "Support Phone",
         supportEmail: "Support Email",
-        location: "Location",
         notes: "Notes",
         purchaseFromName: "Purchase From Name",
         purchaseFromAddress: "Purchase From Address",
@@ -860,16 +868,29 @@ const AddAsset = () => {
           <SectionLabel number="4" title="Deployment" subtitle="Assign to a department." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField required fullWidth select name="department" value={formData.department}
-                onChange={handleChange} sx={inputSx("department")} label="Target Department *">
-                <MenuItem value="Information Technology">Information Technology</MenuItem>
-                <MenuItem value="Administration">Administration</MenuItem>
-                <MenuItem value="Finance & Accounts">Finance & Accounts</MenuItem>
-                <MenuItem value="Operations">Operations</MenuItem>
-                <MenuItem value="Human Resources">Human Resources</MenuItem>
-                <MenuItem value="Sales & Marketing">Sales & Marketing</MenuItem>
-                <MenuItem value="Legal">Legal</MenuItem>
-                <MenuItem value="Security">Security</MenuItem>
+              <TextField
+                required
+                fullWidth
+                select={currentUser?.role !== 'hod'}
+                disabled={currentUser?.role === 'hod'}
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                sx={inputSx("department")}
+                label="Target Department *"
+              >
+                {currentUser?.role !== 'hod' ? (
+                  <>
+                    <MenuItem value="Information Technology">Information Technology</MenuItem>
+                    <MenuItem value="Administration">Administration</MenuItem>
+                    <MenuItem value="Finance & Accounts">Finance & Accounts</MenuItem>
+                    <MenuItem value="Operations">Operations</MenuItem>
+                    <MenuItem value="Human Resources">Human Resources</MenuItem>
+                    <MenuItem value="Sales & Marketing">Sales & Marketing</MenuItem>
+                    <MenuItem value="Legal">Legal</MenuItem>
+                    <MenuItem value="Security">Security</MenuItem>
+                  </>
+                ) : null}
               </TextField>
             </Grid>
             <Grid size={12}>

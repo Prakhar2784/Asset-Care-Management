@@ -2,6 +2,7 @@ const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
 const DeviceRequest = require('../models/DeviceRequest');
 const MaintenanceLog = require('../models/MaintenanceLog');
+const User = require('../models/User');
 
 // @route   GET /api/dashboard/stats
 // @access  Admin / HOD
@@ -9,6 +10,38 @@ const getDashboardStats = async (req, res) => {
   try {
     const now = new Date();
     const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    let assetFilter = { isDeleted: { $ne: true } };
+    let ticketFilter = {};
+    let deviceRequestFilter = {};
+
+    const isHod = req.user.role === 'hod' && req.user.department;
+
+    if (isHod) {
+      // 1. Scope assets by HOD's department
+      assetFilter.department = req.user.department;
+
+      // 2. Fetch users in department to scope tickets and requests
+      const deptUsers = await User.find({ department: req.user.department }).select('_id');
+      const deptUserIds = deptUsers.map(u => u._id);
+
+      // 3. Fetch assets in department to scope tickets
+      const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
+      const deptAssetIds = deptAssets.map(a => a._id);
+
+      // 4. Scope tickets by department users or assets
+      ticketFilter = {
+        $or: [
+          { raisedBy: { $in: deptUserIds } },
+          { asset: { $in: deptAssetIds } }
+        ]
+      };
+
+      // 5. Scope device requests by department users
+      deviceRequestFilter = {
+        raisedBy: { $in: deptUserIds }
+      };
+    }
 
     const [
       totalAssets,
@@ -21,21 +54,21 @@ const getDashboardStats = async (req, res) => {
       recentTickets,
       departmentBreakdown
     ] = await Promise.all([
-      Asset.countDocuments({ isDeleted: { $ne: true } }),
-      Ticket.countDocuments(),
-      Ticket.countDocuments({ status: 'Pending Approval' }),
-      Ticket.countDocuments({ status: { $in: ['Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair'] } }),
-      Ticket.countDocuments({ status: 'Resolved' }),
+      Asset.countDocuments(assetFilter),
+      Ticket.countDocuments(ticketFilter),
+      Ticket.countDocuments({ ...ticketFilter, status: 'Pending Approval' }),
+      Ticket.countDocuments({ ...ticketFilter, status: { $in: ['Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair'] } }),
+      Ticket.countDocuments({ ...ticketFilter, status: 'Resolved' }),
       // Counts assets already past warranty as well as those expiring within 30 days
-      Asset.countDocuments({ isDeleted: { $ne: true }, warrantyEnd: { $ne: null, $lte: in30Days } }),
-      DeviceRequest.countDocuments({ status: 'Pending' }),
-      Ticket.find({})
+      Asset.countDocuments({ ...assetFilter, warrantyEnd: { $ne: null, $lte: in30Days } }),
+      DeviceRequest.countDocuments({ ...deviceRequestFilter, status: 'Pending' }),
+      Ticket.find(ticketFilter)
         .sort({ createdAt: -1 })
         .limit(5)
         .populate('asset', 'name department')
         .populate('raisedBy', 'name'),
       Asset.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: assetFilter },
         { $group: { _id: '$department', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 6 }
