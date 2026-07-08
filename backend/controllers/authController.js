@@ -157,6 +157,8 @@ const loginUser = async (req, res) => {
       role: user.role, department: user.department, tenantId: user.tenantId,
       customPermissions: user.customPermissions || [],
       onboardingDone: user.onboardingDone,
+      avatar: user.avatar || null,
+      phone: user.phone || null,
       plan: tenant?.plan || 'Basic',
       features: tenant?.features || {},
       token: generateToken(user._id, user.tenantId)
