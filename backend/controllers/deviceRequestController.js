@@ -120,7 +120,12 @@ const createRequest = async (req, res) => {
 // @access  Admin
 const getAllRequests = async (req, res) => {
   try {
-    const requests = await DeviceRequest.find({})
+    let filter = {};
+    if (req.user.role === 'hod' && req.user.department) {
+      const deptUsers = await User.find({ department: req.user.department }).select('_id');
+      filter.raisedBy = { $in: deptUsers.map(u => u._id) };
+    }
+    const requests = await DeviceRequest.find(filter)
       .populate('raisedBy', 'name email department')
       .populate('relatedAsset', 'name serialNumber')
       .populate('reviewedBy', 'name')

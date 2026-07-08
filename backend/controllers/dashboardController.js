@@ -73,6 +73,13 @@ const getDateHistory = async (req, res) => {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
+    // For HODs, filter maintenance to their department's assets only
+    let maintenanceAssetFilter = {};
+    if (req.user.role === 'hod' && req.user.department) {
+      const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
+      maintenanceAssetFilter = { asset: { $in: deptAssets.map(a => a._id) } };
+    }
+
     const [assets, tickets, maintenance] = await Promise.all([
       Asset.find({
         isDeleted: { $ne: true },
@@ -83,9 +90,10 @@ const getDateHistory = async (req, res) => {
       }).select('ticketId issue status priority')
         .populate('asset', 'name'),
       MaintenanceLog.find({
-        serviceDate: { $gte: startOfDay, $lte: endOfDay }
+        serviceDate: { $gte: startOfDay, $lte: endOfDay },
+        ...maintenanceAssetFilter,
       }).select('type description status cost')
-        .populate('asset', 'name')
+        .populate('asset', 'name department')
     ]);
 
     res.status(200).json({
@@ -98,4 +106,38 @@ const getDateHistory = async (req, res) => {
   }
 };
 
-module.exports = { getDashboardStats, getDateHistory };
+// @route   GET /api/dashboard/scheduled-maintenance
+// @access  Protected
+// Returns all upcoming scheduled maintenance dates (for calendar dot display).
+// HODs receive only their department's maintenance; admins receive all.
+const getScheduledMaintenance = async (req, res) => {
+  try {
+    let assetFilter = { isDeleted: { $ne: true } };
+    if (req.user.role === 'hod' && req.user.department) {
+      assetFilter.department = req.user.department;
+    }
+
+    const eligibleAssets = await Asset.find(assetFilter).select('_id');
+    const assetIds = eligibleAssets.map(a => a._id);
+
+    const logs = await MaintenanceLog.find({
+      status: 'Scheduled',
+      asset: { $in: assetIds },
+    }).select('serviceDate description type asset')
+      .populate('asset', 'name department');
+
+    const dates = logs.map(log => ({
+      date: log.serviceDate.toISOString().split('T')[0],
+      description: log.description,
+      type: log.type,
+      assetName: log.asset?.name,
+      department: log.asset?.department,
+    }));
+
+    res.status(200).json({ dates });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getDashboardStats, getDateHistory, getScheduledMaintenance };

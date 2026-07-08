@@ -59,7 +59,7 @@ import api from "../../api/axios";
 import BulkImportDialog from "../../components/BulkImportDialog";
 import AssetTimelineDrawer from "../../components/AssetTimelineDrawer";
 
-const CATEGORIES = ["IT Asset", "Electrical", "Electronic", "Furniture"];
+const CATEGORIES = ["IT Asset", "Electrical", "Electronic", "Furniture", "Networking", "Other"];
 const STATUSES = ["Active", "Under Repair", "Decommissioned", "In Storage"];
 const FORM_FACTORS = ["Movable", "Fixed"];
 
@@ -84,7 +84,6 @@ const Assets = () => {
   const canDelete   = hasPerm('Edit / Delete Assets');
   const canAssign   = hasPerm('Assign Assets');
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [deptFilter, setDeptFilter] = useState("All");
   const [departments, setDepartments] = useState([]);
@@ -180,7 +179,7 @@ const Assets = () => {
   }, [assets, searchParams]);
 
   // Reset page when filters change
-  useEffect(() => { setPage(0); }, [search, category, statusFilter, deptFilter]);
+  useEffect(() => { setPage(0); }, [search, statusFilter, deptFilter]);
 
   const fetchEmployees = async () => {
     try {
@@ -229,18 +228,17 @@ const Assets = () => {
         asset.name?.toLowerCase().includes(search.toLowerCase()) ||
         asset._id?.toLowerCase().includes(search.toLowerCase()) ||
         asset.serialNumber?.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = category === "All" || asset.category === category;
       const matchesStatus = statusFilter === "All" || asset.status === statusFilter;
       const matchesDept = deptFilter === "All" || asset.department?.trim().toLowerCase() === deptFilter.trim().toLowerCase();
       const matchesTab = activeTab === "all" || isIncomplete(asset);
       const matchesWarranty = !warrantyFilter || (asset.warrantyEnd && new Date(asset.warrantyEnd) <= in30Days);
-      return matchesSearch && matchesCategory && matchesStatus && matchesDept && matchesTab && matchesWarranty;
+      return matchesSearch && matchesStatus && matchesDept && matchesTab && matchesWarranty;
     });
     if (warrantyFilter) {
       list = [...list].sort((a, b) => new Date(a.warrantyEnd) - new Date(b.warrantyEnd));
     }
     return list;
-  }, [search, category, statusFilter, deptFilter, activeTab, assets, warrantyFilter]);
+  }, [search, statusFilter, deptFilter, activeTab, assets, warrantyFilter]);
 
   const paginatedAssets = useMemo(
     () => filteredAssets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
@@ -500,10 +498,10 @@ const Assets = () => {
           <MenuItem value="All">All Statuses</MenuItem>
           {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
         </Select>
-        {(search || category !== "All" || statusFilter !== "All" || deptFilter !== "All") && (
+        {(search || statusFilter !== "All" || deptFilter !== "All") && (
           <Button
             size="small"
-            onClick={() => { setSearch(""); setCategory("All"); setStatusFilter("All"); setDeptFilter("All"); }}
+            onClick={() => { setSearch(""); setStatusFilter("All"); setDeptFilter("All"); }}
             sx={{ color: "text.secondary", fontWeight: 700, borderRadius: "8px", px: 2, border: 1, borderColor: "divider" }}
           >
             Clear

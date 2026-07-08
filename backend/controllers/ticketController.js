@@ -1,10 +1,12 @@
 const Ticket = require('../models/Ticket');
 const User = require('../models/User');
+const Asset = require('../models/Asset');
 const mongoose = require('mongoose');
 const {
   sendTicketCreatedEmail,
   sendTicketStatusEmail,
-  sendTicketResolvedEmail
+  sendTicketResolvedEmail,
+  sendHodTicketNotificationEmail,
 } = require('../services/emailService');
 const { createNotification } = require('../services/notificationService');
 const { audit } = require('../services/auditService');
@@ -63,7 +65,7 @@ const createTicket = async (req, res) => {
     const itemName = populated.asset?.name || populated.itemLabel || ticketId;
  
     if (initialStatus === 'Pending HOD Approval') {
-      // 1. Notify Department HODs
+      // 1. Notify Department HODs (in-app + email)
       User.find({ role: 'hod', department: req.user.department, isActive: true }).then(hods => {
         hods.forEach(hod => {
           createNotification({
@@ -73,6 +75,8 @@ const createTicket = async (req, res) => {
             message: `${req.user.name} raised ticket ${ticketId} for "${itemName}" pending your approval.`,
             link: `/tickets?highlight=${ticket._id}`
           });
+          sendHodTicketNotificationEmail(hod, populated, populated.asset, populated.raisedBy)
+            .catch(() => {});
         });
       }).catch(() => {});
  
@@ -113,17 +117,25 @@ const createTicket = async (req, res) => {
 // @access  Admin / HOD / Technician (technicians only see their assigned tickets)
 const getTickets = async (req, res) => {
   try {
-    // Technicians only see:
-    //  1. Tickets explicitly assigned to them (new flow)
-    //  2. Tickets in 'Assigned to Technician' status with no specific technician set (legacy / unowned)
-    const filter = req.user.role === 'technician'
-      ? {
-          $or: [
-            { assignedTechnician: req.user._id },
-            { status: { $in: ['Assigned to Technician', 'Service Center Required'] }, assignedTechnician: null }
-          ]
-        }
-      : {};
+    let filter = {};
+
+    if (req.user.role === 'technician') {
+      filter = {
+        $or: [
+          { assignedTechnician: req.user._id },
+          { status: { $in: ['Assigned to Technician', 'Service Center Required'] }, assignedTechnician: null }
+        ]
+      };
+    } else if (req.user.role === 'hod' && req.user.department) {
+      const [deptUsers, deptAssets] = await Promise.all([
+        User.find({ department: req.user.department }).select('_id'),
+        Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id'),
+      ]);
+      filter.$or = [
+        { raisedBy: { $in: deptUsers.map(u => u._id) } },
+        { asset: { $in: deptAssets.map(a => a._id) } },
+      ];
+    }
 
     const tickets = await Ticket.find(filter)
       .populate('asset', 'name serialNumber department')
@@ -387,9 +399,8 @@ const confirmResolution = async (req, res) => {
 
     audit({ req, action: 'ticket_resolution_confirmed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId });
 
-    // Notify all admin-tier reviewers that the user has closed out this ticket
-    const reviewerRoles = ['admin', 'super_admin', 'hod', 'manager'];
-    User.find({ role: { $in: reviewerRoles } }).then(admins => {
+    // Notify admins + the specific dept HOD that the user has confirmed resolution
+    User.find({ role: { $in: ['admin', 'super_admin'] } }).then(admins => {
       admins.forEach(admin => {
         createNotification({
           userId: admin._id,
@@ -400,6 +411,20 @@ const confirmResolution = async (req, res) => {
         });
       });
     }).catch(() => {});
+
+    if (ticket.raisedBy?.department) {
+      User.find({ role: 'hod', department: ticket.raisedBy.department, isActive: true }).then(hods => {
+        hods.forEach(hod => {
+          createNotification({
+            userId: hod._id,
+            type: 'ticket_resolution_confirmed',
+            title: 'Resolution Confirmed',
+            message: `${ticket.raisedBy?.name || 'The user'} confirmed ticket ${ticket.ticketId} is resolved. It can now be closed.`,
+            link: `/tickets?highlight=${ticket._id}`
+          });
+        });
+      }).catch(() => {});
+    }
 
     res.status(200).json(updated);
   } catch (error) {

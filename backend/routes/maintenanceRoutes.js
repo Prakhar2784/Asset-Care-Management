@@ -89,8 +89,13 @@ router.post('/:assetId', protect, authorize('admin', 'technician'), async (req, 
 // GET /api/maintenance — get all maintenance logs in the system
 router.get('/', protect, authorize('admin', 'hod', 'technician'), async (req, res) => {
   try {
-    const logs = await MaintenanceLog.find()
-      .populate('asset', 'name serialNumber category')
+    let filter = {};
+    if (req.user.role === 'hod' && req.user.department) {
+      const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
+      filter = { asset: { $in: deptAssets.map(a => a._id) } };
+    }
+    const logs = await MaintenanceLog.find(filter)
+      .populate('asset', 'name serialNumber category department')
       .populate('loggedBy', 'name')
       .sort({ serviceDate: -1 });
     res.json(logs);

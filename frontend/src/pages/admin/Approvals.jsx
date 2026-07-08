@@ -54,7 +54,7 @@ const Approvals = () => {
       const response = await api.get('/tickets');
       setTickets(response.data);
     } catch {
-      setError("Failed to load repair authorizations.");
+      setSnackbar({ open: true, message: "Failed to load repair authorizations.", severity: "error" });
     } finally {
       setTicketsLoading(false);
     }
@@ -162,9 +162,7 @@ const Approvals = () => {
         </Box>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }}>{error}</Alert>}
-
-      <>
+<>
           {/* KPI Cards */}
           <Grid container spacing={2.5} sx={{ mb: 3 }}>
             {ticketKpis.map(k => (

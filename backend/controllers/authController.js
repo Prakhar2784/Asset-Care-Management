@@ -135,12 +135,15 @@ const loginUser = async (req, res) => {
     }
     // Validate role mapping to match selected portal tab
     if (role) {
-      const adminRoles = ['admin', 'super_admin', 'hod', 'manager'];
-      if (role === 'admin' && !adminRoles.includes(user.role)) {
-        return res.status(403).json({ message: 'Access Denied: This portal requires administrator permissions.' });
+      const allAdminRoles = ['admin', 'super_admin', 'hod', 'manager'];
+      if (role === 'hod' && user.role !== 'hod') {
+        return res.status(403).json({ message: 'Access Denied: Department Access is for Head of Department accounts only.' });
       }
-      if (role === 'employee' && adminRoles.includes(user.role)) {
-        return res.status(403).json({ message: 'This account has admin access. Please switch to the Admin Access portal to log in.' });
+      if (role === 'admin' && !['admin', 'super_admin', 'manager'].includes(user.role)) {
+        return res.status(403).json({ message: user.role === 'hod' ? 'Please use Department Access to sign in.' : 'Access Denied: This portal requires system administrator permissions.' });
+      }
+      if (role === 'employee' && allAdminRoles.includes(user.role)) {
+        return res.status(403).json({ message: 'This account has elevated access. Please use Department Access or Admin sign-in.' });
       }
     }
 

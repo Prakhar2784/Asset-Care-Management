@@ -14,7 +14,6 @@ import {
 } from "@mui/icons-material";
 import api from "../../api/axios";
 
-const ASSET_CATEGORIES = ["Laptop", "Desktop", "Printer", "Server", "Monitor", "UPS", "Mobile", "Network Device", "Other"];
 
 const statusColor = (s) => s === "Active"
   ? { bg: "rgba(34,197,94,0.1)", color: "#22C55E" }
@@ -40,6 +39,7 @@ const emptyForm = {
 export default function ServiceCenters() {
   const [centers, setCenters] = useState([]);
   const [warrantyAssets, setWarrantyAssets] = useState([]);
+  const [assetCategories, setAssetCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
@@ -55,12 +55,15 @@ export default function ServiceCenters() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [c, w] = await Promise.all([
+      const [c, w, a] = await Promise.all([
         api.get("/service-centers"),
         api.get("/service-centers/warranty-assets"),
+        api.get("/assets"),
       ]);
       setCenters(c.data);
       setWarrantyAssets(w.data);
+      const cats = [...new Set((a.data || []).map(asset => asset.category).filter(Boolean))].sort();
+      setAssetCategories(cats);
     } catch { /* ignore */ }
     finally { setLoading(false); }
   };
@@ -310,7 +313,7 @@ export default function ServiceCenters() {
                 <TextField label="City" value={form.city} onChange={set("city")} fullWidth size="small" sx={inputSx} />
               </Grid>
             </Grid>
-            <Autocomplete multiple freeSolo options={ASSET_CATEGORIES} value={form.categories}
+            <Autocomplete multiple freeSolo options={assetCategories} value={form.categories}
               onChange={(_, v) => setForm(f => ({ ...f, categories: v }))}
               renderTags={(val, getProps) => val.map((opt, i) => <Chip key={opt} label={opt} size="small" {...getProps({ index: i })} sx={{ fontWeight: 700 }} />)}
               renderInput={(params) => <TextField {...params} label="Categories Serviced" size="small" sx={inputSx} placeholder="e.g. Laptop, Printer" />} />

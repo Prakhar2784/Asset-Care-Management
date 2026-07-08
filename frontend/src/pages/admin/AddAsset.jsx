@@ -560,12 +560,6 @@ const AddAsset = () => {
 
       {loading && <LinearProgress sx={{ borderRadius: 2, mb: 2, bgcolor: "action.hover", "& .MuiLinearProgress-bar": { bgcolor: "text.primary" } }} />}
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
       <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
 
         {/* Progress Completion Indicator */}
@@ -1001,6 +995,11 @@ const AddAsset = () => {
         </Paper>
 
         {/* Action Row */}
+        {error && (
+          <Alert severity="error" sx={{ borderRadius: "12px", fontWeight: 600 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
           <Button variant="outlined" onClick={() => navigate("/admin/assets")}
             sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "12px", px: 3, py: 1.2 }}>

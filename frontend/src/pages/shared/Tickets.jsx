@@ -112,7 +112,9 @@ const Tickets = () => {
   const [error, setError]                   = useState(null);
   const [searchQuery, setSearchQuery]       = useState('');
   const [statusFilter, setStatusFilter]     = useState('Active');
-  const [snackbar, setSnackbar]             = useState('');
+  const [snackbar, setSnackbar]             = useState({ open: false, message: '', severity: 'success' });
+  const showSnackbar = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
+  const showError = (message) => showSnackbar(message, 'error');
 
   // HOD assign-technician state
   const [selectedTechnicianId, setSelectedTechnicianId] = useState('');
@@ -181,7 +183,7 @@ const Tickets = () => {
           setServiceCenters(scRes.data || []);
         } catch { /* non-critical */ }
       }
-    } catch (err) { setError('Failed to load tickets. Please check your connection.'); }
+    } catch (err) { showError(err.response?.data?.message || 'Failed to load tickets. Please check your connection.'); }
     finally { setLoading(false); }
   };
 
@@ -224,7 +226,7 @@ const Tickets = () => {
         });
       }
 
-      setSnackbar('Ticket raised successfully.');
+      showSnackbar('Ticket raised successfully.');
       setRaiseOpen(false);
       setFormData({ selectedItem: '', issue: '', priority: 'Medium' });
       setImageFile(null);
@@ -268,10 +270,10 @@ const Tickets = () => {
       await api.put(`/tickets/${id}/status`, { status: newStatus, ...extra });
       setTickets(prev => prev.map(t => t._id === id ? { ...t, status: newStatus } : t));
       setSelectedTicket(prev => prev ? { ...prev, status: newStatus } : prev);
-      setSnackbar(`Status updated to "${newStatus}"`);
+      showSnackbar(`Status updated to "${newStatus}"`);
       setSelectedTechnicianId('');
       setSelectedServiceCenterId('');
-    } catch (err) { setError(err.response?.data?.message || 'Failed to update status.'); }
+    } catch (err) { showError(err.response?.data?.message || 'Failed to update status.'); }
   };
 
   const handleConfirmResolution = async (id) => {
@@ -279,8 +281,8 @@ const Tickets = () => {
       const { data } = await api.put(`/tickets/${id}/confirm`, {});
       setTickets(prev => prev.map(t => t._id === id ? data : t));
       setSelectedTicket(prev => prev && prev._id === id ? data : prev);
-      setSnackbar('Resolution confirmed. Ticket closed.');
-    } catch (err) { setError(err.response?.data?.message || 'Failed to confirm resolution.'); }
+      showSnackbar('Resolution confirmed. Ticket closed.');
+    } catch (err) { showError(err.response?.data?.message || 'Failed to confirm resolution.'); }
   };
 
   const handlePriorityUpdate = async (id, newPriority) => {
@@ -288,8 +290,8 @@ const Tickets = () => {
       await api.put(`/tickets/${id}/priority`, { priority: newPriority });
       setTickets(prev => prev.map(t => t._id === id ? { ...t, priority: newPriority } : t));
       setSelectedTicket(prev => prev ? { ...prev, priority: newPriority } : prev);
-      setSnackbar(`Priority updated to "${newPriority}"`);
-    } catch (err) { setError(err.response?.data?.message || 'Failed to update priority.'); }
+      showSnackbar(`Priority updated to "${newPriority}"`);
+    } catch (err) { showError(err.response?.data?.message || 'Failed to update priority.'); }
   };
 
   const handleAddComment = async () => {
@@ -300,7 +302,7 @@ const Tickets = () => {
       // API returns the full refreshed comments array, not a single comment
       setTicketDetail(prev => ({ ...prev, comments: Array.isArray(data) ? data : [...(prev?.comments || []), data] }));
       setCommentText('');
-    } catch { setSnackbar('Failed to add comment.'); }
+    } catch { showError('Failed to add comment.'); }
     finally { setCommentSubmitting(false); }
   };
 
@@ -312,7 +314,7 @@ const Tickets = () => {
       Array.from(files).forEach(f => fd.append('files', f));
       const { data } = await api.post(`/tickets/${selectedTicket._id}/attachments`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setTicketDetail(prev => ({ ...prev, attachments: data.attachments }));
-    } catch { setSnackbar('Failed to upload attachments.'); }
+    } catch { showError('Failed to upload attachments.'); }
     finally { setAttachmentUploading(false); }
   };
 
@@ -320,7 +322,7 @@ const Tickets = () => {
     try {
       await api.delete(`/tickets/${selectedTicket._id}/attachments/${attId}`);
       setTicketDetail(prev => ({ ...prev, attachments: prev.attachments.filter(a => a._id !== attId) }));
-    } catch { setSnackbar('Failed to delete attachment.'); }
+    } catch { showError('Failed to delete attachment.'); }
   };
 
   const confirmDelete = async () => {
@@ -328,12 +330,12 @@ const Tickets = () => {
     setDeleting(true);
     try {
       await api.delete(`/tickets/${ticketToDelete._id}`);
-      setSnackbar(`Ticket ${ticketToDelete.ticketId} deleted.`);
+      showSnackbar(`Ticket ${ticketToDelete.ticketId} deleted.`);
       setDeleteDialogOpen(false);
       setTicketToDelete(null);
       if (selectedTicket?._id === ticketToDelete._id) closeDrawer();
       fetchData();
-    } catch (err) { setError(err.response?.data?.message || 'Failed to delete ticket.'); }
+    } catch (err) { showError(err.response?.data?.message || 'Failed to delete ticket.'); }
     finally { setDeleting(false); }
   };
 
@@ -381,8 +383,6 @@ const Tickets = () => {
           )}
         </Box>
       </Box>
-
-      {error && <Alert severity="error" sx={{ mb: 3, borderRadius: '12px', fontWeight: 600 }} onClose={() => setError(null)}>{error}</Alert>}
 
       {/* KPI */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
@@ -952,7 +952,6 @@ const Tickets = () => {
           {/* noValidate: native validation can't show its bubble on MUI's hidden
               select input, silently blocking submit — JS validation handles it */}
           <form onSubmit={handleSubmitTicket} noValidate>
-            {error && <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2.5, borderRadius: '12px', fontWeight: 600 }}>{error}</Alert>}
             <Stack spacing={2.5}>
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', mb: 1, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.6px' }}>Select Asset / Device</Typography>
@@ -1022,6 +1021,7 @@ const Tickets = () => {
                 )}
               </Box>
             </Stack>
+            {error && <Alert severity="error" onClose={() => setError(null)} sx={{ mt: 2, borderRadius: '12px', fontWeight: 600 }}>{error}</Alert>}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => { setRaiseOpen(false); setImageFile(null); }} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting}
@@ -1063,8 +1063,8 @@ const Tickets = () => {
         </DialogContent>
       </Dialog>
 
-      <Snackbar open={!!snackbar} autoHideDuration={4000} onClose={() => setSnackbar('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-        <Alert severity="success" variant="filled" sx={{ borderRadius: '14px', fontWeight: 800 }}>{snackbar}</Alert>
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Alert severity={snackbar.severity} variant="filled" sx={{ borderRadius: '14px', fontWeight: 800 }}>{snackbar.message}</Alert>
       </Snackbar>
     </Box>
   );

@@ -4,17 +4,20 @@ const { getTenantId } = require('../middleware/tenantContext');
 // ─── Base Email Template ───────────────────────────────────────────────────────
 const baseTemplate = (title, bodyHtml, footerNote = '') => `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
+<title>${title}</title>
 <style>
-  body { margin:0; padding:0; background:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; }
-  .wrapper { max-width:600px; margin:32px auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(15,23,42,0.10); }
-  .header { background:linear-gradient(135deg,#1E3A8A,#0F766E); padding:32px 36px; }
-  .header-logo { font-size:22px; font-weight:800; color:#fff; letter-spacing:-0.5px; }
+  body { margin:0; padding:0; background:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+  .wrapper { max-width:600px; margin:32px auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(15,23,42,0.10); }
+  .header { background:#1E3A8A; padding:32px 36px; }
+  .header-logo { font-size:22px; font-weight:800; color:#ffffff; letter-spacing:-0.5px; }
   .header-logo span { color:#5eead4; }
-  .header-title { font-size:28px; font-weight:800; color:#fff; margin-top:12px; letter-spacing:-0.5px; }
+  .header-title { font-size:28px; font-weight:800; color:#ffffff; margin-top:12px; letter-spacing:-0.5px; }
   .body { padding:32px 36px; }
   .label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:#64748b; margin-bottom:4px; }
   .value { font-size:15px; font-weight:700; color:#0f172a; margin-bottom:16px; }
@@ -23,18 +26,23 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
   .info-row:last-child { border-bottom:none; }
   .info-key { font-size:13px; color:#64748b; font-weight:600; }
   .info-val { font-size:13px; color:#0f172a; font-weight:700; text-align:right; }
-  .btn { display:inline-block; background:linear-gradient(135deg,#1E3A8A,#0F766E); color:#fff; text-decoration:none; font-weight:800; font-size:15px; padding:14px 32px; border-radius:10px; margin:24px 0 8px; }
+  .btn { display:inline-block; background:#1E3A8A; color:#ffffff; text-decoration:none; font-weight:800; font-size:15px; padding:14px 32px; border-radius:10px; margin:24px 0 8px; }
   .status-badge { display:inline-block; padding:4px 14px; border-radius:999px; font-size:13px; font-weight:800; }
   .status-green { background:#dcfce7; color:#166534; }
   .status-red { background:#fee2e2; color:#991b1b; }
   .status-yellow { background:#fef9c3; color:#713f12; }
   .status-blue { background:#dbeafe; color:#1e40af; }
   .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 36px; text-align:center; }
-  .footer-text { font-size:12px; color:#94a3b8; font-weight:500; }
+  .footer-text { font-size:12px; color:#94a3b8; font-weight:500; margin-bottom:6px; }
   .footer-brand { font-size:13px; font-weight:800; color:#64748b; margin-bottom:4px; }
+  .footer-address { font-size:11px; color:#cbd5e1; margin-top:8px; }
 </style>
 </head>
 <body>
+<!-- Preheader (hidden preview text for email clients) -->
+<div style="display:none;font-size:1px;color:#f8fafc;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+  AssetCare Pro — ${title} — This is an automated notification from your asset management system.
+</div>
 <div class="wrapper">
   <div class="header">
     <div class="header-logo">Asset<span>Care</span> Pro</div>
@@ -45,7 +53,9 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
   </div>
   <div class="footer">
     <div class="footer-brand">AssetCare Pro — Enterprise Asset Management</div>
-    <div class="footer-text">${footerNote || 'This is an automated notification. Do not reply to this email.'}</div>
+    <div class="footer-text">${footerNote || 'This is an automated notification from your organisation\'s asset management system.'}</div>
+    <div class="footer-text">You are receiving this email because you are registered on AssetCare Pro.</div>
+    <div class="footer-address">AssetCare Pro &bull; IT Asset Management Platform &bull; support@assetcarepro.com</div>
   </div>
 </div>
 </body>
@@ -71,7 +81,7 @@ const getTenantSmtpConfig = async () => {
 // ─── Send Email Utility ────────────────────────────────────────────────────────
 const sendEmail = async ({ to, subject, html, text }) => {
   const smtpConfig = await getTenantSmtpConfig();
-  
+
   const host = smtpConfig?.host || process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = smtpConfig?.port || parseInt(process.env.SMTP_PORT) || 587;
   const user = smtpConfig?.user || process.env.SMTP_USER;
@@ -88,8 +98,19 @@ const sendEmail = async ({ to, subject, html, text }) => {
       host,
       port,
       secure: port === 465,
-      auth: { user, pass }
+      // Force STARTTLS on port 587; prevents plaintext fallback
+      requireTLS: port !== 465,
+      auth: { user, pass },
+      tls: {
+        // Accept self-signed certs (common on private SMTP servers)
+        rejectUnauthorized: false,
+        minVersion: 'TLSv1.2',
+      },
     });
+
+    // Unique Message-ID prevents duplicate-detection false positives
+    const domain = fromEmail.includes('@') ? fromEmail.split('@')[1] : 'assetcarepro.com';
+    const messageId = `<${Date.now()}.${Math.random().toString(36).slice(2, 10)}@${domain}>`;
 
     await transporter.sendMail({
       from: `"AssetCare Pro" <${fromEmail}>`,
@@ -97,7 +118,22 @@ const sendEmail = async ({ to, subject, html, text }) => {
       to,
       subject,
       html,
-      text: text || subject
+      // Always provide a real plain-text body — missing it is a strong spam signal
+      text: text || subject,
+      messageId,
+      headers: {
+        // Required by Gmail bulk-sender policy (Feb 2024) for transactional mail
+        'List-Unsubscribe': `<mailto:${fromEmail}?subject=unsubscribe>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        // Tells receivers this is automated bulk/transactional mail, not personal
+        'Precedence': 'bulk',
+        // Normal priority — avoid 1 (high) which spam filters flag
+        'X-Priority': '3',
+        'X-MSMail-Priority': 'Normal',
+        'X-Mailer': 'AssetCare Pro Notification System',
+        // Prevents auto-replies / out-of-office loops back to this sender
+        'X-Auto-Response-Suppress': 'All',
+      },
     });
     console.log(`[EMAIL SENT] To: ${to} | Subject: ${subject} (${smtpConfig ? 'Tenant SMTP' : 'Global SMTP'})`);
   } catch (err) {
@@ -392,6 +428,55 @@ const sendContactEmail = async ({ company, name, email, phone, orgSize, inquiryT
   });
 };
 
+// HOD Department Ticket Notification
+const sendHodTicketNotificationEmail = async (hod, ticket, asset, raisedByUser) => {
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      Hello <strong>${hod.name}</strong>,<br><br>
+      A new breakdown ticket has been raised in your department and requires your authorization.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Ticket ID</span><span class="info-val">${ticket.ticketId}</span></div>
+      <div class="info-row"><span class="info-key">Raised By</span><span class="info-val">${raisedByUser?.name || 'N/A'}</span></div>
+      <div class="info-row"><span class="info-key">Department</span><span class="info-val">${raisedByUser?.department || 'N/A'}</span></div>
+      <div class="info-row"><span class="info-key">Asset</span><span class="info-val">${asset?.name || 'N/A'}</span></div>
+      <div class="info-row"><span class="info-key">Issue</span><span class="info-val">${ticket.issue}</span></div>
+      <div class="info-row"><span class="info-key">Priority</span><span class="info-val">${ticket.priority}</span></div>
+      <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="status-badge status-yellow">Pending HOD Approval</span></span></div>
+    </div>
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">Please log in to AssetCare Pro to review and authorize this ticket.</p>`;
+  await sendEmail({
+    to: hod.email,
+    subject: `Action Required: New Ticket in Your Department — ${ticket.ticketId}`,
+    text: `Hello ${hod.name}, a new ticket ${ticket.ticketId} was raised by ${raisedByUser?.name || 'an employee'} (${raisedByUser?.department || 'your department'}) for asset "${asset?.name || 'N/A'}". Issue: ${ticket.issue}. Priority: ${ticket.priority}. Please log in to authorize.`,
+    html: baseTemplate('New Department Ticket — Action Required', body, 'You are receiving this because you are the Head of Department for the affected department.')
+  });
+};
+
+// Account Deactivated Notification
+const sendDeactivationEmail = async (user) => {
+  const body = `
+    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+      Hello <strong>${user.name}</strong>,<br><br>
+      Your <strong>AssetCare Pro</strong> account has been <strong style="color:#dc2626;">deactivated</strong> by your administrator.
+      You will no longer be able to log in to the system.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><span class="info-key">Account</span><span class="info-val">${user.email}</span></div>
+      <div class="info-row"><span class="info-key">Department</span><span class="info-val">${user.department || 'N/A'}</span></div>
+      <div class="info-row"><span class="info-key">Deactivated At</span><span class="info-val">${new Date().toLocaleString('en-IN')}</span></div>
+    </div>
+    <p style="font-size:13px;color:#64748b;font-weight:600;margin-top:16px;">
+      If you believe this is a mistake or need assistance, please contact your IT administrator.
+    </p>`;
+  await sendEmail({
+    to: user.email,
+    subject: 'Your AssetCare Pro Account Has Been Deactivated',
+    text: `Hello ${user.name}, your AssetCare Pro account (${user.email}) has been deactivated by your administrator on ${new Date().toLocaleString('en-IN')}. You will no longer be able to log in. If this is a mistake, contact your IT administrator.`,
+    html: baseTemplate('Account Deactivated', body, 'This is an automated notification from AssetCare Pro.')
+  });
+};
+
 // Invite Email (admin-sent invite link)
 const sendInviteEmail = async (user, inviteLink) => {
   const body = `
@@ -494,5 +579,7 @@ module.exports = {
   sendApprovalRejectedEmail,
   sendWarrantyExpiryEmail,
   sendWelcomeEmail,
-  sendInviteEmail
+  sendInviteEmail,
+  sendDeactivationEmail,
+  sendHodTicketNotificationEmail,
 };

@@ -147,7 +147,11 @@ const createAsset = async (req, res) => {
 // @access  Admin / HOD
 const getAssets = async (req, res) => {
   try {
-    const assets = await Asset.find({ isDeleted: { $ne: true } })
+    const filter = { isDeleted: { $ne: true } };
+    if (req.user.role === 'hod' && req.user.department) {
+      filter.department = req.user.department;
+    }
+    const assets = await Asset.find(filter)
       .populate('assignedTo', 'name email department')
       .sort({ createdAt: -1 });
     res.status(200).json(assets);
@@ -240,7 +244,11 @@ const restoreAsset = async (req, res) => {
 // @access  Admin
 const getDeletedAssets = async (req, res) => {
   try {
-    const assets = await Asset.find({ isDeleted: true })
+    const filter = { isDeleted: true };
+    if (req.user.role === 'hod' && req.user.department) {
+      filter.department = req.user.department;
+    }
+    const assets = await Asset.find(filter)
       .populate('assignedTo', 'name email')
       .sort({ deletedAt: -1 });
     res.status(200).json(assets);
@@ -253,7 +261,11 @@ const getDeletedAssets = async (req, res) => {
 // @access  Any logged-in user (for ticket raising)
 const getActiveAssets = async (req, res) => {
   try {
-    const assets = await Asset.find({ status: { $nin: ['Scrap', 'Decommissioned'] }, isDeleted: { $ne: true } })
+    const filter = { status: { $nin: ['Scrap', 'Decommissioned'] }, isDeleted: { $ne: true } };
+    if (req.user.role === 'hod' && req.user.department) {
+      filter.department = req.user.department;
+    }
+    const assets = await Asset.find(filter)
       .select('name serialNumber category department location status')
       .sort({ name: 1 });
     res.status(200).json(assets);

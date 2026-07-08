@@ -5,7 +5,7 @@ const path    = require('path');
 const User    = require('../models/User');
 const bcrypt  = require('bcryptjs');
 const { protect, authorize } = require('../middleware/authMiddleware');
-const { sendWelcomeEmail, sendInviteEmail } = require('../services/emailService');
+const { sendWelcomeEmail, sendInviteEmail, sendDeactivationEmail } = require('../services/emailService');
 const AssetAssignment = require('../models/AssetAssignment');
 const Asset           = require('../models/Asset');
 const Ticket          = require('../models/Ticket');
@@ -29,10 +29,14 @@ router.get('/employees', protect, authorize('admin', 'super_admin', 'hod'), asyn
   }
 });
 
-// GET /api/users — all users (admin management)
-router.get('/', protect, authorize('admin', 'super_admin'), async (req, res) => {
+// GET /api/users — all users (admin) or dept users (hod)
+router.get('/', protect, authorize('admin', 'super_admin', 'hod'), async (req, res) => {
   try {
-    const users = await User.find()
+    const filter = {};
+    if (req.user.role === 'hod' && req.user.department) {
+      filter.department = req.user.department;
+    }
+    const users = await User.find(filter)
       .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry')
       .sort({ createdAt: -1 });
 
@@ -74,9 +78,19 @@ router.put('/:id', protect, authorize('admin', 'super_admin'), async (req, res) 
     if (isActive   !== undefined) update.isActive   = isActive;
     if (employeeId !== undefined) update.employeeId = employeeId;
 
+    // Capture current state before update to detect active→deactivated transition
+    const existing = isActive === false
+      ? await User.findById(req.params.id).select('isActive name email department')
+      : null;
+
     const user = await User.findByIdAndUpdate(req.params.id, update, { new: true })
       .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
     if (!user) return res.status(404).json({ message: 'User not found.' });
+
+    // Send deactivation email only when flipping active → inactive
+    if (existing?.isActive === true && isActive === false) {
+      sendDeactivationEmail(existing).catch(() => {});
+    }
 
     // Sync department change to assignment records
     if (department !== undefined) {

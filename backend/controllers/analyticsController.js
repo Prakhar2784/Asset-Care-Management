@@ -8,16 +8,35 @@ const GoodsReceivedNote = require('../models/GoodsReceivedNote');
 const User = require('../models/User');
 const MaintenanceSchedule = require('../models/MaintenanceSchedule');
 
+// Build department-scoped filters for HOD users.
+// Returns { assetMatch, ticketAssetIds, userIds, dept } — inject these into queries.
+const buildHodScope = async (req) => {
+  if (req.user.role !== 'hod' || !req.user.department) return null;
+  const dept = req.user.department;
+  const [deptAssets, deptUsers] = await Promise.all([
+    Asset.find({ department: dept, isDeleted: { $ne: true } }).select('_id').lean(),
+    User.find({ department: dept }).select('_id').lean(),
+  ]);
+  const assetIds = deptAssets.map(a => a._id);
+  const userIds = deptUsers.map(u => u._id);
+  return { dept, assetIds, userIds, assetMatch: { department: dept } };
+};
+
 // ─── GET /api/analytics/overview ─────────────────────────────────────────────
 // Full overview KPIs for the analytics dashboard
 const getOverview = async (req, res) => {
   try {
+    const hod = await buildHodScope(req);
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 1);
     const last12Months = new Date(now);
     last12Months.setMonth(last12Months.getMonth() - 11);
     last12Months.setDate(1);
     last12Months.setHours(0, 0, 0, 0);
+
+    const assetBase = hod ? { isDeleted: { $ne: true }, department: hod.dept } : { isDeleted: { $ne: true } };
+    const ticketBase = hod ? { $or: [{ raisedBy: { $in: hod.userIds } }, { asset: { $in: hod.assetIds } }] } : {};
+    const userBase = hod ? { department: hod.dept } : {};
 
     const [
       totalAssets,
@@ -31,16 +50,18 @@ const getOverview = async (req, res) => {
       allAssets,
       pendingMaintenance,
     ] = await Promise.all([
-      Asset.countDocuments({ isDeleted: { $ne: true } }),
-      Asset.countDocuments({ isDeleted: { $ne: true }, status: 'Active' }),
-      Ticket.countDocuments({}),
-      Ticket.countDocuments({ status: 'Resolved' }),
-      Ticket.countDocuments({ status: { $in: ['Pending Approval', 'Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair'] } }),
-      User.countDocuments({}),
-      Asset.countDocuments({ isDeleted: { $ne: true }, warrantyEnd: { $gte: now, $lte: new Date(now.getTime() + 30 * 86400000) } }),
-      Asset.countDocuments({ isDeleted: { $ne: true }, warrantyEnd: { $lt: now } }),
-      Asset.find({ isDeleted: { $ne: true }, purchaseCost: { $gt: 0 } }).select('purchaseCost procurementDate category department').lean(),
-      MaintenanceSchedule.countDocuments({ status: 'Scheduled', nextDue: { $lte: new Date(now.getTime() + 7 * 86400000) } }),
+      Asset.countDocuments(assetBase),
+      Asset.countDocuments({ ...assetBase, status: 'Active' }),
+      Ticket.countDocuments(ticketBase),
+      Ticket.countDocuments({ ...ticketBase, status: 'Resolved' }),
+      Ticket.countDocuments({ ...ticketBase, status: { $in: ['Pending Approval', 'Vendor Assigned', 'Waiting Vendor', 'Waiting Parts', 'Under Repair'] } }),
+      User.countDocuments(userBase),
+      Asset.countDocuments({ ...assetBase, warrantyEnd: { $gte: now, $lte: new Date(now.getTime() + 30 * 86400000) } }),
+      Asset.countDocuments({ ...assetBase, warrantyEnd: { $lt: now } }),
+      Asset.find({ ...assetBase, purchaseCost: { $gt: 0 } }).select('purchaseCost procurementDate category department').lean(),
+      hod
+        ? MaintenanceSchedule.countDocuments({ asset: { $in: hod.assetIds }, status: 'Scheduled', nextDue: { $lte: new Date(now.getTime() + 7 * 86400000) } })
+        : MaintenanceSchedule.countDocuments({ status: 'Scheduled', nextDue: { $lte: new Date(now.getTime() + 7 * 86400000) } }),
     ]);
 
     // Total asset portfolio value
@@ -84,20 +105,22 @@ const getOverview = async (req, res) => {
 // Asset cost breakdown by category & department
 const getAssetCostAnalysis = async (req, res) => {
   try {
+    const hod = await buildHodScope(req);
+    const assetBase = hod ? { isDeleted: { $ne: true }, department: hod.dept } : { isDeleted: { $ne: true } };
     const [byCategory, byDepartment, byStatus] = await Promise.all([
       Asset.aggregate([
-        { $match: { isDeleted: { $ne: true }, purchaseCost: { $gt: 0 } } },
+        { $match: { ...assetBase, purchaseCost: { $gt: 0 } } },
         { $group: { _id: '$category', totalCost: { $sum: '$purchaseCost' }, count: { $sum: 1 }, avgCost: { $avg: '$purchaseCost' } } },
         { $sort: { totalCost: -1 } },
       ]),
       Asset.aggregate([
-        { $match: { isDeleted: { $ne: true }, purchaseCost: { $gt: 0 } } },
+        { $match: { ...assetBase, purchaseCost: { $gt: 0 } } },
         { $group: { _id: '$department', totalCost: { $sum: '$purchaseCost' }, count: { $sum: 1 } } },
         { $sort: { totalCost: -1 } },
         { $limit: 10 },
       ]),
       Asset.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: assetBase },
         { $group: { _id: '$status', count: { $sum: 1 }, totalCost: { $sum: '$purchaseCost' } } },
       ]),
     ]);
@@ -183,6 +206,8 @@ const getProcurementTrends = async (req, res) => {
 // Ticket resolution times, SLA analysis, volume trends
 const getTicketTrends = async (req, res) => {
   try {
+    const hod = await buildHodScope(req);
+    const ticketBase = hod ? { $or: [{ raisedBy: { $in: hod.userIds } }, { asset: { $in: hod.assetIds } }] } : {};
     const last12Months = new Date();
     last12Months.setMonth(last12Months.getMonth() - 11);
     last12Months.setDate(1);
@@ -190,7 +215,7 @@ const getTicketTrends = async (req, res) => {
 
     const [monthlyVolume, byPriority, avgResolutionByPriority, byCategory] = await Promise.all([
       Ticket.aggregate([
-        { $match: { createdAt: { $gte: last12Months } } },
+        { $match: { ...ticketBase, createdAt: { $gte: last12Months } } },
         {
           $group: {
             _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' }, status: '$status' },
@@ -200,10 +225,11 @@ const getTicketTrends = async (req, res) => {
         { $sort: { '_id.year': 1, '_id.month': 1 } },
       ]),
       Ticket.aggregate([
+        { $match: ticketBase },
         { $group: { _id: '$priority', count: { $sum: 1 }, resolved: { $sum: { $cond: [{ $eq: ['$status', 'Resolved'] }, 1, 0] } } } },
       ]),
       Ticket.aggregate([
-        { $match: { status: 'Resolved' } },
+        { $match: { ...ticketBase, status: 'Resolved' } },
         {
           $project: {
             priority: 1,
@@ -215,6 +241,7 @@ const getTicketTrends = async (req, res) => {
         { $group: { _id: '$priority', avgHours: { $avg: '$resolutionHours' } } },
       ]),
       Ticket.aggregate([
+        { $match: ticketBase },
         { $lookup: { from: 'assets', localField: 'asset', foreignField: '_id', as: 'assetInfo' } },
         { $unwind: { path: '$assetInfo', preserveNullAndEmptyArrays: true } },
         { $group: { _id: '$assetInfo.category', count: { $sum: 1 }, totalCost: { $sum: '$estimatedCost' } } },
@@ -263,16 +290,20 @@ const getTicketTrends = async (req, res) => {
 // Asset depreciation summary using Straight-Line Method (SLM)
 const getDepreciationSummary = async (req, res) => {
   try {
+    const hod = await buildHodScope(req);
     const { method = 'slm', usefulLifeYears = 5 } = req.query;
     const now = new Date();
     const lifeYears = parseInt(usefulLifeYears);
     const salvageRate = 0.10; // 10% residual value
 
-    const assets = await Asset.find({
+    const depFilter = {
       isDeleted: { $ne: true },
       purchaseCost: { $gt: 0 },
       procurementDate: { $exists: true, $ne: null },
-    }).select('name category department purchaseCost procurementDate status serialNumber').lean();
+      ...(hod ? { department: hod.dept } : {}),
+    };
+
+    const assets = await Asset.find(depFilter).select('name category department purchaseCost procurementDate status serialNumber').lean();
 
     const depreciatedAssets = assets.map(asset => {
       const cost = asset.purchaseCost;
@@ -355,9 +386,11 @@ const getDepreciationSummary = async (req, res) => {
 // Per-department asset health, ticket load, and cost scorecard
 const getDepartmentScorecard = async (req, res) => {
   try {
+    const hod = await buildHodScope(req);
+    const assetMatchBase = hod ? { isDeleted: { $ne: true }, department: hod.dept } : { isDeleted: { $ne: true } };
     const [assetsByDept, ticketsByDept] = await Promise.all([
       Asset.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
+        { $match: assetMatchBase },
         {
           $group: {
             _id: '$department',
@@ -371,6 +404,7 @@ const getDepartmentScorecard = async (req, res) => {
         { $sort: { totalAssets: -1 } },
       ]),
       Ticket.aggregate([
+        ...(hod ? [{ $match: { $or: [{ raisedBy: { $in: hod.userIds } }, { asset: { $in: hod.assetIds } }] } }] : []),
         {
           $lookup: {
             from: 'assets',

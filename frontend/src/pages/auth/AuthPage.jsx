@@ -8,6 +8,7 @@ import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { useAuth } from "../../context/AuthContext";
 
@@ -66,6 +67,15 @@ const AuthPage = () => {
       feature2Desc: "See exactly when your repair request is approved and assigned.",
       rightLoginSub: "Enter your credentials to access your employee portal.",
     },
+    hod: {
+      leftTitle: "Department Management.",
+      leftDesc: "Oversee your department's assets, track maintenance schedules, and manage equipment requests from your team.",
+      feature1Title: "Department Overview",
+      feature1Desc: "Monitor all assets and maintenance activity for your department.",
+      feature2Title: "Maintenance Calendar",
+      feature2Desc: "Stay on top of scheduled maintenance and asset availability.",
+      rightLoginSub: "Enter your credentials to access your department dashboard.",
+    },
     admin: {
       leftTitle: "Intelligent Asset Management.",
       leftDesc: "Streamline the equipment lifecycle, automate repair approvals, and track enterprise warranties effortlessly.",
@@ -73,7 +83,7 @@ const AuthPage = () => {
       feature1Desc: "Manage asset registries and oversee all department workflows.",
       feature2Title: "Vendor Escalation",
       feature2Desc: "Directly escalate approved repairs to your network of OEM partners.",
-      rightLoginSub: "Enter your root credentials to access the system dashboard.",
+      rightLoginSub: "Enter your system administrator credentials.",
     }
   };
 
@@ -533,22 +543,52 @@ const AuthPage = () => {
             </p>
 
             {view === "login" && (
-              <div className="role-toggle">
-                <button 
-                  type="button" 
-                  className={`role-btn ${role === "employee" ? "active" : ""}`}
-                  onClick={() => handleRoleChange("employee")}
-                >
-                  <BadgeRoundedIcon fontSize="small" /> Employee Portal
-                </button>
-                <button 
-                  type="button" 
-                  className={`role-btn ${role === "admin" ? "active" : ""}`}
-                  onClick={() => handleRoleChange("admin")}
-                >
-                  <AdminPanelSettingsRoundedIcon fontSize="small" /> Admin Access
-                </button>
-              </div>
+              <>
+                {role !== "admin" ? (
+                  <>
+                    <div className="role-toggle">
+                      <button
+                        type="button"
+                        className={`role-btn ${role === "employee" ? "active" : ""}`}
+                        onClick={() => handleRoleChange("employee")}
+                      >
+                        <BadgeRoundedIcon fontSize="small" /> Employee Portal
+                      </button>
+                      <button
+                        type="button"
+                        className={`role-btn ${role === "hod" ? "active" : ""}`}
+                        onClick={() => handleRoleChange("hod")}
+                      >
+                        <BusinessRoundedIcon fontSize="small" /> Department Access
+                      </button>
+                    </div>
+                    <div style={{ textAlign: "center", marginBottom: "20px", marginTop: "-16px" }}>
+                      <span style={{ color: "var(--text-muted)", fontSize: "13px", fontWeight: 600 }}>System Administrator? </span>
+                      <button
+                        type="button"
+                        className="auth-link"
+                        style={{ fontSize: "13px" }}
+                        onClick={() => handleRoleChange("admin")}
+                      >
+                        Sign in here →
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px", padding: "13px 16px", background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", borderRadius: "14px" }}>
+                    <AdminPanelSettingsRoundedIcon style={{ color: "#FBBF24", fontSize: 20 }} />
+                    <span style={{ color: "#FBBF24", fontWeight: 800, fontSize: "14px", flex: 1 }}>Admin Access</span>
+                    <button
+                      type="button"
+                      className="auth-link"
+                      style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 700 }}
+                      onClick={() => handleRoleChange("employee")}
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                )}
+              </>
             )}
 
             <form onSubmit={handleSubmit} style={{ width: "100%" }}>

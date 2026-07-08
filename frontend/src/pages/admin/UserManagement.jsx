@@ -243,7 +243,7 @@ export default function UserManagement() {
       const { data } = await api.get('/users');
       setUsers(data);
     } catch {
-      setError('Failed to load users.');
+      setSnackbar({ open: true, message: 'Failed to load users. Please refresh.', severity: 'error' });
     } finally {
       setLoading(false);
     }
@@ -608,8 +608,6 @@ export default function UserManagement() {
           <IconButton size="small" onClick={clearSelection} sx={{ borderRadius: '8px', color: 'text.disabled' }}><CloseRounded fontSize="small" /></IconButton>
         </Paper>
       )}
-
-      {error && <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>{error}</Alert>}
 
       {/* ── Table ───────────────────────────────────────────────────────────── */}
       {loading ? (

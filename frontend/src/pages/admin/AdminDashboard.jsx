@@ -62,7 +62,7 @@ const KpiCard = ({ label, value, sub, icon, accent, onClick }) => (
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 // Calendar sized for the purple hero banner (light text/cells on translucent glass)
-const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
+const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) => {
   const { currentUser } = useAuth();
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -172,12 +172,14 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
         {cells.map((day, i) => {
           const isToday = isCurrentMonth && day === today.getDate();
           
-          // Check for active reminder in local storage
+          // Check for active reminder in local storage and scheduled maintenance
           let hasReminder = false;
+          let hasMaintenance = false;
           if (day) {
             const dayStr = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const reminderKey = `reminder_${currentUser?._id || 'global'}_${dayStr}`;
             hasReminder = !!localStorage.getItem(reminderKey);
+            hasMaintenance = !!(maintenanceDates?.has(dayStr));
           }
 
           return (
@@ -196,11 +198,15 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated }) => {
             }}>
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
                 <span>{day || "-"}</span>
-                {day && hasReminder && (
-                  <Box sx={{
-                    position: "absolute", bottom: -4, width: 4, height: 4, borderRadius: "50%",
-                    bgcolor: isToday ? "#111827" : "#FBBF24"
-                  }} />
+                {day && (hasReminder || hasMaintenance) && (
+                  <Box sx={{ position: "absolute", bottom: -4, display: "flex", gap: "2px" }}>
+                    {hasReminder && (
+                      <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: isToday ? "#111827" : "#FBBF24" }} />
+                    )}
+                    {hasMaintenance && (
+                      <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: isToday ? "#111827" : "#EF4444" }} />
+                    )}
+                  </Box>
                 )}
               </Box>
             </Box>
@@ -265,6 +271,7 @@ const AdminDashboard = () => {
   const [dateHistory, setDateHistory]   = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [remindersUpdated, setRemindersUpdated] = useState(0);
+  const [maintenanceDates, setMaintenanceDates] = useState(null);
 
   const handleDayClick = (date) => {
     setSelectedDate(date);
@@ -314,9 +321,19 @@ const AdminDashboard = () => {
   useEffect(() => {
     api.get("/dashboard/stats")
       .then(r => setDashboardData(r.data))
-      .catch(() => setError("Failed to load dashboard data."))
+      .catch(() => setSnackbar({ open: true, message: "Failed to load dashboard data.", severity: "error" }))
       .finally(() => setLoading(false));
   }, []);
+
+  // Fetch scheduled maintenance dates to mark on the calendar
+  useEffect(() => {
+    api.get("/dashboard/scheduled-maintenance")
+      .then(r => {
+        const dateSet = new Set((r.data.dates || []).map(d => d.date));
+        setMaintenanceDates(dateSet);
+      })
+      .catch(() => {});
+  }, [user?.department]);
 
   const recentTickets = (dashboardData?.recentTickets || []).map(t => ({
     id: t.ticketId,
@@ -484,7 +501,19 @@ const AdminDashboard = () => {
             </svg>
           </Box>
 
-            <HeroMiniCalendar onDayClick={handleDayClick} remindersUpdated={remindersUpdated} />
+            <Box>
+              <HeroMiniCalendar onDayClick={handleDayClick} remindersUpdated={remindersUpdated} maintenanceDates={maintenanceDates} />
+              <Box sx={{ display: "flex", gap: 1.5, mt: 1, px: 0.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#FBBF24" }} />
+                  <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Reminder</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#EF4444" }} />
+                  <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Maintenance</Typography>
+                </Box>
+              </Box>
+            </Box>
           </Box>
         </Box>
 
@@ -516,8 +545,6 @@ const AdminDashboard = () => {
           </Box>
         )}
       </Box>
-
-      {error && <Alert severity="error" sx={{ mb: 3, borderRadius: "12px", fontWeight: 600 }}>{error}</Alert>}
 
       {loading ? (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh", gap: 2 }}>
@@ -861,13 +888,20 @@ const AdminDashboard = () => {
 
                     {/* Maintenance logs */}
                     {dateHistory.maintenance?.map((m) => (
-                      <Box key={m._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box key={m._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: m.status === 'Scheduled' ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.02)", border: "1px solid", borderColor: m.status === 'Scheduled' ? "rgba(239,68,68,0.25)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
                         <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(239,68,68,0.12)", color: "#EF4444", display: "grid", placeItems: "center" }}>
                           <BuildRounded sx={{ fontSize: 16 }} />
                         </Box>
                         <Box sx={{ minWidth: 0, flex: 1 }}>
-                          <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{m.description}</Typography>
-                          <Typography fontSize={11} color="text.secondary" noWrap>{m.type} Maintenance · Status: {m.status} · Cost: ₹{m.cost || 0}</Typography>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.2 }}>
+                            <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{m.description}</Typography>
+                            {m.status === 'Scheduled' && (
+                              <Box sx={{ px: 0.8, py: 0.1, borderRadius: "6px", bgcolor: "rgba(239,68,68,0.15)", color: "#EF4444", fontSize: 10, fontWeight: 800, flexShrink: 0 }}>
+                                Scheduled
+                              </Box>
+                            )}
+                          </Box>
+                          <Typography fontSize={11} color="text.secondary" noWrap>{m.type} Maintenance · {m.asset?.name || "Unknown Asset"} · Cost: ₹{m.cost || 0}</Typography>
                         </Box>
                       </Box>
                     ))}

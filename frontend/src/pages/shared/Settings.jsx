@@ -71,6 +71,7 @@ function ProfileTab() {
     setSaving(true); setMsg('');
     try {
       await api.put('/settings/profile', { name, phone });
+      await refreshUser();
       setMsg('Profile updated successfully.');
     } catch (err) {
       setMsg(err.response?.data?.message || 'Failed to update profile.');
@@ -836,15 +837,18 @@ function ReportsTab() {
   return (
     <Stack spacing={3}>
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <AssessmentRounded sx={{ color: 'text.primary', fontSize: 18 }} />
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3 }}>
+          <Box sx={{ width: 42, height: 42, borderRadius: '12px', bgcolor: 'rgba(17,24,39,0.10)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+            <AssessmentRounded sx={{ color: 'text.primary', fontSize: 20 }} />
           </Box>
-          <Typography fontWeight={800} fontSize={16} color="text.primary">Ticket Lifecycle Report</Typography>
+          <Box>
+            <Typography fontWeight={800} fontSize={16} color="text.primary" sx={{ lineHeight: 1.3 }}>Ticket Lifecycle Report</Typography>
+            <Typography fontSize={13} color="text.secondary" fontWeight={500} sx={{ mt: 0.4, lineHeight: 1.5 }}>
+              Every ticket from creation to resolution — asset details, cost, resolution time, and personnel.
+            </Typography>
+          </Box>
         </Box>
-        <Typography fontSize={12} color="text.secondary" mb={3} sx={{ pl: '48px' }}>
-          Every ticket from creation to resolution — asset details, cost, resolution time, and personnel.
-        </Typography>
 
         {/* Filters */}
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 3 }}>
@@ -868,7 +872,7 @@ function ReportsTab() {
 
         {error && <Alert severity="error" sx={{ mb: 2.5, borderRadius: '10px' }}>{error}</Alert>}
 
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
           <Button variant="contained"
             startIcon={loading.excel ? <CircularProgress size={16} color="inherit" /> : <DownloadRounded />}
             onClick={downloadExcel} disabled={loading.excel || loading.pdf}
@@ -885,15 +889,18 @@ function ReportsTab() {
       </Paper>
 
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 1 }}>
-          <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(34,197,94,0.12)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <DownloadRounded sx={{ color: '#22C55E', fontSize: 18 }} />
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3 }}>
+          <Box sx={{ width: 42, height: 42, borderRadius: '12px', bgcolor: 'rgba(34,197,94,0.10)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+            <DownloadRounded sx={{ color: '#22C55E', fontSize: 20 }} />
           </Box>
-          <Typography fontWeight={800} fontSize={16} color="text.primary">Asset Registry Report</Typography>
+          <Box>
+            <Typography fontWeight={800} fontSize={16} color="text.primary" sx={{ lineHeight: 1.3 }}>Asset Registry Report</Typography>
+            <Typography fontSize={13} color="text.secondary" fontWeight={500} sx={{ mt: 0.4, lineHeight: 1.5 }}>
+              Complete snapshot of all active assets with assignment, warranty, and AMC details.
+            </Typography>
+          </Box>
         </Box>
-        <Typography fontSize={12} color="text.secondary" mb={3} sx={{ pl: '48px' }}>
-          Complete snapshot of all active assets with assignment, warranty, and AMC details.
-        </Typography>
         <Button
           variant="outlined"
           startIcon={<DownloadRounded />}
