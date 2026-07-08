@@ -1111,12 +1111,7 @@ export default function Settings() {
     ...(!isHod ? [
       { label: 'Appearance',         icon: <PaletteRounded fontSize="small" /> },
     ] : []),
-    ...(isAdmin ? [
-      { label: 'Reports',            icon: <AssessmentRounded fontSize="small" /> },
-      { label: 'My Data',            icon: <DownloadRounded fontSize="small" /> },
-    ] : [
-      { label: 'My Data',            icon: <DownloadRounded fontSize="small" /> },
-    ]),
+    { label: 'My Data',              icon: <DownloadRounded fontSize="small" /> },
   ];
 
   return (
@@ -1148,8 +1143,7 @@ export default function Settings() {
           <TabPanel value={tab} index={0}><ProfileTab /></TabPanel>
           {!isSuperAdmin && !isHod && <TabPanel value={tab} index={1}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>}
           {!isHod && <TabPanel value={tab} index={!isSuperAdmin ? 2 : 1}><AppearanceTab /></TabPanel>}
-          {isAdmin && <TabPanel value={tab} index={3}><ReportsTab /></TabPanel>}
-          <TabPanel value={tab} index={isAdmin ? 4 : isHod ? 1 : (!isSuperAdmin ? 3 : 2)}><DataTab currentUser={currentUser} /></TabPanel>
+          <TabPanel value={tab} index={isHod ? 1 : (!isSuperAdmin ? 3 : 2)}><DataTab currentUser={currentUser} /></TabPanel>
         </Box>
       </Paper>
     </Box>

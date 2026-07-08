@@ -52,7 +52,6 @@ const DEFAULT_PERMISSION_MATRIX = [
   { feature: 'Manage All Tickets',      admin: true,  hod: false, employee: false, technician: true  },
   { feature: 'Approve Device Requests', admin: true,  hod: true,  employee: false, technician: false },
   { feature: 'Manage Users',            admin: true,  hod: false, employee: false, technician: false },
-  { feature: 'View Reports',            admin: true,  hod: true,  employee: false, technician: false },
   { feature: 'View Audit Logs',         admin: true,  hod: false, employee: false, technician: false },
   { feature: 'Manage Departments',      admin: true,  hod: false, employee: false, technician: false },
   { feature: 'Settings & Config',       admin: true,  hod: false, employee: false, technician: false },
@@ -206,9 +205,8 @@ export default function UserManagement() {
   const saveUserPerm = async () => {
     try {
       await api.put(`/users/${userPermTarget._id}/permissions`, { permissions: userPermState });
-      // Update the local users list so re-opening the dialog shows fresh data
       setUsers(prev => prev.map(u => u._id === userPermTarget._id ? { ...u, customPermissions: userPermState } : u));
-      // If editing own permissions, refresh session so sidebar updates immediately
+      if (profileUser?._id === userPermTarget._id) setProfileUser(p => ({ ...p, customPermissions: userPermState }));
       if (userPermTarget._id === me?._id) refreshUser();
       setUserPermSaved(true);
       setTimeout(() => setUserPermSaved(false), 2000);
@@ -227,6 +225,8 @@ export default function UserManagement() {
     } catch { /* ignore */ }
     setUserPermState(roleDefaults);
     setUserPermSaved(false);
+    setUsers(prev => prev.map(u => u._id === userPermTarget._id ? { ...u, customPermissions: roleDefaults } : u));
+    if (profileUser?._id === userPermTarget._id) setProfileUser(p => ({ ...p, customPermissions: roleDefaults }));
   };
 
   // CSV import
@@ -437,6 +437,7 @@ export default function UserManagement() {
     try {
       const { data } = await api.put(`/users/${editTarget._id}`, editForm);
       setUsers(prev => prev.map(u => u._id === data._id ? data : u));
+      if (profileUser?._id === data._id) setProfileUser(data);
       setEditOpen(false);
       setSnackbar({ open: true, message: 'User updated.', severity: 'success' });
       // If admin edited their own account, refresh the session

@@ -54,7 +54,6 @@ app.use("/api/asset-assignments", require("./routes/assetAssignmentRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
 app.use("/api/audit", require("./routes/auditRoutes"));
 app.use("/api/enterprise", require("./routes/enterpriseRoutes"));
-app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/search", require("./routes/searchRoutes"));
 app.use("/api/settings", require("./routes/settingsRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));

@@ -36,7 +36,6 @@ const EditAsset = lazy(() => import("./pages/admin/EditAsset"));
 const Approvals = lazy(() => import("./pages/admin/Approvals"));
 const Departments = lazy(() => import("./pages/admin/Departments"));
 const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
-const Reports = lazy(() => import("./pages/admin/Reports"));
 const AssignedDevices = lazy(() => import("./pages/admin/AssignedDevices"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const EnterpriseWorkspace = lazy(() => import("./pages/admin/EnterpriseWorkspace"));
@@ -111,7 +110,6 @@ function App() {
               <Route path="/admin/approvals" element={<Approvals />} />
               <Route path="/admin/departments" element={<Departments />} />
               <Route path="/admin/audit" element={<AuditLogs />} />
-              <Route path="/admin/reports" element={<Reports />} />
               <Route path="/admin/assignments" element={<AssignedDevices />} />
               <Route path="/admin/users" element={<UserManagement />} />
               <Route path="/admin/enterprise" element={<EnterpriseWorkspace />} />

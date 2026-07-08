@@ -42,7 +42,6 @@ const adminMenu = [
   { text: "Departments",      path: "/admin/departments",  icon: <ApartmentRounded />,   perm: "Manage Departments" },
 
   { section: "Admin" },
-  { text: "Reports",          path: "/admin/reports",      icon: <AssessmentRounded />,  perm: "View Reports" },
   { text: "Users",            path: "/admin/users",        icon: <PeopleRounded />,      perm: "Manage Users" },
   { text: "Settings",         path: "/settings",           icon: <SettingsRounded /> },
 ];
@@ -260,7 +259,6 @@ const PAGE_TITLES = {
   "/admin/analytics":     "Analytics",
   "/admin/approvals":     "Approvals",
   "/admin/departments":   "Departments",
-  "/admin/reports":       "Reports",
   "/admin/audit":         "Audit Logs",
   "/admin/invoices":      "Invoice Management",
   "/admin/apikeys":       "API Key Management",

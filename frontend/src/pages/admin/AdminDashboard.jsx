@@ -316,7 +316,6 @@ const AdminDashboard = () => {
   const canApprove     = hasPerm('Approve Device Requests');
   const canViewTickets = hasPerm('Raise Tickets') || hasPerm('Manage All Tickets');
   const canManageUsers = isAdminTier;
-  const canViewReports = isAdminTier;
 
   useEffect(() => {
     api.get("/dashboard/stats")
@@ -370,7 +369,6 @@ const AdminDashboard = () => {
     { label: "Add Asset",    icon: <AddRounded />,                accent: "#FBBF24", route: "/admin/assets/add",  show: canRegister },
     { label: "Approvals",    icon: <ApprovalRounded />,           accent: "#FBBF24", route: "/admin/approvals",   show: canApprove },
     { label: "Tickets",      icon: <ConfirmationNumberRounded />, accent: "#FBBF24", route: "/tickets",            show: (canViewTickets || isAdminTier) && !canRegister },
-    { label: "Reports",      icon: <StorageRounded />,            accent: "#FBBF24", route: "/admin/reports",     show: canViewReports },
     { label: "Users",        icon: <PeopleRounded />,             accent: "#FBBF24", route: "/admin/users",       show: canManageUsers },
     { label: "Departments",  icon: <BusinessRounded />,           accent: "#FBBF24", route: "/admin/departments", show: canManageUsers },
     { label: "Invoices",     icon: <ReceiptLongRounded />,        accent: "#FBBF24", route: "/admin/invoices",    show: isAdminTier },
