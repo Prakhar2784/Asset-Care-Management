@@ -148,7 +148,7 @@ function ProfileTab() {
           </Box>
           <Stack spacing={2}>
             <TextField label="Full Name" value={name} onChange={e => setName(e.target.value)} fullWidth size="small" sx={inputSx} />
-            <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))} fullWidth size="small" sx={inputSx} placeholder="10-digit mobile number" inputProps={{ inputMode: 'numeric', maxLength: 10 }} />
+            <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))} fullWidth size="small" sx={inputSx} placeholder="10-digit mobile number" slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
             <TextField label="Email Address" value={currentUser?.email || ''} fullWidth size="small" sx={inputSx} disabled helperText="Email cannot be changed" />
             <TextField label="Role" value={currentUser?.role || ''} fullWidth size="small" sx={inputSx} disabled />
             <TextField label="Department" value={currentUser?.department || 'Not assigned'} fullWidth size="small" sx={inputSx} disabled helperText="Contact your admin to change department" />
@@ -444,6 +444,8 @@ function CompanySettingsTab({ isAdmin = true }) {
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField label="Employee Count" type="number" value={form.employeeCount} onChange={set('employeeCount')} fullWidth size="small" sx={inputSx} disabled={!isAdmin}
+              onKeyDown={(e) => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); }}
+              onWheel={(e) => e.target.blur()}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><PeopleRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
           </Grid>
         </Grid>
@@ -459,8 +461,7 @@ function CompanySettingsTab({ isAdmin = true }) {
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <TextField label="Phone / Contact Number" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))} fullWidth size="small" sx={inputSx} disabled={!isAdmin}
-              inputProps={{ inputMode: 'numeric', maxLength: 10 }}
-              slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
+              slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 }, input: { startAdornment: <InputAdornment position="start"><PhoneRounded sx={{ fontSize: 16, color: 'text.disabled' }} /></InputAdornment> } }} />
           </Grid>
           <Grid size={{ xs: 12 }}>
             <TextField label="Website" value={form.website} onChange={set('website')} fullWidth size="small" sx={inputSx} placeholder="https://yourcompany.com" disabled={!isAdmin}

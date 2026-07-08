@@ -246,11 +246,15 @@ export default function InvoiceManagement() {
               <TextField required label="Vendor Name" value={form.vendor} onChange={e => setForm(f => ({ ...f, vendor: e.target.value }))} sx={inputSx} />
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                 <TextField label="Vendor Email" type="email" value={form.vendorEmail} onChange={e => setForm(f => ({ ...f, vendorEmail: e.target.value }))} sx={inputSx} />
-                <TextField label="Vendor Phone" value={form.vendorPhone} onChange={e => setForm(f => ({ ...f, vendorPhone: e.target.value }))} sx={inputSx} />
+                <TextField label="Vendor Phone" value={form.vendorPhone}
+                  onChange={e => setForm(f => ({ ...f, vendorPhone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                  sx={inputSx} slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
               </Box>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
                 <TextField label="Amount (₹)" type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: e.target.value }))} sx={inputSx}
-                  slotProps={{ htmlInput: { min: 0, step: 'any' } }} />
+                  slotProps={{ htmlInput: { min: 0, step: 'any' } }}
+                  onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                  onWheel={(e) => e.target.blur()} />
                 <TextField label="Invoice Date" type="date" value={form.invoiceDate} onChange={e => setForm(f => ({ ...f, invoiceDate: e.target.value }))} sx={inputSx}
                   slotProps={{ inputLabel: { shrink: true } }} />
                 <TextField label="Due Date" type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} sx={inputSx}

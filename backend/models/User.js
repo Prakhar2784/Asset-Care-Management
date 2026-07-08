@@ -62,10 +62,8 @@ const userSchema = new mongoose.Schema({
 // bcrypt embeds a per-hash random salt; work factor 12 per current OWASP
 // guidance. Never MD5/SHA-1. The plaintext is never logged.
 const BCRYPT_WORK_FACTOR = 12;
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(BCRYPT_WORK_FACTOR);
   this.password = await bcrypt.hash(this.password, salt);
 });

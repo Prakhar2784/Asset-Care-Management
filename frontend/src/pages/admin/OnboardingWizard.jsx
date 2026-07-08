@@ -249,7 +249,9 @@ const OnboardingWizard = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth type="number" label="Employee Count" sx={inputSx} value={org.employeeCount}
-                  onChange={e => setOrg({ ...org, employeeCount: e.target.value })} />
+                  onChange={e => setOrg({ ...org, employeeCount: e.target.value })}
+                  onKeyDown={(e) => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); }}
+                  onWheel={(e) => e.target.blur()} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Website" sx={inputSx} value={org.website}
@@ -329,7 +331,8 @@ const OnboardingWizard = () => {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="HOD Phone" sx={inputSx} value={dept.hodPhone}
-                  onChange={e => setDept({ ...dept, hodPhone: e.target.value })} />
+                  onChange={e => setDept({ ...dept, hodPhone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) })}
+                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField fullWidth label="Location / Floor" sx={inputSx} value={dept.location}

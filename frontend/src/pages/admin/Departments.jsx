@@ -394,8 +394,11 @@ const Departments = () => {
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 4 }}>
-                <TextField fullWidth label="HOD Phone" value={formData.hodPhone} onChange={e => handleChange("hodPhone", e.target.value)} sx={inputStyles}
+                <TextField fullWidth label="HOD Phone" value={formData.hodPhone}
+                  onChange={e => handleChange("hodPhone", e.target.value.replace(/[^0-9]/g, '').slice(0, 10))}
+                  sx={inputStyles}
                   slotProps={{
+                    htmlInput: { inputMode: 'numeric', maxLength: 10 },
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
@@ -411,26 +414,8 @@ const Departments = () => {
             </Grid>
           </FormBlock>
 
-          <FormBlock title="Status">
+          <FormBlock title="Notes">
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 4 }}>
-                <TextField select fullWidth label="Status" value={formData.status} onChange={e => handleChange("status", e.target.value)} sx={inputStyles}
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end" sx={{ mr: 2 }}>
-                          <Tooltip title="Active status of the department" arrow>
-                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
-                          </Tooltip>
-                        </InputAdornment>
-                      )
-                    }
-                  }}
-                >
-                  <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Inactive">Inactive</MenuItem>
-                </TextField>
-              </Grid>
               <Grid size={12}>
                 <TextField fullWidth multiline minRows={3} label="Description / Notes" value={formData.description} onChange={e => handleChange("description", e.target.value)} sx={inputStyles}
                   slotProps={{

@@ -299,8 +299,8 @@ const bulkImportAssets = async (req, res) => {
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(400).json({ message: 'No rows provided for import.' });
     }
-    if (rows.length > 500) {
-      return res.status(400).json({ message: 'Maximum 500 rows per import batch.' });
+    if (rows.length > 1000) {
+      return res.status(400).json({ message: 'Maximum 1000 rows per import batch.' });
     }
 
     // Load custom fields for validation and mapping
@@ -311,10 +311,12 @@ const bulkImportAssets = async (req, res) => {
       customFieldsByCat[c.category].push(c);
     });
 
-    const REQUIRED = ['name', 'serialNumber', 'category', 'department'];
+    const REQUIRED = ['name', 'serialNumber', 'department'];
     const errors = [];
     const valid = [];
     const seen = new Set();
+
+    const VALID_STATUSES = ['Active', 'In Transit', 'Under Repair', 'Decommissioned', 'In Storage', 'Scrap'];
 
     rows.forEach((row, i) => {
       const rowNum = i + 1;
@@ -382,7 +384,7 @@ const bulkImportAssets = async (req, res) => {
         purchaseCost: row.purchaseCost ? Number(row.purchaseCost) : undefined,
         procurementDate: row.procurementDate ? new Date(row.procurementDate) : undefined,
         warrantyEnd: row.warrantyEnd ? new Date(row.warrantyEnd) : undefined,
-        status: row.status || 'Active',
+        status: VALID_STATUSES.includes(row.status?.toString().trim()) ? row.status.toString().trim() : 'Active',
         formFactor: row.formFactor || 'Movable',
         customFields,
         tenantId: req.tenantId || 'default',

@@ -33,6 +33,7 @@ const NotFound = lazy(() => import("./pages/public/NotFound"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Assets = lazy(() => import("./pages/admin/Assets"));
 const AddAsset = lazy(() => import("./pages/admin/AddAsset"));
+const EditAsset = lazy(() => import("./pages/admin/EditAsset"));
 const Approvals = lazy(() => import("./pages/admin/Approvals"));
 const Departments = lazy(() => import("./pages/admin/Departments"));
 const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
@@ -107,6 +108,7 @@ function App() {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/assets" element={<Assets />} />
               <Route path="/admin/assets/add" element={<AddAsset />} />
+              <Route path="/admin/assets/edit/:id" element={<EditAsset />} />
               <Route path="/admin/approvals" element={<Approvals />} />
               <Route path="/admin/departments" element={<Departments />} />
               <Route path="/admin/audit" element={<AuditLogs />} />

@@ -105,7 +105,6 @@ const AddAsset = () => {
       "supportEmail",
       "department",
       "location",
-      "notes",
       "purchaseFromName",
       "purchaseFromAddress",
       "purchaseFromPhone",
@@ -120,15 +119,12 @@ const AddAsset = () => {
       }
     });
 
-    const customConfigs = customFieldConfigs || [];
-    let customFilled = 0;
-    customConfigs.forEach(f => {
-      if (customFields[f.name] && customFields[f.name].toString().trim() !== "") {
-        customFilled++;
-      }
-    });
+    const requiredCustomConfigs = (customFieldConfigs || []).filter(f => f.isRequired);
+    const customFilled = requiredCustomConfigs.filter(f =>
+      customFields[f.name] && customFields[f.name].toString().trim() !== ""
+    ).length;
 
-    const totalFields = standardFields.length + customConfigs.length;
+    const totalFields = standardFields.length + requiredCustomConfigs.length;
     const totalFilled = filledCount + customFilled;
 
     return Math.round((totalFilled / totalFields) * 100);
@@ -691,25 +687,9 @@ const AddAsset = () => {
         }}>
           <SectionLabel number="1" title="Hardware Specifications" subtitle="Basic technical and identity details of the asset." />
           <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, md: 5 }}>
+            <Grid size={{ xs: 12 }}>
               <TextField required fullWidth autoFocus name="name" value={formData.name} onChange={handleChange}
                 sx={inputSx("name")} label="Asset Name *" placeholder="e.g. Dell Latitude 5420" />
-            </Grid>
-            <Grid size={{ xs: 6, md: 3 }}>
-              <TextField required fullWidth select name="category" value={formData.category} onChange={handleChange} sx={inputSx("category")} label="Category *">
-                <MenuItem value="IT Asset">IT Asset</MenuItem>
-                <MenuItem value="Electrical">Electrical</MenuItem>
-                <MenuItem value="Electronic">Electronic</MenuItem>
-                <MenuItem value="Furniture">Furniture</MenuItem>
-                <MenuItem value="Networking">Networking</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid size={{ xs: 6, md: 4 }}>
-              <TextField required fullWidth select name="formFactor" value={formData.formFactor} onChange={handleChange} sx={inputSx("formFactor")} label="Form Factor *">
-                <MenuItem value="Movable">Movable</MenuItem>
-                <MenuItem value="Fixed">Fixed / Immovable</MenuItem>
-              </TextField>
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
@@ -726,7 +706,9 @@ const AddAsset = () => {
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth name="purchaseCost" value={formData.purchaseCost} onChange={handleChange}
                 sx={inputSx("purchaseCost")} label="Purchase Cost (₹)" placeholder="e.g. 85000"
-                type="number" slotProps={{ htmlInput: { min: 0, step: "any" } }} />
+                type="number" slotProps={{ htmlInput: { min: 0, step: "any" } }}
+                onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                onWheel={(e) => e.target.blur()} />
             </Grid>
 
             {customFieldConfigs.length > 0 && (
@@ -824,8 +806,10 @@ const AddAsset = () => {
                 sx={inputSx("servicePartnerContact")} label="Contact Person Name" placeholder="e.g. John Doe" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField fullWidth name="supportPhone" value={formData.supportPhone} onChange={handleChange}
-                sx={inputSx("supportPhone")} label="Support Phone" placeholder="+91 800-456-7890" />
+              <TextField fullWidth name="supportPhone" value={formData.supportPhone}
+                onChange={e => setFormData(prev => ({ ...prev, supportPhone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                sx={inputSx("supportPhone")} label="Support Phone" placeholder="e.g. 9876543210"
+                slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <TextField fullWidth type="email" name="supportEmail" value={formData.supportEmail}
@@ -851,8 +835,10 @@ const AddAsset = () => {
                 sx={inputSx("purchaseFromGst")} label="Vendor GST Number" placeholder="e.g. 27AAAAA1111A1Z1" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-              <TextField fullWidth name="purchaseFromPhone" value={formData.purchaseFromPhone} onChange={handleChange}
-                sx={inputSx("purchaseFromPhone")} label="Vendor Phone" placeholder="+91 98765-43210" />
+              <TextField fullWidth name="purchaseFromPhone" value={formData.purchaseFromPhone}
+                onChange={e => setFormData(prev => ({ ...prev, purchaseFromPhone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                sx={inputSx("purchaseFromPhone")} label="Vendor Phone" placeholder="e.g. 9876543210"
+                slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField fullWidth type="email" name="purchaseFromEmail" value={formData.purchaseFromEmail} onChange={handleChange}
@@ -889,16 +875,6 @@ const AddAsset = () => {
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField fullWidth name="location" value={formData.location} onChange={handleChange}
                 sx={inputSx("location")} label="Physical Location" placeholder="e.g. Tower B, Floor 4, Desk 12" />
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField required fullWidth select name="status" value={formData.status}
-                onChange={handleChange} sx={inputSx("status")} label="Current Status *">
-                <MenuItem value="Active">Active / Deployed</MenuItem>
-                <MenuItem value="In Storage">In Storage</MenuItem>
-                <MenuItem value="In Transit">In Transit</MenuItem>
-                <MenuItem value="Under Repair">Under Repair</MenuItem>
-                <MenuItem value="Decommissioned">Decommissioned</MenuItem>
-              </TextField>
             </Grid>
             <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}

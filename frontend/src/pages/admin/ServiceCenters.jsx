@@ -301,7 +301,7 @@ export default function ServiceCenters() {
                 <TextField label="Contact Person" value={form.contactPerson} onChange={set("contactPerson")} fullWidth size="small" sx={inputSx} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField label="Phone" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))} fullWidth size="small" sx={inputSx} inputProps={{ inputMode: 'numeric', maxLength: 10 }} />
+                <TextField label="Phone" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))} fullWidth size="small" sx={inputSx} slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
               </Grid>
             </Grid>
             <TextField label="Email" value={form.email} onChange={set("email")} fullWidth size="small" sx={inputSx} />
@@ -313,13 +313,19 @@ export default function ServiceCenters() {
                 <TextField label="City" value={form.city} onChange={set("city")} fullWidth size="small" sx={inputSx} />
               </Grid>
             </Grid>
-            <Autocomplete multiple freeSolo options={assetCategories} value={form.categories}
+            <Autocomplete multiple freeSolo options={[]} value={form.categories}
               onChange={(_, v) => setForm(f => ({ ...f, categories: v }))}
-              renderTags={(val, getProps) => val.map((opt, i) => <Chip key={opt} label={opt} size="small" {...getProps({ index: i })} sx={{ fontWeight: 700 }} />)}
+              renderTags={(val, getTagProps) => val.map((opt, i) => {
+                const { key, ...tagProps } = getTagProps({ index: i });
+                return <Chip key={key} label={opt} size="small" {...tagProps} sx={{ fontWeight: 700 }} />;
+              })}
               renderInput={(params) => <TextField {...params} label="Categories Serviced" size="small" sx={inputSx} placeholder="e.g. Laptop, Printer" />} />
             <Autocomplete multiple freeSolo options={[]} value={form.brands}
               onChange={(_, v) => setForm(f => ({ ...f, brands: v }))}
-              renderTags={(val, getProps) => val.map((opt, i) => <Chip key={opt} label={opt} size="small" variant="outlined" {...getProps({ index: i })} />)}
+              renderTags={(val, getTagProps) => val.map((opt, i) => {
+                const { key, ...tagProps } = getTagProps({ index: i });
+                return <Chip key={key} label={opt} size="small" variant="outlined" {...tagProps} />;
+              })}
               renderInput={(params) => <TextField {...params} label="Brands Handled" size="small" sx={inputSx} placeholder="Type brand and press Enter" />} />
             <FormControl fullWidth size="small" sx={inputSx}>
               <InputLabel>Status</InputLabel>

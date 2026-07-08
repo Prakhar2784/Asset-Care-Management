@@ -753,10 +753,14 @@ const EnterpriseWorkspace = () => {
               <TextField label="Activation / License Key" fullWidth value={licForm.licenseKey} onChange={(e) => setLicForm({ ...licForm, licenseKey: e.target.value })} required />
               <Grid container spacing={2}>
                 <Grid item xs={6}>
-                  <TextField label="Total Seats / Allocations" type="number" fullWidth value={licForm.totalSeats} onChange={(e) => setLicForm({ ...licForm, totalSeats: e.target.value })} required />
+                  <TextField label="Total Seats / Allocations" type="number" fullWidth value={licForm.totalSeats} onChange={(e) => setLicForm({ ...licForm, totalSeats: e.target.value })} required
+                    onKeyDown={(e) => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); }}
+                    onWheel={(e) => e.target.blur()} />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField label="Renewal Cost (₹)" type="number" fullWidth value={licForm.renewalCost} onChange={(e) => setLicForm({ ...licForm, renewalCost: e.target.value })} />
+                  <TextField label="Renewal Cost (₹)" type="number" fullWidth value={licForm.renewalCost} onChange={(e) => setLicForm({ ...licForm, renewalCost: e.target.value })}
+                    onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                    onWheel={(e) => e.target.blur()} />
                 </Grid>
               </Grid>
               <TextField label="Expiry / Next Renewal Date" type="date" InputLabelProps={{ shrink: true }} fullWidth value={licForm.expiryDate} onChange={(e) => setLicForm({ ...licForm, expiryDate: e.target.value })} />
@@ -817,7 +821,9 @@ const EnterpriseWorkspace = () => {
                   <TextField label="End Date" type="date" InputLabelProps={{ shrink: true }} fullWidth value={amcForm.endDate} onChange={(e) => setAmcForm({ ...amcForm, endDate: e.target.value })} required />
                 </Grid>
               </Grid>
-              <TextField label="Annual Agreement Cost (₹)" type="number" fullWidth value={amcForm.annualCost} onChange={(e) => setAmcForm({ ...amcForm, annualCost: e.target.value })} />
+              <TextField label="Annual Agreement Cost (₹)" type="number" fullWidth value={amcForm.annualCost} onChange={(e) => setAmcForm({ ...amcForm, annualCost: e.target.value })}
+                onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                onWheel={(e) => e.target.blur()} />
             </Box>
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 0 }}>

@@ -23,7 +23,7 @@ import { useAuth } from "../../context/AuthContext";
 const STATUS_LIST = [
   'Pending HOD Approval', 'Pending Approval', 'Assigned to Technician',
   'Service Center Required', 'Sent to Service Center',
-  'Vendor Assigned', 'Under Repair', 'Resolved', 'Rejected'
+  'Vendor Assigned', 'Resolved', 'Rejected'
 ];
 
 const getStatusColor = (status) => {
@@ -146,6 +146,9 @@ const Tickets = () => {
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [attachmentUploading, setAttachmentUploading] = useState(false);
   const [activeTab, setActiveTab]           = useState('timeline'); // 'timeline' | 'comments' | 'attachments'
+  const [remarkOpen, setRemarkOpen]         = useState(false);
+  const [remarkText, setRemarkText]         = useState('');
+  const [remarkSubmitting, setRemarkSubmitting] = useState(false);
   const attachFileRef                       = useRef(null);
 
   useEffect(() => { fetchData(); }, []);
@@ -216,13 +219,14 @@ const Tickets = () => {
         payload.deviceRequestId = id;
         payload.itemLabel = labelParts.join(':');
       }
-      const response = await api.post('/tickets', payload);
+      const response = await api.post('/tickets', payload, { timeout: 20000 });
 
       if (imageFile) {
         const fd = new FormData();
         fd.append('files', imageFile);
         await api.post(`/tickets/${response.data._id}/attachments`, fd, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 30000,
         });
       }
 
@@ -231,7 +235,13 @@ const Tickets = () => {
       setFormData({ selectedItem: '', issue: '', priority: 'Medium' });
       setImageFile(null);
       fetchData();
-    } catch (err) { setError(err.response?.data?.message || 'Failed to submit ticket.'); }
+    } catch (err) {
+      if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        setError('Request timed out. Please try again.');
+      } else {
+        setError(err.response?.data?.message || 'Failed to submit ticket. Please check your connection.');
+      }
+    }
     finally { setSubmitting(false); }
   };
 
@@ -306,6 +316,21 @@ const Tickets = () => {
     finally { setCommentSubmitting(false); }
   };
 
+  const handleVendorRemark = async () => {
+    if (!remarkText.trim()) return;
+    setRemarkSubmitting(true);
+    try {
+      const { data } = await api.post(`/tickets/${selectedTicket._id}/comments`, {
+        text: `[Vendor Remark] ${remarkText.trim()}`,
+      });
+      setTicketDetail(prev => ({ ...prev, comments: Array.isArray(data) ? data : [...(prev?.comments || []), data] }));
+      setRemarkText('');
+      setRemarkOpen(false);
+      setActiveTab('comments');
+    } catch { showError('Failed to save vendor remark.'); }
+    finally { setRemarkSubmitting(false); }
+  };
+
   const handleAttachFiles = async (files) => {
     if (!files?.length) return;
     setAttachmentUploading(true);
@@ -365,7 +390,7 @@ const Tickets = () => {
             <BuildRounded sx={{ color: 'text.primary' }} />
           </Box>
           <Box>
-            <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Breakdown Tickets</Typography>
+            <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: '-0.5px' }}>Breakdown Tickets</Typography>
             <Typography variant="body2" color="text.secondary" fontWeight={600}>Raise issues, track service activity, and view repair lifecycles</Typography>
           </Box>
         </Box>
@@ -488,7 +513,7 @@ const Tickets = () => {
                           <BuildRounded sx={{ fontSize: 20 }} />
                         </Box>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography fontSize={15} fontWeight={900} letterSpacing="-0.3px" sx={{ lineHeight: 1.3 }}>
+                          <Typography fontSize={15} fontWeight={900} sx={{ lineHeight: 1.3, letterSpacing: '-0.3px' }}>
                             {ticket.asset?.name || ticket.itemLabel || ticket.deviceRequestRef?.itemRequested || 'Unknown Asset'}
                           </Typography>
                           <Typography color="text.disabled" fontSize={11} fontWeight={700} sx={{ fontFamily: 'monospace' }}>
@@ -621,7 +646,7 @@ const Tickets = () => {
               {/* ── HOD/Admin Quick Approval Panel (Pending HOD Approval) ── */}
               {selectedTicket.status === 'Pending HOD Approval' && isAuth && (
                 <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(22,163,74,0.03)' }}>
-                  <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={1}>Assign Technician &amp; Approve</Typography>
+                  <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={1} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>Assign Technician &amp; Approve</Typography>
                   <Select fullWidth size="small" displayEmpty value={selectedTechnicianId}
                     onChange={e => setSelectedTechnicianId(e.target.value)}
                     sx={{ borderRadius: '10px', fontSize: 13, fontWeight: 700, mb: 1.5 }}>
@@ -660,7 +685,7 @@ const Tickets = () => {
               {/* ── Technician Action Panel (Assigned to Technician) ── */}
               {canTechnicianAct(selectedTicket) && (
                 <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(14,165,233,0.03)' }}>
-                  <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={1.5}>Take Action on This Ticket</Typography>
+                  <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={1.5} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>Take Action on This Ticket</Typography>
                   <Box sx={{ display: 'flex', gap: 1.5 }}>
                     <Button fullWidth variant="contained" startIcon={<TaskAltRounded />}
                       onClick={() => handleStatusUpdate(selectedTicket._id, 'Resolved')}
@@ -683,7 +708,7 @@ const Tickets = () => {
                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#EF4444', flexShrink: 0 }} />
                     <Typography fontSize={12} fontWeight={700} color="#EF4444">Technician could not resolve this. Please assign a service center.</Typography>
                   </Box>
-                  <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={1}>Select Service Center</Typography>
+                  <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={1} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>Select Service Center</Typography>
                   <Select fullWidth size="small" displayEmpty value={selectedServiceCenterId}
                     onChange={e => setSelectedServiceCenterId(e.target.value)}
                     sx={{ borderRadius: '10px', fontSize: 13, fontWeight: 700, mb: 1.5 }}>
@@ -719,7 +744,7 @@ const Tickets = () => {
               {isAdminOrHod && (
                 <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 2 }}>
                   <Box sx={{ flex: 1 }}>
-                    <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={0.8}>Change Status</Typography>
+                    <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={0.8} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>Change Status</Typography>
                     <Select fullWidth size="small" value={selectedTicket.status}
                       onChange={e => handleStatusUpdate(selectedTicket._id, e.target.value)}
                       sx={{ borderRadius: '10px', fontSize: 13, fontWeight: 700 }}>
@@ -727,7 +752,7 @@ const Tickets = () => {
                     </Select>
                   </Box>
                   <Box sx={{ flex: 1 }}>
-                    <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={0.8}>Priority</Typography>
+                    <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={0.8} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>Priority</Typography>
                     <Select fullWidth size="small" value={selectedTicket.priority}
                       onChange={e => handlePriorityUpdate(selectedTicket._id, e.target.value)}
                       sx={{ borderRadius: '10px', fontSize: 13, fontWeight: 700 }}>
@@ -736,6 +761,22 @@ const Tickets = () => {
                       ))}
                     </Select>
                   </Box>
+                </Box>
+              )}
+
+              {/* ── Vendor Remark ── */}
+              {['Vendor Assigned', 'Sent to Service Center', 'Under Repair'].includes(selectedTicket.status) && isAdminOrHod && (
+                <Box sx={{ px: 3, py: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'rgba(251,191,36,0.04)' }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<span style={{ fontSize: 15 }}>📞</span>}
+                    onClick={() => { setRemarkText(''); setRemarkOpen(true); }}
+                    sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', fontSize: 13, py: 0.9,
+                      borderColor: '#FBBF24', color: '#B45309',
+                      '&:hover': { bgcolor: 'rgba(251,191,36,0.08)', borderColor: '#F59E0B' } }}>
+                    Add Vendor Remark
+                  </Button>
                 </Box>
               )}
 
@@ -779,7 +820,7 @@ const Tickets = () => {
                   ].map(([label, value]) => (
                     <Grid size={{ xs: 6 }} key={label}>
                       <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
-                        <Typography fontSize={10} fontWeight={800} color="text.disabled" textTransform="uppercase" letterSpacing="0.5px">{label}</Typography>
+                        <Typography fontSize={10} fontWeight={800} color="text.disabled" sx={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</Typography>
                         <Typography fontSize={13} fontWeight={700} mt={0.3} sx={{ wordBreak: 'break-word' }}>{value}</Typography>
                       </Box>
                     </Grid>
@@ -828,9 +869,19 @@ const Tickets = () => {
                                 <Typography fontSize={13} fontWeight={800}>{c.authorName || 'User'}</Typography>
                                 <Typography fontSize={11} color="text.disabled">{new Date(c.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</Typography>
                               </Box>
-                              <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
-                                <Typography fontSize={13} color="text.secondary" sx={{ lineHeight: 1.6 }}>{c.text}</Typography>
-                              </Box>
+                              {c.text?.startsWith('[Vendor Remark]') ? (
+                                <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)' }}>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.7, mb: 0.5 }}>
+                                    <span style={{ fontSize: 13 }}>📞</span>
+                                    <Typography fontSize={10} fontWeight={900} sx={{ color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Vendor Remark</Typography>
+                                  </Box>
+                                  <Typography fontSize={13} color="text.secondary" sx={{ lineHeight: 1.6 }}>{c.text.replace('[Vendor Remark] ', '')}</Typography>
+                                </Box>
+                              ) : (
+                                <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
+                                  <Typography fontSize={13} color="text.secondary" sx={{ lineHeight: 1.6 }}>{c.text}</Typography>
+                                </Box>
+                              )}
                             </Box>
                           </Box>
                         ))}
@@ -1023,7 +1074,7 @@ const Tickets = () => {
             </Stack>
             {error && <Alert severity="error" onClose={() => setError(null)} sx={{ mt: 2, borderRadius: '12px', fontWeight: 600 }}>{error}</Alert>}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
-              <Button onClick={() => { setRaiseOpen(false); setImageFile(null); }} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
+              <Button onClick={() => { setRaiseOpen(false); setImageFile(null); setSubmitting(false); setError(null); }} sx={{ color: 'text.secondary', fontWeight: 800, textTransform: 'none', px: 3, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={submitting}
                 startIcon={submitting ? <CircularProgress size={18} color="inherit" /> : null}
                 sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, px: 3.5, borderRadius: '12px', boxShadow: 'none' }}>
@@ -1032,6 +1083,44 @@ const Tickets = () => {
             </Box>
           </form>
         </DialogContent>
+      </Dialog>
+
+      {/* Vendor Remark Dialog */}
+      <Dialog open={remarkOpen} onClose={() => { setRemarkOpen(false); setRemarkText(''); }} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { borderRadius: '20px', overflow: 'hidden', border: 1, borderColor: 'divider' } } }}>
+        <Box sx={{ px: 3, pt: 3, pb: 1, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 40, height: 40, borderRadius: '10px', bgcolor: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.3)', display: 'grid', placeItems: 'center', fontSize: 18 }}>
+              📞
+            </Box>
+            <Box>
+              <Typography fontWeight={900} fontSize={16}>Vendor Remark</Typography>
+              <Typography fontSize={12} color="text.secondary" fontWeight={500}>Note what the vendor said</Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => { setRemarkOpen(false); setRemarkText(''); }} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
+        </Box>
+        <Box sx={{ p: 3 }}>
+          <TextField
+            fullWidth multiline rows={4} size="small"
+            placeholder="e.g. Vendor confirmed part has been ordered, expected delivery in 3 days…"
+            value={remarkText}
+            onChange={e => setRemarkText(e.target.value)}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', fontSize: 13 } }}
+          />
+          <Box sx={{ display: 'flex', gap: 1.5, mt: 2 }}>
+            <Button fullWidth variant="outlined" onClick={() => { setRemarkOpen(false); setRemarkText(''); }}
+              sx={{ fontWeight: 700, borderRadius: '10px', textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button fullWidth variant="contained" disabled={!remarkText.trim() || remarkSubmitting}
+              onClick={handleVendorRemark}
+              sx={{ fontWeight: 800, borderRadius: '10px', textTransform: 'none', boxShadow: 'none', background: '#FBBF24', color: '#111827',
+                '&:hover': { background: '#F59E0B', boxShadow: 'none' } }}>
+              {remarkSubmitting ? <CircularProgress size={18} color="inherit" /> : 'Save Remark'}
+            </Button>
+          </Box>
+        </Box>
       </Dialog>
 
       {/* Delete Confirm Dialog */}

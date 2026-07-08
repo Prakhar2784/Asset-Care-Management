@@ -565,7 +565,7 @@ const AdminDashboard = () => {
           )}
 
           {/* ── Middle row: Tickets + Right sidebar ─────────────── */}
-          <Grid container spacing={3} sx={{ mb: 3 }} alignItems="flex-start">
+          <Grid container spacing={3} sx={{ mb: 3, alignItems: 'flex-start' }}>
 
             {/* Recent Tickets */}
             <Grid size={{ xs: 12, lg: canViewAssets ? 8 : 12 }}>
@@ -780,7 +780,7 @@ const AdminDashboard = () => {
                   { label: "Date",       value: selectedTicket.date },
                 ].map(({ label, value }) => (
                   <Box key={label} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "background.default", border: "1px solid", borderColor: "divider" }}>
-                    <Typography fontSize={10} fontWeight={800} color="text.secondary" textTransform="uppercase" letterSpacing="0.6px" mb={0.3}>{label}</Typography>
+                    <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={0.3} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>{label}</Typography>
                     <Typography fontSize={13} fontWeight={800} color="text.primary">{value}</Typography>
                   </Box>
                 ))}

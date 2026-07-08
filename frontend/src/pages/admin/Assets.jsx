@@ -25,6 +25,7 @@ import {
   Typography,
   IconButton,
   CircularProgress,
+  LinearProgress,
   Divider,
   Tooltip,
   Autocomplete,
@@ -55,7 +56,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 import StatusChip from "../../components/StatusChip";
-import api from "../../api/axios";
+import api, { getFileUrl } from "../../api/axios";
 import BulkImportDialog from "../../components/BulkImportDialog";
 import AssetTimelineDrawer from "../../components/AssetTimelineDrawer";
 
@@ -116,26 +117,8 @@ const Assets = () => {
   const [activeTab, setActiveTab] = useState("all");
 
   const isIncomplete = (asset) => {
-    const optionalFields = [
-      "vendor",
-      "modelNumber",
-      "purchaseCost",
-      "procurementDate",
-      "warrantyStart",
-      "warrantyEnd",
-      "servicePartnerName",
-      "servicePartnerContact",
-      "supportPhone",
-      "supportEmail",
-      "location",
-      "notes",
-      "purchaseFromName",
-      "purchaseFromAddress",
-      "purchaseFromPhone",
-      "purchaseFromEmail",
-      "purchaseFromGst"
-    ];
-    return optionalFields.some(field => !asset[field] || asset[field].toString().trim() === "");
+    const coreFields = ["vendor", "location", "warrantyEnd", "department"];
+    return coreFields.some(field => !asset[field] || asset[field].toString().trim() === "");
   };
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
@@ -145,6 +128,19 @@ const Assets = () => {
 
   // Asset timeline state
   const [timelineAsset, setTimelineAsset] = useState(null);
+
+  // Full asset detail (fetched on drawer open for documents + complete fields)
+  const [fullAsset, setFullAsset] = useState(null);
+  const [fullAssetLoading, setFullAssetLoading] = useState(false);
+
+  useEffect(() => {
+    if (!selected) { setFullAsset(null); return; }
+    setFullAssetLoading(true);
+    api.get(`/assets/${selected._id}`)
+      .then(r => setFullAsset(r.data.asset || r.data))
+      .catch(() => setFullAsset(selected))
+      .finally(() => setFullAssetLoading(false));
+  }, [selected?._id]);
 
   const [editCustomFieldConfigs, setEditCustomFieldConfigs] = useState([]);
 
@@ -271,36 +267,9 @@ const Assets = () => {
 
   // Edit handlers
   const handleEditClick = (asset) => {
-    setEditAsset(asset);
-    setEditForm({
-      name: asset.name || "",
-      serialNumber: asset.serialNumber || "",
-      category: asset.category || "",
-      formFactor: asset.formFactor || "Movable",
-      department: asset.department || "",
-      location: asset.location || "",
-      vendor: asset.vendor || "",
-      status: asset.status || "Active",
-      warrantyEnd: asset.warrantyEnd ? asset.warrantyEnd.split('T')[0] : "",
-      customFields: asset.customFields || {},
-    });
-    setEditDialogOpen(true);
+    navigate(`/admin/assets/edit/${asset._id}`);
   };
 
-  const handleEditSave = async () => {
-    setSaving(true);
-    try {
-      await api.put(`/assets/${editAsset._id}`, editForm);
-      setSnackbar({ open: true, message: "Asset updated successfully.", severity: "success" });
-      setEditDialogOpen(false);
-      setEditAsset(null);
-      fetchAssets();
-    } catch (err) {
-      setSnackbar({ open: true, message: err.response?.data?.message || "Failed to update asset.", severity: "error" });
-    } finally {
-      setSaving(false);
-    }
-  };
 
   // Delete handlers
   const handleDeleteClick = (asset) => {
@@ -488,20 +457,10 @@ const Assets = () => {
           <MenuItem value="All">All Departments</MenuItem>
           {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
         </Select>
-        <Select
-          size="small"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          sx={{ minWidth: 140, borderRadius: "10px", "& .MuiOutlinedInput-root": { borderRadius: "10px" } }}
-          displayEmpty
-        >
-          <MenuItem value="All">All Statuses</MenuItem>
-          {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-        </Select>
-        {(search || statusFilter !== "All" || deptFilter !== "All") && (
+        {(search || deptFilter !== "All") && (
           <Button
             size="small"
-            onClick={() => { setSearch(""); setStatusFilter("All"); setDeptFilter("All"); }}
+            onClick={() => { setSearch(""); setDeptFilter("All"); }}
             sx={{ color: "text.secondary", fontWeight: 700, borderRadius: "8px", px: 2, border: 1, borderColor: "divider" }}
           >
             Clear
@@ -614,206 +573,162 @@ const Assets = () => {
       {/* Detail Drawer */}
       <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}
         slotProps={{ paper: { sx: { bgcolor: "background.paper", color: "text.primary", borderLeft: "1px solid", borderColor: "divider" } } }}>
-        <Box sx={{ width: { xs: "100vw", sm: 400, md: 450 }, p: { xs: 3, md: 4 } }}>
-          {selected && (
-            <>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
-                <Box>
-                  <Typography sx={{ fontWeight: 900, letterSpacing: "-0.5px", fontSize: "24px", color: "text.primary" }}>{selected.name}</Typography>
-                  <Typography sx={{ color: "text.secondary", fontFamily: "monospace", fontWeight: 600, mt: 1, fontSize: "16px" }}>
-                    AST-{selected._id.slice(-5).toUpperCase()}
-                  </Typography>
+        <Box sx={{ width: { xs: "100vw", sm: 520, md: 600 }, height: "100%", display: "flex", flexDirection: "column" }}>
+          {selected && (() => {
+            const a = fullAsset || selected;
+            const fmt = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+            const Row = ({ label, value }) => value && value !== '—' ? (
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", py: 1.2, borderBottom: "1px solid", borderColor: "divider" }}>
+                <Typography sx={{ fontSize: 12, color: "text.secondary", fontWeight: 600, minWidth: 130, flexShrink: 0 }}>{label}</Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: "text.primary", textAlign: "right", wordBreak: "break-word" }}>{value}</Typography>
+              </Box>
+            ) : null;
+            const Section = ({ title }) => (
+              <Typography sx={{ fontSize: 10, fontWeight: 800, color: "text.disabled", textTransform: "uppercase", letterSpacing: "0.8px", mt: 2.5, mb: 0.5 }}>{title}</Typography>
+            );
+            const DOC_LABELS = { invoice: 'Purchase Invoice', warranty: 'Warranty Card', amc: 'AMC Contract', manual: 'User Manual', service: 'Service Report' };
+            const docs = a.documents || [];
+
+            return (
+              <>
+                {/* Header */}
+                <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexShrink: 0 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 900, fontSize: 20, letterSpacing: "-0.4px", color: "text.primary" }}>{a.name}</Typography>
+                    <Typography sx={{ color: "text.secondary", fontFamily: "monospace", fontWeight: 600, fontSize: 13, mt: 0.5 }}>
+                      AST-{a._id?.slice(-5).toUpperCase()} · {a.serialNumber}
+                    </Typography>
+                    <Box sx={{ display: "flex", gap: 1, mt: 1, flexWrap: "wrap" }}>
+                      {a.status && <Chip label={a.status} size="small" sx={{ height: 20, fontSize: 10, fontWeight: 800, bgcolor: a.status === 'Active' ? 'rgba(34,197,94,0.1)' : 'action.hover', color: a.status === 'Active' ? '#16a34a' : 'text.secondary' }} />}
+                      {a.category && <Chip label={a.category} size="small" sx={{ height: 20, fontSize: 10, fontWeight: 700, bgcolor: 'action.hover' }} />}
+                      {a.formFactor && <Chip label={a.formFactor} size="small" sx={{ height: 20, fontSize: 10, fontWeight: 700, bgcolor: 'action.hover' }} />}
+                    </Box>
+                  </Box>
+                  <IconButton onClick={() => setSelected(null)} sx={{ color: "text.secondary", bgcolor: "action.hover", ml: 2, flexShrink: 0 }}><CloseRounded /></IconButton>
                 </Box>
-                <IconButton onClick={() => setSelected(null)} sx={{ color: "text.secondary", bgcolor: "action.hover" }}>
-                  <CloseRounded />
-                </IconButton>
-              </Box>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 5 }}>
-                {[
-                  ["Category", selected.category],
-                  ["Form Factor", selected.formFactor || "Movable"],
-                  ["Department", selected.department],
-                  ["Location", selected.location || "Unassigned"],
-                  ["OEM / Brand", selected.vendor || "Standard OEM"],
-                  ["Serial Number", selected.serialNumber],
-                  ["Warranty Expiry", selected.warrantyEnd ? new Date(selected.warrantyEnd).toLocaleDateString() : "N/A"],
-                  ["Status", selected.status],
-                  ["Purchase From", selected.purchaseFromName || "—"],
-                  ["Vendor GST", selected.purchaseFromGst || "—"],
-                  ["Service Partner", selected.servicePartnerName || "—"],
-                  ["Support Contact", selected.servicePartnerContact || "—"],
-                ].map(([label, value]) => (
-                  <Box key={label} sx={{ p: 2, borderRadius: "12px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography sx={{ fontSize: "13px", color: "text.secondary", fontWeight: 600 }}>{label}</Typography>
-                    <Typography sx={{ fontWeight: 700, color: "text.primary", textAlign: "right", maxWidth: "60%" }}>{value}</Typography>
-                  </Box>
-                ))}
 
-                {Object.keys(selected.customFields || {}).length > 0 && (
-                  <Box sx={{ mt: 1.5, mb: 0.5 }}>
-                    <Divider>
-                      <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                        Custom Specifications
-                      </Typography>
-                    </Divider>
-                  </Box>
-                )}
+                {/* Scrollable body */}
+                <Box sx={{ flex: 1, overflowY: "auto", px: 3, pb: 3 }}>
+                  {fullAssetLoading && <LinearProgress sx={{ mt: 2, mb: 1, borderRadius: 2 }} />}
 
-                {Object.entries(selected.customFields || {}).map(([key, val]) => (
-                  <Box key={key} sx={{ p: 2, borderRadius: "12px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography sx={{ fontSize: "13px", color: "text.secondary", fontWeight: 600 }}>{key}</Typography>
-                    <Typography sx={{ fontWeight: 700, color: "text.primary", textAlign: "right", maxWidth: "60%" }}>{val || "—"}</Typography>
-                  </Box>
-                ))}
-              </Box>
-              {selected.assignedStatus === 'Assigned' && (
-                <Box sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: 'rgba(22,163,74,0.10)', border: '1px solid rgba(22,163,74,0.25)' }}>
-                  <Typography fontSize={12} fontWeight={700} sx={{ color: '#4ADE80', mb: 0.5 }}>Assigned To</Typography>
-                  <Typography fontSize={14} fontWeight={700} color="text.primary">{selected.assignedEmployeeName || '—'}</Typography>
-                  <Typography fontSize={12} color="text.secondary">{selected.assignedEmployeeEmail}</Typography>
-                  <Typography fontSize={12} color="text.secondary">{selected.assignedTo?.department || ''}</Typography>
+                  {/* Hardware */}
+                  <Section title="Hardware Specifications" />
+                  <Row label="OEM / Brand" value={a.vendor} />
+                  <Row label="Model Number" value={a.modelNumber} />
+                  <Row label="Serial Number" value={a.serialNumber} />
+                  <Row label="Purchase Cost" value={a.purchaseCost ? `₹${Number(a.purchaseCost).toLocaleString('en-IN')}` : null} />
+
+                  {/* Lifecycle */}
+                  <Section title="Lifecycle & Warranty" />
+                  <Row label="Procurement Date" value={fmt(a.procurementDate)} />
+                  <Row label="Warranty Start" value={fmt(a.warrantyStart)} />
+                  <Row label="Warranty Expiry" value={fmt(a.warrantyEnd)} />
+                  <Row label="Service Partner" value={a.servicePartnerName} />
+                  <Row label="Contact Person" value={a.servicePartnerContact} />
+                  <Row label="Support Phone" value={a.supportPhone} />
+                  <Row label="Support Email" value={a.supportEmail} />
+
+                  {/* Purchase */}
+                  <Section title="Purchase Details" />
+                  <Row label="Purchased From" value={a.purchaseFromName} />
+                  <Row label="Vendor GST" value={a.purchaseFromGst} />
+                  <Row label="Vendor Phone" value={a.purchaseFromPhone} />
+                  <Row label="Vendor Email" value={a.purchaseFromEmail} />
+                  <Row label="Vendor Address" value={a.purchaseFromAddress} />
+
+                  {/* Deployment */}
+                  <Section title="Deployment" />
+                  <Row label="Department" value={a.department} />
+                  <Row label="Location" value={a.location} />
+                  <Row label="Status" value={a.status} />
+                  {a.notes && <Row label="Notes" value={a.notes} />}
+
+                  {/* Assignment */}
+                  {a.assignedStatus === 'Assigned' && (
+                    <>
+                      <Section title="Assigned To" />
+                      <Box sx={{ p: 2, mt: 1, borderRadius: "12px", bgcolor: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)' }}>
+                        <Typography fontSize={14} fontWeight={800} color="text.primary">{a.assignedEmployeeName || '—'}</Typography>
+                        <Typography fontSize={12} color="text.secondary">{a.assignedEmployeeEmail}</Typography>
+                        <Typography fontSize={12} color="text.secondary">{a.assignedTo?.department || ''}</Typography>
+                      </Box>
+                    </>
+                  )}
+
+                  {/* Custom Fields */}
+                  {Object.keys(a.customFields || {}).length > 0 && (
+                    <>
+                      <Section title="Custom Specifications" />
+                      {Object.entries(a.customFields).map(([k, v]) => <Row key={k} label={k} value={v || '—'} />)}
+                    </>
+                  )}
+
+                  {/* Documents */}
+                  <Section title="Documents" />
+                  {docs.length === 0 ? (
+                    <Typography fontSize={12} color="text.disabled" sx={{ mt: 1, fontStyle: 'italic' }}>No documents attached.</Typography>
+                  ) : (
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
+                      {docs.map((doc) => {
+                        const url = getFileUrl(doc.url);
+                        const isImage = /\.(jpg|jpeg|png|webp)$/i.test(doc.fileName || doc.url || '');
+                        const isPdf = /\.pdf$/i.test(doc.fileName || doc.url || '');
+                        return (
+                          <Box key={doc._id} sx={{ borderRadius: "12px", border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
+                            {isImage && (
+                              <Box component="img" src={url} alt={doc.originalName}
+                                sx={{ width: "100%", maxHeight: 200, objectFit: "contain", bgcolor: "action.hover", display: "block" }} />
+                            )}
+                            <Box sx={{ px: 2, py: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+                              <Box>
+                                <Typography fontSize={11} fontWeight={800} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                                  {DOC_LABELS[doc.docType] || doc.docType}
+                                </Typography>
+                                <Typography fontSize={12} fontWeight={600} color="text.primary" sx={{ wordBreak: "break-all" }}>
+                                  {doc.originalName || doc.fileName}
+                                </Typography>
+                              </Box>
+                              <Button component="a" href={url} target="_blank" rel="noopener noreferrer" size="small" variant="outlined"
+                                sx={{ fontWeight: 700, fontSize: 11, borderRadius: "8px", whiteSpace: "nowrap", flexShrink: 0 }}>
+                                {isPdf ? 'Open PDF' : isImage ? 'View' : 'Download'}
+                              </Button>
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  )}
                 </Box>
-              )}
 
-              <Button variant="outlined" startIcon={<HistoryRounded />} onClick={() => { setTimelineAsset(selected); setSelected(null); }}
-                sx={{ width: "100%", mb: 2, py: 1.4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "action.hover" } }}>
-                View Lifecycle History
-              </Button>
-
-              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
-                <Button variant="outlined" onClick={() => { handleEditClick(selected); setSelected(null); }}
-                  sx={{ flex: 1, py: 1.4, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "action.hover" } }}>
-                  Edit
-                </Button>
-                {selected.assignedStatus !== 'Assigned' ? (
-                  <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
-                    sx={{ flex: 1, py: 1.4, background: "#FBBF24", color: "#111827", fontWeight: 900, borderRadius: "12px", boxShadow: "none", "&:hover": { background: "#F5A623", boxShadow: "none" } }}>
-                    Assign
+                {/* Footer actions */}
+                <Box sx={{ p: 2.5, borderTop: "1px solid", borderColor: "divider", flexShrink: 0, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                  <Button variant="outlined" startIcon={<HistoryRounded />} onClick={() => { setTimelineAsset(selected); setSelected(null); }}
+                    sx={{ width: "100%", py: 1.2, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px" }}>
+                    View Lifecycle History
                   </Button>
-                ) : (
-                  <Button variant="outlined" startIcon={<PersonRemoveRounded />} onClick={() => handleRevokeAssignment(selected)}
-                    sx={{ flex: 1, py: 1.4, borderColor: "#dc2626", color: "#dc2626", fontWeight: 700, borderRadius: "12px", "&:hover": { bgcolor: "#fee2e2" } }}>
-                    Revoke
-                  </Button>
-                )}
-              </Box>
-            </>
-          )}
+                  <Box sx={{ display: "flex", gap: 1.5 }}>
+                    <Button variant="outlined" onClick={() => navigate(`/admin/assets/edit/${selected._id}`)}
+                      sx={{ flex: 1, py: 1.2, borderColor: "divider", color: "text.primary", fontWeight: 700, borderRadius: "12px" }}>
+                      Edit
+                    </Button>
+                    {a.assignedStatus !== 'Assigned' ? (
+                      <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
+                        sx={{ flex: 1, py: 1.2, background: "#FBBF24", color: "#111827", fontWeight: 900, borderRadius: "12px", boxShadow: "none" }}>
+                        Assign
+                      </Button>
+                    ) : (
+                      <Button variant="outlined" startIcon={<PersonRemoveRounded />} onClick={() => handleRevokeAssignment(selected)}
+                        sx={{ flex: 1, py: 1.2, borderColor: "#dc2626", color: "#dc2626", fontWeight: 700, borderRadius: "12px" }}>
+                        Revoke
+                      </Button>
+                    )}
+                  </Box>
+                </Box>
+              </>
+            );
+          })()}
         </Box>
       </Drawer>
-
-      {/* Edit Dialog */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
-        <DialogTitle sx={{ p: 0 }}>
-          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
-                <EditRounded sx={{ color: "#fff" }} />
-              </Box>
-              <Box>
-                <Typography fontWeight={900} fontSize={18}>Edit Asset</Typography>
-                <Typography fontSize={12} color="text.secondary">{editAsset?.name}</Typography>
-              </Box>
-            </Box>
-            <IconButton onClick={() => setEditDialogOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
-          </Box>
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Stack spacing={2.5} sx={{ mt: 0.5 }}>
-            <TextField label="Asset Name" fullWidth required sx={inputStyles} value={editForm.name || ""} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
-            <TextField label="Serial Number" fullWidth required sx={inputStyles} value={editForm.serialNumber || ""} onChange={(e) => setEditForm({ ...editForm, serialNumber: e.target.value })} />
-            <Grid container spacing={2}>
-              <Grid size={6}>
-                <TextField label="Category" fullWidth select sx={inputStyles} value={editForm.category || ""} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}>
-                  {CATEGORIES.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
-                </TextField>
-              </Grid>
-              <Grid size={6}>
-                <TextField label="Form Factor" fullWidth select sx={inputStyles} value={editForm.formFactor || "Movable"} onChange={(e) => setEditForm({ ...editForm, formFactor: e.target.value })}>
-                  {FORM_FACTORS.map(f => <MenuItem key={f} value={f}>{f}</MenuItem>)}
-                </TextField>
-              </Grid>
-            </Grid>
-            <Grid container spacing={2}>
-              <Grid size={6}>
-                <TextField label="Department" fullWidth select sx={inputStyles} value={editForm.department || ""} onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}>
-                  <MenuItem value="">— None —</MenuItem>
-                  {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
-                </TextField>
-              </Grid>
-              <Grid size={6}>
-                <TextField label="Location" fullWidth sx={inputStyles} value={editForm.location || ""} onChange={(e) => setEditForm({ ...editForm, location: e.target.value })} />
-              </Grid>
-            </Grid>
-            <Grid container spacing={2}>
-              <Grid size={6}>
-                <TextField label="Status" fullWidth select sx={inputStyles} value={editForm.status || "Active"} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
-                  {STATUSES.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                </TextField>
-              </Grid>
-              <Grid size={6}>
-                <TextField label="Warranty End" type="date" fullWidth sx={inputStyles} value={editForm.warrantyEnd || ""} onChange={(e) => setEditForm({ ...editForm, warrantyEnd: e.target.value })} slotProps={{ inputLabel: { shrink: true } }} />
-              </Grid>
-            </Grid>
-            <TextField label="Vendor" fullWidth sx={inputStyles} value={editForm.vendor || ""} onChange={(e) => setEditForm({ ...editForm, vendor: e.target.value })} />
-
-            {editCustomFieldConfigs.length > 0 && (
-              <Divider sx={{ my: 1.5 }}>
-                <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 700, textTransform: "uppercase" }}>
-                  Custom Specifications
-                </Typography>
-              </Divider>
-            )}
-
-            <Grid container spacing={2}>
-              {editCustomFieldConfigs.map((field) => (
-                <Grid key={field._id} size={6}>
-                  {field.type === "Select" ? (
-                    <TextField
-                      select
-                      fullWidth
-                      required={field.isRequired}
-                      label={`${field.name}${field.isRequired ? " *" : ""}`}
-                      value={editForm.customFields?.[field.name] || ""}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        customFields: { ...prev.customFields, [field.name]: e.target.value }
-                      }))}
-                      sx={inputStyles}
-                    >
-                      {field.options.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </TextField>
-                  ) : (
-                    <TextField
-                      fullWidth
-                      required={field.isRequired}
-                      type={field.type === "Number" ? "number" : field.type === "Date" ? "date" : "text"}
-                      label={`${field.name}${field.isRequired ? " *" : ""}`}
-                      value={editForm.customFields?.[field.name] || ""}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        customFields: { ...prev.customFields, [field.name]: e.target.value }
-                      }))}
-                      sx={inputStyles}
-                      slotProps={field.type === "Date" ? { inputLabel: { shrink: true } } : undefined}
-                    />
-                  )}
-                </Grid>
-              ))}
-            </Grid>
-          </Stack>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-            <Button onClick={() => setEditDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 800, px: 3 }}>Cancel</Button>
-            <Button variant="contained" disabled={saving} onClick={handleEditSave} startIcon={saving ? <CircularProgress size={18} color="inherit" /> : null}
-              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.2 }}>
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
-          </Box>
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}

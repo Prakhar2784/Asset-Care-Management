@@ -42,7 +42,7 @@ function KPICard({ icon, label, value, sub, color, trend }) {
           <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: `${color}18`, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             {icon}
           </Box>
-          <Typography variant="caption" color="text.secondary" fontWeight={700} textTransform="uppercase" letterSpacing="0.7px">
+          <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.7px' }}>
             {label}
           </Typography>
         </Box>
@@ -549,7 +549,7 @@ export default function Analytics() {
                   <Grid key={card.label} size={{ xs: 12, sm: 6, md: 4, lg: 'auto' }} sx={{ flex: 1 }}>
                     <Paper sx={{ p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
                       <Typography variant="h5" fontWeight={900} color={card.color}>{card.value}</Typography>
-                      <Typography variant="caption" color="text.secondary" fontWeight={700} textTransform="uppercase" letterSpacing="0.5px">
+                      <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         {card.label}
                       </Typography>
                     </Paper>

@@ -80,7 +80,7 @@ const getDateHistory = async (req, res) => {
       maintenanceAssetFilter = { asset: { $in: deptAssets.map(a => a._id) } };
     }
 
-    const [assets, tickets, maintenance] = await Promise.all([
+    const [assets, tickets, byServiceDate, byNextServiceDate] = await Promise.all([
       Asset.find({
         isDeleted: { $ne: true },
         procurementDate: { $gte: startOfDay, $lte: endOfDay }
@@ -92,14 +92,26 @@ const getDateHistory = async (req, res) => {
       MaintenanceLog.find({
         serviceDate: { $gte: startOfDay, $lte: endOfDay },
         ...maintenanceAssetFilter,
-      }).select('type description status cost')
-        .populate('asset', 'name department')
+      }).select('type description status cost nextServiceDate')
+        .populate('asset', 'name department'),
+      MaintenanceLog.find({
+        nextServiceDate: { $gte: startOfDay, $lte: endOfDay },
+        ...maintenanceAssetFilter,
+      }).select('type description status cost nextServiceDate')
+        .populate('asset', 'name department'),
     ]);
+
+    // Merge, de-duplicate by _id
+    const seen = new Set(byServiceDate.map(m => m._id.toString()));
+    const merged = [
+      ...byServiceDate,
+      ...byNextServiceDate.filter(m => !seen.has(m._id.toString())),
+    ];
 
     res.status(200).json({
       assets,
       tickets,
-      maintenance
+      maintenance: merged,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -120,19 +132,49 @@ const getScheduledMaintenance = async (req, res) => {
     const eligibleAssets = await Asset.find(assetFilter).select('_id');
     const assetIds = eligibleAssets.map(a => a._id);
 
-    const logs = await MaintenanceLog.find({
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Upcoming scheduled service dates (today or future, status = Scheduled)
+    const scheduledLogs = await MaintenanceLog.find({
       status: 'Scheduled',
+      serviceDate: { $gte: today },
       asset: { $in: assetIds },
     }).select('serviceDate description type asset')
       .populate('asset', 'name department');
 
-    const dates = logs.map(log => ({
-      date: log.serviceDate.toISOString().split('T')[0],
-      description: log.description,
-      type: log.type,
-      assetName: log.asset?.name,
-      department: log.asset?.department,
-    }));
+    // Future next-service-date entries from any log
+    const nextServiceLogs = await MaintenanceLog.find({
+      nextServiceDate: { $gte: today },
+      asset: { $in: assetIds },
+    }).select('nextServiceDate description type asset')
+      .populate('asset', 'name department');
+
+    const datesMap = new Map();
+
+    scheduledLogs.forEach(log => {
+      const date = log.serviceDate.toISOString().split('T')[0];
+      datesMap.set(`${date}-${log._id}`, {
+        date,
+        description: log.description,
+        type: log.type,
+        assetName: log.asset?.name,
+        department: log.asset?.department,
+      });
+    });
+
+    nextServiceLogs.forEach(log => {
+      const date = new Date(log.nextServiceDate).toISOString().split('T')[0];
+      datesMap.set(`next-${date}-${log._id}`, {
+        date,
+        description: log.description || 'Scheduled Next Service',
+        type: log.type,
+        assetName: log.asset?.name,
+        department: log.asset?.department,
+      });
+    });
+
+    const dates = Array.from(datesMap.values());
 
     res.status(200).json({ dates });
   } catch (error) {

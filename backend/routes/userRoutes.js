@@ -18,7 +18,7 @@ const { checkUserLimit } = require('../middleware/limitMiddleware');
 // Optional ?role=technician to filter by role
 router.get('/employees', protect, authorize('admin', 'super_admin', 'hod'), async (req, res) => {
   try {
-    const filter = { isActive: true };
+    const filter = { isActive: true, role: { $ne: 'super_admin' } };
     if (req.query.role) filter.role = req.query.role;
     const users = await User.find(filter)
       .select('name email phone department role')

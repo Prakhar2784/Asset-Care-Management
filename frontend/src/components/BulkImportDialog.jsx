@@ -21,29 +21,29 @@ const DARK = '#111827';
 const STEPS = ['Download Template', 'Upload File', 'Preview & Validate', 'Import'];
 
 const TEMPLATE_COLUMNS = [
-  'name', 'serialNumber', 'category', 'department',
+  'name', 'serialNumber', 'department',
   'location', 'vendor', 'modelNumber', 'purchaseCost',
-  'procurementDate', 'warrantyEnd', 'status', 'formFactor'
+  'procurementDate', 'warrantyEnd', 'status'
 ];
 
 const SAMPLE_ROWS = [
   {
-    name: 'Dell Latitude 3520', serialNumber: 'SN-DL-001', category: 'IT Asset',
+    name: 'Dell Latitude 3520', serialNumber: 'SN-DL-001',
     department: 'Engineering', location: 'Floor 2', vendor: 'Dell India',
     modelNumber: 'LAT3520', purchaseCost: 55000,
     procurementDate: '2023-01-15', warrantyEnd: '2026-01-14',
-    status: 'Active', formFactor: 'Movable'
+    status: 'Active'
   },
   {
-    name: 'HP LaserJet Pro', serialNumber: 'SN-HP-002', category: 'Electronic',
+    name: 'HP LaserJet Pro', serialNumber: 'SN-HP-002',
     department: 'Admin', location: 'Reception', vendor: 'HP India',
     modelNumber: 'M404dn', purchaseCost: 28000,
     procurementDate: '2022-06-01', warrantyEnd: '2025-06-01',
-    status: 'Active', formFactor: 'Fixed'
+    status: 'Active'
   },
 ];
 
-const REQUIRED_COLS = ['name', 'serialNumber', 'category', 'department'];
+const REQUIRED_COLS = ['name', 'serialNumber', 'department'];
 
 function downloadTemplate(customFieldConfigs = []) {
   const columns = [...TEMPLATE_COLUMNS];
@@ -64,7 +64,6 @@ function downloadTemplate(customFieldConfigs = []) {
     ['Field', 'Required', 'Notes'],
     ['name', 'Yes', 'Asset display name'],
     ['serialNumber', 'Yes', 'Must be unique per company'],
-    ['category', 'Yes', 'IT Asset / Electrical / Electronic / Furniture'],
     ['department', 'Yes', 'Department name (must match exactly)'],
     ['location', 'No', 'Physical location / room'],
     ['vendor', 'No', 'Vendor / supplier name'],
@@ -73,7 +72,6 @@ function downloadTemplate(customFieldConfigs = []) {
     ['procurementDate', 'No', 'YYYY-MM-DD format'],
     ['warrantyEnd', 'No', 'YYYY-MM-DD format'],
     ['status', 'No', 'Active (default) / In Storage / Decommissioned'],
-    ['formFactor', 'No', 'Movable (default) / Fixed'],
   ];
 
   customFieldConfigs.forEach(f => {
@@ -125,7 +123,8 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
       try {
         const wb = XLSX.read(evt.target.result, { type: 'array', cellDates: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(ws, { defval: '' });
+        const data = XLSX.utils.sheet_to_json(ws, { defval: '' })
+          .filter(row => REQUIRED_COLS.some(c => row[c]?.toString().trim()));
 
         const errors = [];
         const valid = [];
@@ -158,7 +157,6 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
       const payload = validRows.map(r => ({
         name: r.name?.toString().trim(),
         serialNumber: r.serialNumber?.toString().trim(),
-        category: r.category?.toString().trim(),
         department: r.department?.toString().trim(),
         location: r.location?.toString().trim() || '',
         vendor: r.vendor?.toString().trim() || '',
@@ -167,7 +165,6 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
         procurementDate: r.procurementDate ? String(r.procurementDate) : undefined,
         warrantyEnd: r.warrantyEnd ? String(r.warrantyEnd) : undefined,
         status: r.status?.toString().trim() || 'Active',
-        formFactor: r.formFactor?.toString().trim() || 'Movable',
       }));
 
       const { data } = await api.post('/assets/bulk-import', { rows: payload });
@@ -184,17 +181,17 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth
-      PaperProps={{ sx: { borderRadius: '16px', bgcolor: 'background.paper' } }}>
+      slotProps={{ paper: { sx: { borderRadius: '16px', bgcolor: 'background.paper' } } }}>
 
       <DialogTitle sx={{ pb: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ width: 38, height: 38, borderRadius: '10px', bgcolor: DARK, display: 'grid', placeItems: 'center' }}>
-              <CloudUploadRounded sx={{ color: ACCENT, fontSize: 20 }} />
+              <CloudUploadRounded sx={{ color: '#fff', fontSize: 20 }} />
             </Box>
             <Box>
               <Typography fontWeight={900} fontSize={18}>Bulk Asset Import</Typography>
-              <Typography variant="caption" color="text.secondary">Import up to 500 assets from an Excel / CSV file</Typography>
+              <Typography variant="caption" color="text.secondary">Import up to 1000 assets from an Excel / CSV file</Typography>
             </Box>
           </Box>
           <IconButton onClick={handleClose} size="small"><CloseRounded /></IconButton>
@@ -212,6 +209,7 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
                 '& .MuiStepLabel-label': { fontWeight: 700, fontSize: 12 },
                 '& .MuiStepIcon-root.Mui-active': { color: ACCENT },
                 '& .MuiStepIcon-root.Mui-completed': { color: ACCENT },
+                '& .MuiStepIcon-text': { fill: '#fff' },
               }}>{label}</StepLabel>
             </Step>
           ))}
@@ -219,12 +217,12 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
 
         {/* ─── STEP 0 — Download Template ─── */}
         {step === 0 && (
-          <Box textAlign="center" py={3}>
+          <Box sx={{ textAlign: 'center', py: 3 }}>
             <Box sx={{ width: 80, height: 80, borderRadius: 3, bgcolor: `${ACCENT}15`, mx: 'auto', mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <TableChartRounded sx={{ fontSize: 40, color: ACCENT }} />
             </Box>
             <Typography variant="h6" fontWeight={800} mb={1}>Start with our Excel Template</Typography>
-            <Typography color="text.secondary" mb={3} maxWidth={480} mx="auto">
+            <Typography color="text.secondary" mb={3} sx={{ maxWidth: 480, mx: 'auto' }}>
               Download the pre-formatted template with sample data and instructions. Fill it in and upload it back.
             </Typography>
             <Button
@@ -233,7 +231,7 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
               size="large"
               startIcon={<DownloadRounded />}
               onClick={() => { downloadTemplate(customFields); setStep(1); }}
-              sx={{ bgcolor: ACCENT, color: DARK, fontWeight: 900, borderRadius: '12px', px: 4, py: 1.3 }}
+              sx={{ bgcolor: ACCENT, color: '#fff', fontWeight: 900, borderRadius: '12px', px: 4, py: 1.3 }}
             >
               Download Template (.xlsx)
             </Button>
@@ -246,9 +244,15 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
         {/* ─── STEP 1 — Upload File ─── */}
         {step === 1 && (
           <Box>
-            <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" hidden onChange={handleFile} />
+            <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleFile} />
             <Paper
-              onClick={() => fileRef.current?.click()}
+              onClick={() => fileRef.current.click()}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => {
+                e.preventDefault();
+                const file = e.dataTransfer.files?.[0];
+                if (file) handleFile({ target: { files: [file], value: '' } });
+              }}
               sx={{
                 p: 6, borderRadius: 3, border: '2px dashed', borderColor: ACCENT,
                 bgcolor: `${ACCENT}08`, cursor: 'pointer', textAlign: 'center',
@@ -257,7 +261,7 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
             >
               <UploadFileRounded sx={{ fontSize: 52, color: ACCENT, mb: 2 }} />
               <Typography variant="h6" fontWeight={800} color="text.primary">Drop your file here or click to browse</Typography>
-              <Typography color="text.secondary" mt={1}>Supports .xlsx, .xls, .csv — max 500 rows</Typography>
+              <Typography color="text.secondary" mt={1}>Supports .xlsx, .xls, .csv — up to 1000 assets</Typography>
             </Paper>
             <Button variant="text" size="small" sx={{ mt: 1.5, color: 'text.secondary', fontWeight: 700 }} onClick={() => setStep(0)}>
               ← Back to template
@@ -323,7 +327,7 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
 
         {/* ─── STEP 3 — Result ─── */}
         {step === 3 && (
-          <Box textAlign="center" py={2}>
+          <Box sx={{ textAlign: 'center', py: 2 }}>
             {result?.error ? (
               <>
                 <ErrorRounded sx={{ fontSize: 60, color: '#f87171', mb: 2 }} />
@@ -382,14 +386,14 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
               onClick={handleImport}
               disabled={importing || validRows.length === 0}
               startIcon={importing ? <CircularProgress size={16} /> : <SendRounded />}
-              sx={{ bgcolor: ACCENT, color: DARK, fontWeight: 900, borderRadius: '10px', px: 3 }}
+              sx={{ bgcolor: ACCENT, color: '#fff', fontWeight: 900, borderRadius: '10px', px: 3 }}
             >
               {importing ? 'Importing...' : `Import ${validRows.length} Asset(s)`}
             </Button>
           </>
         )}
         {step === 3 && (
-          <Button variant="contained" onClick={handleClose} sx={{ bgcolor: ACCENT, color: DARK, fontWeight: 900, borderRadius: '10px', px: 3 }}>
+          <Button variant="contained" onClick={handleClose} sx={{ bgcolor: ACCENT, color: '#fff', fontWeight: 900, borderRadius: '10px', px: 3 }}>
             Done
           </Button>
         )}

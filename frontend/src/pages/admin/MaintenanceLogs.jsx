@@ -130,7 +130,10 @@ export default function MaintenanceLogs() {
     const cost = logs.reduce((s, l) => s + (Number(l.cost) || 0), 0);
     const sorted = [...logs].sort((a, b) => new Date(b.serviceDate) - new Date(a.serviceDate));
     const last = sorted[0]?.serviceDate;
-    const nextDates = logs.map(l => l.nextServiceDate).filter(Boolean).sort();
+    const today = new Date().toISOString().slice(0, 10);
+    const nextDates = logs.map(l => l.nextServiceDate).filter(Boolean)
+      .filter(d => d.slice(0, 10) >= today)
+      .sort();
     const next = nextDates[0];
     return { total, cost: fmtCurrency(cost), last: fmtDate(last), next: fmtDate(next) };
   })();
@@ -666,6 +669,8 @@ export default function MaintenanceLogs() {
                 fullWidth size="small" label="Cost (₹)" type="number" sx={inputSx}
                 value={form.cost}
                 onChange={e => setForm(f => ({ ...f, cost: e.target.value }))}
+                onKeyDown={(e) => { if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault(); }}
+                onWheel={(e) => e.target.blur()}
                 slotProps={{
                   input: {
                     startAdornment: <InputAdornment position="start">₹</InputAdornment>,
