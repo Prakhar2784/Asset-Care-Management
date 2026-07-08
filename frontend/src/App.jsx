@@ -26,7 +26,6 @@ const AuthPage = lazy(() => import("./pages/auth/AuthPage"));
 const RegisterCompany = lazy(() => import("./pages/auth/RegisterCompany"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
-const Pricing = lazy(() => import("./pages/public/Pricing"));
 const NotFound = lazy(() => import("./pages/public/NotFound"));
 
 // Admin Pages
@@ -84,7 +83,6 @@ function App() {
         <Route path="/workflow" element={<WebsiteLayout><Workflow /></WebsiteLayout>} />
         <Route path="/contact" element={<WebsiteLayout><Contact /></WebsiteLayout>} />
         <Route path="/terms" element={<WebsiteLayout><TermsAndConditions /></WebsiteLayout>} />
-        <Route path="/pricing" element={<WebsiteLayout><Pricing /></WebsiteLayout>} />
         <Route path="/login" element={<WebsiteLayout><AuthPage /></WebsiteLayout>} />
         <Route path="/register-company" element={<WebsiteLayout><RegisterCompany /></WebsiteLayout>} />
         <Route path="/forgot-password" element={<WebsiteLayout><ForgotPassword /></WebsiteLayout>} />
