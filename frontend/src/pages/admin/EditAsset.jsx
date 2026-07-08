@@ -318,18 +318,6 @@ const EditAsset = () => {
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
           <SectionLabel number="2" title="Lifecycle & Vendor Data" subtitle="Warranty period, procurement date and service partner." />
           <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField fullWidth type="date" name="procurementDate" value={formData.procurementDate}
-                onChange={handleChange} sx={inputSx} label="Procurement Date" slotProps={{ inputLabel: { shrink: true } }} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField fullWidth type="date" name="warrantyStart" value={formData.warrantyStart}
-                onChange={handleChange} sx={inputSx} label="Warranty Start" slotProps={{ inputLabel: { shrink: true } }} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField fullWidth type="date" name="warrantyEnd" value={formData.warrantyEnd}
-                onChange={handleChange} sx={inputSx} label="Warranty Expiry" slotProps={{ inputLabel: { shrink: true } }} />
-            </Grid>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField fullWidth name="servicePartnerName" value={formData.servicePartnerName}
                 onChange={handleChange} sx={inputSx} label="Authorized Service Partner" placeholder="e.g. Dell ProSupport"
@@ -367,6 +355,18 @@ const EditAsset = () => {
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
           <SectionLabel number="3" title="Purchase & Transaction Details" subtitle="Vendor purchase details, address, and GST registration." />
           <Grid container spacing={2.5}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField fullWidth type="date" name="procurementDate" value={formData.procurementDate}
+                onChange={handleChange} sx={inputSx} label="Procurement Date" slotProps={{ inputLabel: { shrink: true } }} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField fullWidth type="date" name="warrantyStart" value={formData.warrantyStart}
+                onChange={handleChange} sx={inputSx} label="Warranty Start" slotProps={{ inputLabel: { shrink: true } }} />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <TextField fullWidth type="date" name="warrantyEnd" value={formData.warrantyEnd}
+                onChange={handleChange} sx={inputSx} label="Warranty Expiry" slotProps={{ inputLabel: { shrink: true } }} />
+            </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <TextField fullWidth name="purchaseFromName" value={formData.purchaseFromName}
                 onChange={handleChange} sx={inputSx} label="Purchase From (Vendor Name)" placeholder="e.g. Reliance Retail" />
@@ -394,17 +394,13 @@ const EditAsset = () => {
 
         {/* Section 4 — Deployment */}
         <Paper sx={{ p: { xs: 3, md: 4 }, borderRadius: "20px", bgcolor: "background.paper", border: "1px solid", borderColor: "divider" }}>
-          <SectionLabel number="4" title="Deployment & Location" subtitle="Assign to a department and set the asset's physical location." />
+          <SectionLabel number="4" title="Deployment" subtitle="Assign to a department." />
           <Grid container spacing={2.5}>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField required fullWidth select name="department" value={formData.department}
                 onChange={handleChange} sx={inputSx} label="Target Department *">
                 {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
               </TextField>
-            </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
-              <TextField fullWidth name="location" value={formData.location}
-                onChange={handleChange} sx={inputSx} label="Physical Location" placeholder="e.g. Tower B, Floor 4, Desk 12" />
             </Grid>
             <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}

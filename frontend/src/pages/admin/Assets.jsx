@@ -620,9 +620,6 @@ const Assets = () => {
 
                   {/* Lifecycle */}
                   <Section title="Lifecycle & Warranty" />
-                  <Row label="Procurement Date" value={fmt(a.procurementDate)} />
-                  <Row label="Warranty Start" value={fmt(a.warrantyStart)} />
-                  <Row label="Warranty Expiry" value={fmt(a.warrantyEnd)} />
                   <Row label="Service Partner" value={a.servicePartnerName} />
                   <Row label="Contact Person" value={a.servicePartnerContact} />
                   <Row label="Support Phone" value={a.supportPhone} />
@@ -630,6 +627,9 @@ const Assets = () => {
 
                   {/* Purchase */}
                   <Section title="Purchase Details" />
+                  <Row label="Procurement Date" value={fmt(a.procurementDate)} />
+                  <Row label="Warranty Start" value={fmt(a.warrantyStart)} />
+                  <Row label="Warranty Expiry" value={fmt(a.warrantyEnd)} />
                   <Row label="Purchased From" value={a.purchaseFromName} />
                   <Row label="Vendor GST" value={a.purchaseFromGst} />
                   <Row label="Vendor Phone" value={a.purchaseFromPhone} />
@@ -639,7 +639,6 @@ const Assets = () => {
                   {/* Deployment */}
                   <Section title="Deployment" />
                   <Row label="Department" value={a.department} />
-                  <Row label="Location" value={a.location} />
                   <Row label="Status" value={a.status} />
                   {a.notes && <Row label="Notes" value={a.notes} />}
 
