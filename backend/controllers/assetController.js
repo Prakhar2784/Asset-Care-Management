@@ -166,6 +166,11 @@ const getAssetById = async (req, res) => {
   try {
     const asset = await Asset.findById(req.params.id).populate('assignedTo', 'name email department');
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
+
+    if (req.user.role === 'hod' && req.user.department && asset.department !== req.user.department) {
+      return res.status(403).json({ message: 'Not authorized to view assets outside your department.' });
+    }
+
     res.status(200).json(asset);
   } catch (error) {
     res.status(500).json({ message: error.message });

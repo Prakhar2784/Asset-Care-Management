@@ -5,10 +5,9 @@ const amcContractSchema = new mongoose.Schema({
     type: String, 
     required: true 
   }, // e.g. "AMC-1002"
-  vendor: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Vendor', 
-    required: true 
+  vendor: {
+    type: String,
+    required: true
   },
   assetsCovered: [{ 
     type: mongoose.Schema.Types.ObjectId, 

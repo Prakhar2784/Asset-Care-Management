@@ -2,9 +2,6 @@
 // Advanced Business Intelligence & Analytics API
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
-const PurchaseOrder = require('../models/PurchaseOrder');
-const PurchaseRequest = require('../models/PurchaseRequest');
-const GoodsReceivedNote = require('../models/GoodsReceivedNote');
 const User = require('../models/User');
 const MaintenanceSchedule = require('../models/MaintenanceSchedule');
 
@@ -135,72 +132,6 @@ const getAssetCostAnalysis = async (req, res) => {
   }
 };
 
-// ─── GET /api/analytics/procurement-trends ───────────────────────────────────
-// Monthly procurement spend over the last 12 months
-const getProcurementTrends = async (req, res) => {
-  try {
-    const last12Months = new Date();
-    last12Months.setMonth(last12Months.getMonth() - 11);
-    last12Months.setDate(1);
-    last12Months.setHours(0, 0, 0, 0);
-
-    const [monthlySpend, byVendor, statusBreakdown, topItems] = await Promise.all([
-      PurchaseOrder.aggregate([
-        { $match: { createdAt: { $gte: last12Months }, status: { $ne: 'Cancelled' } } },
-        {
-          $group: {
-            _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
-            totalSpend: { $sum: '$totalAmount' },
-            count: { $sum: 1 },
-          }
-        },
-        { $sort: { '_id.year': 1, '_id.month': 1 } },
-      ]),
-      PurchaseOrder.aggregate([
-        { $match: { status: { $nin: ['Cancelled', 'Draft'] } } },
-        { $lookup: { from: 'vendors', localField: 'vendor', foreignField: '_id', as: 'vendorInfo' } },
-        { $unwind: { path: '$vendorInfo', preserveNullAndEmptyArrays: true } },
-        { $group: { _id: '$vendorInfo.name', totalSpend: { $sum: '$totalAmount' }, orderCount: { $sum: 1 } } },
-        { $sort: { totalSpend: -1 } },
-        { $limit: 8 },
-      ]),
-      PurchaseRequest.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-      ]),
-      PurchaseOrder.aggregate([
-        { $match: { status: { $nin: ['Cancelled', 'Draft'] } } },
-        { $unwind: '$items' },
-        { $group: { _id: '$items.name', totalCost: { $sum: '$items.totalCost' }, totalQty: { $sum: '$items.quantity' } } },
-        { $sort: { totalCost: -1 } },
-        { $limit: 10 },
-      ]),
-    ]);
-
-    // Fill in missing months with 0
-    const filledMonths = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      const year = d.getFullYear();
-      const month = d.getMonth() + 1;
-      const found = monthlySpend.find(m => m._id.year === year && m._id.month === month);
-      filledMonths.push({
-        label: d.toLocaleString('en-IN', { month: 'short', year: '2-digit' }),
-        totalSpend: found?.totalSpend || 0,
-        count: found?.count || 0,
-      });
-    }
-
-    res.json({
-      monthlySpend: filledMonths,
-      byVendor: byVendor.map(d => ({ name: d._id || 'Unknown Vendor', totalSpend: d.totalSpend, orderCount: d.orderCount })),
-      statusBreakdown: statusBreakdown.map(d => ({ name: d._id || 'Unknown', count: d.count })),
-      topItems: topItems.map(d => ({ name: d._id || 'Unknown', totalCost: d.totalCost, totalQty: d.totalQty })),
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // ─── GET /api/analytics/ticket-trends ────────────────────────────────────────
 // Ticket resolution times, SLA analysis, volume trends
@@ -461,7 +392,6 @@ const getDepartmentScorecard = async (req, res) => {
 module.exports = {
   getOverview,
   getAssetCostAnalysis,
-  getProcurementTrends,
   getTicketTrends,
   getDepreciationSummary,
   getDepartmentScorecard,

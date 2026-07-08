@@ -73,20 +73,26 @@ const getDateHistory = async (req, res) => {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    // For HODs, filter maintenance to their department's assets only
+    // Non-admin roles: scope maintenance to their own department only
+    const globalAdminRoles = ['admin', 'super_admin', 'manager'];
     let maintenanceAssetFilter = {};
-    if (req.user.role === 'hod' && req.user.department) {
+    if (!globalAdminRoles.includes(req.user.role) && req.user.department) {
       const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
       maintenanceAssetFilter = { asset: { $in: deptAssets.map(a => a._id) } };
     }
 
+    const isGlobalAdmin = globalAdminRoles.includes(req.user.role);
+    const deptFilter = (!isGlobalAdmin && req.user.department) ? { department: req.user.department } : {};
+
     const [assets, tickets, byServiceDate, byNextServiceDate] = await Promise.all([
       Asset.find({
         isDeleted: { $ne: true },
-        procurementDate: { $gte: startOfDay, $lte: endOfDay }
+        procurementDate: { $gte: startOfDay, $lte: endOfDay },
+        ...deptFilter,
       }).select('name serialNumber category department'),
       Ticket.find({
-        createdAt: { $gte: startOfDay, $lte: endOfDay }
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+        ...(isGlobalAdmin ? {} : { raisedBy: req.user._id }),
       }).select('ticketId issue status priority')
         .populate('asset', 'name'),
       MaintenanceLog.find({
@@ -124,8 +130,9 @@ const getDateHistory = async (req, res) => {
 // HODs receive only their department's maintenance; admins receive all.
 const getScheduledMaintenance = async (req, res) => {
   try {
+    const globalAdminRoles = ['admin', 'super_admin', 'manager'];
     let assetFilter = { isDeleted: { $ne: true } };
-    if (req.user.role === 'hod' && req.user.department) {
+    if (!globalAdminRoles.includes(req.user.role) && req.user.department) {
       assetFilter.department = req.user.department;
     }
 

@@ -3,30 +3,60 @@ const Ticket = require('../models/Ticket');
 const DeviceRequest = require('../models/DeviceRequest');
 const User = require('../models/User');
 
+// Builds department-scoped base filters for HOD users.
+// Returns { assetFilter, ticketFilter, userFilter, requestFilter } ready to spread into queries.
+const buildHodScopeFilters = async (user) => {
+  if (user.role !== 'hod' || !user.department) {
+    return {
+      assetFilter: { isDeleted: { $ne: true } },
+      ticketFilter: {},
+      userFilter: {},
+      requestFilter: {},
+    };
+  }
+  const dept = user.department;
+  const [deptUsers, deptAssets] = await Promise.all([
+    User.find({ department: dept }).select('_id'),
+    Asset.find({ department: dept, isDeleted: { $ne: true } }).select('_id'),
+  ]);
+  const deptUserIds = deptUsers.map(u => u._id);
+  const deptAssetIds = deptAssets.map(a => a._id);
+  return {
+    assetFilter: { isDeleted: { $ne: true }, department: dept },
+    ticketFilter: { $or: [{ raisedBy: { $in: deptUserIds } }, { asset: { $in: deptAssetIds } }] },
+    userFilter: { department: dept },
+    requestFilter: { raisedBy: { $in: deptUserIds } },
+    deptUserIds,
+    deptAssetIds,
+  };
+};
+
 // GET /api/reports/summary
 const getSummaryReport = async (req, res) => {
   try {
+    const { assetFilter, ticketFilter, userFilter, requestFilter } = await buildHodScopeFilters(req.user);
+
     const [totalAssets, totalTickets, totalRequests, totalUsers] = await Promise.all([
-      Asset.countDocuments({ isDeleted: { $ne: true } }),
-      Ticket.countDocuments(),
-      DeviceRequest.countDocuments(),
-      User.countDocuments()
+      Asset.countDocuments(assetFilter),
+      Ticket.countDocuments(ticketFilter),
+      DeviceRequest.countDocuments(requestFilter),
+      User.countDocuments(userFilter),
     ]);
 
     const [assetsByStatus, assetsByCategory, assetsByDept, ticketsByStatus, ticketsByPriority] = await Promise.all([
-      Asset.aggregate([{ $match: { isDeleted: { $ne: true } } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Asset.aggregate([{ $match: { isDeleted: { $ne: true } } }, { $group: { _id: '$category', count: { $sum: 1 } } }]),
-      Asset.aggregate([{ $match: { isDeleted: { $ne: true } } }, { $group: { _id: '$department', count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
-      Ticket.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Ticket.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]),
+      Asset.aggregate([{ $match: assetFilter }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Asset.aggregate([{ $match: assetFilter }, { $group: { _id: '$category', count: { $sum: 1 } } }]),
+      Asset.aggregate([{ $match: assetFilter }, { $group: { _id: '$department', count: { $sum: 1 } } }, { $sort: { count: -1 } }]),
+      Ticket.aggregate([{ $match: ticketFilter }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Ticket.aggregate([{ $match: ticketFilter }, { $group: { _id: '$priority', count: { $sum: 1 } } }]),
     ]);
 
     const warrantyExpiring30 = await Asset.countDocuments({
-      isDeleted: { $ne: true },
+      ...assetFilter,
       warrantyEnd: {
         $gte: new Date(),
-        $lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      }
+        $lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      },
     });
 
     res.json({
@@ -46,7 +76,8 @@ const getSummaryReport = async (req, res) => {
 // GET /api/reports/assets — full asset list for export
 const getAssetReport = async (req, res) => {
   try {
-    const assets = await Asset.find({ isDeleted: { $ne: true } })
+    const { assetFilter } = await buildHodScopeFilters(req.user);
+    const assets = await Asset.find(assetFilter)
       .populate('assignedTo', 'name email department')
       .sort({ createdAt: -1 });
     res.json(assets);
@@ -58,7 +89,8 @@ const getAssetReport = async (req, res) => {
 // GET /api/reports/tickets — full ticket list for export
 const getTicketReport = async (req, res) => {
   try {
-    const tickets = await Ticket.find({})
+    const { ticketFilter } = await buildHodScopeFilters(req.user);
+    const tickets = await Ticket.find(ticketFilter)
       .populate('asset', 'name serialNumber department')
       .populate('raisedBy', 'name email department')
       .populate('approvedBy', 'name')
@@ -72,8 +104,9 @@ const getTicketReport = async (req, res) => {
 // GET /api/reports/lifecycle — full ticket lifecycle report for download
 const getLifecycleReport = async (req, res) => {
   try {
+    const { ticketFilter } = await buildHodScopeFilters(req.user);
     const { status, priority, from, to } = req.query;
-    const filter = {};
+    const filter = { ...ticketFilter };
     if (status && status !== 'All') filter.status = status;
     if (priority && priority !== 'All') filter.priority = priority;
     if (from || to) {

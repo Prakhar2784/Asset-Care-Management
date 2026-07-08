@@ -35,7 +35,6 @@ const EnterpriseWorkspace = () => {
   const [transfers, setTransfers] = useState([]);
   const [assets, setAssets] = useState([]);
   const [users, setUsers] = useState([]);
-  const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -55,8 +54,8 @@ const EnterpriseWorkspace = () => {
   // Form Fields
   const [whForm, setWhForm] = useState({ name: "", code: "", location: "", managerId: "" });
   const [licForm, setLicForm] = useState({ softwareName: "", publisher: "", licenseKey: "", totalSeats: 1, expiryDate: "", renewalCost: "" });
-  const [amcForm, setAmcForm] = useState({ contractNumber: "", vendorId: "", assetsCovered: [], startDate: "", endDate: "", annualCost: "" });
-  const [claimForm, setClaimForm] = useState({ assetId: "", vendorId: "", issueDescription: "" });
+  const [amcForm, setAmcForm] = useState({ contractNumber: "", vendor: "", assetsCovered: [], startDate: "", endDate: "", annualCost: "" });
+  const [claimForm, setClaimForm] = useState({ assetId: "", vendor: "", issueDescription: "" });
   const [maintForm, setMaintForm] = useState({ assetId: "", taskName: "", frequency: "Quarterly", nextDueDate: "", assignedEngineerId: "" });
   const [transferForm, setTransferForm] = useState({ assetId: "", toUserId: "" });
   const [assignLicForm, setAssignLicForm] = useState({ userId: "" });
@@ -70,7 +69,7 @@ const EnterpriseWorkspace = () => {
     setLoading(true);
     setError("");
     try {
-      const [whRes, licRes, amcRes, claimRes, maintRes, transRes, assetsRes, usersRes, vendorsRes, deptsRes] = await Promise.all([
+      const [whRes, licRes, amcRes, claimRes, maintRes, transRes, assetsRes, usersRes, deptsRes] = await Promise.all([
         api.get("/enterprise/warehouses").catch(() => ({ data: [] })),
         api.get("/enterprise/licenses").catch(() => ({ data: [] })),
         api.get("/enterprise/amc").catch(() => ({ data: [] })),
@@ -79,7 +78,6 @@ const EnterpriseWorkspace = () => {
         api.get("/enterprise/transfers").catch(() => ({ data: [] })),
         api.get("/assets").catch(() => ({ data: [] })),
         api.get("/users").catch(() => ({ data: [] })),
-        api.get("/vendors").catch(() => ({ data: [] })),
         api.get("/departments").catch(() => ({ data: [] })),
       ]);
       setWarehouses(whRes.data || []);
@@ -90,7 +88,6 @@ const EnterpriseWorkspace = () => {
       setTransfers(transRes.data || []);
       setAssets(assetsRes.data || []);
       setUsers(usersRes.data || []);
-      setVendors(vendorsRes.data || []);
       setDepartments(deptsRes.data || []);
     } catch (err) {
       console.error(err);
@@ -129,7 +126,7 @@ const EnterpriseWorkspace = () => {
     try {
       await api.post("/enterprise/amc", amcForm);
       setAmcModal(false);
-      setAmcForm({ contractNumber: "", vendorId: "", assetsCovered: [], startDate: "", endDate: "", annualCost: "" });
+      setAmcForm({ contractNumber: "", vendor: "", assetsCovered: [], startDate: "", endDate: "", annualCost: "" });
       fetchData();
     } catch (err) { setError(err.response?.data?.message || "Error creating AMC contract"); }
   };
@@ -139,7 +136,7 @@ const EnterpriseWorkspace = () => {
     try {
       await api.post("/enterprise/warranty/claims", claimForm);
       setClaimModal(false);
-      setClaimForm({ assetId: "", vendorId: "", issueDescription: "" });
+      setClaimForm({ assetId: "", vendor: "", issueDescription: "" });
       fetchData();
     } catch (err) { setError(err.response?.data?.message || "Error submitting claim"); }
   };
@@ -445,7 +442,7 @@ const EnterpriseWorkspace = () => {
                       <TableRow key={cl._id}>
                         <TableCell sx={{ fontWeight: 700 }}>{cl.claimNumber}</TableCell>
                         <TableCell>{cl.asset?.name || "Deleted Asset"}</TableCell>
-                        <TableCell>{cl.vendor?.name}</TableCell>
+                        <TableCell>{cl.vendor}</TableCell>
                         <TableCell>{cl.issueDescription}</TableCell>
                         <TableCell><StatusChip status={cl.status} /></TableCell>
                         <TableCell align="right">
@@ -492,7 +489,7 @@ const EnterpriseWorkspace = () => {
                     amcContracts.map((amc) => (
                       <TableRow key={amc._id}>
                         <TableCell sx={{ fontWeight: 700 }}>{amc.contractNumber}</TableCell>
-                        <TableCell>{amc.vendor?.name}</TableCell>
+                        <TableCell>{amc.vendor}</TableCell>
                         <TableCell>{amc.assetsCovered?.length || 0} assets</TableCell>
                         <TableCell>{new Date(amc.startDate).toLocaleDateString()} - {new Date(amc.endDate).toLocaleDateString()}</TableCell>
                         <TableCell>₹{amc.annualCost?.toLocaleString()}</TableCell>
@@ -805,14 +802,7 @@ const EnterpriseWorkspace = () => {
           <DialogContent>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1.5 }}>
               <TextField label="Contract Agreement Number" fullWidth value={amcForm.contractNumber} onChange={(e) => setAmcForm({ ...amcForm, contractNumber: e.target.value })} required />
-              <FormControl fullWidth>
-                <InputLabel>Select Service Vendor</InputLabel>
-                <Select value={amcForm.vendorId} label="Select Service Vendor" onChange={(e) => setAmcForm({ ...amcForm, vendorId: e.target.value })} required>
-                  {vendors.map(v => (
-                    <MenuItem key={v._id} value={v._id}>{v.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField label="Service Vendor" fullWidth value={amcForm.vendor} onChange={(e) => setAmcForm({ ...amcForm, vendor: e.target.value })} required />
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <TextField label="Start Date" type="date" InputLabelProps={{ shrink: true }} fullWidth value={amcForm.startDate} onChange={(e) => setAmcForm({ ...amcForm, startDate: e.target.value })} required />
@@ -848,14 +838,7 @@ const EnterpriseWorkspace = () => {
                   ))}
                 </Select>
               </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Warranty Vendor</InputLabel>
-                <Select value={claimForm.vendorId} label="Warranty Vendor" onChange={(e) => setClaimForm({ ...claimForm, vendorId: e.target.value })} required>
-                  {vendors.map(v => (
-                    <MenuItem key={v._id} value={v._id}>{v.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <TextField label="Warranty Vendor" fullWidth value={claimForm.vendor} onChange={(e) => setClaimForm({ ...claimForm, vendor: e.target.value })} required />
               <TextField label="Hardware Issue Description" multiline rows={3} fullWidth value={claimForm.issueDescription} onChange={(e) => setClaimForm({ ...claimForm, issueDescription: e.target.value })} required />
             </Box>
           </DialogContent>

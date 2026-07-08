@@ -103,7 +103,6 @@ export default function Analytics() {
 
   const [overview, setOverview] = useState(null);
   const [assetCost, setAssetCost] = useState(null);
-  const [procurement, setProcurement] = useState(null);
   const [ticketTrends, setTicketTrends] = useState(null);
   const [depreciation, setDepreciation] = useState(null);
   const [deptScorecard, setDeptScorecard] = useState(null);
@@ -112,17 +111,15 @@ export default function Analytics() {
     try {
       setLoading(true);
       setError('');
-      const [ovRes, acRes, prRes, ttRes, dpRes, dsRes] = await Promise.all([
+      const [ovRes, acRes, ttRes, dpRes, dsRes] = await Promise.all([
         api.get('/analytics/overview'),
         api.get('/analytics/asset-cost'),
-        api.get('/analytics/procurement-trends'),
         api.get('/analytics/ticket-trends'),
         api.get(`/analytics/depreciation?method=${dMethod}&usefulLifeYears=${dLife}`),
         api.get('/analytics/department-scorecard'),
       ]);
       setOverview(ovRes.data);
       setAssetCost(acRes.data);
-      setProcurement(prRes.data);
       setTicketTrends(ttRes.data);
       setDepreciation(dpRes.data);
       setDeptScorecard(dsRes.data);
@@ -171,14 +168,7 @@ export default function Analytics() {
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Department Scorecard');
       }
 
-      if (procurement?.byVendor) {
-        const rows = procurement.byVendor.map(v => ({
-          'Vendor': v.name,
-          'Total Spend': v.totalSpend,
-          'Order Count': v.orderCount,
-        }));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Vendor Spend');
-      }
+
 
       XLSX.writeFile(wb, `AssetCare_Analytics_${Date.now()}.xlsx`);
     } catch {
@@ -242,7 +232,6 @@ export default function Analytics() {
         '& .MuiTabs-indicator': { bgcolor: ACCENT, height: 3, borderRadius: '2px 2px 0 0' }
       }}>
         <Tab id="tab-assets" label="Asset Portfolio" />
-        <Tab id="tab-procurement" label="Procurement" />
         <Tab id="tab-tickets" label="Tickets & SLA" />
         <Tab id="tab-depreciation" label="Depreciation" />
         <Tab id="tab-departments" label="Dept. Scorecard" />
@@ -342,86 +331,9 @@ export default function Analytics() {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {/* TAB 1 — Procurement */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* TAB 1 — Tickets & SLA */}
+      {/* ══════════════════════════════════════════════════════════════════════ */}
       {tab === 1 && (
-        <Box>
-          {/* Monthly Spend Area Chart */}
-          <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
-            <SectionHeader icon={<ShoppingCartRounded sx={{ fontSize: 18 }} />} title="Monthly Procurement Spend" sub="Last 12 months" />
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={procurement?.monthlySpend || []}>
-                <defs>
-                  <linearGradient id="spendGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={ACCENT} stopOpacity={0.25} />
-                    <stop offset="95%" stopColor={ACCENT} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="label" fontSize={11} />
-                <YAxis tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} fontSize={11} />
-                <RTooltip content={<CustomTooltip currency />} />
-                <Area type="monotone" dataKey="totalSpend" name="Total Spend" stroke={ACCENT} fill="url(#spendGrad)" strokeWidth={2.5} dot={false} activeDot={{ r: 5, fill: ACCENT }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </Paper>
-
-          <Grid container spacing={3}>
-            {/* Vendor Spend */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <SectionHeader icon={<AccountBalanceWalletRounded sx={{ fontSize: 18 }} />} title="Spend by Vendor" sub="Top 8 vendors" />
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={procurement?.byVendor || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="name" fontSize={10} tick={{ angle: -20, textAnchor: 'end' }} height={50} />
-                    <YAxis tickFormatter={v => `₹${(v / 1000).toFixed(0)}K`} fontSize={11} />
-                    <RTooltip content={<CustomTooltip currency />} />
-                    <Bar dataKey="totalSpend" name="Total Spend" radius={[4, 4, 0, 0]}>
-                      {procurement?.byVendor?.map((_, i) => <Cell key={i} fill={PALETTE[i % PALETTE.length]} />)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-
-            {/* Top Items */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
-                <SectionHeader icon={<TrendingUpRounded sx={{ fontSize: 18 }} />} title="Top Procured Items" sub="By total cost" />
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'action.hover' }}>
-                        {['Item', 'Qty', 'Total Cost'].map(h => (
-                          <TableCell key={h} sx={{ fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'text.secondary', py: 1.2 }}>{h}</TableCell>
-                        ))}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {procurement?.topItems?.map((item, i) => (
-                        <TableRow key={i} hover>
-                          <TableCell>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: PALETTE[i % PALETTE.length], flexShrink: 0 }} />
-                              <Typography fontSize={13} fontWeight={600}>{item.name}</Typography>
-                            </Box>
-                          </TableCell>
-                          <TableCell><Typography fontSize={12}>{fmt(item.totalQty)}</Typography></TableCell>
-                          <TableCell><Typography fontWeight={700} fontSize={13} sx={{ color: ACCENT }}>{fmtCurr(item.totalCost)}</Typography></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Box>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* TAB 2 — Tickets & SLA */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {tab === 2 && (
         <Box>
           {/* Monthly Volume */}
           <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
@@ -514,7 +426,7 @@ export default function Analytics() {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {/* TAB 3 — Depreciation */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
-      {tab === 3 && (
+      {tab === 2 && (
         <Box>
           {/* Controls */}
           <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
@@ -631,7 +543,7 @@ export default function Analytics() {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {/* TAB 4 — Department Scorecard */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
-      {tab === 4 && (
+      {tab === 3 && (
         <Box>
           <Paper sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
             <Box sx={{ p: 3, pb: 2 }}>

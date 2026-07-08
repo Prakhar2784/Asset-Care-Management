@@ -47,7 +47,6 @@ const authLimiter = rateLimit({
 app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
 app.use("/api/assets", require("./routes/assetRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
-app.use("/api/procurement", require("./routes/procurementRoutes"));
 app.use("/api/device-requests", require("./routes/deviceRequestRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/departments", require("./routes/departmentRoutes"));
@@ -62,10 +61,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/api/super-admin", require("./routes/superAdminRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
-app.use("/api/sla", require("./routes/slaRoutes"));
 app.use("/api/custom-fields", require("./routes/customFieldRoutes"));
-app.use("/api/network", require("./routes/networkRoutes"));
-app.use("/api/ocr",          require("./routes/ocrRoutes"));
 app.use("/api/asset-loans", require("./routes/assetLoanRoutes"));
 app.use("/api/maintenance", require("./routes/maintenanceRoutes"));
 app.use("/api/invoices",    require("./routes/invoiceRoutes"));

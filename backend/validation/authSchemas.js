@@ -62,7 +62,7 @@ const slug = z.string().trim().toLowerCase()
 const loginSchema = z.object({
   email,
   password: loginPassword,
-  role: z.enum(['admin', 'employee']).optional(),
+  role: z.enum(['admin', 'employee', 'hod', 'manager', 'technician', 'super_admin']).optional(),
   captchaToken: z.string().max(2048).optional(),
 });
 

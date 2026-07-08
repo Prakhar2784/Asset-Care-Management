@@ -165,14 +165,14 @@ const revokeLicenseSeat = async (req, res) => {
 // ==========================================
 const createAMCContract = async (req, res) => {
   try {
-    const { contractNumber, vendorId, assetsCovered, startDate, endDate, annualCost } = req.body;
-    if (!contractNumber || !vendorId || !startDate || !endDate) {
+    const { contractNumber, vendor, assetsCovered, startDate, endDate, annualCost } = req.body;
+    if (!contractNumber || !vendor || !startDate || !endDate) {
       return res.status(400).json({ message: 'Contract Number, Vendor, Start Date, and End Date are required' });
     }
 
     const contract = await AMCContract.create({
       contractNumber,
-      vendor: vendorId,
+      vendor,
       assetsCovered: assetsCovered || [],
       startDate,
       endDate,
@@ -198,7 +198,6 @@ const createAMCContract = async (req, res) => {
 const getAMCContracts = async (req, res) => {
   try {
     const contracts = await AMCContract.find({})
-      .populate('vendor', 'name contactPerson phone email')
       .populate('assetsCovered', 'name serialNumber category');
     res.status(200).json(contracts);
   } catch (error) {
@@ -208,8 +207,8 @@ const getAMCContracts = async (req, res) => {
 
 const createWarrantyClaim = async (req, res) => {
   try {
-    const { assetId, vendorId, issueDescription } = req.body;
-    if (!assetId || !vendorId || !issueDescription) {
+    const { assetId, vendor, issueDescription } = req.body;
+    if (!assetId || !vendor || !issueDescription) {
       return res.status(400).json({ message: 'Asset, Vendor, and Issue Description are required' });
     }
 
@@ -225,7 +224,7 @@ const createWarrantyClaim = async (req, res) => {
     const claim = await WarrantyClaim.create({
       claimNumber,
       asset: assetId,
-      vendor: vendorId,
+      vendor,
       issueDescription,
       tenantId: req.tenantId
     });
@@ -244,7 +243,6 @@ const getWarrantyClaims = async (req, res) => {
   try {
     const claims = await WarrantyClaim.find({})
       .populate('asset', 'name serialNumber category')
-      .populate('vendor', 'name contactPerson phone email')
       .sort({ createdAt: -1 });
     res.status(200).json(claims);
   } catch (error) {

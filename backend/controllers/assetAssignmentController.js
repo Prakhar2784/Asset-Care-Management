@@ -6,7 +6,24 @@ const User = require("../models/User");
 
 const getAssignments = async (req, res) => {
   try {
-    const assignments = await AssetAssignment.find({})
+    // HOD: scope to their department's assets and employees only
+    let baseFilter = {};
+    if (req.user.role === 'hod' && req.user.department) {
+      const [deptAssets, deptUsers] = await Promise.all([
+        Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id'),
+        User.find({ department: req.user.department }).select('email'),
+      ]);
+      const deptAssetIds = deptAssets.map(a => a._id);
+      const deptEmails = deptUsers.map(u => u.email.toLowerCase());
+      baseFilter = {
+        $or: [
+          { asset: { $in: deptAssetIds } },
+          { employeeEmail: { $in: deptEmails } },
+        ],
+      };
+    }
+
+    const assignments = await AssetAssignment.find(baseFilter)
       .populate("department", "name code")
       .populate("asset", "assetId name category serialNumber assignedDepartment")
       .sort({ createdAt: -1 });

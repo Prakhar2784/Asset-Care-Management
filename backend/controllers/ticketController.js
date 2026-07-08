@@ -354,8 +354,17 @@ const updateTicketPriority = async (req, res) => {
   try {
     const { priority } = req.body;
 
-    const ticket = await Ticket.findById(req.params.id);
+    const ticket = await Ticket.findById(req.params.id)
+      .populate('raisedBy', 'department')
+      .populate('asset', 'department');
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+
+    if (req.user.role === 'hod' && req.user.department) {
+      const ticketDept = ticket.raisedBy?.department || ticket.asset?.department;
+      if (ticketDept !== req.user.department) {
+        return res.status(403).json({ message: 'Not authorized to modify tickets outside your department.' });
+      }
+    }
 
     ticket.priority = priority;
     const updated = await ticket.save();
@@ -436,11 +445,13 @@ const confirmResolution = async (req, res) => {
 // @access  Admin
 const deleteTicket = async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id);
+    const ticket = await Ticket.findById(req.params.id)
+      .populate('raisedBy', 'department')
+      .populate('asset', 'department');
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
     const adminTier = ['admin', 'super_admin', 'hod', 'manager'];
-    const isOwner = ticket.raisedBy?.toString() === req.user._id.toString();
+    const isOwner = ticket.raisedBy?._id?.toString() === req.user._id.toString();
 
     if (!adminTier.includes(req.user.role) && !isOwner) {
       return res.status(403).json({ message: 'Not authorized to delete this ticket' });
@@ -448,6 +459,13 @@ const deleteTicket = async (req, res) => {
 
     if (isOwner && !adminTier.includes(req.user.role) && ticket.status !== 'Pending Approval') {
       return res.status(400).json({ message: 'Only tickets pending approval can be withdrawn' });
+    }
+
+    if (req.user.role === 'hod' && req.user.department) {
+      const ticketDept = ticket.raisedBy?.department || ticket.asset?.department;
+      if (ticketDept !== req.user.department) {
+        return res.status(403).json({ message: 'Not authorized to delete tickets outside your department.' });
+      }
     }
 
     await ticket.deleteOne();

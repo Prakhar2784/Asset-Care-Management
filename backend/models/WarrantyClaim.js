@@ -10,10 +10,9 @@ const warrantyClaimSchema = new mongoose.Schema({
     ref: 'Asset', 
     required: true 
   },
-  vendor: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Vendor', 
-    required: true 
+  vendor: {
+    type: String,
+    required: true
   },
   issueDescription: { 
     type: String, 

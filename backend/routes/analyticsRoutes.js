@@ -5,7 +5,6 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 const {
   getOverview,
   getAssetCostAnalysis,
-  getProcurementTrends,
   getTicketTrends,
   getDepreciationSummary,
   getDepartmentScorecard,
@@ -16,7 +15,6 @@ router.use(protect, authorize('admin', 'hod'));
 
 router.get('/overview', getOverview);
 router.get('/asset-cost', getAssetCostAnalysis);
-router.get('/procurement-trends', getProcurementTrends);
 router.get('/ticket-trends', getTicketTrends);
 router.get('/depreciation', getDepreciationSummary);
 router.get('/department-scorecard', getDepartmentScorecard);

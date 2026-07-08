@@ -4,9 +4,22 @@ const AssetLoan = require('../models/AssetLoan');
 const Asset     = require('../models/Asset');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
+// Helper: for HOD, verify the asset belongs to their department
+const assertHodAssetAccess = async (req, assetId) => {
+  if (req.user.role !== 'hod' || !req.user.department) return null;
+  const asset = await Asset.findById(assetId).select('department');
+  if (!asset || asset.department !== req.user.department) {
+    return { status: 403, message: 'Not authorized to manage assets outside your department.' };
+  }
+  return null;
+};
+
 // POST /api/asset-loans/:assetId/checkout
 router.post('/:assetId/checkout', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
+    const denied = await assertHodAssetAccess(req, req.params.assetId);
+    if (denied) return res.status(denied.status).json({ message: denied.message });
+
     const { borrowerId, borrowerName, borrowerEmail, purpose, expectedReturnDate, notes } = req.body;
     if (!expectedReturnDate) return res.status(400).json({ message: 'Expected return date is required.' });
 
@@ -41,6 +54,9 @@ router.post('/:assetId/checkout', protect, authorize('admin', 'hod'), async (req
 // POST /api/asset-loans/:assetId/checkin
 router.post('/:assetId/checkin', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
+    const denied = await assertHodAssetAccess(req, req.params.assetId);
+    if (denied) return res.status(denied.status).json({ message: denied.message });
+
     const { notes } = req.body;
     const loan = await AssetLoan.findOne({ asset: req.params.assetId, status: 'Active' });
     if (!loan) return res.status(404).json({ message: 'No active loan found for this asset.' });
@@ -62,6 +78,9 @@ router.post('/:assetId/checkin', protect, authorize('admin', 'hod'), async (req,
 // GET /api/asset-loans/:assetId — loan history
 router.get('/:assetId', protect, authorize('admin', 'hod'), async (req, res) => {
   try {
+    const denied = await assertHodAssetAccess(req, req.params.assetId);
+    if (denied) return res.status(denied.status).json({ message: denied.message });
+
     const loans = await AssetLoan.find({ asset: req.params.assetId })
       .populate('borrower', 'name email department')
       .populate('checkedOutBy', 'name')
@@ -79,6 +98,10 @@ router.get('/', protect, authorize('admin', 'hod'), async (req, res) => {
     const { status } = req.query;
     const filter = {};
     if (status) filter.status = status;
+    if (req.user.role === 'hod' && req.user.department) {
+      const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
+      filter.asset = { $in: deptAssets.map(a => a._id) };
+    }
     const loans = await AssetLoan.find(filter)
       .populate('asset', 'name serialNumber category')
       .populate('borrower', 'name email department')

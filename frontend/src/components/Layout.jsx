@@ -47,6 +47,32 @@ const adminMenu = [
   { text: "Settings",         path: "/settings",           icon: <SettingsRounded /> },
 ];
 
+const hodMenu = [
+  { section: "Overview" },
+  { text: "Dashboard",        path: "/admin/dashboard",        icon: <DashboardRounded /> },
+
+  { section: "My Department" },
+  { text: "Asset Registry",   path: "/admin/assets",           icon: <Inventory2Rounded /> },
+  { text: "Assigned Devices", path: "/admin/assignments",      icon: <AssignmentIndRounded /> },
+  { text: "Maintenance",      path: "/admin/maintenance",      icon: <BuildRounded /> },
+  { text: "Service Centers",  path: "/admin/service-centers",  icon: <StorefrontRounded /> },
+
+  { section: "Operations" },
+  { text: "Tickets",          path: "/tickets",                icon: <ConfirmationNumberRounded /> },
+  { text: "Approvals",        path: "/admin/approvals",        icon: <ApprovalRounded /> },
+
+  { section: "Organization" },
+  { text: "Departments",      path: "/admin/departments",      icon: <ApartmentRounded /> },
+  { text: "Enterprise Hub",   path: "/admin/enterprise",       icon: <BusinessRounded />, feature: "enterpriseHub" },
+
+  { section: "Insights" },
+  { text: "Analytics",        path: "/admin/analytics",        icon: <TrendingUpRounded /> },
+  { text: "Reports",          path: "/admin/reports",          icon: <AssessmentRounded /> },
+
+  { section: "Account" },
+  { text: "Settings",         path: "/settings",               icon: <SettingsRounded /> },
+];
+
 const employeeMenu = [
   { text: "My Portal",    path: "/employee/portal",  icon: <DashboardRounded /> },
   { text: "My Tickets",   path: "/tickets",           icon: <ConfirmationNumberRounded /> },
@@ -99,9 +125,10 @@ const Sidebar = ({ onClose }) => {
   const employeeHasAdminPerms = !isAdminTier &&
     customPerms.some(p => p.allowed && !["View Dashboard", "Raise Tickets"].includes(p.feature));
 
-  const rawMenu = currentUser?.role === "super_admin" ? superAdminMenu
-    : currentUser?.role === "technician" ? technicianMenu
-    : isAdminTier || employeeHasAdminPerms ? adminMenu
+  const rawMenu = currentUser?.role === "super_admin"  ? superAdminMenu
+    : currentUser?.role === "technician"               ? technicianMenu
+    : currentUser?.role === "hod"                      ? hodMenu
+    : isAdminTier || employeeHasAdminPerms             ? adminMenu
     : employeeMenu;
 
   const tenantFeatures = currentUser?.features || {};
@@ -116,9 +143,11 @@ const Sidebar = ({ onClose }) => {
   const userName     = currentUser?.name || "User";
   const userInitials = userName.substring(0, 2).toUpperCase();
 
-  const brandLabel = currentUser?.role === "super_admin"            ? "Platform Console"
-    : currentUser?.role === "technician"                            ? "Technician Portal"
-    : adminRoles.includes(currentUser?.role)                        ? "Admin Panel"
+  const brandLabel = currentUser?.role === "super_admin" ? "Platform Console"
+    : currentUser?.role === "technician"                ? "Technician Portal"
+    : currentUser?.role === "hod"                       ? "HOD Panel"
+    : currentUser?.role === "manager"                   ? "Manager Panel"
+    : currentUser?.role === "admin"                     ? "Admin Panel"
     : "Employee Portal";
 
   const handleNav = (path) => { navigate(path); if (onClose) onClose(); };

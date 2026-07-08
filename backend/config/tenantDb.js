@@ -42,7 +42,6 @@ const getTenantConnection = (tenantId) => {
   connection.model('Asset', require('../models/Asset').schema);
   connection.model('Ticket', require('../models/Ticket').schema);
   connection.model('Department', require('../models/Department').schema);
-  connection.model('Vendor', require('../models/Vendor').schema);
   connection.model('DeviceRequest', require('../models/DeviceRequest').schema);
   connection.model('AssetAssignment', require('../models/AssetAssignment').schema);
   connection.model('Notification', require('../models/Notification').schema);
@@ -57,11 +56,6 @@ const getTenantConnection = (tenantId) => {
   connection.model('MaintenanceSchedule', require('../models/MaintenanceSchedule').schema);
   connection.model('TransferRequest', require('../models/TransferRequest').schema);
   
-  // Procurement models
-  connection.model('PurchaseRequest', require('../models/PurchaseRequest').schema);
-  connection.model('PurchaseOrder', require('../models/PurchaseOrder').schema);
-  connection.model('GoodsReceivedNote', require('../models/GoodsReceivedNote').schema);
-
   // Approval Workflow models
   connection.model('ApprovalWorkflow', require('../models/ApprovalWorkflow').schema);
   connection.model('ApprovalTracking', require('../models/ApprovalTracking').schema);
@@ -69,9 +63,6 @@ const getTenantConnection = (tenantId) => {
   // CMDB Custom Fields model
   connection.model('CustomField', require('../models/CustomField').schema);
 
-  // IT Network Discovery models
-  connection.model('NetworkScan', require('../models/NetworkScan').schema);
-  connection.model('DiscoveredDevice', require('../models/DiscoveredDevice').schema);
   connection.model('ServiceCenter', require('../models/ServiceCenter').schema);
 
   tenantConnections[tenantId] = connection;

@@ -546,6 +546,17 @@ const AuthPage = () => {
               <>
                 {role !== "admin" ? (
                   <>
+                    <div style={{ textAlign: "center", marginBottom: "16px" }}>
+                      <span style={{ color: "var(--text-muted)", fontSize: "13px", fontWeight: 600 }}>System Administrator? </span>
+                      <button
+                        type="button"
+                        className="auth-link"
+                        style={{ fontSize: "13px" }}
+                        onClick={() => handleRoleChange("admin")}
+                      >
+                        Sign in here →
+                      </button>
+                    </div>
                     <div className="role-toggle">
                       <button
                         type="button"
@@ -560,17 +571,6 @@ const AuthPage = () => {
                         onClick={() => handleRoleChange("hod")}
                       >
                         <BusinessRoundedIcon fontSize="small" /> Department Access
-                      </button>
-                    </div>
-                    <div style={{ textAlign: "center", marginBottom: "20px", marginTop: "-16px" }}>
-                      <span style={{ color: "var(--text-muted)", fontSize: "13px", fontWeight: 600 }}>System Administrator? </span>
-                      <button
-                        type="button"
-                        className="auth-link"
-                        style={{ fontSize: "13px" }}
-                        onClick={() => handleRoleChange("admin")}
-                      >
-                        Sign in here →
                       </button>
                     </div>
                   </>
