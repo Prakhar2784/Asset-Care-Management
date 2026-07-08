@@ -159,6 +159,7 @@ const loginUser = async (req, res) => {
       onboardingDone: user.onboardingDone,
       avatar: user.avatar || null,
       phone: user.phone || null,
+      isActive: user.isActive,
       plan: tenant?.plan || 'Basic',
       features: tenant?.features || {},
       token: generateToken(user._id, user.tenantId)
@@ -403,6 +404,12 @@ const registerCompany = async (req, res) => {
         department: adminUser.department,
         tenantId: adminUser.tenantId,
         onboardingDone: adminUser.onboardingDone,
+        avatar: null,
+        phone: adminUser.phone || null,
+        isActive: true,
+        customPermissions: [],
+        plan: tenant.plan || 'Basic',
+        features: tenant.features || {},
         token: generateToken(adminUser._id, tenant.slug)
       }
     });

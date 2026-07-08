@@ -270,6 +270,11 @@ router.post('/invite', protect, authorize('admin', 'super_admin'), checkUserLimi
 router.post('/:id/avatar', protect, avatarUpload, async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
+    const isSelf = req.user._id.toString() === req.params.id;
+    const isPrivileged = ['admin', 'super_admin'].includes(req.user.role);
+    if (!isSelf && !isPrivileged) {
+      return res.status(403).json({ message: 'Not authorized to update this avatar.' });
+    }
     const avatarUrl = `/uploads/avatars/${req.file.filename}`;
     const user = await User.findByIdAndUpdate(req.params.id, { avatar: avatarUrl }, { new: true })
       .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
