@@ -45,6 +45,7 @@ const InvoiceManagement = lazy(() => import("./pages/admin/InvoiceManagement"));
 const ApiKeyManagement = lazy(() => import("./pages/admin/ApiKeyManagement"));
 const MaintenanceLogs = lazy(() => import("./pages/admin/MaintenanceLogs"));
 const ServiceCenters = lazy(() => import("./pages/admin/ServiceCenters"));
+const DepartmentTeam = lazy(() => import("./pages/admin/DepartmentTeam"));
 const SuperAdminPanel = lazy(() => import("./pages/superadmin/SuperAdminPanel"));
 
 // Employee, Technician & Shared Pages
@@ -119,6 +120,7 @@ function App() {
               <Route path="/admin/apikeys" element={<ApiKeyManagement />} />
               <Route path="/admin/maintenance" element={<MaintenanceLogs />} />
               <Route path="/admin/service-centers" element={<ServiceCenters />} />
+              <Route path="/admin/my-team" element={<DepartmentTeam />} />
             </Route>
 
             {/* SUPER ADMIN ONLY - Platform console */}

@@ -10,8 +10,8 @@ const {
   getDepartmentScorecard,
 } = require('../controllers/analyticsController');
 
-// All analytics routes require auth + admin or hod role
-router.use(protect, authorize('admin', 'hod'));
+// All analytics routes require auth + admin role
+router.use(protect, authorize('admin'));
 
 router.get('/overview', getOverview);
 router.get('/asset-cost', getAssetCostAnalysis);

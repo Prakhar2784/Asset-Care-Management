@@ -1095,19 +1095,22 @@ export default function Settings() {
   const { currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isAdmin = currentUser?.role === 'admin';
+  const isHod = currentUser?.role === 'hod';
   const [searchParams] = useSearchParams();
-  // ?tab=org always maps to index 1 (Org Profile) for non-super_admin users
-  const orgTabIndex = !isSuperAdmin ? 1 : -1;
+  // ?tab=org maps to index 1 only for roles that have the Org Profile tab
+  const orgTabIndex = !isSuperAdmin && !isHod ? 1 : -1;
   const [tab, setTab] = useState(
     searchParams.get('tab') === 'org' && orgTabIndex !== -1 ? orgTabIndex : 0
   );
 
   const tabs = [
     { label: 'Profile',              icon: <PersonRounded fontSize="small" /> },
-    ...(!isSuperAdmin ? [
+    ...(!isSuperAdmin && !isHod ? [
       { label: 'Organisation Profile', icon: <BusinessRounded fontSize="small" /> },
     ] : []),
-    { label: 'Appearance',           icon: <PaletteRounded fontSize="small" /> },
+    ...(!isHod ? [
+      { label: 'Appearance',         icon: <PaletteRounded fontSize="small" /> },
+    ] : []),
     ...(isAdmin ? [
       { label: 'Reports',            icon: <AssessmentRounded fontSize="small" /> },
       { label: 'My Data',            icon: <DownloadRounded fontSize="small" /> },
@@ -1143,10 +1146,10 @@ export default function Settings() {
 
         <Box sx={{ p: { xs: 2.5, md: 4 } }}>
           <TabPanel value={tab} index={0}><ProfileTab /></TabPanel>
-          {!isSuperAdmin && <TabPanel value={tab} index={1}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>}
-          <TabPanel value={tab} index={!isSuperAdmin ? 2 : 1}><AppearanceTab /></TabPanel>
+          {!isSuperAdmin && !isHod && <TabPanel value={tab} index={1}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>}
+          {!isHod && <TabPanel value={tab} index={!isSuperAdmin ? 2 : 1}><AppearanceTab /></TabPanel>}
           {isAdmin && <TabPanel value={tab} index={3}><ReportsTab /></TabPanel>}
-          <TabPanel value={tab} index={isAdmin ? 4 : (!isSuperAdmin ? 3 : 2)}><DataTab currentUser={currentUser} /></TabPanel>
+          <TabPanel value={tab} index={isAdmin ? 4 : isHod ? 1 : (!isSuperAdmin ? 3 : 2)}><DataTab currentUser={currentUser} /></TabPanel>
         </Box>
       </Paper>
     </Box>

@@ -52,6 +52,7 @@ const hodMenu = [
   { text: "Dashboard",        path: "/admin/dashboard",        icon: <DashboardRounded /> },
 
   { section: "My Department" },
+  { text: "My Team",          path: "/admin/my-team",          icon: <PeopleRounded /> },
   { text: "Asset Registry",   path: "/admin/assets",           icon: <Inventory2Rounded /> },
   { text: "Assigned Devices", path: "/admin/assignments",      icon: <AssignmentIndRounded /> },
   { text: "Maintenance",      path: "/admin/maintenance",      icon: <BuildRounded /> },
@@ -60,14 +61,6 @@ const hodMenu = [
   { section: "Operations" },
   { text: "Tickets",          path: "/tickets",                icon: <ConfirmationNumberRounded /> },
   { text: "Approvals",        path: "/admin/approvals",        icon: <ApprovalRounded /> },
-
-  { section: "Organization" },
-  { text: "Departments",      path: "/admin/departments",      icon: <ApartmentRounded /> },
-  { text: "Enterprise Hub",   path: "/admin/enterprise",       icon: <BusinessRounded />, feature: "enterpriseHub" },
-
-  { section: "Insights" },
-  { text: "Analytics",        path: "/admin/analytics",        icon: <TrendingUpRounded /> },
-  { text: "Reports",          path: "/admin/reports",          icon: <AssessmentRounded /> },
 
   { section: "Account" },
   { text: "Settings",         path: "/settings",               icon: <SettingsRounded /> },
