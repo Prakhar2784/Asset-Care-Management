@@ -44,7 +44,7 @@ const adminMenu = [
   { section: "Admin" },
   { text: "Reports",          path: "/admin/reports",      icon: <AssessmentRounded />,  perm: "View Reports" },
   { text: "Users",            path: "/admin/users",        icon: <PeopleRounded />,      perm: "Manage Users" },
-  { text: "Settings",         path: "/settings",           icon: <SettingsRounded />,    perm: "Settings & Config" },
+  { text: "Settings",         path: "/settings",           icon: <SettingsRounded /> },
 ];
 
 const employeeMenu = [
