@@ -200,50 +200,7 @@ function ProfileTab() {
   );
 }
 
-// ─── Appearance Tab ────────────────────────────────────────────────────────────
-function AppearanceTab() {
-  const { mode, toggleMode, isDark } = useAppTheme();
-  return (
-    <Grid container spacing={4}>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Theme</Typography>
-          <Typography fontSize={14} color="text.secondary" mb={3}>
-            Choose between light and dark mode for the application interface.
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            {['light', 'dark'].map(m => {
-              const isActive = mode === m;
-              return (
-                <Box
-                  key={m}
-                  onClick={!isActive ? toggleMode : undefined}
-                  sx={{
-                    flex: 1, border: '2px solid', borderRadius: 3, p: 2.5,
-                    cursor: !isActive ? 'pointer' : 'default',
-                    borderColor: isActive ? '#FBBF24' : 'divider',
-                    bgcolor: isActive ? 'rgba(251,191,36,0.08)' : 'transparent',
-                    textAlign: 'center', transition: 'all 0.2s',
-                    '&:hover': !isActive ? { borderColor: 'rgba(251,191,36,0.5)' } : {}
-                  }}
-                >
-                  {m === 'light'
-                    ? <LightModeRounded sx={{ fontSize: 32, color: isActive ? '#FBBF24' : 'text.disabled' }} />
-                    : <DarkModeRounded sx={{ fontSize: 32, color: isActive ? '#FBBF24' : 'text.disabled' }} />}
-                  <Typography fontWeight={700} fontSize={14} sx={{ color: isActive ? 'text.primary' : undefined, mt: 1 }}
-                    color={!isActive ? 'text.secondary' : undefined}>
-                    {m === 'light' ? 'Light Mode' : 'Dark Mode'}
-                  </Typography>
-                  {isActive && <Chip label="Active" size="small" sx={{ mt: 1, bgcolor: "#FBBF24", color: '#111827', fontWeight: 700, height: 20, fontSize: 11 }} />}
-                </Box>
-              );
-            })}
-          </Box>
-        </Paper>
-      </Grid>
-    </Grid>
-  );
-}
+
 
 // ─── Company Settings Tab (admin only) ──────────────────────────────────────────
 const INDUSTRIES = ['Technology', 'Manufacturing', 'Healthcare', 'Education', 'Finance', 'Retail', 'Construction', 'Logistics', 'Hospitality', 'Other'];
@@ -1104,14 +1061,23 @@ export default function Settings() {
   );
 
   const tabs = [
-    { label: 'Profile',              icon: <PersonRounded fontSize="small" /> },
+    { 
+      label: 'Profile', 
+      icon: <PersonRounded fontSize="small" />,
+      panel: <ProfileTab currentUser={currentUser} />
+    },
     ...(!isSuperAdmin && !isHod ? [
-      { label: 'Organisation Profile', icon: <BusinessRounded fontSize="small" /> },
+      { 
+        label: 'Organisation Profile', 
+        icon: <BusinessRounded fontSize="small" />,
+        panel: <CompanySettingsTab isAdmin={isAdmin} />
+      },
     ] : []),
-    ...(!isHod ? [
-      { label: 'Appearance',         icon: <PaletteRounded fontSize="small" /> },
-    ] : []),
-    { label: 'My Data',              icon: <DownloadRounded fontSize="small" /> },
+    { 
+      label: 'My Data', 
+      icon: <DownloadRounded fontSize="small" />,
+      panel: <DataTab currentUser={currentUser} />
+    },
   ];
 
   return (
@@ -1140,10 +1106,7 @@ export default function Settings() {
         </Tabs>
 
         <Box sx={{ p: { xs: 2.5, md: 4 } }}>
-          <TabPanel value={tab} index={0}><ProfileTab /></TabPanel>
-          {!isSuperAdmin && !isHod && <TabPanel value={tab} index={1}><CompanySettingsTab isAdmin={isAdmin} /></TabPanel>}
-          {!isHod && <TabPanel value={tab} index={!isSuperAdmin ? 2 : 1}><AppearanceTab /></TabPanel>}
-          <TabPanel value={tab} index={isHod ? 1 : (!isSuperAdmin ? 3 : 2)}><DataTab currentUser={currentUser} /></TabPanel>
+          {tabs[tab]?.panel}
         </Box>
       </Paper>
     </Box>
