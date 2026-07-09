@@ -183,51 +183,71 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
       return res.status(400).json({ message: 'No users provided.' });
 
     const Tenant = require('../models/Tenant');
-    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    const [tenant, userCount] = await Promise.all([
+      Tenant.findOne({ slug: req.tenantId }),
+      User.countDocuments(),
+    ]);
     const maxUsers = tenant?.limits?.maxUsers ?? Infinity;
-    let userCount = await User.countDocuments();
 
-    const results = { created: [], failed: [] };
+    const failed = [];
 
+    // Validate rows in memory first
+    const candidate = [];
     for (const row of rows) {
       const { name, email, role, department, phone } = row;
       if (!name || !email || !department) {
-        results.failed.push({ email: email || '?', reason: 'Missing name, email or department.' });
+        failed.push({ email: email || '?', reason: 'Missing name, email or department.' });
         continue;
       }
-      if (maxUsers !== -1 && userCount >= maxUsers) {
-        results.failed.push({ email, reason: `Plan limit reached (${maxUsers} users). Upgrade your subscription to add more.` });
-        continue;
-      }
-      try {
-        const exists = await User.findOne({ email: email.toLowerCase().trim() });
-        if (exists) { results.failed.push({ email, reason: 'Email already exists.' }); continue; }
-
-        const inviteToken = crypto.randomBytes(32).toString('hex');
-        const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
-        const placeholder = crypto.randomBytes(32).toString('hex');
-
-        const user = await User.create({
-          name: name.trim(), email: email.toLowerCase().trim(),
-          password: placeholder, role: role?.trim() || 'employee',
-          department: department.trim(), phone: phone?.trim() || '',
-          // Store the SHA-256 of the token — reset-password compares hashes
-          passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
-          passwordResetExpiry: inviteExpiry,
-          isActive: false,
-        });
-
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        const inviteLink = `${frontendUrl}/reset-password/${inviteToken}?invite=true`;
-        sendInviteEmail(user, inviteLink).catch(() => {});
-        results.created.push({ name: user.name, email: user.email });
-        userCount++;
-      } catch (e) {
-        results.failed.push({ email, reason: e.message });
-      }
+      candidate.push({ name: name.trim(), email: email.toLowerCase().trim(), role: role?.trim() || 'employee', department: department.trim(), phone: phone?.trim() || '' });
     }
 
-    res.json({ message: `${results.created.length} created, ${results.failed.length} failed.`, ...results });
+    // Check plan limit
+    const slots = maxUsers === -1 ? Infinity : maxUsers - userCount;
+    if (slots <= 0) {
+      return res.status(400).json({ message: `Plan limit reached (${maxUsers} users). Upgrade to add more.` });
+    }
+    const toProcess = candidate.slice(0, slots);
+    candidate.slice(slots).forEach(r => failed.push({ email: r.email, reason: `Plan limit reached (${maxUsers} users).` }));
+
+    // Single query to find all pre-existing emails
+    const existingEmails = new Set(
+      (await User.find({ email: { $in: toProcess.map(r => r.email) } }).select('email')).map(u => u.email)
+    );
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+    const docs = [];
+    const pendingEmails = []; // { user doc fields, inviteLink } — sent after insertMany
+
+    for (const row of toProcess) {
+      if (existingEmails.has(row.email)) {
+        failed.push({ email: row.email, reason: 'Email already exists.' });
+        continue;
+      }
+      const inviteToken = crypto.randomBytes(32).toString('hex');
+      const placeholder = crypto.randomBytes(32).toString('hex');
+      docs.push({
+        name: row.name, email: row.email,
+        password: placeholder, role: row.role,
+        department: row.department, phone: row.phone,
+        passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
+        passwordResetExpiry: inviteExpiry,
+        isActive: false,
+      });
+      pendingEmails.push({ name: row.name, email: row.email, inviteLink: `${frontendUrl}/reset-password/${inviteToken}?invite=true` });
+    }
+
+    const inserted = docs.length > 0 ? await User.insertMany(docs, { ordered: false }) : [];
+
+    // Fire invite emails asynchronously — don't block the response
+    pendingEmails.forEach(({ name, email, inviteLink }) =>
+      sendInviteEmail({ name, email }, inviteLink).catch(() => {})
+    );
+
+    const created = inserted.map(u => ({ name: u.name, email: u.email }));
+    res.json({ message: `${created.length} created, ${failed.length} failed.`, created, failed });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
