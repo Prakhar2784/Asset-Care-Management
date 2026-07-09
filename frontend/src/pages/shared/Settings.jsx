@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Tabs, Tab, TextField, Button, Alert, Switch, Stack,
@@ -7,17 +7,15 @@ import {
   Avatar
 } from '@mui/material';
 import {
-  PersonRounded, PaletteRounded, AssessmentRounded, SecurityRounded,
+  PersonRounded, PaletteRounded, SecurityRounded,
   DownloadRounded, Visibility, VisibilityOff, DarkModeRounded, LightModeRounded,
   SaveRounded, LockRounded, PictureAsPdfRounded, RefreshRounded, BusinessRounded,
   DeleteOutlineRounded, LocationOnRounded, PhoneRounded, EmailRounded,
   BadgeRounded, WorkRounded, PeopleRounded, LanguageRounded, ReceiptRounded,
   VerifiedRounded, StarRounded, CameraAltRounded, DomainRounded
 } from '@mui/icons-material';
-import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { saveAs } from 'file-saver';
 import api, { getFileUrl } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 import { useAppTheme } from '../../context/ThemeContext';
@@ -684,210 +682,6 @@ function CustomFieldsTab() {
       </Grid>
       <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}><Alert severity="info" variant="filled" sx={{ borderRadius: '12px', fontWeight: 700 }} onClose={() => setToast('')}>{toast}</Alert></Snackbar>
     </Grid>
-  );
-}
-
-// ─── Reports Tab (admin only) ──────────────────────────────────────────────────
-function ReportsTab() {
-  const [status, setStatus] = useState('All');
-  const [priority, setPriority] = useState('All');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [loading, setLoading] = useState({ excel: false, pdf: false });
-  const [error, setError] = useState('');
-
-  const fetchData = async () => {
-    const params = new URLSearchParams();
-    if (status !== 'All') params.append('status', status);
-    if (priority !== 'All') params.append('priority', priority);
-    if (from) params.append('from', from);
-    if (to) params.append('to', to);
-    const { data } = await api.get(`/reports/lifecycle?${params}`);
-    return data;
-  };
-
-  const downloadExcel = async () => {
-    setLoading(l => ({ ...l, excel: true })); setError('');
-    try {
-      const { summary, tickets } = await fetchData();
-
-      const wb = XLSX.utils.book_new();
-
-      // Summary sheet
-      const summaryData = [
-        ['AssetCare Pro — Ticket Lifecycle Report'],
-        ['Generated on', new Date().toLocaleString('en-IN')],
-        [],
-        ['SUMMARY'],
-        ['Total Tickets', summary.total],
-        ['Resolved', summary.resolved],
-        ['Pending', summary.pending],
-        ['In Progress', summary.inProgress],
-        ['Rejected', summary.rejected],
-        ['Avg. Resolution Time (hrs)', summary.avgResolutionHours ?? 'N/A'],
-        ['Total Estimated Cost (₹)', summary.totalCost],
-      ];
-      const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
-      ws1['!cols'] = [{ wch: 30 }, { wch: 20 }];
-      XLSX.utils.book_append_sheet(wb, ws1, 'Summary');
-
-      // Tickets sheet
-      const headers = ['Ticket ID', 'Status', 'Priority', 'Issue', 'Asset', 'Serial No.', 'Dept', 'Raised By', 'Email', 'Approved By', 'Raised At', 'Last Updated', 'Resolution (hrs)', 'Est. Cost (₹)', 'Asset Vendor', 'Warranty End'];
-      const rows = tickets.map(t => [
-        t.ticketId, t.status, t.priority, t.issue, t.assetName, t.assetSerial,
-        t.assetDepartment, t.raisedByName, t.raisedByEmail, t.approvedByName,
-        t.raisedAt, t.lastUpdated, t.resolutionHours ?? 'N/A', t.estimatedCost,
-        t.assetVendor, t.assetWarrantyEnd
-      ]);
-      const ws2 = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-      ws2['!cols'] = headers.map(() => ({ wch: 20 }));
-      XLSX.utils.book_append_sheet(wb, ws2, 'Ticket Lifecycle');
-
-      const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-      saveAs(new Blob([buf], { type: 'application/octet-stream' }), `assetcare-ticket-report-${Date.now()}.xlsx`);
-    } catch (e) {
-      setError('Failed to generate Excel report.');
-    } finally { setLoading(l => ({ ...l, excel: false })); }
-  };
-
-  const downloadPDF = async () => {
-    setLoading(l => ({ ...l, pdf: true })); setError('');
-    try {
-      const { summary, tickets } = await fetchData();
-      const doc = new jsPDF({ orientation: 'landscape' });
-
-      doc.setFontSize(18); doc.setFont('helvetica', 'bold');
-      doc.text('AssetCare Pro - Ticket Lifecycle Report', 14, 16);
-      doc.setFontSize(10); doc.setFont('helvetica', 'normal');
-      doc.text(`Generated: ${new Date().toLocaleString('en-IN')}`, 14, 23);
-
-      // Summary box
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-      doc.text('Summary', 14, 33);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-      const summaryLines = [
-        `Total: ${summary.total}  |  Resolved: ${summary.resolved}  |  Pending: ${summary.pending}  |  In Progress: ${summary.inProgress}  |  Rejected: ${summary.rejected}`,
-        `Avg. Resolution: ${summary.avgResolutionHours ?? 'N/A'} hrs  |  Total Cost: Rs. ${summary.totalCost.toLocaleString('en-IN')}`,
-      ];
-      summaryLines.forEach((l, i) => doc.text(l, 14, 40 + i * 6));
-
-      autoTable(doc, {
-        startY: 56,
-        head: [['Ticket ID', 'Status', 'Priority', 'Issue', 'Asset', 'Dept', 'Raised By', 'Approved By', 'Raised At', 'Res.(hrs)', 'Cost(Rs.)']],
-        body: tickets.map(t => [
-          t.ticketId, t.status, t.priority, t.issue.substring(0, 40), t.assetName.substring(0, 20),
-          t.assetDepartment, t.raisedByName, t.approvedByName,
-          t.raisedAt, t.resolutionHours ?? '—', t.estimatedCost
-        ]),
-        styles: { fontSize: 8, cellPadding: 2 },
-        headStyles: { fillColor: [17, 17, 17], textColor: 255, fontStyle: 'bold' },
-        alternateRowStyles: { fillColor: [248, 248, 246] },
-      });
-
-      doc.save(`assetcare-ticket-report-${Date.now()}.pdf`);
-    } catch (e) {
-      setError('Failed to generate PDF report.');
-    } finally { setLoading(l => ({ ...l, pdf: false })); }
-  };
-
-  const inputSx = { '& .MuiOutlinedInput-root': { borderRadius: '10px' } };
-
-  return (
-    <Stack spacing={3}>
-      <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3 }}>
-          <Box sx={{ width: 42, height: 42, borderRadius: '12px', bgcolor: 'rgba(17,24,39,0.10)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <AssessmentRounded sx={{ color: 'text.primary', fontSize: 20 }} />
-          </Box>
-          <Box>
-            <Typography fontWeight={800} fontSize={16} color="text.primary" sx={{ lineHeight: 1.3 }}>Ticket Lifecycle Report</Typography>
-            <Typography fontSize={13} color="text.secondary" fontWeight={500} sx={{ mt: 0.4, lineHeight: 1.5 }}>
-              Every ticket from creation to resolution — asset details, cost, resolution time, and personnel.
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Filters */}
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 3 }}>
-          <FormControl size="small" sx={{ minWidth: 150, ...inputSx }}>
-            <InputLabel>Status</InputLabel>
-            <Select value={status} label="Status" onChange={e => setStatus(e.target.value)}>
-              {['All', 'Pending Approval', 'Vendor Assigned', 'Under Repair', 'Resolved', 'Rejected'].map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth: 140, ...inputSx }}>
-            <InputLabel>Priority</InputLabel>
-            <Select value={priority} label="Priority" onChange={e => setPriority(e.target.value)}>
-              {['All', 'Low', 'Medium', 'High', 'Critical'].map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <TextField size="small" type="date" label="From Date" value={from} onChange={e => setFrom(e.target.value)}
-            sx={{ minWidth: 160, ...inputSx }} slotProps={{ inputLabel: { shrink: true } }} />
-          <TextField size="small" type="date" label="To Date" value={to} onChange={e => setTo(e.target.value)}
-            sx={{ minWidth: 160, ...inputSx }} slotProps={{ inputLabel: { shrink: true } }} />
-        </Box>
-
-        {error && <Alert severity="error" sx={{ mb: 2.5, borderRadius: '10px' }}>{error}</Alert>}
-
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-          <Button variant="contained"
-            startIcon={loading.excel ? <CircularProgress size={16} color="inherit" /> : <DownloadRounded />}
-            onClick={downloadExcel} disabled={loading.excel || loading.pdf}
-            sx={{ fontWeight: 800, borderRadius: '12px', px: 2.5, bgcolor: '#16A34A', '&:hover': { bgcolor: '#15803D' }, boxShadow: 'none' }}>
-            Download Excel
-          </Button>
-          <Button variant="contained"
-            startIcon={loading.pdf ? <CircularProgress size={16} color="inherit" /> : <DownloadRounded />}
-            onClick={downloadPDF} disabled={loading.excel || loading.pdf}
-            sx={{ fontWeight: 800, borderRadius: '12px', px: 2.5, bgcolor: '#DC2626', '&:hover': { bgcolor: '#B91C1C' }, boxShadow: 'none' }}>
-            Download PDF
-          </Button>
-        </Box>
-      </Paper>
-
-      <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 3 }}>
-          <Box sx={{ width: 42, height: 42, borderRadius: '12px', bgcolor: 'rgba(34,197,94,0.10)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <DownloadRounded sx={{ color: '#22C55E', fontSize: 20 }} />
-          </Box>
-          <Box>
-            <Typography fontWeight={800} fontSize={16} color="text.primary" sx={{ lineHeight: 1.3 }}>Asset Registry Report</Typography>
-            <Typography fontSize={13} color="text.secondary" fontWeight={500} sx={{ mt: 0.4, lineHeight: 1.5 }}>
-              Complete snapshot of all active assets with assignment, warranty, and AMC details.
-            </Typography>
-          </Box>
-        </Box>
-        <Button
-          variant="outlined"
-          startIcon={<DownloadRounded />}
-          onClick={async () => {
-            try {
-              const { data } = await api.get('/reports/assets');
-              const rows = data.map(a => ({
-                Name: a.name, Category: a.category, 'Serial No': a.serialNumber,
-                Status: a.status, Department: a.department, Location: a.location || '',
-                Vendor: a.vendor || '', Model: a.modelNumber || '',
-                'Purchase Cost': a.purchaseCost || '',
-                'Warranty End': a.warrantyEnd ? new Date(a.warrantyEnd).toLocaleDateString('en-IN') : '',
-                'Assigned To': a.assignedTo?.name || a.assignedEmployeeName || 'Unassigned',
-                'Assigned Email': a.assignedTo?.email || a.assignedEmployeeEmail || '',
-                'AMC Vendor': a.amcVendor || '', 'AMC End': a.amcEnd ? new Date(a.amcEnd).toLocaleDateString('en-IN') : '',
-              }));
-              const ws = XLSX.utils.json_to_sheet(rows);
-              const wb = XLSX.utils.book_new();
-              XLSX.utils.book_append_sheet(wb, ws, 'Assets');
-              const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-              saveAs(new Blob([buf], { type: 'application/octet-stream' }), `assetcare-asset-registry-${Date.now()}.xlsx`);
-            } catch { setError('Failed to download asset report.'); }
-          }}
-          sx={{ fontWeight: 800, borderRadius: '12px', borderColor: '#22C55E', color: '#22C55E', '&:hover': { bgcolor: 'rgba(34,197,94,0.08)', borderColor: '#22C55E' } }}
-        >
-          Download Asset Registry (Excel)
-        </Button>
-      </Paper>
-    </Stack>
   );
 }
 
