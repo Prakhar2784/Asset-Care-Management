@@ -49,7 +49,6 @@ const getTenantConnection = (tenantId) => {
   connection.model('MaintenanceLog', require('../models/MaintenanceLog').schema);
   
   // Version 1.5 Enterprise models
-  connection.model('Warehouse', require('../models/Warehouse').schema);
   connection.model('SoftwareLicense', require('../models/SoftwareLicense').schema);
   connection.model('AMCContract', require('../models/AMCContract').schema);
   connection.model('WarrantyClaim', require('../models/WarrantyClaim').schema);

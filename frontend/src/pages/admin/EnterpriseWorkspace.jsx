@@ -6,7 +6,7 @@ import {
   Select, InputLabel, FormControl, Chip, CircularProgress, Alert, Avatar, Checkbox
 } from "@mui/material";
 import {
-  AddRounded, CheckCircleRounded, CancelRounded, BusinessRounded,
+  AddRounded, CheckCircleRounded, CancelRounded,
   QrCode2Rounded, VpnKeyRounded, HandymanRounded, SwapHorizRounded,
   VerifiedUserRounded, EngineeringRounded, SettingsCellRounded, PrintRounded,
   DeleteRounded
@@ -27,7 +27,6 @@ const EnterpriseWorkspace = () => {
   const [tabValue, setTabValue] = useState(0);
 
   // States
-  const [warehouses, setWarehouses] = useState([]);
   const [licenses, setLicenses] = useState([]);
   const [amcContracts, setAmcContracts] = useState([]);
   const [warrantyClaims, setWarrantyClaims] = useState([]);
@@ -42,24 +41,20 @@ const EnterpriseWorkspace = () => {
 
 
   // Modals
-  const [whModal, setWhModal] = useState(false);
   const [licModal, setLicModal] = useState(false);
   const [amcModal, setAmcModal] = useState(false);
   const [claimModal, setClaimModal] = useState(false);
   const [maintModal, setMaintModal] = useState(false);
   const [transferModal, setTransferModal] = useState(false);
   const [assignLicModal, setAssignLicModal] = useState(false);
-  const [whTransferModal, setWhTransferModal] = useState(false);
 
   // Form Fields
-  const [whForm, setWhForm] = useState({ name: "", code: "", location: "", managerId: "" });
   const [licForm, setLicForm] = useState({ softwareName: "", publisher: "", licenseKey: "", totalSeats: 1, expiryDate: "", renewalCost: "" });
   const [amcForm, setAmcForm] = useState({ contractNumber: "", vendor: "", assetsCovered: [], startDate: "", endDate: "", annualCost: "" });
   const [claimForm, setClaimForm] = useState({ assetId: "", vendor: "", issueDescription: "" });
   const [maintForm, setMaintForm] = useState({ assetId: "", taskName: "", frequency: "Quarterly", nextDueDate: "", assignedEngineerId: "" });
   const [transferForm, setTransferForm] = useState({ assetId: "", toUserId: "" });
   const [assignLicForm, setAssignLicForm] = useState({ userId: "" });
-  const [whTransferForm, setWhTransferForm] = useState({ assetId: "", warehouseId: "", stockStatus: "Available" });
 
   // Selected item tracking
   const [activeLicense, setActiveLicense] = useState(null);
@@ -69,8 +64,7 @@ const EnterpriseWorkspace = () => {
     setLoading(true);
     setError("");
     try {
-      const [whRes, licRes, amcRes, claimRes, maintRes, transRes, assetsRes, usersRes, deptsRes] = await Promise.all([
-        api.get("/enterprise/warehouses").catch(() => ({ data: [] })),
+      const [licRes, amcRes, claimRes, maintRes, transRes, assetsRes, usersRes, deptsRes] = await Promise.all([
         api.get("/enterprise/licenses").catch(() => ({ data: [] })),
         api.get("/enterprise/amc").catch(() => ({ data: [] })),
         api.get("/enterprise/warranty/claims").catch(() => ({ data: [] })),
@@ -80,7 +74,6 @@ const EnterpriseWorkspace = () => {
         api.get("/users").catch(() => ({ data: [] })),
         api.get("/departments").catch(() => ({ data: [] })),
       ]);
-      setWarehouses(whRes.data || []);
       setLicenses(licRes.data || []);
       setAmcContracts(amcRes.data || []);
       setWarrantyClaims(claimRes.data || []);
@@ -101,16 +94,6 @@ const EnterpriseWorkspace = () => {
   }, []);
 
   // Submit handlers
-  const submitWarehouse = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/enterprise/warehouses", whForm);
-      setWhModal(false);
-      setWhForm({ name: "", code: "", location: "", managerId: "" });
-      fetchData();
-    } catch (err) { setError(err.response?.data?.message || "Error creating warehouse"); }
-  };
-
   const submitLicense = async (e) => {
     e.preventDefault();
     try {
@@ -169,16 +152,6 @@ const EnterpriseWorkspace = () => {
       setAssignLicForm({ userId: "" });
       fetchData();
     } catch (err) { setError(err.response?.data?.message || "Error assigning license seat"); }
-  };
-
-  const submitWarehouseTransfer = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post("/enterprise/warehouses/transfer", whTransferForm);
-      setWhTransferModal(false);
-      setWhTransferForm({ assetId: "", warehouseId: "", stockStatus: "Available" });
-      fetchData();
-    } catch (err) { setError(err.response?.data?.message || "Error transferring asset to warehouse"); }
   };
 
   // Approval Handlers
@@ -278,7 +251,7 @@ const EnterpriseWorkspace = () => {
 
   return (
     <Box sx={{ pb: 5 }}>
-      <PageHeader title="Enterprise Operations Workspace" subtitle="Centralized warehouse inventory, software seat audits, AMCs, and handovers." />
+      <PageHeader title="Enterprise Operations Workspace" subtitle="Software seat audits, AMC contracts, warranty claims, maintenance schedules, and asset handovers." />
 
       {error && <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>{error}</Alert>}
 
@@ -297,7 +270,6 @@ const EnterpriseWorkspace = () => {
             "& .MuiTabs-indicator": { bgcolor: "text.primary" }
           }}
         >
-          <Tab icon={<BusinessRounded sx={{ fontSize: 18 }} />} iconPosition="start" label="Warehousing" />
           <Tab icon={<VpnKeyRounded sx={{ fontSize: 18 }} />} iconPosition="start" label="Software Licenses" />
           <Tab icon={<VerifiedUserRounded sx={{ fontSize: 18 }} />} iconPosition="start" label="AMC & Warranties" />
           <Tab icon={<HandymanRounded sx={{ fontSize: 18 }} />} iconPosition="start" label="Maintenance Schedules" />
@@ -305,57 +277,8 @@ const EnterpriseWorkspace = () => {
           <Tab icon={<QrCode2Rounded sx={{ fontSize: 18 }} />} iconPosition="start" label="Print QR Codes" />
         </Tabs>
 
-        {/* Tab 0: Warehousing */}
+        {/* Tab 0: Licenses */}
         {tabValue === 0 && (
-          <Box sx={{ p: 3 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
-              <Typography variant="h6" fontWeight={800}>Warehouses & Stock</Typography>
-              <Box sx={{ display: "flex", gap: 2 }}>
-                <Button variant="outlined" onClick={() => setWhTransferModal(true)} startIcon={<SwapHorizRounded />} sx={{ fontWeight: 700, borderRadius: "8px" }}>
-                  Store Asset in Warehouse
-                </Button>
-                <Button variant="contained" onClick={() => setWhModal(true)} startIcon={<AddRounded />} sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700, borderRadius: "8px", "&:hover": { bgcolor: "#bce64c" } }}>
-                  Add Warehouse
-                </Button>
-              </Box>
-            </Box>
-
-            <TableContainer>
-              <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 800 }}>Warehouse Code</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Warehouse Name</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Location</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Manager</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Stock Assets count</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {warehouses.length === 0 ? (
-                    <TableRow><TableCell colSpan={5} align="center" sx={{ color: "text.secondary", py: 4 }}>No warehouses registered.</TableCell></TableRow>
-                  ) : (
-                    warehouses.map((wh) => {
-                      const stockCount = assets.filter(a => String(a.warehouse) === String(wh._id)).length;
-                      return (
-                        <TableRow key={wh._id}>
-                          <TableCell sx={{ fontWeight: 700 }}>{wh.code}</TableCell>
-                          <TableCell>{wh.name}</TableCell>
-                          <TableCell>{wh.location || "N/A"}</TableCell>
-                          <TableCell>{wh.manager?.name || "Unassigned"}</TableCell>
-                          <TableCell>{stockCount} assets</TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        )}
-
-        {/* Tab 1: Licenses */}
-        {tabValue === 1 && (
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Software & Subscriptions</Typography>
@@ -406,8 +329,8 @@ const EnterpriseWorkspace = () => {
           </Box>
         )}
 
-        {/* Tab 2: AMC & Warranty */}
-        {tabValue === 2 && (
+        {/* Tab 1: AMC & Warranty */}
+        {tabValue === 1 && (
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Warranty Claims & AMC Contracts</Typography>
@@ -502,8 +425,8 @@ const EnterpriseWorkspace = () => {
           </Box>
         )}
 
-        {/* Tab 3: Maintenance */}
-        {tabValue === 3 && (
+        {/* Tab 2: Maintenance */}
+        {tabValue === 2 && (
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Preventive Maintenance Schedules</Typography>
@@ -558,8 +481,8 @@ const EnterpriseWorkspace = () => {
           </Box>
         )}
 
-        {/* Tab 4: Transfers */}
-        {tabValue === 4 && (
+        {/* Tab 3: Transfers */}
+        {tabValue === 3 && (
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Asset Handover Workflows</Typography>
@@ -612,8 +535,8 @@ const EnterpriseWorkspace = () => {
           </Box>
         )}
 
-        {/* Tab 5: QR Print Sheets */}
-        {tabValue === 5 && (
+        {/* Tab 4: QR Print Sheets */}
+        {tabValue === 4 && (
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, alignItems: "center" }}>
               <Typography variant="h6" fontWeight={800}>Sticker Tag Generator</Typography>
@@ -671,72 +594,6 @@ const EnterpriseWorkspace = () => {
         )}
 
       </Paper>
-
-      {/* ─── MODAL: ADD WAREHOUSE ─── */}
-      <Dialog open={whModal} onClose={() => setWhModal(false)} maxWidth="sm" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: "16px", bgcolor: "background.paper" } } }}>
-        <form onSubmit={submitWarehouse}>
-          <DialogTitle sx={{ fontWeight: 900 }}>Register Warehouse</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1.5 }}>
-              <TextField label="Warehouse Name" fullWidth value={whForm.name} onChange={(e) => setWhForm({ ...whForm, name: e.target.value })} required />
-              <TextField label="Warehouse Code" fullWidth value={whForm.code} onChange={(e) => setWhForm({ ...whForm, code: e.target.value })} required />
-              <TextField label="Location / Address" fullWidth value={whForm.location} onChange={(e) => setWhForm({ ...whForm, location: e.target.value })} />
-              <FormControl fullWidth>
-                <InputLabel>Assign Warehouse Manager</InputLabel>
-                <Select value={whForm.managerId} label="Assign Warehouse Manager" onChange={(e) => setWhForm({ ...whForm, managerId: e.target.value })}>
-                  {users.map(u => <MenuItem key={u._id} value={u._id}>{u.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ p: 3, pt: 0 }}>
-            <Button onClick={() => setWhModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Add Warehouse</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-
-      {/* ─── MODAL: TRANSFER ASSET TO WAREHOUSE ─── */}
-      <Dialog open={whTransferModal} onClose={() => setWhTransferModal(false)} maxWidth="sm" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: "16px", bgcolor: "background.paper" } } }}>
-        <form onSubmit={submitWarehouseTransfer}>
-          <DialogTitle sx={{ fontWeight: 900 }}>Store Asset in Warehouse</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1.5 }}>
-              <FormControl fullWidth>
-                <InputLabel>Select Asset</InputLabel>
-                <Select value={whTransferForm.assetId} label="Select Asset" onChange={(e) => setWhTransferForm({ ...whTransferForm, assetId: e.target.value })} required>
-                  {assets.filter(a => a.status !== 'In Storage').map(a => (
-                    <MenuItem key={a._id} value={a._id}>{`${a.name} (${a.serialNumber})`}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Target Warehouse</InputLabel>
-                <Select value={whTransferForm.warehouseId} label="Target Warehouse" onChange={(e) => setWhTransferForm({ ...whTransferForm, warehouseId: e.target.value })} required>
-                  {warehouses.map(wh => (
-                    <MenuItem key={wh._id} value={wh._id}>{wh.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel>Stock Condition Status</InputLabel>
-                <Select value={whTransferForm.stockStatus} label="Stock Condition Status" onChange={(e) => setWhTransferForm({ ...whTransferForm, stockStatus: e.target.value })}>
-                  <MenuItem value="Available">Available for Reassignment</MenuItem>
-                  <MenuItem value="Reserved">Reserved</MenuItem>
-                  <MenuItem value="Damaged">Damaged / Faulty</MenuItem>
-                  <MenuItem value="Lost">Lost</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </DialogContent>
-          <DialogActions sx={{ p: 3, pt: 0 }}>
-            <Button onClick={() => setWhTransferModal(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Confirm Storage</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
 
       {/* ─── MODAL: PURCHASE LICENSE ─── */}
       <Dialog open={licModal} onClose={() => setLicModal(false)} maxWidth="sm" fullWidth

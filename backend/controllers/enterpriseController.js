@@ -1,4 +1,3 @@
-const Warehouse = require('../models/Warehouse');
 const SoftwareLicense = require('../models/SoftwareLicense');
 const AMCContract = require('../models/AMCContract');
 const WarrantyClaim = require('../models/WarrantyClaim');
@@ -9,70 +8,7 @@ const User = require('../models/User');
 const { audit } = require('../services/auditService');
 
 // ==========================================
-// 1. Warehouse Stock Handlers
-// ==========================================
-const createWarehouse = async (req, res) => {
-  try {
-    const { name, code, location, managerId } = req.body;
-    if (!name || !code) return res.status(400).json({ message: 'Name and Code are required' });
-
-    const warehouse = await Warehouse.create({
-      name,
-      code,
-      location: location || '',
-      manager: managerId || null,
-      tenantId: req.tenantId
-    });
-
-    audit({ req, action: 'warehouse_created', entity: 'warehouse', entityId: warehouse._id, entityLabel: warehouse.name });
-    res.status(201).json(warehouse);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const getWarehouses = async (req, res) => {
-  try {
-    const warehouses = await Warehouse.find({}).populate('manager', 'name email');
-    res.status(200).json(warehouses);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const transferAssetToWarehouse = async (req, res) => {
-  try {
-    const { assetId, warehouseId, stockStatus } = req.body;
-    if (!assetId || !warehouseId) return res.status(400).json({ message: 'Asset and Warehouse are required' });
-
-    const asset = await Asset.findById(assetId);
-    if (!asset) return res.status(404).json({ message: 'Asset not found' });
-
-    const warehouse = await Warehouse.findById(warehouseId);
-    if (!warehouse) return res.status(404).json({ message: 'Warehouse not found' });
-
-    // Update asset deployment context to warehouse storage
-    asset.warehouse = warehouseId;
-    asset.status = 'In Storage';
-    asset.stockStatus = stockStatus || 'Available';
-    
-    // Revoke any active assignments
-    asset.assignedStatus = 'Unassigned';
-    asset.assignedTo = null;
-    asset.assignedEmployeeName = '';
-    asset.assignedEmployeeEmail = '';
-    
-    await asset.save();
-
-    audit({ req, action: 'asset_transferred_to_warehouse', entity: 'asset', entityId: asset._id, entityLabel: asset.name, changes: { warehouse: warehouse.name } });
-    res.status(200).json(asset);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// ==========================================
-// 2. Software License Handlers
+// 1. Software License Handlers
 // ==========================================
 const createLicense = async (req, res) => {
   try {
@@ -455,8 +391,6 @@ const approveTransferByIT = async (req, res) => {
 };
 
 module.exports = {
-  // Warehousing
-  createWarehouse, getWarehouses, transferAssetToWarehouse,
   // Licenses
   createLicense, getLicenses, assignLicenseSeat, revokeLicenseSeat,
   // AMC & Warranty

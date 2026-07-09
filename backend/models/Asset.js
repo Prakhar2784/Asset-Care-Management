@@ -43,17 +43,6 @@ const assetSchema = new mongoose.Schema({
     enum: ['Active', 'In Transit', 'Under Repair', 'Decommissioned', 'In Storage', 'Scrap'],
     default: 'Active'
   },
-  warehouse: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Warehouse',
-    default: null
-  },
-  stockStatus: {
-    type: String,
-    enum: ['Available', 'Reserved', 'Damaged', 'Lost', 'Returned', 'N/A'],
-    default: 'N/A'
-  },
-
   // Assignment Data (denormalized for fast reads)
   assignedStatus: {
     type: String,

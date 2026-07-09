@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 const {
-  // Warehousing
-  createWarehouse, getWarehouses, transferAssetToWarehouse,
   // Licenses
   createLicense, getLicenses, assignLicenseSeat, revokeLicenseSeat,
   // AMC & Warranty
@@ -17,12 +15,7 @@ const {
 // All enterprise endpoints require authentication
 router.use(protect);
 
-// 1. Warehouse routes
-router.post('/warehouses', authorize('admin'), createWarehouse);
-router.get('/warehouses', getWarehouses);
-router.post('/warehouses/transfer', authorize('admin'), transferAssetToWarehouse);
-
-// 2. Software License routes
+// 1. Software License routes
 router.post('/licenses', authorize('admin'), createLicense);
 router.get('/licenses', getLicenses);
 router.put('/licenses/:id/assign', authorize('admin'), assignLicenseSeat);
