@@ -153,4 +153,4 @@ const requireScope = (...scopes) => {
   };
 };
 
-module.exports = { protect, authorize, requirePermission, requireFeature, requireScope };
+module.exports = { protect, authorize, requirePermission, requireFeature, requireScope, ADMIN_TIER_ROLES };

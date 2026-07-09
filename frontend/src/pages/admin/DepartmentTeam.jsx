@@ -1,15 +1,16 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Avatar, Chip, TextField, InputAdornment,
   Stack, Skeleton, MenuItem, Select, FormControl, InputLabel,
 } from '@mui/material';
 import {
-  PeopleRounded, SearchRounded, BadgeRounded, EmailRounded,
+  PeopleRounded, SearchRounded, EmailRounded,
   PhoneRounded, FiberManualRecordRounded,
 } from '@mui/icons-material';
-import api, { getFileUrl } from '../../api/axios';
+import { getFileUrl } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
+import useFetch from '../../hooks/useFetch';
 
 const ROLE_STYLE = {
   admin:      { label: 'Admin',      color: '#6366F1', bg: 'rgba(99,102,241,0.12)' },
@@ -34,17 +35,10 @@ function StatCard({ label, value, color }) {
 
 export default function DepartmentTeam() {
   const { currentUser } = useAuth();
-  const [members, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data, loading } = useFetch('/users');
+  const members = data || [];
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
-
-  useEffect(() => {
-    api.get('/users')
-      .then(({ data }) => setMembers(data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
 
   const stats = useMemo(() => {
     const active = members.filter(m => m.isActive !== false).length;

@@ -11,6 +11,7 @@ const {
 } = require('../services/emailService');
 const { createNotification } = require('../services/notificationService');
 const { audit } = require('../services/auditService');
+const { ADMIN_TIER_ROLES } = require('../middleware/authMiddleware');
 
 // @route   POST /api/device-requests
 // @access  Employee
@@ -486,14 +487,12 @@ const deleteRequest = async (req, res) => {
     const request = await DeviceRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: 'Request not found' });
 
-    const adminTier = ['admin', 'super_admin', 'hod', 'manager'];
     const isOwner = request.raisedBy.toString() === req.user._id.toString();
 
-    if (!adminTier.includes(req.user.role) && !isOwner) {
+    if (!ADMIN_TIER_ROLES.includes(req.user.role) && !isOwner)
       return res.status(403).json({ message: 'Not authorized to delete this request' });
-    }
 
-    if (isOwner && !adminTier.includes(req.user.role) && !['Pending', 'Under Review'].includes(request.status)) {
+    if (isOwner && !ADMIN_TIER_ROLES.includes(req.user.role) && !['Pending', 'Under Review'].includes(request.status)) {
       return res.status(400).json({ message: 'Only pending requests can be withdrawn' });
     }
 

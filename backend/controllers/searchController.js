@@ -1,6 +1,7 @@
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
 const User = require('../models/User');
+const { getHodScope } = require('../utils/hodScope');
 
 // GET /api/search?q=query
 const globalSearch = async (req, res) => {
@@ -18,12 +19,9 @@ const globalSearch = async (req, res) => {
     let hodUserIds = [];
     let hodAssetIds = [];
     if (isHod) {
-      const [deptUsers, deptAssets] = await Promise.all([
-        User.find({ department: req.user.department }).select('_id'),
-        Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id'),
-      ]);
-      hodUserIds = deptUsers.map(u => u._id);
-      hodAssetIds = deptAssets.map(a => a._id);
+      const { deptUserIds, deptAssetIds } = await getHodScope(req.user);
+      hodUserIds = deptUserIds;
+      hodAssetIds = deptAssetIds;
     }
 
     const [assets, tickets, users] = await Promise.all([

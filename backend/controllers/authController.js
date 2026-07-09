@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Tenant = require('../models/Tenant');
 const jwt = require('jsonwebtoken');
 const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail } = require('../services/emailService');
+const { ADMIN_TIER_ROLES } = require('../middleware/authMiddleware');
 
 // ─── Brute-force / timing constants ───────────────────────────────────────────
 const GENERIC_LOGIN_ERROR = 'Incorrect email or password.';
@@ -135,14 +136,13 @@ const loginUser = async (req, res) => {
     }
     // Validate role mapping to match selected portal tab
     if (role) {
-      const allAdminRoles = ['admin', 'super_admin', 'hod', 'manager'];
       if (role === 'hod' && user.role !== 'hod') {
         return res.status(403).json({ message: 'Access Denied: Department Access is for Head of Department accounts only.' });
       }
       if (role === 'admin' && !['admin', 'super_admin', 'manager'].includes(user.role)) {
         return res.status(403).json({ message: user.role === 'hod' ? 'Please use Department Access to sign in.' : 'Access Denied: This portal requires system administrator permissions.' });
       }
-      if (role === 'employee' && allAdminRoles.includes(user.role)) {
+      if (role === 'employee' && ADMIN_TIER_ROLES.includes(user.role)) {
         return res.status(403).json({ message: 'This account has elevated access. Please use Department Access or Admin sign-in.' });
       }
     }

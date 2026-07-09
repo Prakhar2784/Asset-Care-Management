@@ -2,32 +2,21 @@ const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
 const DeviceRequest = require('../models/DeviceRequest');
 const User = require('../models/User');
+const { getHodScope } = require('../utils/hodScope');
 
-// Builds department-scoped base filters for HOD users.
-// Returns { assetFilter, ticketFilter, userFilter, requestFilter } ready to spread into queries.
 const buildHodScopeFilters = async (user) => {
-  if (user.role !== 'hod' || !user.department) {
-    return {
-      assetFilter: { isDeleted: { $ne: true } },
-      ticketFilter: {},
-      userFilter: {},
-      requestFilter: {},
-    };
-  }
+  if (user.role !== 'hod' || !user.department) return {
+    assetFilter: { isDeleted: { $ne: true } },
+    ticketFilter: {}, userFilter: {}, requestFilter: {},
+  };
+  const { deptUserIds, deptAssetIds } = await getHodScope(user);
   const dept = user.department;
-  const [deptUsers, deptAssets] = await Promise.all([
-    User.find({ department: dept }).select('_id'),
-    Asset.find({ department: dept, isDeleted: { $ne: true } }).select('_id'),
-  ]);
-  const deptUserIds = deptUsers.map(u => u._id);
-  const deptAssetIds = deptAssets.map(a => a._id);
   return {
     assetFilter: { isDeleted: { $ne: true }, department: dept },
     ticketFilter: { $or: [{ raisedBy: { $in: deptUserIds } }, { asset: { $in: deptAssetIds } }] },
     userFilter: { department: dept },
     requestFilter: { raisedBy: { $in: deptUserIds } },
-    deptUserIds,
-    deptAssetIds,
+    deptUserIds, deptAssetIds,
   };
 };
 

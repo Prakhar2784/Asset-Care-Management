@@ -2,6 +2,8 @@ const Ticket = require('../models/Ticket');
 const User = require('../models/User');
 const Asset = require('../models/Asset');
 const mongoose = require('mongoose');
+const { getHodScope } = require('../utils/hodScope');
+const { ADMIN_TIER_ROLES } = require('../middleware/authMiddleware');
 const {
   sendTicketCreatedEmail,
   sendTicketStatusEmail,
@@ -127,14 +129,8 @@ const getTickets = async (req, res) => {
         ]
       };
     } else if (req.user.role === 'hod' && req.user.department) {
-      const [deptUsers, deptAssets] = await Promise.all([
-        User.find({ department: req.user.department }).select('_id'),
-        Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id'),
-      ]);
-      filter.$or = [
-        { raisedBy: { $in: deptUsers.map(u => u._id) } },
-        { asset: { $in: deptAssets.map(a => a._id) } },
-      ];
+      const { deptUserIds, deptAssetIds } = await getHodScope(req.user);
+      filter.$or = [{ raisedBy: { $in: deptUserIds } }, { asset: { $in: deptAssetIds } }];
     }
 
     const tickets = await Ticket.find(filter)
@@ -450,14 +446,12 @@ const deleteTicket = async (req, res) => {
       .populate('asset', 'department');
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
-    const adminTier = ['admin', 'super_admin', 'hod', 'manager'];
     const isOwner = ticket.raisedBy?._id?.toString() === req.user._id.toString();
 
-    if (!adminTier.includes(req.user.role) && !isOwner) {
+    if (!ADMIN_TIER_ROLES.includes(req.user.role) && !isOwner)
       return res.status(403).json({ message: 'Not authorized to delete this ticket' });
-    }
 
-    if (isOwner && !adminTier.includes(req.user.role) && ticket.status !== 'Pending Approval') {
+    if (isOwner && !ADMIN_TIER_ROLES.includes(req.user.role) && ticket.status !== 'Pending Approval') {
       return res.status(400).json({ message: 'Only tickets pending approval can be withdrawn' });
     }
 
