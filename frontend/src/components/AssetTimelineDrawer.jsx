@@ -127,14 +127,14 @@ export default function AssetTimelineDrawer({ open, assetId, assetName, onClose 
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{
+      slotProps={{ paper: {
         sx: {
           width: { xs: '100vw', sm: 520 },
           bgcolor: 'background.default',
           display: 'flex',
           flexDirection: 'column',
         }
-      }}
+      } }}
     >
       {/* Header */}
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', bgcolor: DARK }}>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+﻿import React, { useState, useRef } from "react";
 import {
   Alert, Box, Button, Chip, Divider, Grid, MenuItem,
   Paper, Snackbar, TextField, Typography, CircularProgress,
@@ -1010,7 +1010,7 @@ const AddAsset = () => {
 
       {/* Multi-item picker dialog */}
       <Dialog open={showPicker} onClose={() => setShowPicker(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "20px", bgcolor: "background.paper" } } }}>
         <DialogTitle component="div" sx={{ fontWeight: 800, fontSize: 18, pb: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <ShoppingCartRounded sx={{ color: "text.primary" }} />
@@ -1075,7 +1075,7 @@ const AddAsset = () => {
 
       {/* Optional fields empty notification popup dialog */}
       <Dialog open={emptyFieldsDialog} onClose={() => setEmptyFieldsDialog(false)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: "20px", bgcolor: "background.paper", p: 1 } }}>
+        slotProps={{ paper: { sx: { borderRadius: "20px", bgcolor: "background.paper", p: 1 } } }}>
         <DialogTitle sx={{ fontWeight: 800, fontSize: 18, pb: 1, color: "text.primary" }}>
           Empty Optional Fields
         </DialogTitle>

@@ -628,7 +628,7 @@ export default function SuperAdminPanel() {
 
       {/* ─── Create Company Dialog ─── */}
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: '16px', bgcolor: 'background.paper' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '16px', bgcolor: 'background.paper' } } }}>
         <DialogTitle sx={{ fontWeight: 900, fontSize: 20 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: ACCENT, display: 'grid', placeItems: 'center' }}>
@@ -706,7 +706,7 @@ export default function SuperAdminPanel() {
 
       {/* ─── Plan Update Dialog ─── */}
       <Dialog open={planOpen} onClose={() => setPlanOpen(false)} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '16px' } } }}>
         <DialogTitle fontWeight={900} sx={{ pb: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box sx={{ width: 34, height: 34, borderRadius: '9px', bgcolor: '#3b1f6e', display: 'grid', placeItems: 'center' }}>
@@ -803,7 +803,7 @@ export default function SuperAdminPanel() {
 
       {/* ─── Tenant Users Dialog ─── */}
       <Dialog open={usersOpen} onClose={() => setUsersOpen(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: '16px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '16px' } } }}>
         <DialogTitle fontWeight={900}>
           Users — {selectedTenant?.name}
         </DialogTitle>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Button, IconButton, Dialog, DialogTitle,
@@ -172,7 +172,7 @@ export default function ApiKeyManagement() {
 
       {/* Create dialog */}
       <Dialog open={addOpen} onClose={() => { if (!saving) { setAddOpen(false); setNewKey(null); } }} maxWidth="sm" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
         <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={18}>Generate API Key</Typography>
           <IconButton onClick={() => { setAddOpen(false); setNewKey(null); }} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
@@ -231,7 +231,7 @@ export default function ApiKeyManagement() {
       </Dialog>
 
       {/* Delete confirm */}
-      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '16px' } }}>
+      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: '16px' } } }}>
         <DialogTitle component="div"><Typography fontWeight={800} fontSize={17}>Delete API Key?</Typography></DialogTitle>
         <DialogContent><Typography color="text.secondary">Deleting <strong>{deleteTarget?.name}</strong> will immediately revoke access for any integration using it.</Typography></DialogContent>
         <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>

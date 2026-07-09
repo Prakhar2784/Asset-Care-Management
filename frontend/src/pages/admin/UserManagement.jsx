@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
@@ -716,7 +716,7 @@ export default function UserManagement() {
 
       {/* ── Bulk change-role dialog ──────────────────────────────────────────── */}
       <Dialog open={bulkRoleOpen} onClose={() => setBulkRoleOpen(false)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
         <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Box>
             <Typography fontWeight={800} fontSize={17}>Change Role</Typography>
@@ -743,7 +743,7 @@ export default function UserManagement() {
 
       {/* ── Per-User Permissions Dialog ──────────────────────────────────────── */}
       <Dialog open={userPermOpen} onClose={() => setUserPermOpen(false)} maxWidth="sm" fullWidth
-          PaperProps={{ sx: { borderRadius: '20px' } }}>
+          slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
           <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <SecurityRounded sx={{ color: 'text.primary' }} />
@@ -806,7 +806,7 @@ export default function UserManagement() {
 
       {/* ── Role Permissions Matrix ──────────────────────────────────────────── */}
       <Dialog open={permOpen} onClose={() => setPermOpen(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
         <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <SecurityRounded sx={{ color: 'text.primary' }} />
@@ -859,7 +859,7 @@ export default function UserManagement() {
 
       {/* ── CSV Import Dialog ────────────────────────────────────────────────── */}
       <Dialog open={csvOpen} onClose={() => !csvImporting && setCsvOpen(false)} maxWidth="md" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
         <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <UploadFileRounded sx={{ color: 'text.primary' }} />
@@ -970,7 +970,7 @@ export default function UserManagement() {
 
       {/* ── User Profile Drawer ──────────────────────────────────────────────── */}
       <Drawer anchor="right" open={profileOpen} onClose={() => setProfileOpen(false)}
-        PaperProps={{ sx: { width: { xs: '100vw', sm: 500 }, bgcolor: 'background.default' } }}>
+        slotProps={{ paper: { sx: { width: { xs: '100vw', sm: 500 }, bgcolor: 'background.default' } } }}>
         {profileUser && (
           <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ p: 3, background: 'linear-gradient(135deg,rgba(17,24,39,0.12),rgba(17,24,39,0.06))', borderBottom: 1, borderColor: 'divider' }}>
@@ -1289,7 +1289,7 @@ export default function UserManagement() {
 
       {/* Offboarding confirm dialog */}
       <Dialog open={!!offboardTarget} onClose={() => setOffboardTarget(null)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
         <DialogTitle component="div" sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <ExitToAppRounded sx={{ color: '#DC2626' }} />
@@ -1321,7 +1321,7 @@ export default function UserManagement() {
 
       {/* Permanent Delete confirmation dialog */}
       <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)} maxWidth="xs" fullWidth
-        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
         <DialogTitle component="div" sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <DeleteRounded sx={{ color: '#DC2626' }} />

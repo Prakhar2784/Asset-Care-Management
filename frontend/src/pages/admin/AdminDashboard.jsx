@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 import {
   Alert, Box, Button, Chip, CircularProgress, Dialog,
   DialogContent, Grid, IconButton,
@@ -753,7 +753,7 @@ const AdminDashboard = () => {
 
       {/* ── Ticket Detail Dialog ─────────────────────────────── */}
       <Dialog open={!!selectedTicket} onClose={() => setSelectedTicket(null)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider" } } }}>
         {selectedTicket && (
           <>
             <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -794,7 +794,7 @@ const AdminDashboard = () => {
 
       {/* ── Calendar Event Planner Dialog ──────────────────────── */}
       <Dialog open={!!selectedDate} onClose={() => setSelectedDate(null)} fullWidth maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } }}>
+        slotProps={{ paper: { sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
         {selectedDate && (
           <>
             <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
