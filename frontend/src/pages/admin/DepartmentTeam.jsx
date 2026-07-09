@@ -81,7 +81,7 @@ export default function DepartmentTeam() {
       </Box>
 
       {/* Stat cards */}
-      <Stack direction="row" flexWrap="wrap" gap={2} mb={3}>
+      <Stack direction="row" gap={2} mb={3} sx={{ flexWrap: 'wrap' }}>
         <StatCard label="Total Members" value={loading ? '—' : stats.total} />
         <StatCard label="Active" value={loading ? '—' : stats.active} color="#22C55E" />
         <StatCard label="Inactive" value={loading ? '—' : stats.inactive} color="#EF4444" />
@@ -102,7 +102,7 @@ export default function DepartmentTeam() {
           placeholder="Search by name, email or phone…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          InputProps={{ startAdornment: <InputAdornment position="start"><SearchRounded fontSize="small" /></InputAdornment> }}
+          slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded fontSize="small" /></InputAdornment> } }}
           sx={{ flex: 1 }}
         />
         <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -153,7 +153,7 @@ export default function DepartmentTeam() {
                       <TableRow key={member._id} hover>
                         {/* Member */}
                         <TableCell>
-                          <Stack direction="row" alignItems="center" gap={1.5}>
+                          <Stack direction="row" sx={{ alignItems: 'center' }} gap={1.5}>
                             <Avatar
                               src={member.avatar ? getFileUrl(member.avatar) : undefined}
                               sx={{ width: 36, height: 36, bgcolor: 'rgba(17,24,39,0.12)', fontSize: 14, fontWeight: 800 }}
@@ -164,7 +164,7 @@ export default function DepartmentTeam() {
                               <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.3 }}>
                                 {member.name}
                               </Typography>
-                              <Stack direction="row" alignItems="center" gap={0.5}>
+                              <Stack direction="row" sx={{ alignItems: 'center' }} gap={0.5}>
                                 <EmailRounded sx={{ fontSize: 11, color: 'text.disabled' }} />
                                 <Typography variant="caption" color="text.secondary">{member.email}</Typography>
                               </Stack>
@@ -185,7 +185,7 @@ export default function DepartmentTeam() {
                         <TableCell>
                           {member.phone
                             ? (
-                              <Stack direction="row" alignItems="center" gap={0.5}>
+                              <Stack direction="row" sx={{ alignItems: 'center' }} gap={0.5}>
                                 <PhoneRounded sx={{ fontSize: 13, color: 'text.secondary' }} />
                                 <Typography variant="body2" color="text.secondary">{member.phone}</Typography>
                               </Stack>
@@ -196,7 +196,7 @@ export default function DepartmentTeam() {
 
                         {/* Status */}
                         <TableCell>
-                          <Stack direction="row" alignItems="center" gap={0.5}>
+                          <Stack direction="row" sx={{ alignItems: 'center' }} gap={0.5}>
                             <FiberManualRecordRounded sx={{ fontSize: 10, color: isActive ? '#22C55E' : '#EF4444' }} />
                             <Typography variant="body2" fontWeight={700} sx={{ color: isActive ? '#22C55E' : '#EF4444' }}>
                               {isActive ? 'Active' : 'Inactive'}
