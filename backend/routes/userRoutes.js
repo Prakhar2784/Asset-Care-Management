@@ -19,7 +19,11 @@ const { checkUserLimit } = require('../middleware/limitMiddleware');
 router.get('/employees', protect, authorize('admin', 'super_admin', 'hod'), async (req, res) => {
   try {
     const filter = { isActive: true, role: { $ne: 'super_admin' } };
-    if (req.query.role) filter.role = req.query.role;
+    if (req.user.role === 'hod') {
+      filter.role = 'employee';
+    } else if (req.query.role) {
+      filter.role = req.query.role;
+    }
     const users = await User.find(filter)
       .select('name email phone department role')
       .sort({ name: 1 });
@@ -202,18 +206,13 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
       candidate.push({ name: name.trim(), email: email.toLowerCase().trim(), role: role?.trim() || 'employee', department: department.trim(), phone: phone?.trim() || '' });
     }
 
-    // Check plan limit
-    const slots = maxUsers === -1 ? Infinity : maxUsers - userCount;
-    if (slots <= 0) {
-      return res.status(400).json({ message: `Plan limit reached (${maxUsers} users). Upgrade to add more.` });
-    }
-    const toProcess = candidate.slice(0, slots);
-    candidate.slice(slots).forEach(r => failed.push({ email: r.email, reason: `Plan limit reached (${maxUsers} users).` }));
-
     // Single query to find all pre-existing emails
     const existingEmails = new Set(
-      (await User.find({ email: { $in: toProcess.map(r => r.email) } }).select('email')).map(u => u.email)
+      (await User.find({ email: { $in: candidate.map(r => r.email) } }).select('email')).map(u => u.email)
     );
+
+    const unlimited = maxUsers === -1 || maxUsers == null || maxUsers === Infinity;
+    let remaining = unlimited ? Infinity : maxUsers - userCount;
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000);
@@ -221,9 +220,13 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
     const docs = [];
     const pendingEmails = []; // { user doc fields, inviteLink } — sent after insertMany
 
-    for (const row of toProcess) {
+    for (const row of candidate) {
       if (existingEmails.has(row.email)) {
         failed.push({ email: row.email, reason: 'Email already exists.' });
+        continue;
+      }
+      if (remaining <= 0) {
+        failed.push({ email: row.email, reason: `Plan limit reached (${maxUsers} users). Upgrade to add more.` });
         continue;
       }
       const inviteToken = crypto.randomBytes(32).toString('hex');
@@ -237,6 +240,7 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
         isActive: false,
       });
       pendingEmails.push({ name: row.name, email: row.email, inviteLink: `${frontendUrl}/reset-password/${inviteToken}?invite=true` });
+      remaining--;
     }
 
     const inserted = docs.length > 0 ? await User.insertMany(docs, { ordered: false }) : [];

@@ -315,17 +315,17 @@ export default function ServiceCenters() {
             </Grid>
             <Autocomplete multiple freeSolo options={[]} value={form.categories}
               onChange={(_, v) => setForm(f => ({ ...f, categories: v }))}
-              renderTags={(val, getTagProps) => val.map((opt, i) => {
+              slots={{ renderTags: (val, getTagProps) => val.map((opt, i) => {
                 const { key, ...tagProps } = getTagProps({ index: i });
                 return <Chip key={key} label={opt} size="small" {...tagProps} sx={{ fontWeight: 700 }} />;
-              })}
+              }) }}
               renderInput={(params) => <TextField {...params} label="Categories Serviced" size="small" sx={inputSx} placeholder="e.g. Laptop, Printer" />} />
             <Autocomplete multiple freeSolo options={[]} value={form.brands}
               onChange={(_, v) => setForm(f => ({ ...f, brands: v }))}
-              renderTags={(val, getTagProps) => val.map((opt, i) => {
+              slots={{ renderTags: (val, getTagProps) => val.map((opt, i) => {
                 const { key, ...tagProps } = getTagProps({ index: i });
                 return <Chip key={key} label={opt} size="small" variant="outlined" {...tagProps} />;
-              })}
+              }) }}
               renderInput={(params) => <TextField {...params} label="Brands Handled" size="small" sx={inputSx} placeholder="Type brand and press Enter" />} />
             <FormControl fullWidth size="small" sx={inputSx}>
               <InputLabel>Status</InputLabel>

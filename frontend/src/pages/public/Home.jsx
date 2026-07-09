@@ -8,7 +8,6 @@ import ApprovalIcon from "@mui/icons-material/Approval";
 import InsightsIcon from "@mui/icons-material/Insights";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import AutoGraphRoundedIcon from "@mui/icons-material/AutoGraphRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 
@@ -404,26 +403,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: "100px 24px", background: "#0B0D12" }}>
-        <motion.div initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}
-          style={{ maxWidth: 1200, margin: "0 auto", background: "rgba(17,24,39,0.12)", borderRadius: 32, padding: "68px 56px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 36, position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -80, right: -80, width: 280, height: 280, background: "radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
-          <div style={{ maxWidth: 600, position: "relative", zIndex: 1 }}>
-            <h2 style={{ fontSize: 40, fontWeight: 950, color: "#FFFFFF", marginBottom: 14, letterSpacing: "-1.2px", lineHeight: 1.18 }}>
-              Ready to digitize your company asset management?
-            </h2>
-            <p style={{ fontSize: 17, color: "#6B7280", lineHeight: 1.7, margin: 0, fontWeight: 500 }}>
-              Start managing assets, warranty, breakdown tickets, vendor complaints and approval workflow from one clean dashboard.
-            </p>
-          </div>
-          <Link to="/register-company" style={{ background: "#FBBF24", color: "#111827", padding: "18px 34px", borderRadius: 999, fontWeight: 900, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1, transition: "all 0.22s ease", letterSpacing: "-0.3px" }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 14px 28px rgba(17,24,39,0.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
-            Start Free Trial <AutoGraphRoundedIcon fontSize="small" />
-          </Link>
-        </motion.div>
-      </section>
     </div>
   );
 };

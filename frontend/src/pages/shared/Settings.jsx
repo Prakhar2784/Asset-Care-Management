@@ -315,44 +315,6 @@ function CompanySettingsTab({ isAdmin = true }) {
 
   return (
     <Stack spacing={3}>
-      {/* Subscription Banner */}
-      <Paper sx={{ p: 3, borderRadius: '20px', border: 1, borderColor: 'divider', background: 'linear-gradient(135deg,rgba(17,24,39,0.06),rgba(17,24,39,0.03))' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: '12px', bgcolor: 'rgba(17,24,39,0.12)', display: 'grid', placeItems: 'center' }}>
-              <StarRounded sx={{ color: 'text.primary', fontSize: 22 }} />
-            </Box>
-            <Box>
-              <Typography fontWeight={800} fontSize={15} color="text.primary">Subscription</Typography>
-              <Typography fontSize={13} color="text.secondary">
-                {stats ? `${stats.activeUsers} / ` : ''}{tenant?.limits?.maxUsers || 10} seats · {tenant?.planExpiry ? `expires ${new Date(tenant.planExpiry).toLocaleDateString('en-IN')}` : 'expires never'}
-              </Typography>
-              {stats && (() => {
-                const pct = (stats.activeUsers / (tenant?.limits?.maxUsers || 10)) * 100;
-                const pctString = pct > 0 && pct < 1 ? `${pct.toFixed(2)}%` : `${Math.round(pct)}%`;
-                return (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.8, width: 200 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min(100, pct)}
-                      sx={{ flex: 1, height: 5, borderRadius: 2.5, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: 'text.primary' } }}
-                    />
-                    <Typography fontSize={11} color="text.secondary" fontWeight={700}>
-                      {pctString}
-                    </Typography>
-                  </Box>
-                );
-              })()}
-            </Box>
-          </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Chip label={tenant?.plan || 'Basic'} size="small" sx={{ fontWeight: 800, fontSize: 12, bgcolor: planColor, color: '#111827', px: 0.5 }} />
-            <Chip label="ACTIVE" size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: 12, borderColor: '#10B981', color: '#10B981' }} />
-            {isAdmin && <Button size="small" onClick={() => navigate('/contact')} sx={{ fontWeight: 700, color: 'text.primary', textTransform: 'none', fontSize: 13 }}>Manage Plan</Button>}
-          </Box>
-        </Box>
-      </Paper>
-
       {/* Logo + Basic Information */}
       <Paper sx={{ p: 3.5, borderRadius: '20px', border: 1, borderColor: 'divider' }}>
         <SectionHeader icon={<DomainRounded sx={{ color: 'text.primary', fontSize: 18 }} />} title="Basic Information" />
@@ -761,10 +723,27 @@ function DataTab({ currentUser }) {
         doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
         doc.text('Device Requests', 14, y); y += 4;
         doc.setTextColor(0, 0, 0);
-        autoTable(doc, {
+        const t3 = autoTable(doc, {
           startY: y,
           head: [['Request ID', 'Item Requested', 'Type', 'Status', 'Urgency', 'Date']],
           body: data.deviceRequests.map(r => [r.requestId, r.itemRequested, r.requestType, r.status, r.urgency, new Date(r.raisedAt).toLocaleDateString('en-IN')]),
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [17, 17, 17] },
+          margin: { left: 14, right: 14 },
+        });
+        y = (t3?.finalY ?? doc.lastAutoTable?.finalY ?? y + 20) + 6;
+      }
+
+      // Notifications
+      if (data.notifications?.length) {
+        if (y > 230) { doc.addPage(); y = 20; }
+        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 58, 138);
+        doc.text('Notifications', 14, y); y += 4;
+        doc.setTextColor(0, 0, 0);
+        autoTable(doc, {
+          startY: y,
+          head: [['Title', 'Message', 'Type', 'Read', 'Received At']],
+          body: data.notifications.map(n => [n.title, (n.message || '').substring(0, 50), n.type, n.isRead ? 'Yes' : 'No', new Date(n.receivedAt).toLocaleDateString('en-IN')]),
           styles: { fontSize: 9 },
           headStyles: { fillColor: [17, 17, 17] },
           margin: { left: 14, right: 14 },
@@ -784,7 +763,7 @@ function DataTab({ currentUser }) {
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
           <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Export My Data</Typography>
           <Typography fontSize={14} color="text.secondary" mb={3}>
-            Download a complete copy of all your data — profile, tickets, device requests, notifications, and assigned assets — as a JSON file.
+            Download a complete copy of all your data — profile, tickets, device requests, notifications, and assigned assets — as a PDF file.
           </Typography>
           <Button
             variant="outlined"

@@ -23,6 +23,67 @@ import api, { getFileUrl } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
 const ROLES = ['employee', 'hod', 'admin', 'technician'];
+const INPUT_SX = { '& .MuiOutlinedInput-root': { borderRadius: '12px' } };
+
+function EditUserDialog({ open, onClose, target, departments, saving, onSave }) {
+  const [form, setForm] = useState({ role: '', department: '', phone: '', employeeId: '' });
+
+  useEffect(() => {
+    if (target) setForm({ role: target.role, department: target.department || '', phone: target.phone || '', employeeId: target.employeeId || '' });
+  }, [target]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"
+      slotProps={{ paper: { sx: { borderRadius: '24px', border: 1, borderColor: 'divider' } } }}>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 0 }}>
+        <Box>
+          <Typography fontWeight={900} fontSize={20}>Edit User</Typography>
+          <Typography fontSize={13} color="text.secondary">{target?.name}</Typography>
+        </Box>
+        <IconButton onClick={onClose} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
+      </DialogTitle>
+      <DialogContent sx={{ pt: 2 }}>
+        <Box component="form" onSubmit={handleSubmit}>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <FormControl fullWidth sx={INPUT_SX}>
+              <InputLabel>Role</InputLabel>
+              <Select value={form.role} label="Role" onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
+                {ROLES.map(r => <MenuItem key={r} value={r} sx={{ textTransform: 'capitalize' }}>{r.replace(/_/g, ' ')}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <FormControl fullWidth sx={INPUT_SX}>
+              <InputLabel>Department</InputLabel>
+              <Select value={form.department || ''} label="Department" onChange={e => setForm(f => ({ ...f, department: e.target.value }))}>
+                {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <TextField fullWidth label="Phone" value={form.phone}
+                onChange={e => setForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
+                sx={INPUT_SX}
+                slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
+              <TextField fullWidth label="Employee ID" value={form.employeeId}
+                onChange={e => setForm(f => ({ ...f, employeeId: e.target.value }))} sx={INPUT_SX}
+                slotProps={{ input: { startAdornment: <BadgeRounded sx={{ fontSize: 16, mr: 0.8, color: 'text.disabled' }} /> } }} />
+            </Box>
+          </Stack>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+            <Button onClick={onClose} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
+            <Button type="submit" variant="contained" disabled={saving}
+              sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+}
 const ROLE_COLORS = {
   admin:      { color: 'text.primary', bg: 'rgba(17,24,39,0.13)' },
   hod:        { color: '#A78BFA', bg: 'rgba(17,24,39,0.13)' },
@@ -153,7 +214,6 @@ export default function UserManagement() {
   // Edit dialog
   const [editOpen, setEditOpen]     = useState(false);
   const [editTarget, setEditTarget] = useState(null);
-  const [editForm, setEditForm]     = useState({ role: '', department: '', phone: '', employeeId: '' });
   const [editSaving, setEditSaving] = useState(false);
   const [departments, setDepartments] = useState([]);
 
@@ -389,7 +449,6 @@ export default function UserManagement() {
   // ── Edit user ─────────────────────────────────────────────────────────────────
   const openEdit = (user) => {
     setEditTarget(user);
-    setEditForm({ role: user.role, department: user.department, phone: user.phone || '', employeeId: user.employeeId || '' });
     setEditOpen(true);
   };
 
@@ -427,15 +486,14 @@ export default function UserManagement() {
 
   const { refreshUser } = useAuth();
 
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    if (editForm.phone && editForm.phone.length !== 10) {
+  const handleEdit = async (formData) => {
+    if (formData.phone && formData.phone.length !== 10) {
       setSnackbar({ open: true, message: 'Phone number must be exactly 10 digits.', severity: 'error' });
       return;
     }
     setEditSaving(true);
     try {
-      const { data } = await api.put(`/users/${editTarget._id}`, editForm);
+      const { data } = await api.put(`/users/${editTarget._id}`, formData);
       setUsers(prev => prev.map(u => u._id === data._id ? data : u));
       if (profileUser?._id === data._id) setProfileUser(data);
       setEditOpen(false);
@@ -858,43 +916,45 @@ export default function UserManagement() {
       </Dialog>
 
       {/* ── CSV Import Dialog ────────────────────────────────────────────────── */}
-      <Dialog open={csvOpen} onClose={() => !csvImporting && setCsvOpen(false)} maxWidth="md" fullWidth
+      <Dialog open={csvOpen} onClose={() => !csvImporting && setCsvOpen(false)} maxWidth="sm" fullWidth
         slotProps={{ paper: { sx: { borderRadius: '20px' } } }}>
-        <DialogTitle component="div" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
+        <DialogTitle component="div" sx={{ px: 3, py: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <UploadFileRounded sx={{ color: 'text.primary' }} />
+            <Box sx={{ width: 38, height: 38, borderRadius: '10px', bgcolor: 'rgba(17,24,39,0.10)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+              <UploadFileRounded sx={{ color: 'text.primary', fontSize: 20 }} />
+            </Box>
             <Box>
-              <Typography fontWeight={800} fontSize={18}>Import Users from CSV</Typography>
-              <Typography fontSize={12} color="text.secondary">Bulk-create employees and send invite links automatically</Typography>
+              <Typography fontWeight={800} fontSize={17} sx={{ lineHeight: 1.3 }}>Import Users from CSV</Typography>
+              <Typography fontSize={12} color="text.secondary">Bulk-create employees and send invite links</Typography>
             </Box>
           </Box>
-          <IconButton onClick={() => setCsvOpen(false)} disabled={csvImporting} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
+          <IconButton onClick={() => setCsvOpen(false)} disabled={csvImporting} size="small" sx={{ bgcolor: 'action.hover', borderRadius: '8px' }}><CloseRounded fontSize="small" /></IconButton>
         </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          {csvImporting && <LinearProgress sx={{ mb: 2, borderRadius: 2 }} />}
+        <DialogContent sx={{ px: 3, pt: 4, pb: 2 }}>
+          {csvImporting && <LinearProgress sx={{ mb: 2.5, borderRadius: 2 }} />}
           {!csvResult && (
-            <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+            <Stack direction="row" gap={1.5} sx={{ mb: 2.5, flexWrap: 'wrap' }}>
               <Button variant="outlined" startIcon={<DownloadRounded />} onClick={downloadTemplate}
-                sx={{ borderRadius: '10px', fontWeight: 700, borderColor: 'divider', color: 'text.secondary' }}>
+                sx={{ borderRadius: '10px', fontWeight: 700, borderColor: 'divider', color: 'text.secondary', flex: 1 }}>
                 Download Template
               </Button>
               <Button component="label" variant="contained" startIcon={<UploadFileRounded />}
-                sx={{ borderRadius: '10px', fontWeight: 700, background: '#FBBF24', color: '#111827' }}>
+                sx={{ borderRadius: '10px', fontWeight: 700, background: '#FBBF24', color: '#111827', flex: 1 }}>
                 Choose CSV File
                 <input ref={csvInputRef} type="file" hidden accept=".csv"
                   onChange={e => { e.target.files[0] && handleCsvFile(e.target.files[0]); if (csvInputRef.current) csvInputRef.current.value = ''; }} />
               </Button>
-            </Box>
+            </Stack>
           )}
           {csvRows.length === 0 && !csvResult && (
-            <Paper sx={{ p: 2, borderRadius: '12px', bgcolor: 'action.hover', border: 1, borderColor: 'divider', mb: 2 }}>
-              <Typography fontSize={12} fontWeight={700} color="text.secondary" sx={{ mb: 1 }}>Expected columns:</Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+            <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '12px', bgcolor: 'action.hover' }}>
+              <Typography fontSize={12} fontWeight={700} color="text.secondary" sx={{ mb: 1.5 }}>Expected columns</Typography>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1.5 }}>
                 {['name *', 'email *', 'role', 'department *', 'phone'].map(c => (
-                  <Box key={c} sx={{ px: 1.5, py: 0.4, borderRadius: '8px', bgcolor: 'background.paper', border: 1, borderColor: 'divider', fontSize: 12, fontWeight: 700, fontFamily: 'monospace' }}>{c}</Box>
+                  <Box key={c} sx={{ px: 1.5, py: 0.5, borderRadius: '8px', bgcolor: 'background.paper', border: 1, borderColor: 'divider', fontSize: 12, fontWeight: 700, fontFamily: 'monospace' }}>{c}</Box>
                 ))}
               </Box>
-              <Typography fontSize={11} color="text.disabled" sx={{ mt: 1 }}>role defaults to "employee" if blank. Each user gets an invite email.</Typography>
+              <Typography fontSize={11} color="text.disabled">role defaults to "employee" if blank · each user gets an invite email</Typography>
             </Paper>
           )}
           {csvError && <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>{csvError}</Alert>}
@@ -1242,50 +1302,14 @@ export default function UserManagement() {
       </Dialog>
 
       {/* ── Edit User Dialog ─────────────────────────────────────────────────── */}
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: '24px', border: 1, borderColor: 'divider' } } }}>
-        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 0 }}>
-          <Box>
-            <Typography fontWeight={900} fontSize={20}>Edit User</Typography>
-            <Typography fontSize={13} color="text.secondary">{editTarget?.name}</Typography>
-          </Box>
-          <IconButton onClick={() => setEditOpen(false)} sx={{ bgcolor: 'action.hover', borderRadius: '10px' }}><CloseRounded /></IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <Box component="form" onSubmit={handleEdit}>
-            <Stack spacing={2} sx={{ mt: 1 }}>
-              <FormControl fullWidth sx={inputSx}>
-                <InputLabel>Role</InputLabel>
-                <Select value={editForm.role} label="Role" onChange={e => setEditForm(f => ({ ...f, role: e.target.value }))}>
-                  {ROLES.map(r => <MenuItem key={r} value={r} sx={{ textTransform: 'capitalize' }}>{r.replace(/_/g, ' ')}</MenuItem>)}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth sx={inputSx}>
-                <InputLabel>Department</InputLabel>
-                <Select value={editForm.department || ''} label="Department" onChange={e => setEditForm(f => ({ ...f, department: e.target.value }))}>
-                  {departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)}
-                </Select>
-              </FormControl>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-                <TextField fullWidth label="Phone" value={editForm.phone}
-                  onChange={e => setEditForm(f => ({ ...f, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) }))}
-                  sx={inputSx}
-                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
-                <TextField fullWidth label="Employee ID" value={editForm.employeeId}
-                  onChange={e => setEditForm(f => ({ ...f, employeeId: e.target.value }))} sx={inputSx}
-                  slotProps={{ input: { startAdornment: <BadgeRounded sx={{ fontSize: 16, mr: 0.8, color: 'text.disabled' }} /> } }} />
-              </Box>
-            </Stack>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-              <Button onClick={() => setEditOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
-              <Button type="submit" variant="contained" disabled={editSaving}
-                sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '10px', px: 3 }}>
-                {editSaving ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </Box>
-          </Box>
-        </DialogContent>
-      </Dialog>
+      <EditUserDialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        target={editTarget}
+        departments={departments}
+        saving={editSaving}
+        onSave={handleEdit}
+      />
 
       {/* Offboarding confirm dialog */}
       <Dialog open={!!offboardTarget} onClose={() => setOffboardTarget(null)} maxWidth="xs" fullWidth

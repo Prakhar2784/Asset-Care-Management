@@ -35,16 +35,6 @@ const RupeeIcon = (props) => (
   </Box>
 );
 
-const TYPE_OPTIONS = ["Preventive", "Corrective", "Inspection", "Upgrade", "Other"];
-const STATUS_OPTIONS = ["Scheduled", "In Progress", "Completed", "Cancelled"];
-
-const TYPE_COLOR = {
-  Preventive:  { bg: "rgba(34,197,94,0.12)",  color: "#22C55E" },
-  Corrective:  { bg: "rgba(245,158,11,0.12)", color: "#F59E0B" },
-  Inspection:  { bg: "rgba(59,130,246,0.12)", color: "#3B82F6" },
-  Upgrade:     { bg: "rgba(17,24,39,0.12)", color: "text.primary" },
-  Other:       { bg: "rgba(107,114,128,0.12)",color: "#6B7280" },
-};
 
 const STATUS_COLOR = {
   Scheduled:    { bg: "rgba(107,114,128,0.12)", color: "#6B7280" },
@@ -63,7 +53,7 @@ const KPI_DEFS = [
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
 
 const EMPTY_FORM = {
-  type: "Preventive", status: "Scheduled", serviceDate: "", description: "",
+  serviceDate: "", description: "",
   technicianName: "", technicianContact: "", vendor: "", cost: "", nextServiceDate: "", notes: "",
 };
 
@@ -90,6 +80,7 @@ export default function MaintenanceLogs() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [formError, setFormError] = useState("");
 
   const [serviceCenters, setServiceCenters] = useState([]);
   const [scDialogOpen, setScDialogOpen] = useState(false);
@@ -141,13 +132,13 @@ export default function MaintenanceLogs() {
   const openAdd = () => {
     setEditLog(null);
     setForm(EMPTY_FORM);
+    setFormError("");
     setDialogOpen(true);
   };
   const openEdit = (log) => {
     setEditLog(log);
+    setFormError("");
     setForm({
-      type: log.type || "Preventive",
-      status: log.status || "Scheduled",
       serviceDate: log.serviceDate ? log.serviceDate.slice(0, 10) : "",
       description: log.description || "",
       technicianName: log.technicianName || "",
@@ -161,6 +152,11 @@ export default function MaintenanceLogs() {
   };
 
   const handleSave = async () => {
+    if (!form.serviceDate) { setFormError("Service Date is required."); return; }
+    const yr = parseInt(form.serviceDate.slice(0, 4), 10);
+    if (isNaN(yr) || yr < 1990 || yr > 2099) { setFormError("Please enter a valid year for Service Date (1990–2099)."); return; }
+    if (!form.description.trim()) { setFormError("Description is required."); return; }
+    setFormError("");
     setSaving(true);
     try {
       if (editLog) {
@@ -372,7 +368,6 @@ export default function MaintenanceLogs() {
                 ) : (
                   <Box>
                     {logs.map((log, idx) => {
-                      const tc = TYPE_COLOR[log.type] || TYPE_COLOR.Other;
                       const sc = STATUS_COLOR[log.status] || STATUS_COLOR.Scheduled;
                       return (
                         <Box key={log._id}>
@@ -382,8 +377,8 @@ export default function MaintenanceLogs() {
                             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", pt: 0.5 }}>
                               <Box sx={{
                                 width: 10, height: 10, borderRadius: "50%",
-                                bgcolor: tc.color, flexShrink: 0,
-                                boxShadow: `0 0 0 3px ${tc.bg}`,
+                                bgcolor: sc.color, flexShrink: 0,
+                                boxShadow: `0 0 0 3px ${sc.bg}`,
                               }} />
                               {idx < logs.length - 1 && (
                                 <Box sx={{ flex: 1, width: 2, bgcolor: "divider", mt: 0.5 }} />
@@ -394,11 +389,6 @@ export default function MaintenanceLogs() {
                             <Box sx={{ flex: 1, minWidth: 0 }}>
                               <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1, flexWrap: "wrap", mb: 1 }}>
                                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                                  <Chip
-                                    label={log.type}
-                                    size="small"
-                                    sx={{ fontSize: 11, fontWeight: 700, borderRadius: "7px", bgcolor: tc.bg, color: tc.color }}
-                                  />
                                   <Chip
                                     label={log.status}
                                     size="small"
@@ -530,24 +520,8 @@ export default function MaintenanceLogs() {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth size="small" sx={inputSx}>
-                <InputLabel>Type</InputLabel>
-                <Select value={form.type} label="Type" onChange={e => setForm(f => ({ ...f, type: e.target.value }))}>
-                  {TYPE_OPTIONS.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth size="small" sx={inputSx}>
-                <InputLabel>Status</InputLabel>
-                <Select value={form.status} label="Status" onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-                  {STATUS_OPTIONS.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                fullWidth size="small" label="Service Date" type="date" sx={inputSx}
+                fullWidth size="small" label="Service Date *" type="date" sx={inputSx}
                 value={form.serviceDate}
                 onChange={e => setForm(f => ({ ...f, serviceDate: e.target.value }))}
                 slotProps={{
@@ -585,7 +559,7 @@ export default function MaintenanceLogs() {
             </Grid>
             <Grid size={{ xs: 12 }}>
               <TextField
-                fullWidth size="small" label="Description" multiline rows={2} sx={inputSx}
+                fullWidth size="small" label="Description *" multiline rows={2} sx={inputSx}
                 value={form.description}
                 onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 slotProps={{
@@ -706,7 +680,11 @@ export default function MaintenanceLogs() {
           </Grid>
         </DialogContent>
 
-        <Box sx={{ px: 3, pb: 3, display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
+        <Box sx={{ px: 3, pb: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
+          {formError && (
+            <Typography fontSize={13} fontWeight={700} color="error">{formError}</Typography>
+          )}
+          <Box sx={{ display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
           <Button onClick={() => setDialogOpen(false)} sx={{ fontWeight: 700, borderRadius: "12px" }}>
             Cancel
           </Button>
@@ -722,6 +700,7 @@ export default function MaintenanceLogs() {
           >
             {saving ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : editLog ? "Save Changes" : "Add Log"}
           </Button>
+          </Box>
         </Box>
       </Dialog>
 

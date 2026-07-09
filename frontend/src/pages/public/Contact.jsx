@@ -35,9 +35,7 @@ const Contact = () => {
       name: form.name.value,
       email: form.email.value,
       phone: form.phone.value,
-      orgSize: form.orgSize.value,
-      inquiryType: form.inquiryType.value,
-      message: form.message.value,
+message: form.message.value,
     };
     try {
       await api.post('/contact', payload);
@@ -280,29 +278,6 @@ const Contact = () => {
                       maxLength={10} pattern="[0-9]{10}"
                       onInput={e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); }}
                       title="Please enter a valid 10-digit phone number" />
-                  </div>
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
-                  <div className="input-group">
-                    <label className="input-label">Organisation Size<span className="required-mark">*</span></label>
-                    <select name="orgSize" className="contact-input" required defaultValue="">
-                      <option value="" disabled>Select team size</option>
-                      <option>1 – 50 employees</option>
-                      <option>51 – 200 employees</option>
-                      <option>201 – 500 employees</option>
-                      <option>500+ employees</option>
-                    </select>
-                  </div>
-                  <div className="input-group">
-                    <label className="input-label">Inquiry Type</label>
-                    <select name="inquiryType" className="contact-input" defaultValue="Request a Demo">
-                      <option>Request a Demo</option>
-                      <option>General Inquiry</option>
-                      <option>Pricing Information</option>
-                      <option>Technical Support</option>
-                      <option>Partnership</option>
-                    </select>
                   </div>
                 </div>
 
