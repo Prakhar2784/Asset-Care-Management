@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create a configured instance of axios
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Pointing to your Node.js server
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 // Function to dynamically resolve tenant ID
