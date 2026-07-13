@@ -19,6 +19,18 @@ const { protect, authorize, requirePermission } = require('../middleware/authMid
 const { assetDocUpload } = require('../middleware/upload');
 
 // Must be before /:id to avoid route conflict
+router.get('/next-tag', protect, async (req, res) => {
+  try {
+    const Asset = require('../models/Asset');
+    const assets = await Asset.find({ assetTag: /^ITV\d+$/i }).select('assetTag');
+    const max = assets.reduce((m, a) => {
+      const n = parseInt(a.assetTag.replace(/^ITV/i, ''), 10);
+      return n > m ? n : m;
+    }, 0);
+    const next = `ITV${String(max + 1).padStart(3, '0')}`;
+    res.json({ nextTag: next });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
 router.get('/myassets',    protect, getMyAssets);
 router.get('/all-active',  protect, getActiveAssets);
 router.get('/trash',       protect, requirePermission('View All Assets'), getDeletedAssets);

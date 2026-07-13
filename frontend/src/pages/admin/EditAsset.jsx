@@ -3,7 +3,8 @@ import {
   Alert, Box, Button, Chip, Divider, Grid, MenuItem,
   Paper, Snackbar, TextField, Typography, CircularProgress,
   LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItemButton, ListItemText, InputAdornment, IconButton
+  List, ListItemButton, ListItemText, InputAdornment, IconButton,
+  FormControl, InputLabel, Select
 } from "@mui/material";
 import {
   SaveRounded, UploadFileRounded, CheckCircleRounded,
@@ -263,15 +264,19 @@ const EditAsset = () => {
               <TextField required fullWidth name="name" value={formData.name} onChange={handleChange}
                 sx={inputSx} label="Asset Name *" placeholder="e.g. Dell Latitude 5420" />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <TextField fullWidth name="assetTag" value={formData.assetTag || ""} onChange={handleChange}
+                sx={inputSx} label="Asset ID" placeholder="e.g. ITV001" />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField fullWidth name="vendor" value={formData.vendor} onChange={handleChange}
                 sx={inputSx} label="OEM / Brand" placeholder="e.g. Dell" />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField fullWidth name="modelNumber" value={formData.modelNumber} onChange={handleChange}
                 sx={inputSx} label="Model Number" placeholder="e.g. LAT-5420-X" />
             </Grid>
-            <Grid size={{ xs: 12, md: 4 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField required fullWidth name="serialNumber" value={formData.serialNumber} onChange={handleChange}
                 sx={inputSx} label="Serial Number / Service Tag *" placeholder="e.g. 8JZ91A" />
             </Grid>
@@ -399,21 +404,19 @@ const EditAsset = () => {
           <SectionLabel number="4" title="Deployment" subtitle="Assign to a department." />
           <Grid container spacing={2.5}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                required
-                fullWidth
-                select={currentUser?.role !== 'hod'}
-                disabled={currentUser?.role === 'hod'}
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                sx={inputSx}
-                label="Target Department *"
-              >
-                {currentUser?.role !== 'hod' ? (
-                  departments.map(d => <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>)
-                ) : null}
-              </TextField>
+              <FormControl fullWidth required sx={inputSx} disabled={currentUser?.role === 'hod'}>
+                <InputLabel>Target Department *</InputLabel>
+                <Select
+                  name="department"
+                  value={formData.department}
+                  label="Target Department *"
+                  onChange={handleChange}
+                >
+                  {departments.map(d => (
+                    <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}

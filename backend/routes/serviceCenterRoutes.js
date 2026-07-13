@@ -45,7 +45,7 @@ router.get('/warranty-assets', protect, async (req, res) => {
     const filter = { warrantyEnd: { $gte: now } };
     if (category) filter.category = category;
     const assets = await Asset.find(filter)
-      .select('assetId name category serialNumber warrantyStart warrantyEnd assignedEmployeeName assignedDepartment status')
+      .select('assetTag name category serialNumber warrantyStart warrantyEnd assignedEmployeeName assignedDepartment status')
       .sort({ warrantyEnd: 1 });
     res.json(assets);
   } catch (err) { res.status(500).json({ message: err.message }); }

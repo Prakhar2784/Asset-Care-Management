@@ -265,7 +265,7 @@ export default function ServiceCenters() {
                       const chip = warrantyChip(a.warrantyEnd);
                       return (
                         <TableRow key={a._id} hover>
-                          <TableCell sx={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, color: "text.primary" }}>{a.assetId}</TableCell>
+                          <TableCell sx={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, color: "text.primary" }}>{a.assetTag || "—"}</TableCell>
                           <TableCell sx={{ fontSize: 13, fontWeight: 600 }}>{a.name}</TableCell>
                           <TableCell><Chip label={a.category} size="small" sx={{ fontSize: 11, fontWeight: 600, bgcolor: "rgba(59,130,246,0.1)", color: "#3B82F6" }} /></TableCell>
                           <TableCell sx={{ fontSize: 12, fontFamily: "monospace" }}>{a.serialNumber}</TableCell>

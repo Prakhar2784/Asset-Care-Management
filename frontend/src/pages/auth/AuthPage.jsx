@@ -537,10 +537,28 @@ const AuthPage = () => {
               {view === "login" && "Welcome Back"}
               {view === "forgot" && "Reset Credentials"}
             </h2>
-            <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "32px", lineHeight: 1.6, fontWeight: 600 }}>
+            <p style={{ fontSize: "15px", color: "var(--text-muted)", marginBottom: "20px", lineHeight: 1.6, fontWeight: 600 }}>
               {view === "login" && pageContent[role].rightLoginSub}
               {view === "forgot" && "Enter your registered email to receive recovery instructions."}
             </p>
+
+            {view === "login" && (
+              <button
+                type="button"
+                onClick={() => navigate('/register-company')}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "14px 18px", marginBottom: "24px",
+                  background: "rgba(251,191,36,0.10)", border: "1.5px solid rgba(251,191,36,0.35)",
+                  borderRadius: "14px", cursor: "pointer", transition: "all 0.2s ease",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(251,191,36,0.18)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(251,191,36,0.10)"}
+              >
+                <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-muted)" }}>New company?</span>
+                <span style={{ fontSize: "14px", fontWeight: 900, color: "#FBBF24" }}>Get Started Free →</span>
+              </button>
+            )}
 
             {view === "login" && (
               <>
@@ -626,15 +644,6 @@ const AuthPage = () => {
             {view === "forgot" && (
               <div style={{ color: "var(--text-muted)", fontSize: "14px", fontWeight: "600", textAlign: "center" }}>
                 <button type="button" className="auth-link" onClick={() => handleViewChange("login")}>← Back to Login</button>
-              </div>
-            )}
-
-            {view === "login" && (
-              <div style={{
-                marginTop: "20px", paddingTop: "20px", borderTop: "1px solid var(--border-color, rgba(17,24,39,0.15))",
-                textAlign: "center", fontSize: "14px", fontWeight: 600, color: "var(--text-muted)"
-              }}>
-                New company? <button type="button" className="auth-link" onClick={() => navigate('/register-company')}>Get Started Free</button>
               </div>
             )}
 
