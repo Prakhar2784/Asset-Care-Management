@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Avatar,
   Box,
@@ -12,7 +12,8 @@ import {
   TextField,
   Typography,
   CircularProgress,
-  Grid
+  Grid,
+  TablePagination
 } from "@mui/material";
 import {
   CheckRounded,
@@ -43,6 +44,13 @@ const Approvals = () => {
   const [processing, setProcessing] = useState(false);
 
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const paginatedTickets = useMemo(
+    () => tickets.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [tickets, page, rowsPerPage]
+  );
 
   useEffect(() => {
     fetchTickets();
@@ -189,7 +197,7 @@ const Approvals = () => {
             </Paper>
           ) : (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-              {tickets.map((item) => {
+              {paginatedTickets.map((item) => {
                 const displayStatus = getTicketDisplayStatus(item.status);
                 const statusStyle = getStatusStyle(displayStatus);
                 const isCompleted = displayStatus !== "Pending";
@@ -236,6 +244,18 @@ const Approvals = () => {
                 );
               })}
             </Box>
+          )}
+          {!ticketsLoading && tickets.length > 0 && (
+            <TablePagination
+              component="div"
+              count={tickets.length}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              sx={{ color: "text.secondary" }}
+            />
           )}
         </>
 

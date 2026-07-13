@@ -1,10 +1,10 @@
-﻿import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Button, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, MenuItem, Select, FormControl,
   InputLabel, Alert, Skeleton, Tooltip, Stack, InputAdornment, Snackbar,
-  Chip, LinearProgress
+  Chip, LinearProgress, TablePagination
 } from '@mui/material';
 import {
   ReceiptRounded, AddRounded, EditRounded, DeleteRounded, SearchRounded,
@@ -32,6 +32,8 @@ export default function InvoiceManagement() {
   const [search, setSearch]     = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [addOpen, setAddOpen]   = useState(false);
   const [editTarget, setEditTarget] = useState(null);
@@ -42,6 +44,11 @@ export default function InvoiceManagement() {
   const fileRef = useRef(null);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const paginatedInvoices = useMemo(
+    () => invoices.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [invoices, page, rowsPerPage]
+  );
 
   const fetchInvoices = async () => {
     setLoading(true);
@@ -56,7 +63,7 @@ export default function InvoiceManagement() {
     } finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchInvoices(); }, [search, statusFilter]);
+  useEffect(() => { fetchInvoices(); setPage(0); }, [search, statusFilter]);
 
   const openAdd = () => { setForm(defaultForm); setFile(null); setFormError(''); setEditTarget(null); setAddOpen(true); };
   const openEdit = (inv) => {
@@ -178,7 +185,7 @@ export default function InvoiceManagement() {
             <TableBody>
               {invoices.length === 0 ? (
                 <TableRow><TableCell colSpan={8} sx={{ textAlign: 'center', py: 6, color: 'text.disabled', fontWeight: 600 }}>No invoices found. Add one to get started.</TableCell></TableRow>
-              ) : invoices.map(inv => {
+              ) : paginatedInvoices.map(inv => {
                 const sc = STATUS_COLORS[inv.status] || STATUS_COLORS.Unpaid;
                 return (
                   <TableRow key={inv._id} hover sx={{ '&:last-child td': { borderBottom: 0 } }}>
@@ -220,6 +227,16 @@ export default function InvoiceManagement() {
               })}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={invoices.length}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+          />
         </TableContainer>
       )}
 

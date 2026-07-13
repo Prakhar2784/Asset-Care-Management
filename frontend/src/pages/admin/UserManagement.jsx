@@ -6,7 +6,7 @@ import {
   TextField, MenuItem, Select, FormControl, InputLabel, Alert, Skeleton,
   Tooltip, Stack, InputAdornment, Snackbar, Tabs, Tab,
   Drawer, Divider, CircularProgress, ToggleButtonGroup, ToggleButton, Avatar,
-  DialogActions, LinearProgress, Checkbox, TableSortLabel
+  DialogActions, LinearProgress, Checkbox, TableSortLabel, TablePagination
 } from '@mui/material';
 import {
   PeopleRounded, EditRounded, BlockRounded, CheckCircleRounded,
@@ -196,6 +196,8 @@ export default function UserManagement() {
 
   // Sorting
   const [sort, setSort] = useState({ col: 'name', dir: 'asc' });
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   // Selection / bulk actions
   const [selected, setSelected]           = useState(new Set());
@@ -356,6 +358,11 @@ export default function UserManagement() {
       return 0;
     });
   }, [users, search, activeTab, sort]);
+
+  const paginatedUsers = useMemo(
+    () => filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [filtered, page, rowsPerPage]
+  );
 
   const toggleSort = (col) => {
     setSort(s => ({ col, dir: s.col === col && s.dir === 'asc' ? 'desc' : 'asc' }));
@@ -610,13 +617,13 @@ export default function UserManagement() {
       {/* ── Search ──────────────────────────────────────────────────────────── */}
       <Paper sx={{ p: 2, borderRadius: '16px', border: 1, borderColor: 'divider', mb: 3 }}>
         <TextField fullWidth placeholder="Search by name, email or department..."
-          value={search} onChange={e => setSearch(e.target.value)} sx={inputSx}
+          value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} sx={inputSx}
           slotProps={{ input: { startAdornment: <SearchRounded sx={{ color: 'text.disabled', mr: 1 }} /> } }} />
       </Paper>
 
       {/* ── Role tabs ───────────────────────────────────────────────────────── */}
       <Paper sx={{ borderRadius: '16px', border: 1, borderColor: 'divider', mb: 3, overflow: 'hidden' }}>
-        <Tabs value={activeTab} onChange={(_, v) => { setActiveTab(v); clearSelection(); }} sx={{
+        <Tabs value={activeTab} onChange={(_, v) => { setActiveTab(v); clearSelection(); setPage(0); }} sx={{
           px: 1,
           '& .MuiTabs-indicator': { bgcolor: 'text.primary', borderRadius: '2px', height: 3 },
           '& .MuiTab-root': { fontWeight: 700, fontSize: 13, textTransform: 'none', minHeight: 48, color: 'text.secondary' },
@@ -697,7 +704,7 @@ export default function UserManagement() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={7} sx={{ textAlign: 'center', py: 6, color: 'text.disabled', fontWeight: 600 }}>No users found.</TableCell></TableRow>
-              ) : filtered.map(user => {
+              ) : paginatedUsers.map(user => {
                 const isSelected = selected.has(user._id);
                 const isMe = me?._id === user._id || me?.email === user.email;
                 return (
@@ -769,6 +776,16 @@ export default function UserManagement() {
               })}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filtered.length}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+          />
         </TableContainer>
       )}
 

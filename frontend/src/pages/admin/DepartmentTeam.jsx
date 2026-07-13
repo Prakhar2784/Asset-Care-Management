@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Avatar, Chip, TextField, InputAdornment,
-  Stack, Skeleton, MenuItem, Select, FormControl, InputLabel,
+  Stack, Skeleton, MenuItem, Select, FormControl, InputLabel, TablePagination,
 } from '@mui/material';
 import {
   PeopleRounded, SearchRounded, EmailRounded,
@@ -39,6 +39,8 @@ export default function DepartmentTeam() {
   const members = data || [];
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const stats = useMemo(() => {
     const active = members.filter(m => m.isActive !== false).length;
@@ -60,6 +62,11 @@ export default function DepartmentTeam() {
       return matchesSearch && matchesRole;
     });
   }, [members, search, roleFilter]);
+
+  const paginatedMembers = useMemo(
+    () => filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [filtered, page, rowsPerPage]
+  );
 
   const dept = currentUser?.department || 'Department';
 
@@ -101,13 +108,13 @@ export default function DepartmentTeam() {
           size="small"
           placeholder="Search by name, email or phone…"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => { setSearch(e.target.value); setPage(0); }}
           slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded fontSize="small" /></InputAdornment> } }}
           sx={{ flex: 1 }}
         />
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel>Role</InputLabel>
-          <Select value={roleFilter} label="Role" onChange={e => setRoleFilter(e.target.value)}>
+          <Select value={roleFilter} label="Role" onChange={e => { setRoleFilter(e.target.value); setPage(0); }}>
             <MenuItem value="all">All Roles</MenuItem>
             {Object.entries(ROLE_STYLE).map(([r, s]) => (
               <MenuItem key={r} value={r}>{s.label}</MenuItem>
@@ -146,7 +153,7 @@ export default function DepartmentTeam() {
                     </TableCell>
                   </TableRow>
                 )
-                : filtered.map(member => {
+                : paginatedMembers.map(member => {
                     const rs = ROLE_STYLE[member.role] || { label: member.role, color: '#6B7280', bg: 'rgba(107,114,128,0.12)' };
                     const isActive = member.isActive !== false;
                     return (
@@ -219,6 +226,16 @@ export default function DepartmentTeam() {
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          component="div"
+          count={filtered.length}
+          page={page}
+          onPageChange={(_, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+          rowsPerPageOptions={[5, 10, 25, 50]}
+          sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+        />
       </Paper>
     </Box>
   );

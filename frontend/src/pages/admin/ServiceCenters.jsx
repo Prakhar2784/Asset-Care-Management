@@ -4,7 +4,7 @@ import {
   IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Stack,
   MenuItem, Select, FormControl, InputLabel, CircularProgress, Tooltip,
   Table, TableBody, TableCell, TableHead, TableRow, Tabs, Tab, Divider,
-  Autocomplete,
+  Autocomplete, TablePagination,
 } from "@mui/material";
 import {
   SearchRounded, AddRounded, EditRounded, DeleteRounded, CloseRounded,
@@ -45,6 +45,10 @@ export default function ServiceCenters() {
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
+  const [centerPage, setCenterPage] = useState(0);
+  const [centerRowsPerPage, setCenterRowsPerPage] = useState(9);
+  const [assetPage, setAssetPage] = useState(0);
+  const [assetRowsPerPage, setAssetRowsPerPage] = useState(10);
 
   // Dialog
   const [open, setOpen] = useState(false);
@@ -109,6 +113,16 @@ export default function ServiceCenters() {
     warrantyAssets.filter(a => catFilter === "All" || a.category === catFilter),
     [warrantyAssets, catFilter]);
 
+  const paginatedCenters = useMemo(
+    () => filteredCenters.slice(centerPage * centerRowsPerPage, centerPage * centerRowsPerPage + centerRowsPerPage),
+    [filteredCenters, centerPage, centerRowsPerPage]
+  );
+
+  const paginatedAssets = useMemo(
+    () => filteredAssets.slice(assetPage * assetRowsPerPage, assetPage * assetRowsPerPage + assetRowsPerPage),
+    [filteredAssets, assetPage, assetRowsPerPage]
+  );
+
   const expiringSoon = warrantyAssets.filter(a => warrantyDaysLeft(a.warrantyEnd) <= 30).length;
   const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
 
@@ -160,7 +174,7 @@ export default function ServiceCenters() {
         {/* Tab 0 — Service Centers */}
         {tab === 0 && (
           <Box sx={{ p: 2.5 }}>
-            <TextField placeholder="Search by name or city…" value={search} onChange={e => setSearch(e.target.value)} size="small" sx={{ ...inputSx, mb: 2, width: 320 }}
+            <TextField placeholder="Search by name or city…" value={search} onChange={e => { setSearch(e.target.value); setCenterPage(0); }} size="small" sx={{ ...inputSx, mb: 2, width: 320 }}
               slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchRounded sx={{ fontSize: 18, color: "text.disabled" }} /></InputAdornment> } }} />
 
             {loading ? (
@@ -172,7 +186,7 @@ export default function ServiceCenters() {
               </Box>
             ) : (
               <Grid container spacing={2}>
-                {filteredCenters.map(c => (
+                {paginatedCenters.map(c => (
                   <Grid size={{ xs: 12, md: 6, lg: 4 }} key={c._id}>
                     <Paper variant="outlined" sx={{ p: 2.5, borderRadius: "16px", height: "100%", display: "flex", flexDirection: "column", gap: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
@@ -232,6 +246,18 @@ export default function ServiceCenters() {
                 ))}
               </Grid>
             )}
+            {!loading && filteredCenters.length > 0 && (
+              <TablePagination
+                component="div"
+                count={filteredCenters.length}
+                page={centerPage}
+                onPageChange={(_, newPage) => setCenterPage(newPage)}
+                rowsPerPage={centerRowsPerPage}
+                onRowsPerPageChange={(e) => { setCenterRowsPerPage(parseInt(e.target.value, 10)); setCenterPage(0); }}
+                rowsPerPageOptions={[9, 18, 36]}
+                sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+              />
+            )}
           </Box>
         )}
 
@@ -241,7 +267,7 @@ export default function ServiceCenters() {
             <Box sx={{ display: "flex", gap: 2, mb: 2, flexWrap: "wrap" }}>
               <FormControl size="small" sx={{ ...inputSx, minWidth: 180 }}>
                 <InputLabel>Category</InputLabel>
-                <Select value={catFilter} label="Category" onChange={e => setCatFilter(e.target.value)}>
+                <Select value={catFilter} label="Category" onChange={e => { setCatFilter(e.target.value); setAssetPage(0); }}>
                   <MenuItem value="All">All Categories</MenuItem>
                   {presentCategories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
                 </Select>
@@ -267,7 +293,7 @@ export default function ServiceCenters() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {filteredAssets.map(a => {
+                    {paginatedAssets.map(a => {
                       const chip = warrantyChip(a.warrantyEnd);
                       return (
                         <TableRow key={a._id} hover>
@@ -286,6 +312,16 @@ export default function ServiceCenters() {
                     })}
                   </TableBody>
                 </Table>
+                <TablePagination
+                  component="div"
+                  count={filteredAssets.length}
+                  page={assetPage}
+                  onPageChange={(_, newPage) => setAssetPage(newPage)}
+                  rowsPerPage={assetRowsPerPage}
+                  onRowsPerPageChange={(e) => { setAssetRowsPerPage(parseInt(e.target.value, 10)); setAssetPage(0); }}
+                  rowsPerPageOptions={[5, 10, 25, 50]}
+                  sx={{ borderTop: "1px solid", borderColor: "divider", color: "text.secondary" }}
+                />
               </Box>
             )}
           </Box>
