@@ -401,7 +401,7 @@ const Tickets = () => {
             </IconButton>
           </Tooltip>
           {!isTechnician && (
-            <Button variant="contained" startIcon={<AddRounded />} onClick={() => setRaiseOpen(true)}
+            <Button variant="contained" startIcon={<AddRounded />} onClick={() => { setError(null); setRaiseOpen(true); }}
               sx={{ background: '#FBBF24', color: '#111827', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none' }}>
               Raise Ticket
             </Button>

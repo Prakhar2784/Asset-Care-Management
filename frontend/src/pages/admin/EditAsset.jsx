@@ -11,7 +11,7 @@ import {
   DeleteRounded, CloseRounded, ArrowBackRounded, EditRounded,
 } from "@mui/icons-material";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "../../api/axios";
+import api, { getFileUrl } from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 
 const SectionLabel = ({ number, title, subtitle }) => (
@@ -81,6 +81,7 @@ const EditAsset = () => {
   const [serviceCenters, setServiceCenters] = useState([]);
   const [scDialogOpen, setScDialogOpen] = useState(false);
   const [docs, setDocs] = useState({});
+  const [existingDocs, setExistingDocs] = useState({});
 
   // Fetch asset data on mount
   useEffect(() => {
@@ -120,6 +121,9 @@ const EditAsset = () => {
           servicePartnerContact: a.servicePartnerContact || "",
         });
         setCustomFields(a.customFields || {});
+        const byType = {};
+        (a.documents || []).forEach(d => { byType[d.docType] = d; });
+        setExistingDocs(byType);
       } catch {
         setError("Failed to load asset.");
       } finally {
@@ -205,7 +209,7 @@ const EditAsset = () => {
     }
   };
 
-  const docCount = Object.keys(docs).length;
+  const docCount = new Set([...Object.keys(docs), ...Object.keys(existingDocs)]).size;
   const pct = getCompletionPercentage();
 
   if (loading) {
@@ -418,6 +422,11 @@ const EditAsset = () => {
                 </Select>
               </FormControl>
             </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField fullWidth name="location" value={formData.location}
+                onChange={handleChange} sx={inputSx} label="Location"
+                placeholder="e.g. 4th Floor, Bengaluru Office" />
+            </Grid>
             <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}
                 onChange={handleChange} sx={inputSx} label="Notes (optional)"
@@ -438,15 +447,17 @@ const EditAsset = () => {
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
             {DOC_TYPES.map(({ key, label, accept }) => {
               const file = docs[key];
+              const existing = existingDocs[key];
+              const attached = file || existing;
               return (
                 <Box key={key} sx={{
                   p: 2, borderRadius: "14px", border: "1.5px dashed",
-                  borderColor: file ? "#111827" : "divider",
-                  bgcolor: file ? "rgba(17,24,39,0.04)" : "background.default",
+                  borderColor: attached ? "#111827" : "divider",
+                  bgcolor: attached ? "rgba(17,24,39,0.04)" : "background.default",
                   display: "flex", flexDirection: "column", gap: 1, transition: "all 0.2s ease",
                 }}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: file ? "#111827" : "text.secondary" }}>{label}</Typography>
+                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: attached ? "#111827" : "text.secondary" }}>{label}</Typography>
                     {file && (
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                         <CheckCircleRounded sx={{ fontSize: 14, color: "text.primary" }} />
@@ -461,6 +472,19 @@ const EditAsset = () => {
                     <Typography sx={{ fontSize: 11.5, color: "text.secondary", fontWeight: 500, wordBreak: "break-all" }}>
                       {file.name.length > 28 ? file.name.substring(0, 28) + "…" : file.name}
                     </Typography>
+                  ) : existing ? (
+                    <>
+                      <Typography component="a" href={getFileUrl(existing.url)} target="_blank" rel="noopener noreferrer"
+                        sx={{ fontSize: 11.5, color: "text.secondary", fontWeight: 500, wordBreak: "break-all", textDecoration: "underline" }}>
+                        {existing.originalName.length > 28 ? existing.originalName.substring(0, 28) + "…" : existing.originalName}
+                      </Typography>
+                      <Button component="label" size="small" startIcon={<UploadFileRounded sx={{ fontSize: 15 }} />}
+                        sx={{ justifyContent: "flex-start", borderRadius: "8px", fontWeight: 700, fontSize: 12, color: "text.secondary", p: 0, "&:hover": { color: "text.primary", bgcolor: "transparent" } }}>
+                        Replace
+                        <input type="file" hidden accept={accept}
+                          onChange={(e) => e.target.files[0] && setDocs(prev => ({ ...prev, [key]: e.target.files[0] }))} />
+                      </Button>
+                    </>
                   ) : (
                     <Button component="label" size="small" startIcon={<UploadFileRounded sx={{ fontSize: 15 }} />}
                       sx={{ justifyContent: "flex-start", borderRadius: "8px", fontWeight: 700, fontSize: 12, color: "text.secondary", p: 0, "&:hover": { color: "text.primary", bgcolor: "transparent" } }}>

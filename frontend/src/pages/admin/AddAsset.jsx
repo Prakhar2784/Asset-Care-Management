@@ -899,6 +899,11 @@ const AddAsset = () => {
                 </Select>
               </FormControl>
             </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField fullWidth name="location" value={formData.location}
+                onChange={handleChange} sx={inputSx("location")} label="Location"
+                placeholder="e.g. 4th Floor, Bengaluru Office" />
+            </Grid>
             <Grid size={12}>
               <TextField fullWidth multiline rows={2} name="notes" value={formData.notes}
                 onChange={handleChange} sx={inputSx("notes")} label="Notes (optional)"
