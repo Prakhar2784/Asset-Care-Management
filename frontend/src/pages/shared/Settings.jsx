@@ -826,32 +826,34 @@ export default function Settings() {
   const { currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isAdmin = currentUser?.role === 'admin';
-  const isHod = currentUser?.role === 'hod';
+  const isEmployee = currentUser?.role === 'employee';
   const [searchParams] = useSearchParams();
   // ?tab=org maps to index 1 only for roles that have the Org Profile tab
-  const orgTabIndex = !isSuperAdmin && !isHod ? 1 : -1;
+  const orgTabIndex = isAdmin ? 1 : -1;
   const [tab, setTab] = useState(
     searchParams.get('tab') === 'org' && orgTabIndex !== -1 ? orgTabIndex : 0
   );
 
   const tabs = [
-    { 
-      label: 'Profile', 
+    {
+      label: 'Profile',
       icon: <PersonRounded fontSize="small" />,
       panel: <ProfileTab currentUser={currentUser} />
     },
-    ...(!isSuperAdmin && !isHod ? [
+    ...(isAdmin ? [
       { 
         label: 'Organisation Profile', 
         icon: <BusinessRounded fontSize="small" />,
         panel: <CompanySettingsTab isAdmin={isAdmin} />
       },
     ] : []),
-    { 
-      label: 'My Data', 
-      icon: <DownloadRounded fontSize="small" />,
-      panel: <DataTab currentUser={currentUser} />
-    },
+    ...(isEmployee ? [] : [
+      {
+        label: 'My Data',
+        icon: <DownloadRounded fontSize="small" />,
+        panel: <DataTab currentUser={currentUser} />
+      },
+    ]),
   ];
 
   return (

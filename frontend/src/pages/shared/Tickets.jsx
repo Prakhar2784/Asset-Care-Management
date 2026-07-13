@@ -436,7 +436,7 @@ const Tickets = () => {
           sx={{ minWidth: 190, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}>
           <MenuItem value="Active">Active (Open)</MenuItem>
           <MenuItem value="All">All Statuses</MenuItem>
-          {STATUS_LIST.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+          {currentUser?.role !== 'employee' && STATUS_LIST.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
         </TextField>
         <Button variant="outlined" onClick={() => { setSearchQuery(''); setStatusFilter('Active'); }}
           sx={{ borderColor: 'divider', color: 'text.secondary', borderRadius: '10px', fontWeight: 700, textTransform: 'none', height: 40, px: 2 }}>
