@@ -55,8 +55,10 @@ const phone = z.string().trim().max(20, 'Phone number is too long.')
   .regex(/^[\d+\-() ]*$/, 'Phone number contains invalid characters.')
   .optional().or(z.literal(''));
 
+// No dots: the slug becomes part of the per-tenant Mongo database name
+// (assetcare_<slug>), and Mongo database names cannot contain '.'.
 const slug = z.string().trim().toLowerCase()
-  .regex(/^[a-z0-9][a-z0-9.-]{1,39}$/, 'Slug must be 2–40 chars: lowercase letters, digits, dots or hyphens.');
+  .regex(/^[a-z0-9][a-z0-9-]{1,39}$/, 'Slug must be 2–40 chars: lowercase letters, digits, or hyphens.');
 
 // ─── Schemas per endpoint ──────────────────────────────────────────────────────
 const loginSchema = z.object({

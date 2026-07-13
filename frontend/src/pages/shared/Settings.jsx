@@ -149,7 +149,8 @@ function ProfileTab() {
             <TextField label="Phone Number" value={phone} onChange={e => setPhone(e.target.value.replace(/[^0-9]/g, '').slice(0, 10))} fullWidth size="small" sx={inputSx} placeholder="10-digit mobile number" slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
             <TextField label="Email Address" value={currentUser?.email || ''} fullWidth size="small" sx={inputSx} disabled helperText="Email cannot be changed" />
             <TextField label="Role" value={currentUser?.role || ''} fullWidth size="small" sx={inputSx} disabled />
-            <TextField label="Department" value={currentUser?.department || 'Not assigned'} fullWidth size="small" sx={inputSx} disabled helperText="Contact your admin to change department" />
+            <TextField label="Department" value={currentUser?.department || 'Not assigned'} fullWidth size="small" sx={inputSx} disabled
+              helperText={currentUser?.role === 'admin' ? 'Manage departments from the Company tab' : 'Contact your admin to change department'} />
           </Stack>
           {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{msg}</Alert>}
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
