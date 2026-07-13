@@ -4,10 +4,15 @@ const ServiceCenter = require('../models/ServiceCenter');
 const Asset = require('../models/Asset');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// GET all service centers
+// GET all service centers — HOD only sees centers assigned to their
+// department (or unassigned/global ones); admins see everything.
 router.get('/', protect, async (req, res) => {
   try {
-    const centers = await ServiceCenter.find({}).sort({ createdAt: -1 });
+    const filter = {};
+    if (req.user.role === 'hod' && req.user.department) {
+      filter.$or = [{ department: req.user.department }, { department: null }];
+    }
+    const centers = await ServiceCenter.find(filter).sort({ createdAt: -1 });
     res.json(centers);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });

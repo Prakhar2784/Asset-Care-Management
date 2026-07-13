@@ -33,13 +33,14 @@ const warrantyChip = (end) => {
 
 const emptyForm = {
   name: "", contactPerson: "", phone: "", email: "",
-  address: "", city: "", categories: [], brands: [], status: "Active", notes: ""
+  address: "", city: "", categories: [], brands: [], department: "", status: "Active", notes: ""
 };
 
 export default function ServiceCenters() {
   const [centers, setCenters] = useState([]);
   const [warrantyAssets, setWarrantyAssets] = useState([]);
   const [assetCategories, setAssetCategories] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
   const [search, setSearch] = useState("");
@@ -55,15 +56,17 @@ export default function ServiceCenters() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [c, w, a] = await Promise.all([
+      const [c, w, a, d] = await Promise.all([
         api.get("/service-centers"),
         api.get("/service-centers/warranty-assets"),
         api.get("/assets"),
+        api.get("/departments"),
       ]);
       setCenters(c.data);
       setWarrantyAssets(w.data);
       const cats = [...new Set((a.data || []).map(asset => asset.category).filter(Boolean))].sort();
       setAssetCategories(cats);
+      setDepartments(Array.isArray(d.data) ? d.data : d.data.departments || []);
     } catch { /* ignore */ }
     finally { setLoading(false); }
   };
@@ -182,7 +185,10 @@ export default function ServiceCenters() {
                             {c.city && <Typography fontSize={12} color="text.secondary">{c.city}</Typography>}
                           </Box>
                         </Box>
-                        <Chip label={c.status} size="small" sx={{ fontWeight: 700, fontSize: 11, bgcolor: statusColor(c.status).bg, color: statusColor(c.status).color }} />
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          {c.department && <Chip label={c.department} size="small" sx={{ fontWeight: 700, fontSize: 11, bgcolor: "rgba(167,139,250,0.12)", color: "#A78BFA" }} />}
+                          <Chip label={c.status} size="small" sx={{ fontWeight: 700, fontSize: 11, bgcolor: statusColor(c.status).bg, color: statusColor(c.status).color }} />
+                        </Stack>
                       </Box>
 
                       <Divider />
@@ -327,6 +333,15 @@ export default function ServiceCenters() {
                 return <Chip key={key} label={opt} size="small" variant="outlined" {...tagProps} />;
               }) }}
               renderInput={(params) => <TextField {...params} label="Brands Handled" size="small" sx={inputSx} placeholder="Type brand and press Enter" />} />
+            <FormControl fullWidth size="small" sx={inputSx}>
+              <InputLabel>Assign Department</InputLabel>
+              <Select value={form.department || ""} label="Assign Department" onChange={set("department")}>
+                <MenuItem value=""><em>All Departments</em></MenuItem>
+                {departments.map(d => (
+                  <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <FormControl fullWidth size="small" sx={inputSx}>
               <InputLabel>Status</InputLabel>
               <Select value={form.status} label="Status" onChange={set("status")}>

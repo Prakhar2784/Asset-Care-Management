@@ -9,6 +9,7 @@ const serviceCenterSchema = new mongoose.Schema({
   city:           { type: String, default: null },
   categories:     [{ type: String }], // asset categories they service
   brands:         [{ type: String }], // brands they handle
+  department:     { type: String, default: null }, // restricts visibility to this department (null = visible to all)
   status:         { type: String, enum: ['Active', 'Inactive'], default: 'Active' },
   notes:          { type: String, default: null },
   tenantId:       { type: String, required: true, default: 'default' },
