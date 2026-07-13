@@ -46,7 +46,9 @@ const globalSearch = async (req, res) => {
 
       Ticket.find({
         ...(isAdmin ? {} : isHod
-          ? { $or: [{ raisedBy: { $in: hodUserIds } }, { asset: { $in: hodAssetIds } }] }
+          // Tickets route by the asset's assigned department; device-request
+          // tickets (no asset yet) fall back to the raiser's own department.
+          ? { $and: [{ $or: [{ asset: { $in: hodAssetIds } }, { asset: null, raisedBy: { $in: hodUserIds } }] }] }
           : { raisedBy: req.user._id }),
         $or: [{ ticketId: regex }, { issue: regex }],
       })

@@ -48,18 +48,18 @@ const adminMenu = [
 
 const hodMenu = [
   { section: "Overview" },
-  { text: "Dashboard",        path: "/admin/dashboard",        icon: <DashboardRounded /> },
+  { text: "Dashboard",        path: "/admin/dashboard",        icon: <DashboardRounded />,   perm: "View Dashboard" },
 
   { section: "My Department" },
   { text: "My Team",          path: "/admin/my-team",          icon: <PeopleRounded /> },
-  { text: "Asset Registry",   path: "/admin/assets",           icon: <Inventory2Rounded /> },
-  { text: "Assigned Devices", path: "/admin/assignments",      icon: <AssignmentIndRounded /> },
-  { text: "Maintenance",      path: "/admin/maintenance",      icon: <BuildRounded /> },
-  { text: "Service Centers",  path: "/admin/service-centers",  icon: <StorefrontRounded /> },
+  { text: "Asset Registry",   path: "/admin/assets",           icon: <Inventory2Rounded />,  perms: ["View All Assets", "Register Assets", "Edit / Delete Assets"] },
+  { text: "Assigned Devices", path: "/admin/assignments",      icon: <AssignmentIndRounded />, perm: "Assign Assets" },
+  { text: "Maintenance",      path: "/admin/maintenance",      icon: <BuildRounded />,        perm: "View All Assets" },
+  { text: "Service Centers",  path: "/admin/service-centers",  icon: <StorefrontRounded />,   perm: "View All Assets" },
 
   { section: "Operations" },
-  { text: "Tickets",          path: "/tickets",                icon: <ConfirmationNumberRounded /> },
-  { text: "Approvals",        path: "/admin/approvals",        icon: <ApprovalRounded /> },
+  { text: "Tickets",          path: "/tickets",                icon: <ConfirmationNumberRounded />, perm: "Raise Tickets" },
+  { text: "Approvals",        path: "/admin/approvals",        icon: <ApprovalRounded />,    perm: "Approve Device Requests" },
 
   { section: "Account" },
   { text: "Settings",         path: "/settings",               icon: <SettingsRounded /> },

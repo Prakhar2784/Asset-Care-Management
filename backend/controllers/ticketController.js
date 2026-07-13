@@ -67,8 +67,11 @@ const createTicket = async (req, res) => {
     const itemName = populated.asset?.name || populated.itemLabel || ticketId;
  
     if (initialStatus === 'Pending HOD Approval') {
-      // 1. Notify Department HODs (in-app + email)
-      User.find({ role: 'hod', department: req.user.department, isActive: true }).then(hods => {
+      // 1. Notify Department HODs (in-app + email) — routed by the asset's
+      // assigned department, falling back to the raiser's department only
+      // for device-request tickets that have no asset yet.
+      const ticketDept = populated.asset?.department || req.user.department;
+      User.find({ role: 'hod', department: ticketDept, isActive: true }).then(hods => {
         hods.forEach(hod => {
           createNotification({
             userId: hod._id,
@@ -129,8 +132,13 @@ const getTickets = async (req, res) => {
         ]
       };
     } else if (req.user.role === 'hod' && req.user.department) {
+      // Tickets route by the asset's assigned department. Device-request
+      // tickets (no asset yet) fall back to the raiser's own department.
       const { deptUserIds, deptAssetIds } = await getHodScope(req.user);
-      filter.$or = [{ raisedBy: { $in: deptUserIds } }, { asset: { $in: deptAssetIds } }];
+      filter.$or = [
+        { asset: { $in: deptAssetIds } },
+        { asset: null, raisedBy: { $in: deptUserIds } },
+      ];
     }
 
     const tickets = await Ticket.find(filter)
@@ -176,9 +184,12 @@ const updateTicketStatus = async (req, res) => {
 
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
-    // HOD department approval constraint
+    // HOD department approval constraint — the asset's assigned department
+    // decides ownership; raiser's department is only used as a fallback for
+    // device-request tickets that have no asset yet.
     if (req.user.role === 'hod' && status === 'Assigned to Technician') {
-      if (ticket.raisedBy?.department !== req.user.department) {
+      const ticketDept = ticket.asset?.department || ticket.raisedBy?.department;
+      if (ticketDept !== req.user.department) {
         return res.status(403).json({ message: `Access denied. You can only approve tickets for the ${req.user.department} department.` });
       }
     }
@@ -240,7 +251,9 @@ const updateTicketStatus = async (req, res) => {
 
     // 2. Notify the department HOD for EVERY status change on their department's tickets
     //    (HOD should know everything happening with tickets they oversee)
-    User.find({ role: 'hod', department: ticket.raisedBy?.department, isActive: true }).then(hods => {
+    //    Routed by the asset's assigned department, falling back to the
+    //    raiser's department for device-request tickets with no asset.
+    User.find({ role: 'hod', department: ticket.asset?.department || ticket.raisedBy?.department, isActive: true }).then(hods => {
       hods.forEach(hod => {
         if (hod._id.toString() === req.user._id.toString()) return; // skip if HOD is the actor
         let hodTitle = `Ticket ${ticket.ticketId} — ${status}`;
@@ -356,7 +369,7 @@ const updateTicketPriority = async (req, res) => {
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
     if (req.user.role === 'hod' && req.user.department) {
-      const ticketDept = ticket.raisedBy?.department || ticket.asset?.department;
+      const ticketDept = ticket.asset?.department || ticket.raisedBy?.department;
       if (ticketDept !== req.user.department) {
         return res.status(403).json({ message: 'Not authorized to modify tickets outside your department.' });
       }
@@ -375,7 +388,9 @@ const updateTicketPriority = async (req, res) => {
 const confirmResolution = async (req, res) => {
   try {
     const { remarks } = req.body;
-    const ticket = await Ticket.findById(req.params.id).populate('raisedBy', 'name email');
+    const ticket = await Ticket.findById(req.params.id)
+      .populate('raisedBy', 'name email department')
+      .populate('asset', 'department');
     if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
 
     if (ticket.raisedBy?._id.toString() !== req.user._id.toString()) {
@@ -417,8 +432,9 @@ const confirmResolution = async (req, res) => {
       });
     }).catch(() => {});
 
-    if (ticket.raisedBy?.department) {
-      User.find({ role: 'hod', department: ticket.raisedBy.department, isActive: true }).then(hods => {
+    const resolveDept = ticket.asset?.department || ticket.raisedBy?.department;
+    if (resolveDept) {
+      User.find({ role: 'hod', department: resolveDept, isActive: true }).then(hods => {
         hods.forEach(hod => {
           createNotification({
             userId: hod._id,
@@ -451,12 +467,12 @@ const deleteTicket = async (req, res) => {
     if (!ADMIN_TIER_ROLES.includes(req.user.role) && !isOwner)
       return res.status(403).json({ message: 'Not authorized to delete this ticket' });
 
-    if (isOwner && !ADMIN_TIER_ROLES.includes(req.user.role) && ticket.status !== 'Pending Approval') {
+    if (isOwner && !ADMIN_TIER_ROLES.includes(req.user.role) && !['Pending HOD Approval', 'Pending Approval'].includes(ticket.status)) {
       return res.status(400).json({ message: 'Only tickets pending approval can be withdrawn' });
     }
 
     if (req.user.role === 'hod' && req.user.department) {
-      const ticketDept = ticket.raisedBy?.department || ticket.asset?.department;
+      const ticketDept = ticket.asset?.department || ticket.raisedBy?.department;
       if (ticketDept !== req.user.department) {
         return res.status(403).json({ message: 'Not authorized to delete tickets outside your department.' });
       }

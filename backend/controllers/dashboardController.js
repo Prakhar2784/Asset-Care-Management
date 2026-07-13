@@ -29,11 +29,12 @@ const getDashboardStats = async (req, res) => {
       const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
       const deptAssetIds = deptAssets.map(a => a._id);
 
-      // 4. Scope tickets by department users or assets
+      // 4. Scope tickets by the asset's assigned department; device-request
+      // tickets (no asset yet) fall back to the raiser's own department.
       ticketFilter = {
         $or: [
-          { raisedBy: { $in: deptUserIds } },
-          { asset: { $in: deptAssetIds } }
+          { asset: { $in: deptAssetIds } },
+          { asset: null, raisedBy: { $in: deptUserIds } }
         ]
       };
 

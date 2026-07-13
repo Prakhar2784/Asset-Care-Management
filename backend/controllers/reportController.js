@@ -13,7 +13,9 @@ const buildHodScopeFilters = async (user) => {
   const dept = user.department;
   return {
     assetFilter: { isDeleted: { $ne: true }, department: dept },
-    ticketFilter: { $or: [{ raisedBy: { $in: deptUserIds } }, { asset: { $in: deptAssetIds } }] },
+    // Tickets route by the asset's assigned department; device-request
+    // tickets (no asset yet) fall back to the raiser's own department.
+    ticketFilter: { $or: [{ asset: { $in: deptAssetIds } }, { asset: null, raisedBy: { $in: deptUserIds } }] },
     userFilter: { department: dept },
     requestFilter: { raisedBy: { $in: deptUserIds } },
     deptUserIds, deptAssetIds,
