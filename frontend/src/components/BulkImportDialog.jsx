@@ -21,21 +21,21 @@ const DARK = '#111827';
 const STEPS = ['Download Template', 'Upload File', 'Preview & Validate', 'Import'];
 
 const TEMPLATE_COLUMNS = [
-  'name', 'serialNumber', 'department',
+  'name', 'serialNumber', 'category', 'department',
   'location', 'vendor', 'modelNumber', 'purchaseCost',
   'procurementDate', 'warrantyEnd', 'status'
 ];
 
 const SAMPLE_ROWS = [
   {
-    name: 'Dell Latitude 3520', serialNumber: 'SN-DL-001',
+    name: 'Dell Latitude 3520', serialNumber: 'SN-DL-001', category: 'Laptop',
     department: 'Engineering', location: 'Floor 2', vendor: 'Dell India',
     modelNumber: 'LAT3520', purchaseCost: 55000,
     procurementDate: '2023-01-15', warrantyEnd: '2026-01-14',
     status: 'Active'
   },
   {
-    name: 'HP LaserJet Pro', serialNumber: 'SN-HP-002',
+    name: 'HP LaserJet Pro', serialNumber: 'SN-HP-002', category: 'Printer',
     department: 'Admin', location: 'Reception', vendor: 'HP India',
     modelNumber: 'M404dn', purchaseCost: 28000,
     procurementDate: '2022-06-01', warrantyEnd: '2025-06-01',
@@ -43,7 +43,7 @@ const SAMPLE_ROWS = [
   },
 ];
 
-const REQUIRED_COLS = ['name', 'serialNumber', 'department'];
+const REQUIRED_COLS = ['name', 'serialNumber', 'category', 'department'];
 
 function downloadTemplate(customFieldConfigs = []) {
   const columns = [...TEMPLATE_COLUMNS];
@@ -157,6 +157,7 @@ export default function BulkImportDialog({ open, onClose, onSuccess }) {
       const payload = validRows.map(r => ({
         name: r.name?.toString().trim(),
         serialNumber: r.serialNumber?.toString().trim(),
+        category: r.category?.toString().trim(),
         department: r.department?.toString().trim(),
         location: r.location?.toString().trim() || '',
         vendor: r.vendor?.toString().trim() || '',

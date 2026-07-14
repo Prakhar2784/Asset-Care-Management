@@ -194,6 +194,7 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
     const maxUsers = tenant?.limits?.maxUsers ?? Infinity;
 
     const failed = [];
+    const VALID_ROLES = ['admin', 'employee', 'hod', 'technician', 'manager'];
 
     // Validate rows in memory first
     const candidate = [];
@@ -203,7 +204,12 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
         failed.push({ email: email || '?', reason: 'Missing name, email or department.' });
         continue;
       }
-      candidate.push({ name: name.trim(), email: email.toLowerCase().trim(), role: role?.trim() || 'employee', department: department.trim(), phone: phone?.trim() || '' });
+      const trimmedRole = role?.trim() || 'employee';
+      if (!VALID_ROLES.includes(trimmedRole)) {
+        failed.push({ email, reason: `Invalid role "${trimmedRole}". Must be one of: ${VALID_ROLES.join(', ')}.` });
+        continue;
+      }
+      candidate.push({ name: name.trim(), email: email.toLowerCase().trim(), role: trimmedRole, department: department.trim(), phone: phone?.trim() || '' });
     }
 
     // Single query to find all pre-existing emails
@@ -238,15 +244,35 @@ router.post('/bulk', protect, authorize('admin', 'super_admin'), async (req, res
         passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
         passwordResetExpiry: inviteExpiry,
         isActive: false,
+        // insertMany() skips the pre('save') hook that normally stamps
+        // tenantId, so it must be set explicitly here or these rows become
+        // invisible to any tenant-scoped query (tenantPlugin.js).
+        tenantId: req.tenantId || 'default',
       });
       pendingEmails.push({ name: row.name, email: row.email, inviteLink: `${frontendUrl}/reset-password/${inviteToken}?invite=true` });
+      existingEmails.add(row.email); // catch duplicate emails within this same CSV batch too
       remaining--;
     }
 
-    const inserted = docs.length > 0 ? await User.insertMany(docs, { ordered: false }) : [];
+    let inserted = [];
+    if (docs.length > 0) {
+      try {
+        inserted = await User.insertMany(docs, { ordered: false });
+      } catch (bulkErr) {
+        // insertMany with ordered:false still inserts the valid docs; on
+        // partial failure Mongoose attaches them to err.insertedDocs so we
+        // don't lose successes just because one row collided.
+        inserted = bulkErr.insertedDocs || [];
+        const insertedEmails = new Set(inserted.map(d => d.email));
+        docs.filter(d => !insertedEmails.has(d.email))
+          .forEach(d => failed.push({ email: d.email, reason: 'Could not be created (duplicate or invalid).' }));
+      }
+    }
+
+    const insertedEmailSet = new Set(inserted.map(u => u.email));
 
     // Fire invite emails asynchronously — don't block the response
-    pendingEmails.forEach(({ name, email, inviteLink }) =>
+    pendingEmails.filter(p => insertedEmailSet.has(p.email)).forEach(({ name, email, inviteLink }) =>
       sendInviteEmail({ name, email }, inviteLink).catch(() => {})
     );
 

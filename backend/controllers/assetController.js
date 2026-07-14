@@ -316,7 +316,7 @@ const bulkImportAssets = async (req, res) => {
       customFieldsByCat[c.category].push(c);
     });
 
-    const REQUIRED = ['name', 'serialNumber', 'department'];
+    const REQUIRED = ['name', 'serialNumber', 'category', 'department'];
     const errors = [];
     const valid = [];
     const seen = new Set();
