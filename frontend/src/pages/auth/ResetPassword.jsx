@@ -9,6 +9,7 @@ import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const rules = [
   { key: 'length',    label: '8+ chars',   test: (p) => p.length >= 8 },
