@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Tenant = require('../models/Tenant');
 const jwt = require('jsonwebtoken');
-const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail } = require('../services/emailService');
+const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail, sendWelcomeEmail } = require('../services/emailService');
 const { ADMIN_TIER_ROLES } = require('../middleware/authMiddleware');
 
 // ─── Brute-force / timing constants ───────────────────────────────────────────
@@ -386,6 +386,8 @@ const registerCompany = async (req, res) => {
         tenantId: tenant.slug
       });
     });
+
+    sendWelcomeEmail(adminUser).catch(() => {});
 
     res.status(201).json({
       message: 'Company registered successfully!',

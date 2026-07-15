@@ -399,6 +399,40 @@ const RegisterCompany = () => {
 
         .pw-rule.pass .pw-dot { background: #16A34A; }
         .pw-rule.fail .pw-dot { background: #DC2626; }
+
+        .section-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+
+        .section-num {
+          width: 34px;
+          height: 34px;
+          border-radius: 10px;
+          background: #FBBF24;
+          color: #111827;
+          display: grid;
+          place-items: center;
+          font-weight: 900;
+          font-size: 14px;
+          flex-shrink: 0;
+        }
+
+        .section-title {
+          font-size: 16px;
+          font-weight: 800;
+          color: #ffffff;
+          letter-spacing: -0.3px;
+        }
+
+        .section-sub {
+          font-size: 12px;
+          font-weight: 500;
+          color: #666666;
+          margin-top: 2px;
+        }
       `}</style>
 
       {/* LEFT DESIGN SIDE */}
@@ -466,6 +500,13 @@ const RegisterCompany = () => {
           {!success && (
             <form onSubmit={handleSubmit}>
               {/* Company Section */}
+              <div className="section-header">
+                <div className="section-num">1</div>
+                <div>
+                  <div className="section-title">Company Information</div>
+                  <div className="section-sub">Set up your workspace identity and URL slug.</div>
+                </div>
+              </div>
               <div className="input-group">
                 <span className="input-icon"><ApartmentRoundedIcon fontSize="small" /></span>
                 <input
@@ -492,9 +533,16 @@ const RegisterCompany = () => {
                 />
               </div>
 
-              <div style={{ borderBottom: "1px solid #222", margin: "24px 0 20px 0" }}></div>
+              <div style={{ borderBottom: "1px solid #222", margin: "24px 0 24px 0" }}></div>
 
               {/* Admin Section */}
+              <div className="section-header">
+                <div className="section-num">2</div>
+                <div>
+                  <div className="section-title">Admin Account</div>
+                  <div className="section-sub">Primary administrator credentials for this workspace.</div>
+                </div>
+              </div>
               <div className="input-group">
                 <span className="input-icon"><PersonRoundedIcon fontSize="small" /></span>
                 <input
