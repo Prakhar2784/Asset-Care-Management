@@ -55,8 +55,6 @@ const getTenantConnection = (tenantId) => {
   connection.model('MaintenanceSchedule', require('../models/MaintenanceSchedule').schema);
   connection.model('TransferRequest', require('../models/TransferRequest').schema);
   
-  // Approval Workflow models
-  connection.model('ApprovalWorkflow', require('../models/ApprovalWorkflow').schema);
   connection.model('ApprovalTracking', require('../models/ApprovalTracking').schema);
 
   // CMDB Custom Fields model

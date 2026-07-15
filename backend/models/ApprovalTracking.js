@@ -8,8 +8,7 @@ const approvalTrackingSchema = new mongoose.Schema({
   },
   workflow: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'ApprovalWorkflow',
-    required: true
+    default: null
   },
   currentStageIndex: {
     type: Number,

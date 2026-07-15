@@ -3,7 +3,6 @@ const DeviceRequest = require('../models/DeviceRequest');
 const Asset = require('../models/Asset');
 const AssetAssignment = require('../models/AssetAssignment');
 const User = require('../models/User');
-const ApprovalWorkflow = require('../models/ApprovalWorkflow');
 const ApprovalTracking = require('../models/ApprovalTracking');
 const {
   sendApprovalApprovedEmail,
@@ -21,95 +20,29 @@ const createRequest = async (req, res) => {
 
     const requestId = `REQ-${Math.floor(10000 + Math.random() * 90000)}`;
 
-    // Check for active workflow matching the requestType, or falling back to 'All'
-    let matchingWorkflow = await ApprovalWorkflow.findOne({
+    const request = await DeviceRequest.create({
+      requestId,
       requestType,
-      isActive: true
+      itemRequested,
+      reason,
+      urgency: urgency || 'Medium',
+      relatedAsset: relatedAsset || null,
+      raisedBy: req.user._id,
+      status: 'Pending'
     });
 
-    if (!matchingWorkflow) {
-      matchingWorkflow = await ApprovalWorkflow.findOne({
-        requestType: 'All',
-        isActive: true
-      });
-    }
-
-    let request;
-    if (matchingWorkflow) {
-      request = await DeviceRequest.create({
-        requestId,
-        requestType,
-        itemRequested,
-        reason,
-        urgency: urgency || 'Medium',
-        relatedAsset: relatedAsset || null,
-        raisedBy: req.user._id,
-        status: 'Under Review'
-      });
-
-      const history = matchingWorkflow.stages.map((stage, idx) => ({
-        stageIndex: idx,
-        sequence: stage.sequence,
-        label: stage.label,
-        assignedRole: stage.role,
-        action: 'Pending',
-        remarks: '',
-        actionedBy: null,
-        actionedAt: null
-      }));
-
-      await ApprovalTracking.create({
-        deviceRequest: request._id,
-        workflow: matchingWorkflow._id,
-        currentStageIndex: 0,
-        history,
-        tenantId: req.tenantId || 'default'
-      });
-
-      // Notify the first stage approver(s)
-      const firstStage = matchingWorkflow.stages[0];
-      let query = { role: firstStage.role };
-      if (firstStage.role === 'hod') {
-        query.department = req.user.department;
-      }
-
-      User.find(query).then(approvers => {
-        approvers.forEach(approver => {
-          createNotification({
-            userId: approver._id,
-            type: 'system',
-            title: 'Action Required: Device Request Approval',
-            message: `${req.user.name} submitted request ${requestId} for "${itemRequested}" requiring your review.`,
-            link: '/admin/approvals'
-          });
+    // Notify all admin-tier reviewers about the new device request
+    User.find({ role: { $in: ['admin', 'super_admin', 'hod'] } }).then(admins => {
+      admins.forEach(admin => {
+        createNotification({
+          userId: admin._id,
+          type: 'system',
+          title: 'New Device Request',
+          message: `${req.user.name || 'An employee'} submitted device request ${requestId} for "${itemRequested}".`,
+          link: '/admin/approvals'
         });
-      }).catch(() => {});
-    } else {
-      // Default fallback when no workflow is configured
-      request = await DeviceRequest.create({
-        requestId,
-        requestType,
-        itemRequested,
-        reason,
-        urgency: urgency || 'Medium',
-        relatedAsset: relatedAsset || null,
-        raisedBy: req.user._id,
-        status: 'Pending'
       });
-
-      // Notify all admin-tier reviewers about the new device request
-      User.find({ role: { $in: ['admin', 'super_admin', 'hod'] } }).then(admins => {
-        admins.forEach(admin => {
-          createNotification({
-            userId: admin._id,
-            type: 'system',
-            title: 'New Device Request',
-            message: `${req.user.name || 'An employee'} submitted device request ${requestId} for "${itemRequested}".`,
-            link: '/admin/approvals'
-          });
-        });
-      }).catch(() => {});
-    }
+    }).catch(() => {});
 
     res.status(201).json(request);
   } catch (error) {
