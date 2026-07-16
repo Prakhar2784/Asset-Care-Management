@@ -158,13 +158,13 @@ const Sidebar = ({ onClose }) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{
             width: 36, height: 36, borderRadius: "10px", flexShrink: 0, overflow: "hidden",
-            background: logoSrc ? "transparent" : "#111827",
+            background: logoSrc ? "transparent" : "transparent",
             display: "grid", placeItems: "center",
-            boxShadow: logoSrc ? "none" : "0 4px 16px rgba(17,24,39,0.5)",
+            boxShadow: "none",
           }}>
             {logoSrc
               ? <Box component="img" src={logoSrc} alt={effectiveBranding?.name} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : <Inventory2Rounded sx={{ fontSize: 19, color: "#FFFFFF" }} />
+              : <Box component="img" src="/favicon.svg" alt="AssetCare" sx={{ width: 28, height: 28 }} />
             }
           </Box>
           <Box>

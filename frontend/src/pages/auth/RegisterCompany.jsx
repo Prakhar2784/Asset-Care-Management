@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
@@ -439,7 +438,7 @@ const RegisterCompany = () => {
       <div className="auth-info">
         <div className="brand-header">
           <div className="brand-logo">
-            <Inventory2Icon />
+            <img src="/favicon.svg" alt="AssetCare" style={{ width: 32, height: 32 }} />
           </div>
           <span className="brand-name">AssetCare</span>
         </div>

@@ -35,32 +35,45 @@ const cardTheme = createTheme({
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
 
+const STORAGE_KEY = "assetcare_onboarding_draft";
+
+const loadDraft = () => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+};
+
 const OnboardingWizard = () => {
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
-  const [active, setActive] = useState(0);
+
+  const draft = loadDraft();
+
+  const [active, setActive] = useState(draft.active ?? 0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const [org, setOrg] = useState({
+  const [org, setOrg] = useState(draft.org ?? {
     name: "", industry: "", employeeCount: "", phone: "", website: "", contactEmail: "",
     gstNumber: "", panNumber: "",
     addressLine: "", city: "", state: "", pin: "", country: "India"
   });
 
   const emptyDept = { name: "", code: "", hodName: "", hodEmail: "", hodPhone: "", location: "" };
-  const [dept, setDept] = useState(emptyDept);
-  const [savedDepts, setSavedDepts] = useState([]);
+  const [dept, setDept] = useState(draft.dept ?? emptyDept);
+  const [savedDepts, setSavedDepts] = useState(draft.savedDepts ?? []);
   const [existingDepts, setExistingDepts] = useState([]);
 
   const emptyUser = { name: "", email: "", password: "", role: "employee", department: "", phone: "", employeeId: "" };
-  const [user, setUser] = useState(emptyUser);
-  const [savedUsers, setSavedUsers] = useState([]);
+  const [user, setUser] = useState(draft.user ?? emptyUser);
+  const [savedUsers, setSavedUsers] = useState(draft.savedUsers ?? []);
   const [showPass, setShowPass] = useState(false);
 
   useEffect(() => {
     api.get("/departments").then(({ data }) => setExistingDepts(data || [])).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ active, org, dept, savedDepts, user, savedUsers }));
+  }, [active, org, dept, savedDepts, user, savedUsers]);
 
   const departmentOptions = [
     ...existingDepts.map(d => d.name),
@@ -70,6 +83,7 @@ const OnboardingWizard = () => {
   const finish = async () => {
     await api.patch("/auth/complete-onboarding");
     await refreshUser();
+    localStorage.removeItem(STORAGE_KEY);
     navigate("/admin/dashboard");
   };
 

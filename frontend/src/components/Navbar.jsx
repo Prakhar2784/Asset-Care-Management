@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
 import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 
@@ -194,7 +193,7 @@ const Navbar = () => {
         <nav className="nav-pill">
           <Link to="/" className="brand-link" onClick={() => setOpen(false)}>
             <div className="brand-icon-box">
-              <Inventory2Icon fontSize="small" />
+              <img src="/favicon.svg" alt="AssetCare Pro" style={{ width: 22, height: 22 }} />
             </div>
             <div className="brand-text">AssetCare Pro</div>
           </Link>
