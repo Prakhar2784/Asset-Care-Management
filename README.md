@@ -2,11 +2,11 @@
 
 A multi-tenant **Enterprise Asset Management (EAM)** platform that digitizes how organizations track assets, process invoices, and manage service requests — featuring an **OCR-powered document-intelligence pipeline** that converts scanned documents into structured data automatically.
 
-Built with a **React** frontend, a **FastAPI** backend, and **MySQL**, secured end-to-end with **JWT authentication** and **role-based access control (RBAC)**.
+Built with a **React** frontend, a **FastAPI** backend, and **MongoDB**, secured end-to-end with **JWT authentication** and **role-based access control (RBAC)**.
 
 ![Frontend](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=white)
 ![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)
-![Database](https://img.shields.io/badge/Database-MySQL-4479A1?logo=mysql&logoColor=white)
+![Database](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)
 ![Auth](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
 
 > **Status:** Actively developed. The backend and frontend live in this repository under `backend/` and `frontend/`.
@@ -46,12 +46,12 @@ The problem it solves: **turn slow, manual, error-prone asset and document handl
 
 ## Tech Stack
 
-| Layer     | Technology                        |
-|-----------|-----------------------------------|
-| Frontend  | React                             |
-| Backend   | FastAPI (Python)                  |
-| Database  | MySQL                             |
-| Auth      | JWT (JSON Web Tokens)             |
+| Layer     | Technology                          |
+|-----------|-------------------------------------|
+| Frontend  | React                               |
+| Backend   | FastAPI (Python)                    |
+| Database  | MongoDB                             |
+| Auth      | JWT (JSON Web Tokens)               |
 | Document  | Optical Character Recognition (OCR) |
 
 ---
@@ -72,9 +72,9 @@ The problem it solves: **turn slow, manual, error-prone asset and document handl
                     └───────┬─────────────┬────────┘
                             │             │
                  ┌──────────▼───┐   ┌─────▼─────────┐
-                 │    MySQL      │   │  OCR Engine   │
+                 │   MongoDB     │   │  OCR Engine   │
                  │ (multi-tenant │   │ (document →   │
-                 │    schema)    │   │  structured)  │
+                 │     data)     │   │  structured)  │
                  └───────────────┘   └───────────────┘
 ```
 
@@ -85,7 +85,7 @@ The problem it solves: **turn slow, manual, error-prone asset and document handl
 ### Prerequisites
 - Node.js (v18+)
 - Python 3.10+
-- MySQL
+- MongoDB
 
 > These are the standard setup commands for a FastAPI + React project. Adjust the entry-point (`main:app`) and script names if your files differ.
 
@@ -114,7 +114,7 @@ npm run dev
 ### 4. Environment variables
 Create a `.env` file inside `backend/` with your own values:
 ```env
-DATABASE_URL=mysql://<user>:<password>@localhost:3306/assetcare
+MONGODB_URI=mongodb://localhost:27017/assetcare
 JWT_SECRET=<your-secret-key>
 ```
 
