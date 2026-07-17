@@ -535,4 +535,17 @@ const deleteAssetDocument = async (req, res) => {
   }
 };
 
-module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets, bulkImportAssets, getAssetTimeline, uploadAssetDocuments, deleteAssetDocument };
+// @desc  Light endpoint for QR scan — returns basic asset info, no permission gate beyond auth
+// @route GET /api/assets/scan/:id
+const getScanAsset = async (req, res) => {
+  try {
+    const asset = await Asset.findById(req.params.id)
+      .select('name serialNumber department location category vendor status');
+    if (!asset) return res.status(404).json({ message: 'Asset not found.' });
+    res.json(asset);
+  } catch {
+    res.status(400).json({ message: 'Invalid asset ID.' });
+  }
+};
+
+module.exports = { createAsset, getAssets, getAssetById, updateAsset, deleteAsset, restoreAsset, getDeletedAssets, getMyAssets, getActiveAssets, bulkImportAssets, getAssetTimeline, uploadAssetDocuments, deleteAssetDocument, getScanAsset };

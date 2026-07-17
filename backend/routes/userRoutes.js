@@ -149,14 +149,14 @@ router.get('/:id/profile', protect, authorize('admin', 'super_admin'), async (re
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     const [assignments, tickets, deviceRequests] = await Promise.all([
-      AssetAssignment.find({ user: user._id, status: 'Active' })
+      AssetAssignment.find({ assignedEmployeeEmail: user.email, status: 'Assigned' })
         .populate('asset', 'name serialNumber category status')
-        .sort({ assignedAt: -1 }).limit(10),
-      Ticket.find({ createdBy: user._id })
-        .select('title status priority createdAt')
+        .sort({ assignedDate: -1 }).limit(10),
+      Ticket.find({ raisedBy: user._id })
+        .select('issue status priority createdAt')
         .sort({ createdAt: -1 }).limit(10),
-      DeviceRequest.find({ requestedBy: user._id })
-        .select('deviceType status createdAt')
+      DeviceRequest.find({ raisedBy: user._id })
+        .select('requestType itemRequested status createdAt')
         .sort({ createdAt: -1 }).limit(10),
     ]);
 

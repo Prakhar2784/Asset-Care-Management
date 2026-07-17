@@ -147,6 +147,7 @@ const getTickets = async (req, res) => {
       .populate('raisedBy', 'name department role')
       .populate('approvedBy', 'name')
       .populate('assignedTechnician', 'name role')
+      .populate('assignedVendor', 'name contactPerson phone email')
       .sort({ createdAt: -1 });
 
     res.status(200).json(tickets);

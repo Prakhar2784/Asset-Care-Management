@@ -58,6 +58,8 @@ const EnterpriseWorkspace = () => {
 
   // Selected item tracking
   const [activeLicense, setActiveLicense] = useState(null);
+  const [revokeLicModal, setRevokeLicModal] = useState(false);
+  const [revokeUserId, setRevokeUserId] = useState("");
   const [selectedAssetsQR, setSelectedAssetsQR] = useState([]);
 
   const fetchData = async () => {
@@ -152,6 +154,16 @@ const EnterpriseWorkspace = () => {
       setAssignLicForm({ userId: "" });
       fetchData();
     } catch (err) { setError(err.response?.data?.message || "Error assigning license seat"); }
+  };
+
+  const submitLicenseRevoke = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put(`/enterprise/licenses/${activeLicense._id}/revoke`, { userId: revokeUserId });
+      setRevokeLicModal(false);
+      setRevokeUserId("");
+      fetchData();
+    } catch (err) { setError(err.response?.data?.message || "Error revoking license seat"); }
   };
 
   // Approval Handlers
@@ -311,14 +323,20 @@ const EnterpriseWorkspace = () => {
                         <TableCell>{lic.expiryDate ? new Date(lic.expiryDate).toLocaleDateString() : "Lifetime"}</TableCell>
                         <TableCell><StatusChip status={lic.status} /></TableCell>
                         <TableCell align="right">
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => { setActiveLicense(lic); setAssignLicModal(true); }}
-                            sx={{ textTransform: "none", fontWeight: 700, borderRadius: "6px" }}
-                          >
-                            Assign Seat
-                          </Button>
+                          <Box sx={{ display: "flex", gap: 1, justifyContent: "flex-end" }}>
+                            <Button variant="outlined" size="small"
+                              onClick={() => { setActiveLicense(lic); setAssignLicModal(true); }}
+                              sx={{ textTransform: "none", fontWeight: 700, borderRadius: "6px" }}>
+                              Assign Seat
+                            </Button>
+                            {lic.assignments?.length > 0 && (
+                              <Button variant="outlined" size="small" color="error"
+                                onClick={() => { setActiveLicense(lic); setRevokeUserId(""); setRevokeLicModal(true); }}
+                                sx={{ textTransform: "none", fontWeight: 700, borderRadius: "6px" }}>
+                                Revoke Seat
+                              </Button>
+                            )}
+                          </Box>
                         </TableCell>
                       </TableRow>
                     ))
@@ -647,6 +665,31 @@ const EnterpriseWorkspace = () => {
           <DialogActions sx={{ p: 3, pt: 0 }}>
             <Button onClick={() => setAssignLicModal(false)}>Cancel</Button>
             <Button type="submit" variant="contained" sx={{ bgcolor: "text.primary", color: "#000", fontWeight: 700 }}>Allocate Seat</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* ─── MODAL: REVOKE LICENSE SEAT ─── */}
+      <Dialog open={revokeLicModal} onClose={() => setRevokeLicModal(false)} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { borderRadius: "16px", bgcolor: "background.paper" } } }}>
+        <form onSubmit={submitLicenseRevoke}>
+          <DialogTitle sx={{ fontWeight: 900 }}>Revoke License Seat</DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1.5 }}>
+              <FormControl fullWidth>
+                <InputLabel>Select User to Revoke</InputLabel>
+                <Select value={revokeUserId} label="Select User to Revoke" onChange={(e) => setRevokeUserId(e.target.value)} required>
+                  {(activeLicense?.assignments || []).map(a => {
+                    const u = users.find(u => u._id === (a.user?._id || a.user));
+                    return u ? <MenuItem key={u._id} value={u._id}>{`${u.name} (${u.department})`}</MenuItem> : null;
+                  })}
+                </Select>
+              </FormControl>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, pt: 0 }}>
+            <Button onClick={() => setRevokeLicModal(false)}>Cancel</Button>
+            <Button type="submit" variant="contained" color="error" sx={{ fontWeight: 700 }}>Revoke Seat</Button>
           </DialogActions>
         </form>
       </Dialog>

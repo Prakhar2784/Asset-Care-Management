@@ -41,7 +41,7 @@ const RegisterCompany = () => {
     let { name, value } = e.target;
     // Slugs must be alphanumeric, periods and lowercase only
     if (name === "slug") {
-      value = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+      value = value.toLowerCase().replace(/[^a-z0-9.-]/g, "");
     }
     if (name === "adminPhone") {
       value = value.replace(/[^0-9]/g, '').slice(0, 10);

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogTitle,
@@ -51,7 +52,10 @@ import {
   BuildRounded,
   DevicesRounded,
   HelpOutlineRounded,
+  QrCode2Rounded,
 } from "@mui/icons-material";
+import QRCode from "qrcode";
+import { jsPDF } from "jspdf";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
@@ -89,6 +93,10 @@ const Assets = () => {
   const [deptFilter, setDeptFilter] = useState("All");
   const [departments, setDepartments] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [qrAsset, setQrAsset]     = useState(null);
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkDownloading, setBulkDownloading] = useState(false);
 
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -176,6 +184,90 @@ const Assets = () => {
 
   // Reset page when filters change
   useEffect(() => { setPage(0); }, [search, statusFilter, deptFilter]);
+
+  useEffect(() => {
+    if (!qrAsset) { setQrDataUrl(""); return; }
+    const url = `${window.location.origin}/scan/${qrAsset._id}`;
+    QRCode.toDataURL(url, { width: 300, margin: 2, color: { dark: "#111827", light: "#FFFFFF" } })
+      .then(setQrDataUrl)
+      .catch(() => {});
+  }, [qrAsset]);
+
+  const toggleSelect = (id) => setSelectedIds(prev => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredAssets.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredAssets.map(a => a._id)));
+    }
+  };
+
+  const buildQrCard = (doc, asset, dataUrl, x, y, cardW, cardH) => {
+    const pad = 4;
+    const textH = 16; // mm reserved for 3 lines of text at bottom
+    const qrSize = Math.min(cardW - pad * 2, cardH - pad - textH - 2);
+    const qrX = x + (cardW - qrSize) / 2;
+    const qrY = y + pad;
+    doc.addImage(dataUrl, "PNG", qrX, qrY, qrSize, qrSize);
+    const textY = qrY + qrSize + 4;
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(17, 24, 39);
+    const name = asset.name.length > 24 ? asset.name.slice(0, 23) + "…" : asset.name;
+    doc.text(name, x + cardW / 2, textY, { align: "center" });
+    doc.setFontSize(6);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(107, 114, 128);
+    const sub = `${asset.department || "—"}  ·  ${asset.location || "No location"}`;
+    doc.text(sub.length > 32 ? sub.slice(0, 31) + "…" : sub, x + cardW / 2, textY + 4.5, { align: "center" });
+    doc.setFontSize(5.5);
+    doc.setTextColor(156, 163, 175);
+    doc.text(asset.serialNumber || "", x + cardW / 2, textY + 9, { align: "center" });
+    // card border
+    doc.setDrawColor(229, 231, 235);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(x, y, cardW, cardH, 2, 2);
+  };
+
+  const downloadQrPdf = async (assetList, filename) => {
+    setBulkDownloading(true);
+    try {
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const pageW = 210, pageH = 297;
+      const cols = 3, rows = 4;
+      const marginX = 10, marginY = 15, gapX = 5, gapY = 8;
+      const cardW = (pageW - marginX * 2 - gapX * (cols - 1)) / cols;
+      const cardH = (pageH - marginY * 2 - gapY * (rows - 1)) / rows;
+      let col = 0, row = 0, page = 1;
+
+      for (const asset of assetList) {
+        if (col === 0 && row === 0 && page > 1) doc.addPage();
+        const url = `${window.location.origin}/scan/${asset._id}`;
+
+        // Draw QR onto an HTML canvas then pass canvas directly to jsPDF
+        // (avoids jsPDF's PNG decoder which behaves differently in the browser)
+        const canvas = document.createElement("canvas");
+        await QRCode.toCanvas(canvas, url, { width: 200, margin: 1, color: { dark: "#000000", light: "#ffffff" } });
+
+        const x = marginX + col * (cardW + gapX);
+        const y = marginY + row * (cardH + gapY);
+        buildQrCard(doc, asset, canvas, x, y, cardW, cardH);
+        col++;
+        if (col >= cols) { col = 0; row++; }
+        if (row >= rows) { col = 0; row = 0; page++; }
+      }
+      doc.save(filename);
+    } catch (err) {
+      console.error("QR PDF error:", err);
+    } finally {
+      setBulkDownloading(false);
+    }
+  };
 
   const fetchEmployees = async () => {
     try {
@@ -392,6 +484,17 @@ const Assets = () => {
               Import CSV
             </Button>
           )}
+          <Tooltip title="Download QR codes for every asset as a printable PDF">
+            <Button
+              variant="outlined"
+              startIcon={bulkDownloading ? <CircularProgress size={14} color="inherit" /> : <QrCode2Rounded />}
+              disabled={bulkDownloading || assets.length === 0}
+              onClick={() => downloadQrPdf(assets, `AssetCare_All_QR_${Date.now()}.pdf`)}
+              sx={{ borderColor: "divider", color: "text.primary", borderRadius: "10px", fontWeight: 700, "&:hover": { bgcolor: "action.hover", borderColor: "text.secondary" } }}
+            >
+              All QR Codes
+            </Button>
+          </Tooltip>
           {canRegister && (
             <Button
               variant="contained"
@@ -468,6 +571,36 @@ const Assets = () => {
         )}
       </Paper>
 
+      {/* Bulk-selection toolbar */}
+      {selectedIds.size > 0 && (
+        <Paper sx={{ mb: 2, px: 2.5, py: 1.5, borderRadius: "14px", border: "1.5px solid", borderColor: "#FBBF24", bgcolor: "rgba(251,191,36,0.06)", display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+          <Typography fontWeight={800} fontSize={14} sx={{ flex: 1 }}>
+            {selectedIds.size} asset{selectedIds.size > 1 ? "s" : ""} selected
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setSelectedIds(new Set())}
+            sx={{ fontWeight: 700, borderRadius: "8px", borderColor: "divider", color: "text.secondary", textTransform: "none" }}
+          >
+            Clear
+          </Button>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={bulkDownloading ? <CircularProgress size={14} color="inherit" /> : <QrCode2Rounded />}
+            disabled={bulkDownloading}
+            onClick={() => {
+              const list = assets.filter(a => selectedIds.has(a._id));
+              downloadQrPdf(list, `AssetCare_QR_Selected_${Date.now()}.pdf`);
+            }}
+            sx={{ bgcolor: "#111827", color: "#FBBF24", fontWeight: 800, borderRadius: "8px", textTransform: "none", boxShadow: "none" }}
+          >
+            Download QR ({selectedIds.size})
+          </Button>
+        </Paper>
+      )}
+
       {/* Table */}
       <TableContainer component={Paper} sx={{ borderRadius: "20px", border: 1, borderColor: "divider", overflow: "hidden" }}>
         {loading ? (
@@ -485,6 +618,15 @@ const Assets = () => {
             <Table size="small" sx={{ minWidth: 700 }}>
               <TableHead>
                 <TableRow sx={{ bgcolor: "background.default" }}>
+                  <TableCell padding="checkbox" sx={{ borderBottom: 2, borderColor: "divider", pl: 1.5 }}>
+                    <Checkbox
+                      size="small"
+                      checked={filteredAssets.length > 0 && selectedIds.size === filteredAssets.length}
+                      indeterminate={selectedIds.size > 0 && selectedIds.size < filteredAssets.length}
+                      onChange={toggleSelectAll}
+                      sx={{ color: "text.disabled", "&.Mui-checked": { color: "#FBBF24" }, "&.MuiCheckbox-indeterminate": { color: "#FBBF24" } }}
+                    />
+                  </TableCell>
                   {["Asset", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
                     <TableCell key={head} sx={{ fontWeight: 800, fontSize: 11, color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.6px", py: 1.5, borderBottom: 2, borderColor: "divider" }}>
                       {head}
@@ -494,7 +636,14 @@ const Assets = () => {
               </TableHead>
               <TableBody>
                 {paginatedAssets.map((asset) => (
-                  <TableRow key={asset._id} hover sx={{ "&:last-child td": { borderBottom: 0 }, cursor: "pointer" }}>
+                  <TableRow key={asset._id} hover selected={selectedIds.has(asset._id)} sx={{ "&:last-child td": { borderBottom: 0 }, cursor: "pointer", "&.Mui-selected": { bgcolor: "rgba(251,191,36,0.06)" }, "&.Mui-selected:hover": { bgcolor: "rgba(251,191,36,0.1)" } }}>
+                    <TableCell padding="checkbox" sx={{ pl: 1.5 }} onClick={e => { e.stopPropagation(); toggleSelect(asset._id); }}>
+                      <Checkbox
+                        size="small"
+                        checked={selectedIds.has(asset._id)}
+                        sx={{ color: "text.disabled", "&.Mui-checked": { color: "#FBBF24" } }}
+                      />
+                    </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                         <Typography sx={{ fontWeight: 800, color: "text.primary", fontSize: 14 }}>{asset.name}</Typography>
@@ -516,6 +665,11 @@ const Assets = () => {
                         <Tooltip title="View details">
                           <IconButton size="small" onClick={() => setSelected(asset)} sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: "rgba(17,24,39,0.08)" } }}>
                             <VisibilityRounded fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="QR Code">
+                          <IconButton size="small" onClick={() => setQrAsset(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#FBBF24", bgcolor: "rgba(251,191,36,0.1)" } }}>
+                            <QrCode2Rounded fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Timeline / History">
@@ -826,6 +980,103 @@ const Assets = () => {
         assetName={timelineAsset?.name}
         onClose={() => setTimelineAsset(null)}
       />
+
+      {/* QR Code Modal */}
+      <Dialog open={Boolean(qrAsset)} onClose={() => setQrAsset(null)} maxWidth="xs" fullWidth
+        slotProps={{ paper: { sx: { borderRadius: "20px", border: 1, borderColor: "divider" } } }}>
+        <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "rgba(251,191,36,0.12)", display: "grid", placeItems: "center" }}>
+              <QrCode2Rounded sx={{ color: "#FBBF24" }} />
+            </Box>
+            <Box>
+              <Typography fontWeight={900} fontSize={16}>Asset QR Code</Typography>
+              <Typography fontSize={12} color="text.secondary" fontWeight={600}>{qrAsset?.name}</Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={() => setQrAsset(null)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
+        </Box>
+        <DialogContent sx={{ p: 3, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+          {qrDataUrl ? (
+            <>
+              <Box sx={{ p: 2, borderRadius: "16px", bgcolor: "#fff", border: 1, borderColor: "divider", display: "inline-block" }}>
+                <img src={qrDataUrl} alt="QR Code" style={{ width: 240, height: 240, display: "block" }} />
+              </Box>
+
+              {/* Label info below QR */}
+              <Box sx={{ width: "100%", p: 2, borderRadius: "12px", bgcolor: "action.hover", border: 1, borderColor: "divider", textAlign: "center" }}>
+                <Typography fontWeight={900} fontSize={15}>{qrAsset?.name}</Typography>
+                <Typography fontSize={12} color="text.secondary" fontWeight={600} mt={0.3}>
+                  {qrAsset?.department || "—"}  ·  {qrAsset?.location || "No location"}
+                </Typography>
+                <Typography fontSize={11} color="text.disabled" fontWeight={700} mt={0.3} sx={{ fontFamily: "monospace" }}>
+                  {qrAsset?.serialNumber}
+                </Typography>
+              </Box>
+
+              <Button
+                fullWidth
+                variant="contained"
+                startIcon={<DownloadRounded />}
+                onClick={() => {
+                  const qrSize = 300;
+                  const pad = 24;
+                  const labelH = 100;
+                  const canvasW = qrSize + pad * 2;
+                  const canvasH = qrSize + pad * 2 + labelH;
+                  const canvas = document.createElement("canvas");
+                  canvas.width = canvasW;
+                  canvas.height = canvasH;
+                  const ctx = canvas.getContext("2d");
+                  ctx.fillStyle = "#FFFFFF";
+                  ctx.fillRect(0, 0, canvasW, canvasH);
+                  const img = new Image();
+                  img.onload = () => {
+                    ctx.drawImage(img, pad, pad, qrSize, qrSize);
+                    // divider
+                    ctx.strokeStyle = "#E5E7EB";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(pad, qrSize + pad + 12);
+                    ctx.lineTo(canvasW - pad, qrSize + pad + 12);
+                    ctx.stroke();
+                    // asset name
+                    const ty = qrSize + pad + 36;
+                    ctx.fillStyle = "#111827";
+                    ctx.font = "bold 16px Arial, sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.fillText(qrAsset?.name || "", canvasW / 2, ty);
+                    // dept · location
+                    ctx.font = "13px Arial, sans-serif";
+                    ctx.fillStyle = "#6B7280";
+                    ctx.fillText(
+                      `${qrAsset?.department || "—"}  ·  ${qrAsset?.location || "No location"}`,
+                      canvasW / 2, ty + 22
+                    );
+                    // serial
+                    ctx.font = "bold 11px Courier New, monospace";
+                    ctx.fillStyle = "#9CA3AF";
+                    ctx.fillText(qrAsset?.serialNumber || "", canvasW / 2, ty + 44);
+                    const a = document.createElement("a");
+                    a.href = canvas.toDataURL("image/png");
+                    a.download = `QR_${qrAsset?.serialNumber || qrAsset?._id}.png`;
+                    a.click();
+                  };
+                  img.src = qrDataUrl;
+                }}
+                sx={{ bgcolor: "#111827", color: "#FBBF24", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3 }}
+              >
+                Download QR Code
+              </Button>
+              <Typography fontSize={11} color="text.disabled" textAlign="center">
+                Print and stick this on the physical asset. Scanning will let anyone log in and raise a ticket directly.
+              </Typography>
+            </>
+          ) : (
+            <Box sx={{ py: 6 }}><CircularProgress sx={{ color: "#FBBF24" }} /></Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

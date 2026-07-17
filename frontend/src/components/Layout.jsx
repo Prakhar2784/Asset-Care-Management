@@ -11,7 +11,7 @@ import {
   NotificationsRounded, LogoutRounded, HistoryRounded, AssessmentRounded,
   SettingsRounded, ChevronRightRounded, PeopleRounded, ShoppingCartRounded,
   DnsRounded, TrendingUpRounded, LightModeRounded, DarkModeRounded,
-  ReceiptRounded, VpnKeyRounded, BuildRounded, StorefrontRounded
+  ReceiptRounded, VpnKeyRounded, BuildRounded, StorefrontRounded, SwapHorizRounded
 } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -30,6 +30,7 @@ const adminMenu = [
   { section: "Assets" },
   { text: "Asset Registry",   path: "/admin/assets",       icon: <Inventory2Rounded />,  perms: ["View All Assets", "Register Assets", "Edit / Delete Assets"] },
   { text: "Assigned Devices", path: "/admin/assignments",  icon: <AssignmentIndRounded />, perm: "Assign Assets" },
+  { text: "Asset Loans",      path: "/admin/asset-loans",  icon: <SwapHorizRounded />,    perm: "Assign Assets" },
   { text: "Maintenance",      path: "/admin/maintenance",  icon: <BuildRounded />,        perm: "View All Assets" },
   { text: "Service Centers",  path: "/admin/service-centers", icon: <StorefrontRounded />, perm: "View All Assets" },
 
@@ -54,6 +55,7 @@ const hodMenu = [
   { text: "My Team",          path: "/admin/my-team",          icon: <PeopleRounded /> },
   { text: "Asset Registry",   path: "/admin/assets",           icon: <Inventory2Rounded />,  perms: ["View All Assets", "Register Assets", "Edit / Delete Assets"] },
   { text: "Assigned Devices", path: "/admin/assignments",      icon: <AssignmentIndRounded />, perm: "Assign Assets" },
+  { text: "Asset Loans",      path: "/admin/asset-loans",      icon: <SwapHorizRounded />,    perm: "Assign Assets" },
   { text: "Maintenance",      path: "/admin/maintenance",      icon: <BuildRounded />,        perm: "View All Assets" },
   { text: "Service Centers",  path: "/admin/service-centers",  icon: <StorefrontRounded />,   perm: "View All Assets" },
 

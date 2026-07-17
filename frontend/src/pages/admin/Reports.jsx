@@ -7,7 +7,7 @@ import {
 import {
   AssessmentRounded, PictureAsPdfRounded, TableChartRounded,
   WarningAmberRounded, InventoryRounded, ConfirmationNumberRounded,
-  PeopleRounded, BusinessRounded, SearchRounded
+  PeopleRounded, BusinessRounded, SearchRounded, TimelineRounded
 } from '@mui/icons-material';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -91,6 +91,43 @@ export default function Reports() {
       doc.save(`AssetCare_Report_${Date.now()}.pdf`);
     } catch {
       alert('Failed to export PDF. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const exportLifecycle = async () => {
+    setExporting(true);
+    try {
+      const { data } = await api.get('/reports/lifecycle');
+      const rows = data.tickets.map(t => ({
+        'Ticket ID': t.ticketId,
+        Status: t.status,
+        Priority: t.priority,
+        Issue: t.issue,
+        'Estimated Cost': t.estimatedCost,
+        'Raised At': t.raisedAt,
+        'Last Updated': t.lastUpdated,
+        'Resolution Hours': t.resolutionHours ?? '',
+        'Asset Name': t.assetName,
+        'Asset Serial': t.assetSerial,
+        'Asset Category': t.assetCategory,
+        'Asset Department': t.assetDepartment,
+        'Asset Location': t.assetLocation,
+        'Asset Vendor': t.assetVendor,
+        'Asset Purchase Cost': t.assetPurchaseCost,
+        'Warranty End': t.assetWarrantyEnd,
+        'Raised By': t.raisedByName,
+        'Raised By Email': t.raisedByEmail,
+        'Raised By Dept': t.raisedByDept,
+        'Raised By Role': t.raisedByRole,
+        'Approved By': t.approvedByName,
+      }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Ticket Lifecycle');
+      XLSX.writeFile(wb, `AssetCare_Lifecycle_${Date.now()}.xlsx`);
+    } catch {
+      alert('Failed to export lifecycle report.');
     } finally {
       setExporting(false);
     }
@@ -187,6 +224,15 @@ export default function Reports() {
           </Box>
         </Box>
         <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            startIcon={<TimelineRounded />}
+            onClick={exportLifecycle}
+            disabled={exporting}
+            sx={{ fontWeight: 700, borderRadius: '12px', borderColor: 'divider', color: 'text.primary', textTransform: 'none', px: 2.5 }}
+          >
+            Lifecycle Report
+          </Button>
           <Button
             variant="outlined"
             startIcon={<TableChartRounded />}

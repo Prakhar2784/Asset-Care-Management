@@ -14,9 +14,13 @@ const {
   getAssetTimeline,
   uploadAssetDocuments,
   deleteAssetDocument,
+  getScanAsset,
 } = require('../controllers/assetController');
 const { protect, authorize, requirePermission } = require('../middleware/authMiddleware');
 const { assetDocUpload } = require('../middleware/upload');
+
+// QR scan — auth only, no permission gate
+router.get('/scan/:id', protect, getScanAsset);
 
 // Must be before /:id to avoid route conflict
 router.get('/next-tag', protect, async (req, res) => {

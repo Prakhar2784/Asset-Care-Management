@@ -896,6 +896,7 @@ const AddAsset = () => {
                   {departments.map(d => (
                     <MenuItem key={d._id} value={d.name}>{d.name}</MenuItem>
                   ))}
+                  <MenuItem value="Others">Others</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

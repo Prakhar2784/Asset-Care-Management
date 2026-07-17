@@ -42,7 +42,7 @@ const ticketSchema = new mongoose.Schema({
   },
   assignedVendor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Vendor',
+    ref: 'ServiceCenter',
     default: null
   },
   // Used when ticket is raised for an approved device request (not yet a formal asset)

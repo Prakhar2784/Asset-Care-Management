@@ -46,11 +46,13 @@ const MaintenanceLogs = lazy(() => import("./pages/admin/MaintenanceLogs"));
 const ServiceCenters = lazy(() => import("./pages/admin/ServiceCenters"));
 const DepartmentTeam = lazy(() => import("./pages/admin/DepartmentTeam"));
 const SuperAdminPanel = lazy(() => import("./pages/superadmin/SuperAdminPanel"));
+const AssetLoans = lazy(() => import("./pages/admin/AssetLoans"));
 
 // Employee, Technician & Shared Pages
 const EmployeePortal = lazy(() => import("./pages/employee/EmployeePortal"));
 const TechnicianPortal = lazy(() => import("./pages/technician/TechnicianPortal"));
 const Tickets = lazy(() => import("./pages/shared/Tickets"));
+const ScanAsset = lazy(() => import("./pages/shared/ScanAsset"));
 const Notifications = lazy(() => import("./pages/shared/Notifications"));
 const Settings = lazy(() => import("./pages/shared/Settings"));
 const OnboardingWizard = lazy(() => import("./pages/admin/OnboardingWizard"));
@@ -91,6 +93,8 @@ function App() {
         {/* SECURE ROUTES - Must be logged in */}
         <Route element={<ProtectedRoute />}>
           <Route path="/onboarding" element={<OnboardingWizard />} />
+          <Route path="/scan/:assetId" element={<ScanAsset />} />
+
           <Route element={<Layout />}>
 
             {/* Employee Route (Admins can view this too if they navigate to it) */}
@@ -119,6 +123,7 @@ function App() {
               <Route path="/admin/maintenance" element={<MaintenanceLogs />} />
               <Route path="/admin/service-centers" element={<ServiceCenters />} />
               <Route path="/admin/my-team" element={<DepartmentTeam />} />
+              <Route path="/admin/asset-loans" element={<AssetLoans />} />
             </Route>
 
             {/* SUPER ADMIN ONLY - Platform console */}

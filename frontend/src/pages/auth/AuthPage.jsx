@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
@@ -27,6 +27,7 @@ const landingRouteFor = (session) => {
 
 const AuthPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   
   // UI State
@@ -120,7 +121,8 @@ const AuthPage = () => {
           localStorage.removeItem(`assetcare_remembered_email_${role}`);
         }
         const session = await login(formData.email, formData.password, role);
-        navigate(landingRouteFor(session));
+        const returnTo = searchParams.get('return');
+        navigate(returnTo && returnTo.startsWith('/') ? returnTo : landingRouteFor(session));
       }
       else if (view === "forgot") {
         const { data } = await api.post('/auth/forgot-password', { email: formData.email });

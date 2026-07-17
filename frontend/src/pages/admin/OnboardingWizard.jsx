@@ -407,6 +407,7 @@ const OnboardingWizard = () => {
                   <Select label="Department" value={user.department} onChange={e => setUser({ ...user, department: e.target.value })}>
                     <MenuItem value="">No Department</MenuItem>
                     {departmentOptions.map(name => <MenuItem key={name} value={name}>{name}</MenuItem>)}
+                    <MenuItem value="Others">Others</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
