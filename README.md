@@ -1,101 +1,63 @@
-# Asset-Care-Management
+<div align="center">
 
-A multi-tenant **Enterprise Asset Management (EAM)** platform that digitizes how organizations track assets, process invoices, and manage service requests — featuring an **OCR-powered document-intelligence pipeline** that converts scanned documents into structured data automatically.
+# 🏢 Asset Care Management
 
-Built with a **React** frontend, a **FastAPI** backend, and **MongoDB**, secured end-to-end with **JWT authentication** and **role-based access control (RBAC)**.
+**A multi-tenant Enterprise Asset Management (EAM) platform with OCR-powered document intelligence**
 
-![Frontend](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=white)
-![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)
-![Database](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)
-![Auth](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
+<p>
+  <img src="https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+  <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white" alt="JWT" />
+  <img src="https://img.shields.io/badge/Status-Active_Development-6366f1?style=flat-square" alt="Status" />
+</p>
 
-> **Status:** Actively developed. The backend and frontend live in this repository under `backend/` and `frontend/`.
+</div>
 
----
+## 📖 Overview
 
-## Overview
+**Asset Care Management** modernizes how organizations track assets, process invoices, and manage service requests. Manual, error-prone document handling is replaced with a transparent, digital, workflow-driven system: scanned documents pass through an **automated OCR pipeline** that extracts asset and invoice fields directly into structured records — no manual data entry.
 
-In many organizations, asset and invoice records are still maintained by hand — data typed in one field at a time, requests tracked over email, and no single source of truth. **Asset-Care-Management** centralizes this into one platform where each tenant organization's data, users, and permissions stay fully isolated, and where document data entry is automated through OCR.
+Each organization (tenant) operates in **complete isolation** with its own data, users, and permissions, managed from a central Super-Admin panel.
 
-The problem it solves: **turn slow, manual, error-prone asset and document handling into a transparent, digital, workflow-driven system.**
+## ✨ Key Features
 
----
+- 🏬 **Multi-Tenant Architecture** — fully isolated data, users & permissions per organization, with Super-Admin tenant onboarding and feature management
+- 📄 **OCR Document Intelligence** — automated extraction of asset & invoice fields from scanned documents, flowing straight into structured records
+- 🔐 **Role-Based Access Control (RBAC)** — scoped permissions across Super Admin, Admin, HOD, and standard user roles
+- 🔁 **Approval Workflows** — device/asset request flows with multi-step approvals and full tracking
+- 🎫 **Real-Time Ticketing** — service request and ticket management with live status and notifications
 
-## Key Features
+## 🏗️ Tech Stack
 
-### 🏢 Multi-Tenancy
-- Fully isolated data, users, and permissions per tenant organization
-- Super-Admin panel to onboard tenants, configure custom plans, and control feature gating per organization
-- Guided onboarding flow for new tenants
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React (dashboards & role-based views) |
+| **Backend** | FastAPI (Python) |
+| **Database** | MongoDB |
+| **Auth** | JWT + Role-Based Access Control |
+| **Intelligence** | OCR pipeline for document data extraction |
 
-### 📄 Document Intelligence (OCR)
-- Automated Optical Character Recognition (OCR) extraction of asset and invoice fields from scanned documents and images
-- Extracted data flows directly into asset records and approval workflows, replacing manual data entry
-
-### 🔐 Authentication & Access Control
-- JWT-based authentication with password hashing
-- Role-based access control (RBAC) with scoped permissions across roles (Super Admin, Admin, HOD, and standard users)
-- Input validation on sensitive fields
-
-### 🔁 Workflows & Ticketing
-- Device / asset request workflows with approval steps
-- Ticket management with resolution tracking
-- Real-time notifications to keep requests moving
-
----
-
-## Tech Stack
-
-| Layer     | Technology                          |
-|-----------|-------------------------------------|
-| Frontend  | React                               |
-| Backend   | FastAPI (Python)                    |
-| Database  | MongoDB                             |
-| Auth      | JWT (JSON Web Tokens)               |
-| Document  | Optical Character Recognition (OCR) |
-
----
-
-## Architecture
+## 📁 Project Structure
 
 ```
-                    ┌─────────────────────────────┐
-                    │        React Frontend        │
-                    │  (Super Admin / Admin / User │
-                    │      dashboards & flows)     │
-                    └──────────────┬──────────────┘
-                                   │  REST API (JWT-secured)
-                    ┌──────────────▼──────────────┐
-                    │        FastAPI Backend       │
-                    │  Auth · RBAC · Tenancy ·     │
-                    │  Workflows · OCR pipeline    │
-                    └───────┬─────────────┬────────┘
-                            │             │
-                 ┌──────────▼───┐   ┌─────▼─────────┐
-                 │   MongoDB     │   │  OCR Engine   │
-                 │ (multi-tenant │   │ (document →   │
-                 │     data)     │   │  structured)  │
-                 └───────────────┘   └───────────────┘
+Asset-Care-Management/
+├── backend/          # FastAPI services, OCR pipeline, auth & tenant logic
+├── frontend/         # React app — dashboards, workflows, ticketing UI
+└── README.md
 ```
 
----
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
-- Python 3.10+
-- MongoDB
 
-> These are the standard setup commands for a FastAPI + React project. Adjust the entry-point (`main:app`) and script names if your files differ.
+- Node.js **v18+**
+- Python **3.10+**
+- MongoDB (local or Atlas)
 
-### 1. Clone
-```bash
-git clone https://github.com/Prakhar2784/Asset-Care-Management.git
-cd Asset-Care-Management
-```
+### 1️⃣ Backend Setup
 
-### 2. Backend (FastAPI)
 ```bash
 cd backend
 python -m venv venv
@@ -104,35 +66,39 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-### 3. Frontend (React)
+### 2️⃣ Frontend Setup
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### 4. Environment variables
-Create a `.env` file inside `backend/` with your own values:
+### 3️⃣ Configuration
+
+Create a `.env` file inside `backend/` with your MongoDB connection string and JWT secrets:
+
 ```env
-MONGODB_URI=mongodb://localhost:27017/assetcare
-JWT_SECRET=<your-secret-key>
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
 ```
+
+## 👥 Roles & Permissions
+
+| Role | Capabilities |
+|------|-------------|
+| **Super Admin** | Tenant onboarding, feature management, platform-wide control |
+| **Admin** | Organization-level asset, user & workflow management |
+| **HOD** | Departmental approvals and request oversight |
+| **User** | Raise requests, track tickets, view assigned assets |
+
+## 👤 Author
+
+**Prakhar Kedia** — B.Tech CSE (AI), Bennett University
+
+[![GitHub](https://img.shields.io/badge/GitHub-Prakhar2784-181717?style=flat-square&logo=github)](https://github.com/Prakhar2784)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-prakharkedia-0A66C2?style=flat-square&logo=linkedin)](https://www.linkedin.com/in/prakharkedia/)
 
 ---
 
-## Project Structure
-
-```
-Asset-Care-Management/
-├── backend/     # FastAPI — API, auth, RBAC, tenancy, OCR pipeline
-├── frontend/    # React — dashboards and user flows
-├── .gitignore
-└── README.md
-```
-
----
-
-## Author
-
-**Prakhar Kedia** — AI/ML Engineer
-[GitHub](https://github.com/Prakhar2784) · [LinkedIn](https://www.linkedin.com/in/prakharkedia) · kediaprakhar@gmail.com
+<div align="center">⭐ If you find this project interesting, consider giving it a star!</div>
