@@ -2,16 +2,15 @@
 import {
   Alert, Box, Button, Chip, CircularProgress, Dialog,
   DialogContent, Grid, IconButton,
-  LinearProgress, Paper, Snackbar, Stack, Typography,
+  Paper, Snackbar, Stack, Typography,
   TextField,
 } from "@mui/material";
 import {
   Inventory2Rounded, ConfirmationNumberRounded, ApprovalRounded,
-  ArrowForwardRounded, CloseRounded, TaskAltRounded,
+  CloseRounded, TaskAltRounded,
   BusinessRounded, AddRounded, BuildRounded, DevicesRounded,
   ShieldRounded, SpeedRounded, PeopleRounded,
   NotificationsActiveRounded, CalendarTodayRounded,
-  CheckCircleRounded, AccessTimeRounded,
   ReceiptLongRounded, StorageRounded,
   EventNoteRounded,
 } from "@mui/icons-material";
@@ -345,14 +344,6 @@ const AdminDashboard = () => {
     department: t.asset?.department || "Unassigned",
   }));
 
-  const deptBreakdown = dashboardData?.departmentBreakdown || [];
-  const deptTotal     = deptBreakdown.reduce((s, d) => s + d.count, 0) || 1;
-  const DEPT_COLORS   = ["#374151", "#4B5563", "#6B7280", "#9CA3AF", "#B0B7C3", "#D1D5DB"];
-
-  const inWarranty   = Math.max(0, (dashboardData?.totalAssets || 0) - (dashboardData?.warrantyExpiringSoon || 0));
-  const expiringSoon = dashboardData?.warrantyExpiringSoon || 0;
-  const totalAssets  = dashboardData?.totalAssets || 1;
-  const healthPct    = Math.round((inWarranty / totalAssets) * 100);
 
   /* ── filtered KPIs ── */
   const allKpis = [
@@ -566,7 +557,7 @@ const AdminDashboard = () => {
           <Grid container spacing={3} sx={{ mb: 3, alignItems: 'flex-start' }}>
 
             {/* Recent Tickets */}
-            <Grid size={{ xs: 12, lg: canViewAssets ? 8 : 12 }}>
+            <Grid size={{ xs: 12 }}>
               <Paper sx={{ borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper", overflow: "hidden" }}>
                 <Box sx={{ px: 3, py: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid", borderColor: "divider" }}>
                   <Box>
@@ -601,151 +592,20 @@ const AdminDashboard = () => {
               </Paper>
             </Grid>
 
-            {/* Right sidebar — asset health & dept breakdown, only for users who can view assets */}
-            {canViewAssets && (
-              <Grid size={{ xs: 12, lg: 4 }}>
-                <Stack spacing={3}>
-                  <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2.5 }}>
-                      <ShieldRounded sx={{ color: "text.primary", fontSize: 20 }} />
-                      <Typography fontWeight={900} fontSize={16}>Asset Health</Typography>
-                    </Box>
-
-                    <Box sx={{ textAlign: "center", mb: 2.5 }}>
-                      <Box sx={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", width: 100, height: 100 }}>
-                        <CircularProgress variant="determinate" value={healthPct} size={100} thickness={5}
-                          sx={{ color: healthPct > 70 ? "#4B5563" : healthPct > 40 ? "#9CA3AF" : "#D1D5DB", position: "absolute" }} />
-                        <CircularProgress variant="determinate" value={100} size={100} thickness={5}
-                          sx={{ color: "action.selected", position: "absolute" }} />
-                        <Box sx={{ position: "relative", textAlign: "center" }}>
-                          <Typography fontSize={22} fontWeight={950} color="text.primary" sx={{ lineHeight: 1 }}>{healthPct}%</Typography>
-                          <Typography fontSize={10} color="text.secondary" fontWeight={700}>healthy</Typography>
-                        </Box>
-                      </Box>
-                    </Box>
-
-                    <Stack spacing={1.5}>
-                      {[
-                        { label: "In Warranty",    value: inWarranty,   color: "#4B5563" },
-                        { label: "Expiring Soon",  value: expiringSoon, color: "#9CA3AF" },
-                        { label: "Active Repairs", value: dashboardData?.activeRepairs || 0, color: "#D1D5DB" },
-                      ].map(({ label, value, color }) => (
-                        <Box key={label}>
-                          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                              <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
-                              <Typography fontSize={12} fontWeight={600} color="text.secondary">{label}</Typography>
-                            </Box>
-                            <Typography fontSize={12} fontWeight={800} color="text.primary">{value}</Typography>
-                          </Box>
-                          <LinearProgress variant="determinate" value={totalAssets > 0 ? Math.round((value / totalAssets) * 100) : 0}
-                            sx={{ height: 5, borderRadius: 3, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: color, borderRadius: 3 } }} />
-                        </Box>
-                      ))}
-                    </Stack>
-                  </Paper>
-
-                  {deptBreakdown.length > 0 && (
-                    <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
-                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
-                        <Typography fontWeight={900} fontSize={16}>Assets by Dept.</Typography>
-                        <Chip label={`${deptTotal} total`} size="small" sx={{ fontWeight: 800, fontSize: 11, bgcolor: "rgba(17,24,39,0.1)", color: "text.primary" }} />
-                      </Box>
-                      <Stack spacing={1.8}>
-                        {deptBreakdown.slice(0, 6).map((d, i) => {
-                          const pct   = Math.round((d.count / deptTotal) * 100);
-                          const color = DEPT_COLORS[i % DEPT_COLORS.length];
-                          return (
-                            <Box key={d._id || "Unknown"}>
-                              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.6 }}>
-                                <Typography fontSize={12} fontWeight={700} color="text.primary" noWrap sx={{ maxWidth: "70%" }}>{d._id || "Unassigned"}</Typography>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.8 }}>
-                                  <Typography fontSize={11} color="text.secondary">{pct}%</Typography>
-                                  <Typography fontSize={12} fontWeight={800} color={color}>{d.count}</Typography>
-                                </Box>
-                              </Box>
-                              <LinearProgress variant="determinate" value={pct}
-                                sx={{ height: 6, borderRadius: 3, bgcolor: "action.selected", "& .MuiLinearProgress-bar": { bgcolor: color, borderRadius: 3 } }} />
-                            </Box>
-                          );
-                        })}
-                      </Stack>
-                    </Paper>
-                  )}
-                </Stack>
-              </Grid>
-            )}
           </Grid>
 
-          {/* ── Warranty Overview + Quick Actions ──────────────── */}
-          {(canViewAssets || allQuickActions.length > 0) && (
-            <Grid container spacing={3} sx={{ alignItems: "flex-start" }}>
-
-              {canViewAssets && (
-                <Grid size={{ xs: 12, lg: allQuickActions.length > 0 ? 8 : 12 }}>
-                  <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2.5 }}>
-                      <Box>
-                        <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px">Warranty Overview</Typography>
-                        <Typography fontSize={12} color="text.secondary" mt={0.2}>Fleet warranty health across all registered assets</Typography>
-                      </Box>
-                      <Button size="small" endIcon={<ArrowForwardRounded />} onClick={() => navigate("/admin/assets")}
-                        sx={{ fontWeight: 700, color: "text.primary", "&:hover": { bgcolor: "rgba(17,24,39,0.08)" } }}>
-                        View Assets
-                      </Button>
-                    </Box>
-
-                    <Box sx={{ mb: 3 }}>
-                      <Box sx={{ display: "flex", gap: 0.5, height: 12, borderRadius: 6, overflow: "hidden", bgcolor: "action.selected" }}>
-                        {[
-                          { pct: Math.round((inWarranty / totalAssets) * 100),   color: "#4B5563" },
-                          { pct: Math.round((expiringSoon / totalAssets) * 100), color: "#9CA3AF" },
-                          { pct: 100 - Math.round((inWarranty / totalAssets) * 100) - Math.round((expiringSoon / totalAssets) * 100), color: "#D1D5DB" },
-                        ].filter(s => s.pct > 0).map((s, i) => (
-                          <Box key={i} sx={{ width: `${s.pct}%`, bgcolor: s.color, borderRadius: 6 }} />
-                        ))}
-                      </Box>
-                      <Box sx={{ display: "flex", gap: 2.5, mt: 1.5 }}>
-                        {[{ label: "In Warranty", color: "#4B5563" }, { label: "Expiring Soon", color: "#9CA3AF" }, { label: "Expired / Unknown", color: "#D1D5DB" }].map(({ label, color }) => (
-                          <Box key={label} sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
-                            <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: color }} />
-                            <Typography fontSize={11} fontWeight={600} color="text.secondary">{label}</Typography>
-                          </Box>
-                        ))}
-                      </Box>
-                    </Box>
-
-                    <Grid container spacing={2}>
-                      {[
-                        { label: "In Warranty",         value: inWarranty,   color: "#4B5563", bg: "rgba(75,85,99,0.1)",   desc: "Assets under active warranty", icon: <CheckCircleRounded /> },
-                        { label: "Expiring in 30 days", value: expiringSoon, color: "#9CA3AF", bg: "rgba(156,163,175,0.1)",  desc: "Renew before they lapse",       icon: <AccessTimeRounded /> },
-                        { label: "Active Repairs",       value: dashboardData?.activeRepairs || 0, color: "#D1D5DB", bg: "rgba(209,213,219,0.1)", desc: "Currently under service", icon: <BuildRounded /> },
-                      ].map(({ label, value, color, bg, desc, icon }) => (
-                        <Grid size={{ xs: 12, sm: 4 }} key={label}>
-                          <Box onClick={() => navigate("/admin/assets")} sx={{ p: 2.5, borderRadius: "18px", bgcolor: bg, border: "1px solid", borderColor: `${color}33`, cursor: "pointer", transition: "all 0.2s", "&:hover": { transform: "translateY(-3px)", boxShadow: `0 12px 28px ${color}22` } }}>
-                            <Box sx={{ color, mb: 1, "& svg": { fontSize: 20 } }}>{icon}</Box>
-                            <Typography fontSize={28} fontWeight={950} color="text.primary" sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{value}</Typography>
-                            <Typography fontSize={12} fontWeight={800} color={color} mt={0.5}>{label}</Typography>
-                            <Typography fontSize={11} color="text.secondary" mt={0.3}>{desc}</Typography>
-                          </Box>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Paper>
-                </Grid>
-              )}
-
-              {allQuickActions.length > 0 && (
-                <Grid size={{ xs: 12, lg: canViewAssets ? 4 : 12 }}>
-                  <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper", height: "100%" }}>
-                    <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px" mb={0.3}>Quick Actions</Typography>
-                    <Typography fontSize={12} color="text.secondary" mb={2.5}>Jump to any section instantly</Typography>
-                    <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5 }}>
-                      {allQuickActions.map(a => <QuickAction key={a.label} {...a} onClick={() => navigate(a.route)} />)}
-                    </Box>
-                  </Paper>
-                </Grid>
-              )}
+          {/* ── Quick Actions ──────────────────────────────────── */}
+          {allQuickActions.length > 0 && (
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12 }}>
+                <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
+                  <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px" mb={0.3}>Quick Actions</Typography>
+                  <Typography fontSize={12} color="text.secondary" mb={2.5}>Jump to any section instantly</Typography>
+                  <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 1.5 }}>
+                    {allQuickActions.map(a => <QuickAction key={a.label} {...a} onClick={() => navigate(a.route)} />)}
+                  </Box>
+                </Paper>
+              </Grid>
             </Grid>
           )}
         </>
