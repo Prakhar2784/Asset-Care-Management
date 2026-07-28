@@ -3,7 +3,6 @@ const User = require('../models/User');
 const Ticket = require('../models/Ticket');
 const Asset = require('../models/Asset');
 const Notification = require('../models/Notification');
-const DeviceRequest = require('../models/DeviceRequest');
 
 // PUT /api/settings/profile
 const updateProfile = async (req, res) => {
@@ -54,13 +53,12 @@ const exportMyData = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const [user, tickets, notifications, deviceRequests, assignedAssets] = await Promise.all([
+    const [user, tickets, notifications, assignedAssets] = await Promise.all([
       User.findById(userId).select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry'),
       Ticket.find({ raisedBy: userId })
         .populate('asset', 'name serialNumber')
         .sort({ createdAt: -1 }),
       Notification.find({ user: userId }).sort({ createdAt: -1 }).limit(100),
-      DeviceRequest.find({ raisedBy: userId }).sort({ createdAt: -1 }),
       Asset.find({ assignedTo: userId, isDeleted: { $ne: true } }).select('name serialNumber category status department'),
     ]);
 
@@ -78,14 +76,7 @@ const exportMyData = async (req, res) => {
         lastUpdated: t.updatedAt,
         estimatedCost: t.estimatedCost,
       })),
-      deviceRequests: deviceRequests.map(r => ({
-        requestId: r.requestId,
-        requestType: r.requestType,
-        itemRequested: r.itemRequested,
-        status: r.status,
-        urgency: r.urgency,
-        raisedAt: r.createdAt,
-      })),
+      deviceRequests: [],
       notifications: notifications.map(n => ({
         title: n.title,
         message: n.message,

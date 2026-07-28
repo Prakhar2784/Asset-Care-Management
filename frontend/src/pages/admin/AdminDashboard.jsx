@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert, Box, Button, Chip, CircularProgress, Dialog,
   DialogContent, Grid, IconButton,
@@ -312,7 +312,7 @@ const AdminDashboard = () => {
 
   const canViewAssets  = hasPerm('View All Assets') || hasPerm('Register Assets') || hasPerm('Edit / Delete Assets') || hasPerm('Assign Assets');
   const canRegister    = hasPerm('Register Assets');
-  const canApprove     = hasPerm('Approve Device Requests');
+  const canApprove     = isAdminTier;
   const canViewTickets = hasPerm('Raise Tickets') || hasPerm('Manage All Tickets');
   const canManageUsers = isAdminTier;
 
@@ -352,7 +352,6 @@ const AdminDashboard = () => {
     { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#FBBF24", route: "/admin/approvals", show: canApprove },
     { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#FBBF24", route: "/tickets",         show: canViewTickets || isAdminTier },
     { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within 30 days or overdue",       icon: <ShieldRounded />,               accent: "#FBBF24", route: "/admin/assets",    show: canViewAssets },
-    { label: "Device Requests",   value: dashboardData?.pendingRequests,      sub: "Awaiting review",            icon: <DevicesRounded />,              accent: "#FBBF24", route: "/admin/approvals", show: canApprove },
   ].filter(k => k.show);
 
   /* ── filtered quick actions ── */

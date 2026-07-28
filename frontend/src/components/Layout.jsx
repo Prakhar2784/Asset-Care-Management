@@ -35,7 +35,7 @@ const adminMenu = [
 
   { section: "Operations" },
   { text: "Tickets",          path: "/tickets",            icon: <ConfirmationNumberRounded />, perm: "Raise Tickets" },
-  { text: "Approvals",        path: "/admin/approvals",    icon: <ApprovalRounded />,    perm: "Approve Device Requests" },
+  { text: "Approvals",        path: "/admin/approvals",    icon: <ApprovalRounded /> },
 
   { section: "Organization" },
   { text: "Enterprise Hub",   path: "/admin/enterprise",   icon: <BusinessRounded />, perm: "Settings & Config", feature: "enterpriseHub" },
@@ -59,7 +59,7 @@ const hodMenu = [
 
   { section: "Operations" },
   { text: "Tickets",          path: "/tickets",                icon: <ConfirmationNumberRounded />, perm: "Raise Tickets" },
-  { text: "Approvals",        path: "/admin/approvals",        icon: <ApprovalRounded />,    perm: "Approve Device Requests" },
+  { text: "Approvals",        path: "/admin/approvals",        icon: <ApprovalRounded /> },
 
   { section: "Account" },
   { text: "Settings",         path: "/settings",               icon: <SettingsRounded /> },

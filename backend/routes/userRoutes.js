@@ -9,7 +9,6 @@ const { sendWelcomeEmail, sendInviteEmail, sendDeactivationEmail } = require('..
 const AssetAssignment = require('../models/AssetAssignment');
 const Asset           = require('../models/Asset');
 const Ticket          = require('../models/Ticket');
-const DeviceRequest   = require('../models/DeviceRequest');
 const AuditLog        = require('../models/AuditLog');
 const { avatarUpload } = require('../middleware/upload');
 const { checkUserLimit } = require('../middleware/limitMiddleware');
@@ -148,19 +147,16 @@ router.get('/:id/profile', protect, authorize('admin', 'super_admin'), async (re
       .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
-    const [assignments, tickets, deviceRequests] = await Promise.all([
+    const [assignments, tickets] = await Promise.all([
       AssetAssignment.find({ assignedEmployeeEmail: user.email, status: 'Assigned' })
         .populate('asset', 'name serialNumber category status')
         .sort({ assignedDate: -1 }).limit(10),
       Ticket.find({ raisedBy: user._id })
         .select('issue status priority createdAt')
         .sort({ createdAt: -1 }).limit(10),
-      DeviceRequest.find({ raisedBy: user._id })
-        .select('requestType itemRequested status createdAt')
-        .sort({ createdAt: -1 }).limit(10),
     ]);
 
-    res.json({ user, assignments, tickets, deviceRequests });
+    res.json({ user, assignments, tickets, deviceRequests: [] });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

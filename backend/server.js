@@ -47,7 +47,7 @@ const authLimiter = rateLimit({
 app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
 app.use("/api/assets", require("./routes/assetRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
-app.use("/api/device-requests", require("./routes/deviceRequestRoutes"));
+// app.use("/api/device-requests", require("./routes/deviceRequestRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/departments", require("./routes/departmentRoutes"));
 app.use("/api/asset-assignments", require("./routes/assetAssignmentRoutes"));

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
@@ -111,13 +111,11 @@ const DEFAULT_PERMISSION_MATRIX = [
   { feature: 'View All Assets',         admin: true,  hod: true,  employee: false, technician: true  },
   { feature: 'Raise Tickets',           admin: true,  hod: true,  employee: true,  technician: true  },
   { feature: 'Manage All Tickets',      admin: true,  hod: false, employee: false, technician: true  },
-  { feature: 'Approve Device Requests', admin: true,  hod: true,  employee: false, technician: false },
   { feature: 'Manage Users',            admin: true,  hod: false, employee: false, technician: false },
   { feature: 'View Audit Logs',         admin: true,  hod: false, employee: false, technician: false },
   { feature: 'Manage Departments',      admin: true,  hod: false, employee: false, technician: false },
   { feature: 'Settings & Config',       admin: true,  hod: false, employee: false, technician: false },
   { feature: 'Employee Portal',         admin: false, hod: false, employee: true,  technician: false },
-  { feature: 'Submit Device Requests',  admin: false, hod: true,  employee: true,  technician: false },
 ];
 
 const PERM_STORAGE_KEY = 'assetcare_permission_matrix';
@@ -1140,25 +1138,6 @@ export default function UserManagement() {
                               <Box sx={{ px: 1, py: 0.2, borderRadius: '20px', fontSize: 10, fontWeight: 800, bgcolor: `${STATUS_COLORS[t.status] || '#94A3B8'}22`, color: STATUS_COLORS[t.status] || '#94A3B8', whiteSpace: 'nowrap' }}>{t.status}</Box>
                             </Box>
                             <Typography fontSize={11} color="text.disabled" mt={0.3}>{new Date(t.createdAt).toLocaleDateString('en-IN')} · {t.priority}</Typography>
-                          </Paper>
-                        ))}</Stack>}
-                    </Box>
-                    <Divider />
-                    <Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                        <DevicesRounded sx={{ fontSize: 18, color: '#22C55E' }} />
-                        <Typography fontWeight={800} fontSize={14}>Device Requests</Typography>
-                        <Box sx={{ ml: 'auto', px: 1, py: 0.2, borderRadius: '20px', bgcolor: 'rgba(34,197,94,0.12)', color: '#22C55E', fontSize: 11, fontWeight: 800 }}>{profileData.deviceRequests.length}</Box>
-                      </Box>
-                      {profileData.deviceRequests.length === 0
-                        ? <Typography fontSize={13} color="text.disabled" sx={{ pl: 1 }}>No device requests.</Typography>
-                        : <Stack spacing={1}>{profileData.deviceRequests.map(d => (
-                          <Paper key={d._id} sx={{ p: 1.5, borderRadius: '12px', border: 1, borderColor: 'divider' }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                              <Typography fontSize={13} fontWeight={700}>{d.deviceType}</Typography>
-                              <Box sx={{ px: 1, py: 0.2, borderRadius: '20px', fontSize: 10, fontWeight: 800, bgcolor: `${STATUS_COLORS[d.status] || '#94A3B8'}22`, color: STATUS_COLORS[d.status] || '#94A3B8' }}>{d.status}</Box>
-                            </Box>
-                            <Typography fontSize={11} color="text.disabled" mt={0.3}>{new Date(d.createdAt).toLocaleDateString('en-IN')}</Typography>
                           </Paper>
                         ))}</Stack>}
                     </Box>
