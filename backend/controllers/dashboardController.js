@@ -1,6 +1,5 @@
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
-const DeviceRequest = require('../models/DeviceRequest');
 const MaintenanceLog = require('../models/MaintenanceLog');
 const User = require('../models/User');
 
@@ -13,7 +12,6 @@ const getDashboardStats = async (req, res) => {
 
     let assetFilter = { isDeleted: { $ne: true } };
     let ticketFilter = {};
-    let deviceRequestFilter = {};
 
     const isHod = req.user.role === 'hod' && req.user.department;
 
@@ -29,18 +27,12 @@ const getDashboardStats = async (req, res) => {
       const deptAssets = await Asset.find({ department: req.user.department, isDeleted: { $ne: true } }).select('_id');
       const deptAssetIds = deptAssets.map(a => a._id);
 
-      // 4. Scope tickets by the asset's assigned department; device-request
-      // tickets (no asset yet) fall back to the raiser's own department.
+      // 4. Scope tickets by the asset's assigned department
       ticketFilter = {
         $or: [
           { asset: { $in: deptAssetIds } },
           { asset: null, raisedBy: { $in: deptUserIds } }
         ]
-      };
-
-      // 5. Scope device requests by department users
-      deviceRequestFilter = {
-        raisedBy: { $in: deptUserIds }
       };
     }
 
@@ -51,7 +43,6 @@ const getDashboardStats = async (req, res) => {
       activeRepairs,
       resolvedTickets,
       warrantyExpiringSoon,
-      pendingRequests,
       recentTickets,
       departmentBreakdown
     ] = await Promise.all([
@@ -62,7 +53,6 @@ const getDashboardStats = async (req, res) => {
       Ticket.countDocuments({ ...ticketFilter, status: 'Resolved' }),
       // Counts assets already past warranty as well as those expiring within 30 days
       Asset.countDocuments({ ...assetFilter, warrantyEnd: { $ne: null, $lte: in30Days } }),
-      DeviceRequest.countDocuments({ ...deviceRequestFilter, status: 'Pending' }),
       Ticket.find(ticketFilter)
         .sort({ createdAt: -1 })
         .limit(5)
@@ -83,7 +73,7 @@ const getDashboardStats = async (req, res) => {
       activeRepairs,
       resolvedTickets,
       warrantyExpiringSoon,
-      pendingRequests,
+      pendingRequests: 0,
       recentTickets,
       departmentBreakdown
     });

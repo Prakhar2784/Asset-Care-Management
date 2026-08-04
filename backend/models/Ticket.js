@@ -45,12 +45,6 @@ const ticketSchema = new mongoose.Schema({
     ref: 'ServiceCenter',
     default: null
   },
-  // Used when ticket is raised for an approved device request (not yet a formal asset)
-  deviceRequestRef: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'DeviceRequest',
-    default: null
-  },
   itemLabel: {
     type: String,
     default: null

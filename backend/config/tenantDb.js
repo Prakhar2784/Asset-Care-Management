@@ -42,7 +42,6 @@ const getTenantConnection = (tenantId) => {
   connection.model('Asset', require('../models/Asset').schema);
   connection.model('Ticket', require('../models/Ticket').schema);
   connection.model('Department', require('../models/Department').schema);
-  connection.model('DeviceRequest', require('../models/DeviceRequest').schema);
   connection.model('AssetAssignment', require('../models/AssetAssignment').schema);
   connection.model('Notification', require('../models/Notification').schema);
   connection.model('AuditLog', require('../models/AuditLog').schema);
@@ -55,8 +54,6 @@ const getTenantConnection = (tenantId) => {
   connection.model('MaintenanceSchedule', require('../models/MaintenanceSchedule').schema);
   connection.model('TransferRequest', require('../models/TransferRequest').schema);
   
-  connection.model('ApprovalTracking', require('../models/ApprovalTracking').schema);
-
   // CMDB Custom Fields model
   connection.model('CustomField', require('../models/CustomField').schema);
 

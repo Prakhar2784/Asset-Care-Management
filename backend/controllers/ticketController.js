@@ -17,10 +17,10 @@ const { audit } = require('../services/auditService');
 // @access  Private (any logged-in user)
 const createTicket = async (req, res) => {
   try {
-    const { issue, priority, assetId, deviceRequestId, itemLabel } = req.body;
+    const { issue, priority, assetId, itemLabel } = req.body;
 
-    if (!assetId && !deviceRequestId) {
-      return res.status(400).json({ message: 'Either an asset or an approved device request must be selected.' });
+    if (!assetId) {
+      return res.status(400).json({ message: 'An asset must be selected.' });
     }
 
     const ticketId = `SRV-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -37,8 +37,7 @@ const createTicket = async (req, res) => {
       ticketId,
       issue,
       priority: priority || 'Medium',
-      asset: assetId || null,
-      deviceRequestRef: deviceRequestId || null,
+      asset: assetId,
       itemLabel: itemLabel || null,
       raisedBy: req.user._id,
       status: initialStatus,
@@ -47,7 +46,6 @@ const createTicket = async (req, res) => {
  
     const populated = await Ticket.findById(ticket._id)
       .populate('asset', 'name serialNumber department')
-      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name email department');
  
     // Fire-and-forget email + notification + audit
@@ -143,7 +141,6 @@ const getTickets = async (req, res) => {
 
     const tickets = await Ticket.find(filter)
       .populate('asset', 'name serialNumber department')
-      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name department role')
       .populate('approvedBy', 'name')
       .populate('assignedTechnician', 'name role')
@@ -162,7 +159,6 @@ const getMyTickets = async (req, res) => {
   try {
     const tickets = await Ticket.find({ raisedBy: req.user._id })
       .populate('asset', 'name serialNumber department')
-      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name email department')
       .populate('approvedBy', 'name')
       .sort({ createdAt: -1 });
@@ -415,7 +411,6 @@ const confirmResolution = async (req, res) => {
     // since the frontend replaces its state with this response
     const updated = await Ticket.findById(ticket._id)
       .populate('asset', 'name serialNumber department')
-      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .populate('raisedBy', 'name email department');
 
     audit({ req, action: 'ticket_resolution_confirmed', entity: 'ticket', entityId: ticket._id, entityLabel: ticket.ticketId });

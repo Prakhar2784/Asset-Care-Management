@@ -1,23 +1,20 @@
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
-const DeviceRequest = require('../models/DeviceRequest');
 const User = require('../models/User');
 const { getHodScope } = require('../utils/hodScope');
 
 const buildHodScopeFilters = async (user) => {
   if (user.role !== 'hod' || !user.department) return {
     assetFilter: { isDeleted: { $ne: true } },
-    ticketFilter: {}, userFilter: {}, requestFilter: {},
+    ticketFilter: {}, userFilter: {},
   };
   const { deptUserIds, deptAssetIds } = await getHodScope(user);
   const dept = user.department;
   return {
     assetFilter: { isDeleted: { $ne: true }, department: dept },
-    // Tickets route by the asset's assigned department; device-request
-    // tickets (no asset yet) fall back to the raiser's own department.
+    // Tickets route by the asset's assigned department
     ticketFilter: { $or: [{ asset: { $in: deptAssetIds } }, { asset: null, raisedBy: { $in: deptUserIds } }] },
     userFilter: { department: dept },
-    requestFilter: { raisedBy: { $in: deptUserIds } },
     deptUserIds, deptAssetIds,
   };
 };
@@ -25,14 +22,14 @@ const buildHodScopeFilters = async (user) => {
 // GET /api/reports/summary
 const getSummaryReport = async (req, res) => {
   try {
-    const { assetFilter, ticketFilter, userFilter, requestFilter } = await buildHodScopeFilters(req.user);
+    const { assetFilter, ticketFilter, userFilter } = await buildHodScopeFilters(req.user);
 
-    const [totalAssets, totalTickets, totalRequests, totalUsers] = await Promise.all([
+    const [totalAssets, totalTickets, totalUsers] = await Promise.all([
       Asset.countDocuments(assetFilter),
       Ticket.countDocuments(ticketFilter),
-      DeviceRequest.countDocuments(requestFilter),
       User.countDocuments(userFilter),
     ]);
+    const totalRequests = 0;
 
     const [assetsByStatus, assetsByCategory, assetsByDept, ticketsByStatus, ticketsByPriority] = await Promise.all([
       Asset.aggregate([{ $match: assetFilter }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
@@ -110,7 +107,6 @@ const getLifecycleReport = async (req, res) => {
       .populate('asset', 'name serialNumber category department location vendor modelNumber purchaseCost warrantyEnd')
       .populate('raisedBy', 'name email department role phone')
       .populate('approvedBy', 'name email role')
-      .populate('deviceRequestRef', 'requestId itemRequested requestType')
       .sort({ createdAt: -1 });
 
     const rows = tickets.map(t => {
@@ -129,7 +125,7 @@ const getLifecycleReport = async (req, res) => {
         raisedAt: raisedAt.toLocaleString('en-IN'),
         lastUpdated: updatedAt.toLocaleString('en-IN'),
         resolutionHours,
-        assetName: t.asset?.name || t.itemLabel || t.deviceRequestRef?.itemRequested || 'N/A',
+        assetName: t.asset?.name || t.itemLabel || 'N/A',
         assetSerial: t.asset?.serialNumber || 'N/A',
         assetCategory: t.asset?.category || 'N/A',
         assetDepartment: t.asset?.department || 'N/A',
