@@ -247,10 +247,14 @@ export default function UserManagement() {
   const [userPermSaved, setUserPermSaved] = useState(false);
 
   const openUserPerm = (user) => {
-    // Load from user's saved DB customPermissions first; fall back to role defaults
-    const dbPerms = user.customPermissions?.length
-      ? user.customPermissions
-      : DEFAULT_PERMISSION_MATRIX.map(row => ({ feature: row.feature, allowed: row[user.role] ?? false }));
+    // Merge user's saved DB customPermissions with DEFAULT_PERMISSION_MATRIX so all features are always listed
+    const dbPerms = DEFAULT_PERMISSION_MATRIX.map(row => {
+      const saved = user.customPermissions?.find(p => p.feature === row.feature);
+      return {
+        feature: row.feature,
+        allowed: saved !== undefined ? saved.allowed : (row[user.role] ?? false)
+      };
+    });
     setUserPermState(dbPerms);
     setUserPermTarget(user);
     setUserPermSaved(false);

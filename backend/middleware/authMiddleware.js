@@ -99,16 +99,33 @@ const authorize = (...roles) => {
 const requirePermission = (...features) => {
   return (req, res, next) => {
     const userRole = req.user.role;
+    const customPerms = req.user.customPermissions || [];
+
+    // Check if there is an explicit custom permission override first (for any role including admins/HODs)
+    let allowedByOverride = null;
+    for (const f of features) {
+      const entry = customPerms.find(p => p.feature === f);
+      if (entry !== undefined) {
+        if (entry.allowed === true) {
+          allowedByOverride = true;
+          break;
+        } else if (entry.allowed === false) {
+          allowedByOverride = false;
+        }
+      }
+    }
+
+    if (allowedByOverride === true) return next();
+    if (allowedByOverride === false) {
+      return res.status(403).json({ message: `You do not have permission: ${features.join(' or ')}` });
+    }
+
+    // No explicit override found: fall back to role defaults
     // Admin-tier roles pass without custom permission check
     if (ADMIN_TIER_ROLES.includes(userRole)) return next();
     // Technicians are allowed to perform read-only asset lookups
     if (userRole === 'technician' && features.includes('View All Assets')) return next();
-    const customPerms = req.user.customPermissions || [];
-    const allowed = features.some(f => {
-      const entry = customPerms.find(p => p.feature === f);
-      return entry?.allowed === true;
-    });
-    if (allowed) return next();
+
     return res.status(403).json({ message: `You do not have permission: ${features.join(' or ')}` });
   };
 };
