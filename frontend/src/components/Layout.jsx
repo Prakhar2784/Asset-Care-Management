@@ -118,6 +118,7 @@ const Sidebar = ({ onClose }) => {
     customPerms.some(p => p.allowed && !["View Dashboard", "Raise Tickets"].includes(p.feature));
 
   const rawMenu = currentUser?.role === "super_admin"  ? superAdminMenu
+    : hasCustomPerms                                   ? adminMenu
     : currentUser?.role === "technician"               ? technicianMenu
     : currentUser?.role === "hod"                      ? hodMenu
     : isAdminTier || employeeHasAdminPerms             ? adminMenu
