@@ -101,6 +101,8 @@ const requirePermission = (...features) => {
     const userRole = req.user.role;
     // Admin-tier roles pass without custom permission check
     if (ADMIN_TIER_ROLES.includes(userRole)) return next();
+    // Technicians are allowed to perform read-only asset lookups
+    if (userRole === 'technician' && features.includes('View All Assets')) return next();
     const customPerms = req.user.customPermissions || [];
     const allowed = features.some(f => {
       const entry = customPerms.find(p => p.feature === f);
