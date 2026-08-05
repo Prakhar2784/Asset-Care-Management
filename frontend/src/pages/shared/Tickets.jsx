@@ -105,7 +105,6 @@ const Tickets = () => {
   // List state
   const [tickets, setTickets]               = useState([]);
   const [assets, setAssets]                 = useState([]);
-  const [approvedRequests, setApprovedRequests] = useState([]);
   const [technicians, setTechnicians]       = useState([]);
   const [serviceCenters, setServiceCenters] = useState([]);
   const [loading, setLoading]               = useState(true);
@@ -171,10 +170,7 @@ const Tickets = () => {
         } catch { setAssets([]); }
       }
 
-      if (isEmployee) {
-        try { const r = await api.get('/device-requests/my-approved'); setApprovedRequests(r.data); }
-        catch { setApprovedRequests([]); }
-      }
+
       // Fetch technicians & service centers for HOD/admin
       if (!isEmployee && !isTechRole) {
         try {
@@ -214,11 +210,7 @@ const Tickets = () => {
     try {
       let payload = { issue, priority };
       if (selectedItem.startsWith('asset:')) payload.assetId = selectedItem.replace('asset:', '');
-      else if (selectedItem.startsWith('dreq:')) {
-        const [, id, ...labelParts] = selectedItem.split(':');
-        payload.deviceRequestId = id;
-        payload.itemLabel = labelParts.join(':');
-      }
+
       const response = await api.post('/tickets', payload, { timeout: 20000 });
 
       if (imageFile) {
@@ -1007,15 +999,10 @@ const Tickets = () => {
               <Box>
                 <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', mb: 1, display: 'block', textTransform: 'uppercase', fontSize: 10, letterSpacing: '0.6px' }}>Select Asset / Device</Typography>
                 <TextField fullWidth select required autoFocus sx={inputStyles} name="selectedItem" value={formData.selectedItem} onChange={e => setFormData({ ...formData, selectedItem: e.target.value })}>
-                  {assets.length === 0 && approvedRequests.length === 0 && <MenuItem disabled value="">No assets available</MenuItem>}
-                  {assets.length > 0 && [
-                    <MenuItem key="__ah" disabled sx={{ fontSize: 11, fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.6px' }}>— Registered Assets —</MenuItem>,
-                    ...assets.map(a => <MenuItem key={a._id} value={`asset:${a._id}`} sx={{ fontWeight: 600 }}>{a.name} <span style={{ marginLeft: 6, color: '#64748B' }}>(SN: {a.serialNumber})</span></MenuItem>)
-                  ]}
-                  {approvedRequests.length > 0 && [
-                    <MenuItem key="__dh" disabled sx={{ fontSize: 11, fontWeight: 900, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.6px' }}>— Approved Device Requests —</MenuItem>,
-                    ...approvedRequests.map(r => <MenuItem key={r._id} value={`dreq:${r._id}:${r.itemRequested}`} sx={{ fontWeight: 600 }}>{r.itemRequested} <span style={{ color: '#22C55E', marginLeft: 6, fontSize: 12 }}>({r.requestId})</span></MenuItem>)
-                  ]}
+                  {assets.length === 0 && <MenuItem disabled value="">No assets available</MenuItem>}
+                  {assets.length > 0 && assets.map(a => (
+                    <MenuItem key={a._id} value={`asset:${a._id}`} sx={{ fontWeight: 600 }}>{a.name} <span style={{ marginLeft: 6, color: '#64748B' }}>(SN: {a.serialNumber})</span></MenuItem>
+                  ))}
                 </TextField>
               </Box>
               <Box>
