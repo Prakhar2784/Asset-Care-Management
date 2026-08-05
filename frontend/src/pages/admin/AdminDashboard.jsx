@@ -306,15 +306,16 @@ const AdminDashboard = () => {
   const isAdminTier = ADMIN_TIER.includes(user?.role);
   const customPerms = user?.customPermissions || [];
   const hasPerm = (feature) => {
-    if (isAdminTier) return true;
-    return customPerms.some(p => p.feature === feature && p.allowed);
+    const entry = customPerms.find(p => p.feature === feature);
+    if (entry !== undefined) return entry.allowed;
+    return isAdminTier;
   };
 
   const canViewAssets  = hasPerm('View All Assets') || hasPerm('Register Assets') || hasPerm('Edit / Delete Assets') || hasPerm('Assign Assets');
   const canRegister    = hasPerm('Register Assets');
   const canApprove     = isAdminTier;
   const canViewTickets = hasPerm('Raise Tickets') || hasPerm('Manage All Tickets');
-  const canManageUsers = isAdminTier;
+  const canManageUsers = hasPerm('Manage Users');
 
   useEffect(() => {
     api.get("/dashboard/stats")

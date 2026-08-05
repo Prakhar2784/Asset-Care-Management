@@ -79,9 +79,9 @@ const Assets = () => {
   const adminRoles = ['admin', 'super_admin', 'hod', 'manager'];
   const isAdminTier = adminRoles.includes(currentUser?.role);
   const hasPerm = (feature) => {
-    if (isAdminTier) return true;
     const entry = customPerms.find(p => p.feature === feature);
-    return entry?.allowed === true;
+    if (entry !== undefined) return entry.allowed;
+    return isAdminTier;
   };
   const canView     = hasPerm('View All Assets') || hasPerm('Register Assets') || hasPerm('Edit / Delete Assets') || hasPerm('Assign Assets');
   const canRegister = hasPerm('Register Assets');
