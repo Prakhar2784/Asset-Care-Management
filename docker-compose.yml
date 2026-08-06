@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: assetcare_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: assetcare_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/assetcare
+      - JWT_SECRET=super_secret_fallback_key_please_change
+      - NODE_ENV=production
+      - SMTP_HOST=smtp.example.com
+      - SMTP_PORT=587
+      - SMTP_USER=your_smtp_username
+      - SMTP_PASS=your_smtp_password
+      - FRONTEND_URL=http://localhost:5000
+    volumes:
+      - uploads_data:/app/backend/uploads
+
+volumes:
+  mongodb_data:
+  uploads_data:

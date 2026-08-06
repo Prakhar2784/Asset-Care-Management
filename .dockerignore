@@ -1,0 +1,22 @@
+# Node dependencies and lockfiles
+**/node_modules
+**/npm-debug.log
+
+# Build outputs
+**/dist
+**/build
+
+# Environment configs and secrets
+**/.env
+**/.env.local
+**/.env.*.local
+**/.env.production
+
+# Git configs
+.git
+.gitignore
+.github
+
+# System files
+.DS_Store
+Thumbs.db
