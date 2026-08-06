@@ -5,6 +5,16 @@ const { protect } = require('../middleware/authMiddleware');
 const { validate, loginSchema, registerCompanySchema, forgotPasswordSchema, verifyOtpSchema, resetPasswordSchema } = require('../validation/authSchemas');
 const { loginLimiter, forgotLimiter, registerLimiter } = require('../middleware/authRateLimiters');
 
+router.get('/setup-status', async (req, res) => {
+  try {
+    const Tenant = require('../models/Tenant');
+    const count = await Tenant.countDocuments();
+    res.json({ needsSetup: count === 0 });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.post('/register-company', registerLimiter, validate(registerCompanySchema), registerCompany);
 router.post('/login', loginLimiter, validate(loginSchema), loginUser);
 router.get('/tenant-branding', getTenantBranding);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
@@ -28,6 +28,22 @@ const RegisterCompany = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isFirstTime, setIsFirstTime] = useState(false);
+
+  // Check if first-run setup is required
+  useEffect(() => {
+    const checkSetupStatus = async () => {
+      try {
+        const { data } = await api.get("/auth/setup-status");
+        if (data.needsSetup) {
+          setIsFirstTime(true);
+        }
+      } catch (err) {
+        console.error("Failed to check setup status:", err);
+      }
+    };
+    checkSetupStatus();
+  }, []);
 
   const pwRules = [
     { label: '8+ chars',  pass: formData.adminPassword.length >= 8 },
@@ -483,6 +499,25 @@ const RegisterCompany = () => {
           <p className="form-sub">Create your tenant workspace and primary admin profile.</p>
 
           {error && <div className="error-banner">{error}</div>}
+
+          {isFirstTime && (
+            <div className="info-banner" style={{
+              background: 'rgba(251, 191, 36, 0.1)',
+              border: '1px solid rgba(251, 191, 36, 0.25)',
+              color: '#FBBF24',
+              padding: '16px',
+              borderRadius: '16px',
+              fontSize: '13.5px',
+              marginBottom: '24px',
+              lineHeight: '1.6',
+              textAlign: 'center'
+            }}>
+              <strong>✨ First-Time Installation Detected</strong>
+              <div style={{ marginTop: '4px', opacity: 0.8 }}>
+                Please register your company organization and primary administrator account to set up your workspace.
+              </div>
+            </div>
+          )}
           
           {success && (
             <div className="success-banner">

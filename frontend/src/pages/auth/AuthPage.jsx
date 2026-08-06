@@ -45,6 +45,21 @@ const AuthPage = () => {
     password: "",
   });
 
+  // Check if first-run setup is required
+  useEffect(() => {
+    const checkSetupStatus = async () => {
+      try {
+        const { data } = await api.get("/auth/setup-status");
+        if (data.needsSetup) {
+          navigate("/register-company");
+        }
+      } catch (err) {
+        console.error("Failed to check setup status:", err);
+      }
+    };
+    checkSetupStatus();
+  }, [navigate]);
+
   // Load remembered email when role tab changes
   useEffect(() => {
     const saved = localStorage.getItem(`assetcare_remembered_email_${role}`);
