@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: assetcare_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  app:
+    image: prakhar2784/asset-care-system:latest
+    container_name: assetcare_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    env_file:
+      - .env
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/assetcare
+    volumes:
+      - uploads_data:/app/backend/uploads
+
+volumes:
+  mongodb_data:
+  uploads_data:
