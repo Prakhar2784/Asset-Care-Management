@@ -8,7 +8,7 @@ const { protect, authorize } = require('../middleware/authMiddleware');
 // GET /api/apikeys — list keys for current tenant (never returns full key)
 router.get('/', protect, authorize('admin'), async (req, res) => {
   try {
-    const keys = await ApiKey.find({})
+    const keys = await ApiKey.find({ tenantId: req.tenantId })
       .populate('createdBy', 'name')
       .select('-keyHash')
       .sort({ createdAt: -1 });
@@ -38,6 +38,7 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
       scopes:    scopes || ['read'],
       expiresAt: expiresAt || null,
       createdBy: req.user._id,
+      tenantId:  req.tenantId || 'default',
     });
 
     res.status(201).json({
@@ -63,7 +64,7 @@ router.put('/:id', protect, authorize('admin'), async (req, res) => {
     if (isActive !== undefined) update.isActive = isActive;
     if (scopes   !== undefined) update.scopes   = scopes;
 
-    const key = await ApiKey.findByIdAndUpdate(req.params.id, update, { new: true })
+    const key = await ApiKey.findOneAndUpdate({ _id: req.params.id, tenantId: req.tenantId }, update, { new: true })
       .populate('createdBy', 'name')
       .select('-keyHash');
     if (!key) return res.status(404).json({ message: 'Key not found.' });
@@ -76,7 +77,8 @@ router.put('/:id', protect, authorize('admin'), async (req, res) => {
 // DELETE /api/apikeys/:id
 router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
-    await ApiKey.findByIdAndDelete(req.params.id);
+    const key = await ApiKey.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    if (!key) return res.status(404).json({ message: 'Key not found.' });
     res.json({ message: 'API key deleted.' });
   } catch (err) {
     res.status(500).json({ message: err.message });

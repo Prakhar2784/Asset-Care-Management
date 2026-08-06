@@ -88,6 +88,49 @@ const createDepartment = async (req, res) => {
       createdBy: req.user?._id,
     });
 
+    // Auto-create/invite HOD user
+    try {
+      const User = require("../models/User");
+      const crypto = require("crypto");
+      const { sendInviteEmail } = require("../services/emailService");
+
+      const emailLower = hodEmail.toLowerCase().trim();
+      let user = await User.findOne({ email: emailLower });
+
+      if (!user) {
+        const placeholder = crypto.randomBytes(32).toString('hex');
+        const inviteToken = crypto.randomBytes(32).toString('hex');
+        const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48h
+
+        user = await User.create({
+          name: hodName,
+          email: emailLower,
+          password: placeholder,
+          role: 'hod',
+          department: name,
+          phone: hodPhone || '',
+          passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
+          passwordResetExpiry: inviteExpiry,
+          isActive: false
+        });
+
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const inviteLink = `${frontendUrl}/reset-password/${inviteToken}?invite=true`;
+        await sendInviteEmail(user, inviteLink);
+      } else {
+        const updateFields = { department: name };
+        if (!['admin', 'super_admin', 'hod'].includes(user.role)) {
+          updateFields.role = 'hod';
+        }
+        if (hodPhone && !user.phone) {
+          updateFields.phone = hodPhone;
+        }
+        await User.findByIdAndUpdate(user._id, updateFields);
+      }
+    } catch (hodErr) {
+      console.error("[HOD Activation] Error creating/inviting HOD user:", hodErr.message);
+    }
+
     res.status(201).json(department);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -125,6 +168,54 @@ const updateDepartment = async (req, res) => {
         runValidators: true,
       }
     );
+
+    // Auto-create/invite/update HOD user
+    try {
+      if (updatedDepartment.hodEmail) {
+        const User = require("../models/User");
+        const crypto = require("crypto");
+        const { sendInviteEmail } = require("../services/emailService");
+
+        const emailLower = updatedDepartment.hodEmail.toLowerCase().trim();
+        let user = await User.findOne({ email: emailLower });
+
+        if (!user) {
+          const placeholder = crypto.randomBytes(32).toString('hex');
+          const inviteToken = crypto.randomBytes(32).toString('hex');
+          const inviteExpiry = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48h
+
+          user = await User.create({
+            name: updatedDepartment.hodName,
+            email: emailLower,
+            password: placeholder,
+            role: 'hod',
+            department: updatedDepartment.name,
+            phone: updatedDepartment.hodPhone || '',
+            passwordResetToken: crypto.createHash('sha256').update(inviteToken).digest('hex'),
+            passwordResetExpiry: inviteExpiry,
+            isActive: false
+          });
+
+          const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+          const inviteLink = `${frontendUrl}/reset-password/${inviteToken}?invite=true`;
+          await sendInviteEmail(user, inviteLink);
+        } else {
+          const updateFields = { department: updatedDepartment.name };
+          if (!['admin', 'super_admin', 'hod'].includes(user.role)) {
+            updateFields.role = 'hod';
+          }
+          if (updatedDepartment.hodPhone && !user.phone) {
+            updateFields.phone = updatedDepartment.hodPhone;
+          }
+          if (updatedDepartment.hodName && user.name !== updatedDepartment.hodName) {
+            updateFields.name = updatedDepartment.hodName;
+          }
+          await User.findByIdAndUpdate(user._id, updateFields);
+        }
+      }
+    } catch (hodErr) {
+      console.error("[HOD Activation] Error updating/inviting HOD user:", hodErr.message);
+    }
 
     res.status(200).json(updatedDepartment);
   } catch (error) {

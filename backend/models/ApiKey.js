@@ -17,5 +17,4 @@ apiKeySchema.index({ tenantId: 1 });
 apiKeySchema.index({ createdBy: 1 });
 
 const ApiKey = mongoose.model('ApiKey', apiKeySchema);
-const createTenantModelProxy = require('../middleware/tenantModelProxy');
-module.exports = createTenantModelProxy('ApiKey', ApiKey);
+module.exports = ApiKey;

@@ -9,9 +9,8 @@ const protectWithApiKey = async (rawKey, req, res, next) => {
     // SHA-256 the incoming key for O(1) lookup (never stored in plaintext)
     const keyId = crypto.createHash('sha256').update(rawKey).digest('hex');
 
-    // Query the BASE model directly (bypasses tenant proxy — we don't know tenant yet)
     const ApiKeyModel = mongoose.model('ApiKey');
-    const apiKey = await ApiKeyModel.findOne({ keyId, isActive: true });
+    const apiKey = await ApiKeyModel.findOne({ keyId, isActive: true }, null, { bypassTenantFilter: true });
 
     if (!apiKey) {
       return res.status(401).json({ message: 'Invalid or inactive API key.' });
