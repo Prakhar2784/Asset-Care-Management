@@ -72,8 +72,16 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", uptime: process.uptime(), timestamp: new Date().toISOString() });
 });
 
-app.get("/", (req, res) => {
-  res.send("AssetCare API is running...");
+// Serve static frontend build files
+const frontendPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(frontendPath));
+
+// Wildcard handler for SPA routing
+app.use((req, res, next) => {
+  if (req.method === "GET" && !req.path.startsWith("/api") && !path.extname(req.path)) {
+    return res.sendFile(path.join(frontendPath, "index.html"));
+  }
+  next();
 });
 
 // 404 Route Handler
