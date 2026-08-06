@@ -75,6 +75,7 @@ const registerCompanySchema = z.object({
   adminEmail: email,
   adminPassword: newPassword,
   adminPhone: phone,
+  licenseKey: z.string().trim().min(1, 'License key is required.'),
 });
 
 const forgotPasswordSchema = z.object({ email });

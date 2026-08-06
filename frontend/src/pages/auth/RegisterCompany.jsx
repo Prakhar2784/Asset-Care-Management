@@ -21,7 +21,8 @@ const RegisterCompany = () => {
     adminName: "",
     adminEmail: "",
     adminPassword: "",
-    adminPhone: ""
+    adminPhone: "",
+    licenseKey: ""
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -562,6 +563,19 @@ const RegisterCompany = () => {
                   placeholder="Company Slug / URL (e.g., acme)"
                   className="auth-input"
                   value={formData.slug}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="input-group">
+                <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
+                <input
+                  type="text"
+                  name="licenseKey"
+                  placeholder="Commercial License Key (AC-SLUG-XXXX)"
+                  className="auth-input"
+                  value={formData.licenseKey}
                   onChange={handleInputChange}
                   required
                 />

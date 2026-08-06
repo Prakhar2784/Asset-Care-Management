@@ -329,10 +329,16 @@ const verifyResetToken = async (req, res) => {
 // POST /api/auth/register-company
 const registerCompany = async (req, res) => {
   try {
-    const { companyName, slug, adminName, adminEmail, adminPassword, adminPhone } = req.body;
+    const { companyName, slug, adminName, adminEmail, adminPassword, adminPhone, licenseKey } = req.body;
     
-    if (!companyName || !slug || !adminName || !adminEmail || !adminPassword) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!companyName || !slug || !adminName || !adminEmail || !adminPassword || !licenseKey) {
+      return res.status(400).json({ message: 'All fields are required including a valid license key' });
+    }
+
+    // Verify License Key
+    const { verifyLicenseKey } = require('../services/licenseService');
+    if (!verifyLicenseKey(licenseKey, slug)) {
+      return res.status(400).json({ message: 'Invalid license key for this company slug.' });
     }
 
     const Tenant = require('../models/Tenant');
@@ -355,7 +361,8 @@ const registerCompany = async (req, res) => {
       name: companyName,
       slug: slug.toLowerCase(),
       plan: 'Basic', // Default to Basic tier
-      limits: { maxAssets: 50, maxUsers: 10 }
+      limits: { maxAssets: 50, maxUsers: 10 },
+      licenseKey: licenseKey
     });
 
     // We run User and Department creation in the tenant context so the Mongoose plugin captures it correctly

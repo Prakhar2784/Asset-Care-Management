@@ -62,7 +62,8 @@ const tenantSchema = new mongoose.Schema({
     country:  { type: String, default: 'India' }
   },
   planSeats:   { type: Number, default: 10 },
-  planExpiry:  { type: Date, default: null }
+  planExpiry:  { type: Date, default: null },
+  licenseKey:  { type: String, default: null }
 }, {
   timestamps: true 
 });
