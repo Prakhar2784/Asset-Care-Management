@@ -48,6 +48,13 @@ const connectDB = async (retries = MAX_RETRIES) => {
   } catch (error) {
     console.error(`[MongoDB] Connection failed: ${error.message}`);
     if (retries > 0) {
+      // If the failed URI was a local server, switch to the MongoDB Atlas cloud fallback URI for retries
+      const currentUri = process.env.MONGO_URI || "";
+      if (currentUri.includes("localhost") || currentUri.includes("127.0.0.1") || currentUri === "") {
+        console.log(`[MongoDB] Local database connection failed. Auto-switching fallback to MongoDB Atlas cloud database...`);
+        process.env.MONGO_URI = "mongodb+srv://prakharitvoice_db_user:Prakhar2784@asset.brdoqab.mongodb.net/assetcare?appName=ASSET";
+      }
+      
       console.log(`[MongoDB] Retrying in ${RETRY_DELAY / 1000}s... (${retries} attempts left)`);
       await new Promise(res => setTimeout(res, RETRY_DELAY));
       return connectDB(retries - 1);
