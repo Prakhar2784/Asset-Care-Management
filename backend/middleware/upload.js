@@ -3,7 +3,10 @@ const path   = require('path');
 const fs     = require('fs');
 
 function makeStorage(folder) {
-  const dir = path.join(__dirname, '..', 'uploads', folder);
+  const uploadsBaseDir = process.pkg
+    ? path.join(path.dirname(process.execPath), 'uploads')
+    : path.join(__dirname, '..', 'uploads');
+  const dir = path.join(uploadsBaseDir, folder);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
   return multer.diskStorage({
