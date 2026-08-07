@@ -85,9 +85,11 @@ app.get("/api/health", (req, res) => {
 
 // Route to download the standalone Windows setup installer
 app.get("/download/desktop-app", (req, res) => {
-  // If a cloud download URL is configured in env, redirect to it directly
-  if (process.env.DESKTOP_APP_DOWNLOAD_URL) {
-    return res.redirect(process.env.DESKTOP_APP_DOWNLOAD_URL);
+  // Use env variable if set, otherwise fallback to the Google Drive download URL
+  const downloadUrl = process.env.DESKTOP_APP_DOWNLOAD_URL || "https://drive.google.com/uc?export=download&id=1sf8xo6AAX5_d07goJndeuNxtpvILHoRs";
+  
+  if (downloadUrl) {
+    return res.redirect(downloadUrl);
   }
 
   const possiblePaths = [
