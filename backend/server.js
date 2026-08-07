@@ -85,6 +85,11 @@ app.get("/api/health", (req, res) => {
 
 // Route to download the standalone Windows setup installer
 app.get("/download/desktop-app", (req, res) => {
+  // If a cloud download URL is configured in env, redirect to it directly
+  if (process.env.DESKTOP_APP_DOWNLOAD_URL) {
+    return res.redirect(process.env.DESKTOP_APP_DOWNLOAD_URL);
+  }
+
   const possiblePaths = [
     path.join(__dirname, "../asset-care-setup.exe"), // Development path
     path.join(path.dirname(process.execPath), "asset-care-setup.exe"), // Next to running binary path
