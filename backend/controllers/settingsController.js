@@ -143,7 +143,19 @@ const uploadTenantLogo = async (req, res) => {
     const tenant = await Tenant.findOne({ slug: req.tenantId });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found.' });
 
-    const logoUrl = `/uploads/logos/${req.file.filename}`;
+    const { getPlanDefaults } = require('../config/planDefaults');
+    const planDefaults = getPlanDefaults(tenant.plan);
+    const hasBranding = tenant.features?.customBranding ?? planDefaults.features?.customBranding ?? false;
+    if (!hasBranding) {
+      return res.status(403).json({
+        message: 'Custom Branding is an exclusive feature of the Large Scale plan. Please upgrade your subscription to upload a custom logo.',
+        code: 'FEATURE_NOT_ENTITLED'
+      });
+    }
+
+    const logoUrl = (req.file.path && req.file.path.startsWith('http'))
+      ? req.file.path
+      : `/uploads/logos/${req.file.filename}`;
     tenant.branding.logoUrl = logoUrl;
     await tenant.save();
 
@@ -162,6 +174,18 @@ const updateTenantSettings = async (req, res) => {
     const tenant = await Tenant.findOne({ slug: req.tenantId });
     if (!tenant) {
       return res.status(404).json({ message: 'Tenant settings not found.' });
+    }
+
+    if (branding && (branding.primaryColor || branding.secondaryColor || branding.logoUrl)) {
+      const { getPlanDefaults } = require('../config/planDefaults');
+      const planDefaults = getPlanDefaults(tenant.plan);
+      const hasBranding = tenant.features?.customBranding ?? planDefaults.features?.customBranding ?? false;
+      if (!hasBranding) {
+        return res.status(403).json({
+          message: 'Custom Branding is an exclusive feature of the Large Scale plan. Please upgrade your subscription to customize company theme colors.',
+          code: 'FEATURE_NOT_ENTITLED'
+        });
+      }
     }
 
     if (name) tenant.name = name;

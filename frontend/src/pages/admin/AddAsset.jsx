@@ -22,7 +22,7 @@ const SectionLabel = ({ number, title, subtitle }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3, mt: 0.5 }}>
     <Box sx={{
       width: 34, height: 34, borderRadius: "10px",
-      background: "#FBBF24",
+      background: "#051C12",
       color: "#111827",
       display: "grid", placeItems: "center",
       fontWeight: 900, fontSize: 14, flexShrink: 0,
@@ -647,9 +647,9 @@ const AddAsset = () => {
                 disabled={ocrLoading}
                 startIcon={ocrLoading ? <CircularProgress size={15} color="inherit" /> : <UploadFileRounded sx={{ fontSize: 17 }} />}
                 sx={{
-                  background: "#FBBF24", color: "#111827",
+                  background: "#051C12", color: "#FFFFFF",
                   fontWeight: 800, borderRadius: "12px", px: 3, py: 1.1, fontSize: 13.5, boxShadow: "none",
-                  "&:hover": { background: "#F5A623", boxShadow: "none" },
+                  "&:hover": { background: "#072F1F", boxShadow: "none" },
                   whiteSpace: "nowrap",
                 }}>
                 {ocrLoading ? "Scanning…" : ocrFilled.length > 0 ? "Scan Again" : "Upload Invoice"}
@@ -923,7 +923,7 @@ const AddAsset = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               <Box sx={{
                 width: 34, height: 34, borderRadius: "10px",
-                background: "#FBBF24",
+                background: "#051C12",
                 color: "#111827", display: "grid", placeItems: "center",
                 fontWeight: 900, fontSize: 14, flexShrink: 0,
               }}>
@@ -940,7 +940,7 @@ const AddAsset = () => {
             </Box>
             {docCount > 0 && (
               <Chip label={`${docCount} file${docCount > 1 ? "s" : ""} attached`}
-                size="small" sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, fontSize: 11 }} />
+                size="small" sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, fontSize: 11 }} />
             )}
           </Box>
 
@@ -1013,7 +1013,7 @@ const AddAsset = () => {
 
           <Button type="submit" variant="contained" disabled={loading}
             startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <SaveRounded />}
-            sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "#F5A623", boxShadow: "none" } }}>
+            sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "#072F1F", boxShadow: "none" } }}>
             {loading ? "Registering…" : "Register Asset"}
           </Button>
         </Box>
@@ -1112,7 +1112,7 @@ const AddAsset = () => {
           <Button onClick={() => setEmptyFieldsDialog(false)} variant="outlined" sx={{ borderColor: "divider", color: "text.secondary", fontWeight: 700, borderRadius: "10px", flex: 1, textTransform: "none" }}>
             Fill Them
           </Button>
-          <Button onClick={() => { setEmptyFieldsDialog(false); handleSubmit(null, true); }} variant="contained" sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "10px", flex: 1, boxShadow: "none", textTransform: "none" }}>
+          <Button onClick={() => { setEmptyFieldsDialog(false); handleSubmit(null, true); }} variant="contained" sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "10px", flex: 1, boxShadow: "none", textTransform: "none" }}>
             Register Anyway
           </Button>
         </DialogActions>

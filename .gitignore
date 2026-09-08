@@ -1,6 +1,8 @@
 node_modules/
 dist/
 build/
+backend/dist/
+frontend/dist/
 .env
 .env.local
 .env.*.local
@@ -9,3 +11,8 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 backend/uploads/
+*.exe
+release-exe/
+scratch/
+test_footer_margin.js
+backend/test_footer_margin.js

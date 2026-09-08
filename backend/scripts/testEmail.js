@@ -22,9 +22,9 @@ const test = async () => {
     console.log('\n✓ SMTP connection verified successfully!');
 
     await transporter.sendMail({
-      from: `"AssetCare Pro" <${process.env.SMTP_USER}>`,
+      from: `"IAssetCare" <${process.env.SMTP_USER}>`,
       to: process.env.SMTP_USER,
-      subject: 'AssetCare Pro SMTP Test',
+      subject: 'IAssetCare SMTP Test',
       text: 'Your SMTP setup is configured correctly.',
       html: '<h2>Email is working!</h2><p>Your SMTP setup is configured correctly.</p>'
     });

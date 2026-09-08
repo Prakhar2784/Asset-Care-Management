@@ -321,7 +321,9 @@ router.post('/:id/avatar', protect, avatarUpload, async (req, res) => {
     if (!isSelf && !isPrivileged) {
       return res.status(403).json({ message: 'Not authorized to update this avatar.' });
     }
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    const avatarUrl = (req.file.path && req.file.path.startsWith('http'))
+      ? req.file.path
+      : `/uploads/avatars/${req.file.filename}`;
     const user = await User.findByIdAndUpdate(req.params.id, { avatar: avatarUrl }, { new: true })
       .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
     if (!user) return res.status(404).json({ message: 'User not found.' });

@@ -32,7 +32,7 @@ export default function ResetPassword() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState('');a
 
   const ruleResults = rules.map(r => ({ ...r, passed: r.test(password) }));
   const allRulesPassed = ruleResults.every(r => r.passed);
@@ -81,9 +81,9 @@ export default function ResetPassword() {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0B0D12;
+      background: #F4F6F5;
       background-attachment: fixed;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       width: 100%;
     }
 
@@ -91,20 +91,17 @@ export default function ResetPassword() {
       display: flex;
       width: 100%;
       max-width: 1200px;
-      background: rgba(255, 255, 255, 0.70);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(17,24,39,0.18);
+      background: #FFFFFF;
+      border: 1.5px solid #E9EFEF;
       border-radius: 36px;
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 30px 70px rgba(5, 28, 18, 0.05);
       overflow: hidden;
-      border: 1px solid rgba(17,24,39,0.15);
-      color: #ffffff;
+      color: #0B130F;
     }
 
     .auth-info {
       flex: 1.2;
-      background: linear-gradient(135deg, #111111 0%, #050505 100%);
+      background: #051C12;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -119,8 +116,8 @@ export default function ResetPassword() {
       left: -10%;
       width: 380px;
       height: 380px;
-      background: radial-gradient(circle, rgba(17,24,39,0.12) 0%, rgba(0,0,0,0) 70%);
-      border: 1px dashed rgba(17,24,39,0.15);
+      background: radial-gradient(circle, rgba(180,241,5,0.12) 0%, rgba(0,0,0,0) 70%);
+      border: 1px dashed rgba(255,255,255,0.15);
       border-radius: 50%;
     }
 
@@ -135,16 +132,17 @@ export default function ResetPassword() {
       width: 48px;
       height: 48px;
       border-radius: 12px;
-      background: #111827;
+      background: #B4F105;
       display: grid;
       place-items: center;
-      color: #FFFFFF;
+      color: #051C12;
     }
 
     .brand-name {
       font-size: 22px;
       font-weight: 800;
       letter-spacing: -0.5px;
+      color: #FFFFFF;
     }
 
     .info-content {
@@ -158,13 +156,13 @@ export default function ResetPassword() {
       font-weight: 800;
       line-height: 1.2;
       margin-bottom: 20px;
-      background: linear-gradient(90deg, #FFFFFF 0%, #888888 100%);
+      background: linear-gradient(90deg, #FFFFFF 0%, #879A91 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .info-desc {
-      color: #909090;
+      color: #879A91;
       line-height: 1.6;
       margin-bottom: 40px;
     }
@@ -185,8 +183,8 @@ export default function ResetPassword() {
       width: 40px;
       height: 40px;
       border-radius: 10px;
-      background: rgba(17,24,39,0.1);
-      color: #FFFFFF;
+      background: rgba(180,241,5,0.1);
+      color: #B4F105;
       display: grid;
       place-items: center;
     }
@@ -195,11 +193,12 @@ export default function ResetPassword() {
       font-size: 16px;
       font-weight: 700;
       margin: 0 0 4px 0;
+      color: #FFFFFF;
     }
 
     .feature-details p {
       font-size: 13px;
-      color: #808080;
+      color: #879A91;
       margin: 0;
     }
 
@@ -209,7 +208,7 @@ export default function ResetPassword() {
       align-items: center;
       justify-content: center;
       padding: 40px;
-      background: #090909;
+      background: #FFFFFF;
       z-index: 2;
     }
 
@@ -221,11 +220,12 @@ export default function ResetPassword() {
     .form-title {
       font-size: 28px;
       font-weight: 800;
+      color: #0B130F;
       margin-bottom: 8px;
     }
 
     .form-sub {
-      color: #888888;
+      color: #6C7E75;
       font-size: 14px;
       margin-bottom: 30px;
     }
@@ -240,27 +240,27 @@ export default function ResetPassword() {
       left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: #555555;
+      color: #879A91;
       display: flex;
       align-items: center;
     }
 
     .auth-input {
       width: 100%;
-      background: #141414;
-      border: 1px solid #222222;
+      background: #FFFFFF;
+      border: 1.5px solid #E9EFEF;
       padding: 14px 14px 14px 44px;
       border-radius: 12px;
-      color: #ffffff;
+      color: #0B130F;
       font-size: 14px;
       transition: all 0.3s;
       outline: none;
     }
 
     .auth-input:focus {
-      border-color: #FFFFFF;
-      background: #181818;
-      box-shadow: 0 0 0 4px rgba(17,24,39,0.1);
+      border-color: #051C12;
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(5,28,18,0.05);
     }
 
     .input-suffix {
@@ -268,14 +268,14 @@ export default function ResetPassword() {
       right: 14px;
       top: 50%;
       transform: translateY(-50%);
-      color: #555555;
+      color: #879A91;
       cursor: pointer;
       display: flex;
       align-items: center;
     }
 
     .input-suffix:hover {
-      color: #ffffff;
+      color: #051C12;
     }
 
     .error-banner {
@@ -306,8 +306,8 @@ export default function ResetPassword() {
 
     .submit-btn {
       width: 100%;
-      background: #FBBF24;
-      color: #111827;
+      background: #051C12;
+      color: #FFFFFF;
       font-weight: 700;
       border: none;
       padding: 14px;
@@ -324,12 +324,13 @@ export default function ResetPassword() {
 
     .submit-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(17,24,39,0.3);
+      box-shadow: 0 8px 20px rgba(5,28,18,0.18);
+      background: #072F1F;
     }
 
     .submit-btn:disabled {
-      background: #444444;
-      color: #888888;
+      background: #E9EFEF;
+      color: #879A91;
       cursor: not-allowed;
     }
 
@@ -337,16 +338,17 @@ export default function ResetPassword() {
       margin-top: 24px;
       text-align: center;
       font-size: 13px;
-      color: #666666;
+      color: #6C7E75;
     }
 
     .auth-link {
-      color: #FFFFFF;
+      color: #051C12;
       text-decoration: none;
       font-weight: 600;
     }
 
     .auth-link:hover {
+      color: #B4F105;
       text-decoration: underline;
     }
 
@@ -354,8 +356,8 @@ export default function ResetPassword() {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px 14px;
-      background: rgba(20,20,20,0.65);
-      border: 1.5px solid rgba(17,24,39,0.2);
+      background: #FFFFFF;
+      border: 1.5px solid #E9EFEF;
       border-radius: 14px;
       padding: 12px 16px;
       margin-top: 5px;
@@ -385,9 +387,9 @@ export default function ResetPassword() {
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: #090909;
-      color: #ffffff;
-      font-family: 'Inter', sans-serif;
+      background: #F4F6F5;
+      color: #0B130F;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       flex-direction: column;
       gap: 16px;
     }
@@ -403,8 +405,8 @@ export default function ResetPassword() {
     return (
       <div className="loading-center">
         <style>{cssStyles}</style>
-        <CircularProgress sx={{ color: '#FBBF24' }} />
-        <span style={{ fontWeight: 700, fontSize: '14px', color: '#888888' }}>Verifying security token...</span>
+        <CircularProgress sx={{ color: '#051C12' }} />
+        <span style={{ fontWeight: 700, fontSize: '14px', color: '#6C7E75' }}>Verifying security token...</span>
       </div>
     );
   }
@@ -417,10 +419,10 @@ export default function ResetPassword() {
           {/* LEFT DESIGN SIDE */}
           <div className="auth-info">
             <div className="brand-header">
-              <div className="brand-logo">
-                <Inventory2Icon />
+              <div className="brand-logo" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
+                <img src="/logo.png" alt="IAssetCare" style={{ width: 42, height: 42, display: 'block', objectFit: 'contain' }} />
               </div>
-              <span className="brand-name">AssetCare</span>
+              <span className="brand-name">IAssetCare</span>
             </div>
             <div className="info-content">
               <h1 className="info-title">Security Link Expired.</h1>
@@ -465,10 +467,10 @@ export default function ResetPassword() {
       {/* LEFT DESIGN SIDE */}
       <div className="auth-info">
         <div className="brand-header">
-          <div className="brand-logo">
-            <Inventory2Icon />
+          <div className="brand-logo" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
+            <img src="/logo.png" alt="IAssetCare" style={{ width: 42, height: 42, display: 'block', objectFit: 'contain' }} />
           </div>
-          <span className="brand-name">AssetCare</span>
+          <span className="brand-name">IAssetCare</span>
         </div>
 
         <div className="info-content">

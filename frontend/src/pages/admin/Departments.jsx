@@ -111,8 +111,8 @@ const Departments = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name || !formData.code || !formData.hodName || !formData.hodEmail) {
-      setSnackbar({ open: true, message: "Please fill department name, code, HOD name and HOD email.", severity: "error" });
+    if (!formData.name || !formData.hodName || !formData.hodEmail) {
+      setSnackbar({ open: true, message: "Please fill department name, HOD name and HOD email.", severity: "error" });
       return false;
     }
     return true;
@@ -122,11 +122,13 @@ const Departments = () => {
     if (!validateForm()) return;
     setSaving(true);
     try {
+      const finalCode = formData.code?.trim() || (formData.name.trim().split(/\s+/).map(w => w[0]).join('') || formData.name.trim().slice(0, 3)).toUpperCase();
+      const payload = { ...formData, code: finalCode };
       if (mode === "edit" && selectedDept?._id) {
-        await api.put(`/departments/${selectedDept._id}`, formData);
+        await api.put(`/departments/${selectedDept._id}`, payload);
         setSnackbar({ open: true, message: "Department updated successfully.", severity: "success" });
       } else {
-        await api.post("/departments", formData);
+        await api.post("/departments", payload);
         setSnackbar({ open: true, message: "Department added successfully.", severity: "success" });
       }
       setFormOpen(false);
@@ -155,7 +157,7 @@ const Departments = () => {
 
   const kpis = [
     { label: "Total Departments", value: summary.total,    color: "text.primary", icon: <ApartmentRounded fontSize="small" /> },
-    { label: "Active",            value: summary.active,   color: "#FBBF24", icon: <CheckCircleRounded fontSize="small" /> },
+    { label: "Active",            value: summary.active,   color: "#B4F105", icon: <CheckCircleRounded fontSize="small" /> },
   ];
 
   return (
@@ -174,7 +176,7 @@ const Departments = () => {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm}
-          sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
+          sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
           Add Department
         </Button>
       </Box>
@@ -210,7 +212,7 @@ const Departments = () => {
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             Add departments to manage approvals and asset ownership.
           </Typography>
-          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
             Add First Department
           </Button>
         </Paper>
@@ -314,12 +316,12 @@ const Departments = () => {
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth required label="Department Code" value={formData.code} onChange={e => handleChange("code", e.target.value)} sx={inputStyles}
+                <TextField fullWidth label="Department Code" value={formData.code} onChange={e => handleChange("code", e.target.value)} sx={inputStyles}
                   slotProps={{
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title="Unique short code (e.g., FIN, IT)" arrow>
+                          <Tooltip title="Unique short code (e.g., FIN, IT) - optional, auto-generated if left blank" arrow>
                             <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
                           </Tooltip>
                         </InputAdornment>
@@ -328,28 +330,13 @@ const Departments = () => {
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth label="Location" value={formData.location} onChange={e => handleChange("location", e.target.value)} sx={inputStyles}
+              <Grid size={{ xs: 12 }}>
+                <TextField fullWidth label="Department Address" value={formData.location} onChange={e => handleChange("location", e.target.value)} sx={inputStyles}
                   slotProps={{
                     input: {
                       endAdornment: (
                         <InputAdornment position="end">
-                          <Tooltip title="Office campus or branch location" arrow>
-                            <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
-                          </Tooltip>
-                        </InputAdornment>
-                      )
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField fullWidth label="Floor / Building" value={formData.floor} onChange={e => handleChange("floor", e.target.value)} sx={inputStyles}
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Tooltip title="Floor number or building name" arrow>
+                          <Tooltip title="Department office address, branch or campus location" arrow>
                             <HelpOutlineRounded sx={{ fontSize: 16, color: "text.secondary", cursor: "help" }} />
                           </Tooltip>
                         </InputAdornment>
@@ -441,7 +428,7 @@ const Departments = () => {
           </Button>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSaveDepartment} disabled={saving}
-            sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
+            sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
             {saving ? "Saving..." : mode === "add" ? "Save Department" : "Update Department"}
           </Button>
         </DialogActions>
@@ -474,8 +461,7 @@ const Departments = () => {
               <DetailRow label="HOD Name" value={selectedDept.hodName} />
               <DetailRow label="HOD Email" value={selectedDept.hodEmail} />
               <DetailRow label="HOD Phone" value={selectedDept.hodPhone} />
-              <DetailRow label="Location" value={selectedDept.location} />
-              <DetailRow label="Floor / Building" value={selectedDept.floor} />
+              <DetailRow label="Department Address" value={selectedDept.location} />
               <DetailRow label="Total Employees" value={String(selectedDept.employeeCount || 0)} />
               <DetailRow label="Status" value={selectedDept.status} />
               <DetailRow label="Description" value={selectedDept.description} />

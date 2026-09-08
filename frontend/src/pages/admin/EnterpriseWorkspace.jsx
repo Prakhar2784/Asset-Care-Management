@@ -301,7 +301,7 @@ const EnterpriseWorkspace = () => {
 
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
+                <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 800 }}>Software Name</TableCell>
                     <TableCell sx={{ fontWeight: 800 }}>Publisher</TableCell>
@@ -365,7 +365,7 @@ const EnterpriseWorkspace = () => {
             <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1, mt: 2 }}>Warranty Support Claims</Typography>
             <TableContainer sx={{ mb: 4 }}>
               <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
+                <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 800 }}>Claim No</TableCell>
                     <TableCell sx={{ fontWeight: 800 }}>Asset Name</TableCell>
@@ -414,7 +414,7 @@ const EnterpriseWorkspace = () => {
             <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 1 }}>Active AMC Agreements</Typography>
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
+                <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 800 }}>Contract Number</TableCell>
                     <TableCell sx={{ fontWeight: 800 }}>Vendor</TableCell>
@@ -455,7 +455,7 @@ const EnterpriseWorkspace = () => {
 
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
+                <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 800 }}>Asset Name</TableCell>
                     <TableCell sx={{ fontWeight: 800 }}>Task / Inspection</TableCell>
@@ -511,7 +511,7 @@ const EnterpriseWorkspace = () => {
 
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
+                <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 800 }}>Asset</TableCell>
                     <TableCell sx={{ fontWeight: 800 }}>Transferring From</TableCell>
@@ -571,7 +571,7 @@ const EnterpriseWorkspace = () => {
 
             <TableContainer>
               <Table>
-                <TableHead sx={{ bgcolor: isDark ? "#141414" : "#F5F2EB" }}>
+                <TableHead>
                   <TableRow>
                     <TableCell padding="checkbox">
                       <Checkbox

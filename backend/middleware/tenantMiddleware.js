@@ -41,7 +41,7 @@ const resolveTenantContext = async (req, res, next) => {
       }
     } else {
       try {
-        const tenant = await Tenant.findOne({ slug: tenantId.toLowerCase() });
+        const tenant = await Tenant.findOne({ slug: tenantId.toLowerCase() }).setOptions({ bypassTenantFilter: true });
         if (!tenant) {
           verifiedLicenses[tenantId] = { isValid: false, timestamp: Date.now() };
           return res.status(404).json({ message: "Tenant organisation not found." });
@@ -75,5 +75,11 @@ const resolveTenantContext = async (req, res, next) => {
   });
 };
 
-module.exports = { resolveTenantContext };
+const invalidateTenantCache = (slug) => {
+  if (slug) {
+    delete verifiedLicenses[slug.toLowerCase()];
+  }
+};
+
+module.exports = { resolveTenantContext, invalidateTenantCache };
 

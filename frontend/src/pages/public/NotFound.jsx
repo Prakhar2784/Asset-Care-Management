@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <Box sx={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      textAlign: "center", px: 3, bgcolor: "#0B0D12",
+      textAlign: "center", px: 3, bgcolor: "#051C12",
       backgroundImage: "radial-gradient(ellipse at 15% 0%, rgba(17,24,39,0.18) 0%, transparent 50%), radial-gradient(ellipse at 85% 100%, rgba(17,24,39,0.12) 0%, transparent 50%)",
     }}>
       <Box>
@@ -27,9 +27,9 @@ export default function NotFound() {
         <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
           <Button component={Link} to="/" variant="contained" startIcon={<HomeRounded />}
             sx={{
-              background: "#FBBF24", color: "#111827", fontWeight: 800,
+              background: "#B4F105", color: "#051C12", fontWeight: 800,
               px: 3.5, py: 1.4, borderRadius: "12px", boxShadow: "0 4px 16px rgba(17,24,39,0.4)",
-              "&:hover": { background: "#F5A623" },
+              "&:hover": { background: "#c1f824" },
             }}>
             Back to Home
           </Button>

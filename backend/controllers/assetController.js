@@ -127,6 +127,20 @@ const validateCustomFieldsHelper = async (category, customFieldsInput = {}) => {
 // @access  Admin
 const createAsset = async (req, res) => {
   try {
+    const Tenant = require('../models/Tenant');
+    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    if (tenant && tenant.limits && tenant.limits.maxAssets !== -1 && tenant.limits.maxAssets < 999999 && tenant.limits.maxAssets > 0) {
+      const assetCount = await Asset.countDocuments({ isDeleted: { $ne: true } });
+      if (assetCount >= tenant.limits.maxAssets) {
+        const upgradeMsg = tenant.plan === 'Home User'
+          ? 'Your Home User plan allows up to 20 assets. Upgrade to MSME to add more assets.'
+          : tenant.plan === 'MSME'
+          ? 'Your MSME plan allows up to 50 assets. Upgrade to Large Scale to add more assets.'
+          : `Plan asset limit reached (${tenant.limits.maxAssets}). Please upgrade your plan.`;
+        return res.status(403).json({ message: upgradeMsg, code: 'PLAN_LIMIT_REACHED' });
+      }
+    }
+    
     const { category, customFields } = req.body;
     const validationErrors = await validateCustomFieldsHelper(category, customFields);
     if (validationErrors.length > 0) {
@@ -507,7 +521,7 @@ const uploadAssetDocuments = async (req, res) => {
       docType: docTypes[i] || 'invoice',
       originalName: f.originalname,
       fileName: f.filename,
-      url: `/uploads/asset-documents/${f.filename}`,
+      url: (f.path && f.path.startsWith('http')) ? f.path : `/uploads/asset-documents/${f.filename}`,
     }));
 
     asset.documents.push(...newDocs);

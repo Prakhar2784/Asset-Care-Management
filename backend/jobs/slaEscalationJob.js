@@ -29,6 +29,9 @@ const checkSLABreaches = async () => {
     const tenants = await Tenant.find({ isActive: true });
 
     for (const tenant of tenants) {
+      // SLA escalation engine is enabled for MSME and Large Scale plans
+      if (tenant.plan !== 'MSME' && tenant.plan !== 'Large Scale') continue;
+
       await setTenantId(tenant.slug, async () => {
         const now = new Date();
 

@@ -10,9 +10,12 @@ const api = axios.create({
 const getTenantId = (user) => {
   // 1. Try to resolve from subdomain (e.g. companyA.assetcare.com)
   const hostname = window.location.hostname;
-  const parts = hostname.split('.');
-  if (parts.length > 2 && parts[0] !== 'www' && parts[0] !== 'app') {
-    return parts[0];
+  const isIpOrLocal = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname) || hostname === 'localhost' || hostname === '127.0.0.1';
+  if (!isIpOrLocal) {
+    const parts = hostname.split('.');
+    if (parts.length > 2 && parts[0] !== 'www' && parts[0] !== 'app') {
+      return parts[0];
+    }
   }
   
   // 2. Try to resolve from query parameter (e.g. ?tenant=companyA) - useful for local testing
@@ -47,6 +50,25 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor to handle session invalidation and company deactivation
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      const { status, data } = error.response;
+      if (status === 403 && (data?.code === 'COMPANY_DEACTIVATED' || data?.message?.includes('Company account is deactivated') || data?.message?.includes('deactivated'))) {
+        localStorage.removeItem('assetcare_user');
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login?deactivated=1';
+        }
+      } else if (status === 401 && typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        localStorage.removeItem('assetcare_user');
+      }
+    }
     return Promise.reject(error);
   }
 );

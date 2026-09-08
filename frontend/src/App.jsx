@@ -22,6 +22,10 @@ const Modules = lazy(() => import("./pages/public/Modules"));
 const Workflow = lazy(() => import("./pages/public/Workflow"));
 const Contact = lazy(() => import("./pages/public/Contact"));
 const TermsAndConditions = lazy(() => import("./pages/public/TermsAndConditions"));
+const PrivacyPolicy = lazy(() => import("./pages/public/PrivacyPolicy"));
+const RefundPolicy = lazy(() => import("./pages/public/RefundPolicy"));
+const Checkout = lazy(() => import("./pages/billing/Checkout"));
+const InvoiceView = lazy(() => import("./pages/billing/InvoiceView"));
 const AuthPage = lazy(() => import("./pages/auth/AuthPage"));
 const RegisterCompany = lazy(() => import("./pages/auth/RegisterCompany"));
 const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
@@ -45,6 +49,7 @@ const ApiKeyManagement = lazy(() => import("./pages/admin/ApiKeyManagement"));
 const MaintenanceLogs = lazy(() => import("./pages/admin/MaintenanceLogs"));
 const ServiceCenters = lazy(() => import("./pages/admin/ServiceCenters"));
 const DepartmentTeam = lazy(() => import("./pages/admin/DepartmentTeam"));
+const SubscriptionBilling = lazy(() => import("./pages/admin/SubscriptionBilling"));
 const SuperAdminPanel = lazy(() => import("./pages/superadmin/SuperAdminPanel"));
 
 // Employee, Technician & Shared Pages
@@ -66,7 +71,7 @@ const WebsiteLayout = ({ children }) => (
 
 const RouteFallback = () => (
   <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-    <CircularProgress sx={{ color: "#FBBF24" }} />
+    <CircularProgress sx={{ color: "#051C12" }} />
   </Box>
 );
 
@@ -86,6 +91,8 @@ function App() {
         <Route path="/terms" element={<WebsiteLayout><TermsAndConditions /></WebsiteLayout>} />
         <Route path="/login" element={<WebsiteLayout><AuthPage /></WebsiteLayout>} />
         <Route path="/register-company" element={<WebsiteLayout><RegisterCompany /></WebsiteLayout>} />
+        <Route path="/privacy-policy" element={<WebsiteLayout><PrivacyPolicy /></WebsiteLayout>} />
+        <Route path="/refund-policy" element={<WebsiteLayout><RefundPolicy /></WebsiteLayout>} />
         <Route path="/forgot-password" element={<WebsiteLayout><ForgotPassword /></WebsiteLayout>} />
         <Route path="/reset-password/:token" element={<WebsiteLayout><ResetPassword /></WebsiteLayout>} />
 
@@ -122,6 +129,10 @@ function App() {
               <Route path="/admin/maintenance" element={<MaintenanceLogs />} />
               <Route path="/admin/service-centers" element={<ServiceCenters />} />
               <Route path="/admin/my-team" element={<DepartmentTeam />} />
+              <Route path="/admin/checkout" element={<Checkout />} />
+              <Route path="/admin/billing" element={<SubscriptionBilling />} />
+              <Route path="/admin/subscription-billing" element={<SubscriptionBilling />} />
+              <Route path="/admin/billing/invoice/:id" element={<InvoiceView />} />
 
             </Route>
 

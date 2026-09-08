@@ -43,7 +43,7 @@ router.post('/:id/attachments', protect, attachmentUpload, async (req, res) => {
     const newAttachments = req.files.map(f => ({
       originalName: f.originalname,
       fileName:     f.filename,
-      url:          `/uploads/attachments/${f.filename}`,
+      url:          (f.path && f.path.startsWith('http')) ? f.path : `/uploads/attachments/${f.filename}`,
       size:         f.size,
       uploadedBy:   req.user._id,
     }));

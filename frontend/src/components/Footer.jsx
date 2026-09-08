@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
@@ -12,6 +12,7 @@ const Footer = () => {
           background: #000000;
           border-top: 1px solid rgba(255,255,255,0.1);
           padding: 72px 24px 24px;
+          margin-top: 0;
           color: #9CA3AF;
           font-family: 'Inter', sans-serif;
         }
@@ -165,13 +166,13 @@ const Footer = () => {
         <div className="footer-container">
           <div className="footer-col">
             <div className="footer-brand">
-              <div className="footer-brand-icon">
-                <Inventory2Icon fontSize="small" />
+              <div className="footer-brand-icon" style={{ background: "transparent", border: "none", width: 36, height: 36 }}>
+                <img src="/logo_home.png" alt="IAssetCare" style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
               </div>
-              <h3>AssetCare Pro</h3>
+              <h3>IAssetCare</h3>
             </div>
             <p className="footer-desc">
-              A professional asset service and warranty management platform for enterprises to track assets, breakdown tickets, vendors, approvals and complete service history.
+              A professional asset service and warranty management platform for enterprises to track assets, service requests, vendors, approvals and complete service history.
             </p>
             <div className="footer-badge">
               Enterprise Asset Management System
@@ -197,7 +198,7 @@ const Footer = () => {
             <h4>Contact</h4>
             <div className="footer-contact-item">
               <div className="footer-contact-icon"><EmailRoundedIcon fontSize="small" /></div>
-              <div>admin@assetcare.com<br />support@assetcarepro.com</div>
+              <div>admin@iassetcare.com<br />support@iassetcare.com</div>
             </div>
             <div className="footer-contact-item">
               <div className="footer-contact-icon"><PhoneRoundedIcon fontSize="small" /></div>
@@ -207,7 +208,7 @@ const Footer = () => {
         </div>
 
         <div className="footer-bottom">
-          <p>© 2026 AssetCare Systems. All rights reserved.</p>
+          <p>© 2026 IAssetCare. All rights reserved.</p>
           <div className="footer-bottom-links">
             <Link to="/contact">Support</Link>
             <Link to="/terms">Terms &amp; Conditions</Link>

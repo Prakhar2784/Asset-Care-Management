@@ -135,7 +135,7 @@ export default function ServiceCenters() {
           <Typography fontSize={14} color="text.secondary">Manage service partners and track warranty assets</Typography>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "#FBBF24", color: "#111827", boxShadow: "none" }}>
+          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "#051C12", color: "#FFFFFF", boxShadow: "none" }}>
           Add Service Center
         </Button>
       </Box>
@@ -144,9 +144,9 @@ export default function ServiceCenters() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
           { label: "Service Centers", value: centers.length, color: "text.primary", icon: <StorefrontRounded /> },
-          { label: "Assets Under Warranty", value: warrantyAssets.length, color: "#FBBF24", icon: <VerifiedRounded /> },
-          { label: "Expiring in 30 Days", value: expiringSoon, color: "#FBBF24", icon: <WarningAmberRounded /> },
-          { label: "Categories Covered", value: new Set(centers.flatMap(c => c.categories)).size, color: "#FBBF24", icon: <CategoryRounded /> },
+          { label: "Assets Under Warranty", value: warrantyAssets.length, color: "#B4F105", icon: <VerifiedRounded /> },
+          { label: "Expiring in 30 Days", value: expiringSoon, color: "#B4F105", icon: <WarningAmberRounded /> },
+          { label: "Categories Covered", value: new Set(centers.flatMap(c => c.categories)).size, color: "#B4F105", icon: <CategoryRounded /> },
         ].map((k) => (
           <Grid size={{ xs: 6, md: 3 }} key={k.label}>
             <Paper sx={{ p: 2.5, borderRadius: "18px", border: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 2 }}>
@@ -391,7 +391,7 @@ export default function ServiceCenters() {
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => setOpen(false)} sx={{ fontWeight: 700, borderRadius: "10px", color: "text.secondary" }}>Cancel</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving || !form.name.trim()}
-            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#FBBF24", color: "#111827", boxShadow: "none" }}>
+            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#051C12", color: "#FFFFFF", boxShadow: "none" }}>
             {saving ? <CircularProgress size={18} color="inherit" /> : editTarget ? "Save Changes" : "Add Center"}
           </Button>
         </DialogActions>

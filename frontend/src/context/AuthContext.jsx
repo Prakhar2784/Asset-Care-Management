@@ -7,16 +7,22 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem("assetcare_user");
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // On app load: hydrate from localStorage immediately, then refresh from server
+  // On app load: refresh from server in background
   useEffect(() => {
     const storedUser = localStorage.getItem("assetcare_user");
     if (storedUser) {
       const parsed = JSON.parse(storedUser);
-      setCurrentUser(parsed);
       // Fetch fresh profile so role/permission changes take effect immediately
       api.get('/auth/me', { headers: { Authorization: `Bearer ${parsed.token}` } })
         .then(({ data }) => {

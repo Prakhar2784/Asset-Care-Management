@@ -1,38 +1,85 @@
 // Single source of truth for what each plan tier includes.
 // -1 on a limit means unlimited.
 const PLAN_DEFAULTS = {
-  Basic: {
+  'Home User': {
+    name: 'Home User',
+    price: 999,
+    maxAssets: 20,
+    maxUsers: 1,
+    maxDepartments: 1,
+    features: {
+      qrTagging: true,
+      maintenanceTickets: true,
+      serviceCenters: true,
+      emailNotifications: true,
+      singleDepartment: true,
+      multiDepartment: false,
+      approvals: false,
+      warrantyRadar: false,
+      slaEscalation: false,
+      complianceReports: false,
+      technicianServiceLogs: false,
+      restApi: false,
+      customBranding: false,
+      auditTrail: false,
+      prioritySupport: false
+    },
+  },
+  'MSME': {
+    name: 'MSME',
+    price: 2999,
     maxAssets: 50,
     maxUsers: 10,
+    maxDepartments: -1,
     features: {
-      procurement: false,
-      enterpriseHub: false,
+      qrTagging: true,
+      maintenanceTickets: true,
+      serviceCenters: true,
+      emailNotifications: true,
+      singleDepartment: true,
+      multiDepartment: true,
+      approvals: true,
+      warrantyRadar: true,
+      slaEscalation: true,
+      complianceReports: true,
+      technicianServiceLogs: true,
+      restApi: false,
       customBranding: false,
-      advancedReports: false,
+      auditTrail: true,
+      prioritySupport: false
     },
   },
-  Pro: {
-    maxAssets: 500,
-    maxUsers: 50,
-    features: {
-      procurement: true,
-      enterpriseHub: true,
-      customBranding: false,
-      advancedReports: true,
-    },
-  },
-  Enterprise: {
+  'Large Scale': {
+    name: 'Large Scale',
+    price: 8999,
     maxAssets: -1,
     maxUsers: -1,
+    maxDepartments: -1,
     features: {
-      procurement: true,
-      enterpriseHub: true,
+      qrTagging: true,
+      maintenanceTickets: true,
+      serviceCenters: true,
+      emailNotifications: true,
+      singleDepartment: true,
+      multiDepartment: true,
+      approvals: true,
+      warrantyRadar: true,
+      slaEscalation: true,
+      complianceReports: true,
+      technicianServiceLogs: true,
+      restApi: true,
       customBranding: true,
-      advancedReports: true,
+      auditTrail: true,
+      prioritySupport: true
     },
   },
 };
 
-const getPlanDefaults = (plan) => PLAN_DEFAULTS[plan] || PLAN_DEFAULTS.Basic;
+const getPlanDefaults = (plan) => {
+  if (!plan) return PLAN_DEFAULTS['Home User'];
+  const normalized = Object.keys(PLAN_DEFAULTS).find(k => k.toLowerCase() === plan.toLowerCase());
+  return normalized ? PLAN_DEFAULTS[normalized] : PLAN_DEFAULTS['Home User'];
+};
 
 module.exports = { PLAN_DEFAULTS, getPlanDefaults };
+

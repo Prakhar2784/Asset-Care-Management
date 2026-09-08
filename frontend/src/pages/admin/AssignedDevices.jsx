@@ -27,7 +27,7 @@ const fmt = (date) => {
 const COND = {
   New:     { bg: 'rgba(22,163,74,0.14)',  color: '#4ADE80' },
   Good:    { bg: 'rgba(37,99,235,0.14)',  color: '#60A5FA' },
-  Average: { bg: 'rgba(217,119,6,0.14)', color: '#FBBF24' },
+  Average: { bg: 'rgba(180,241,5,0.16)', color: '#051C12' },
   Damaged: { bg: 'rgba(220,38,38,0.14)', color: '#F87171' },
 };
 
@@ -99,9 +99,9 @@ export default function AssignedDevices() {
 
   const kpis = [
     { label: 'Total Assigned', value: assignments.length, color: 'text.primary', icon: <DevicesRounded fontSize="small" /> },
-    { label: 'Employees',      value: uniqueEmployees,    color: '#FBBF24', icon: <GroupRounded fontSize="small" /> },
-    { label: 'Departments',    value: uniqueDepts,        color: '#FBBF24', icon: <ApartmentRounded fontSize="small" /> },
-    { label: 'Categories',     value: uniqueCategories,   color: '#FBBF24', icon: <CategoryRounded fontSize="small" /> },
+    { label: 'Employees',      value: uniqueEmployees,    color: '#B4F105', icon: <GroupRounded fontSize="small" /> },
+    { label: 'Departments',    value: uniqueDepts,        color: '#B4F105', icon: <ApartmentRounded fontSize="small" /> },
+    { label: 'Categories',     value: uniqueCategories,   color: '#B4F105', icon: <CategoryRounded fontSize="small" /> },
   ];
 
   return (
@@ -220,7 +220,7 @@ export default function AssignedDevices() {
                     </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: '#FBBF24', color: '#111827' }}>
+                        <Avatar sx={{ width: 34, height: 34, fontSize: 13, fontWeight: 800, background: '#051C12', color: '#B4F105' }}>
                           {a.employeeName?.[0]?.toUpperCase() || '?'}
                         </Avatar>
                         <Box>

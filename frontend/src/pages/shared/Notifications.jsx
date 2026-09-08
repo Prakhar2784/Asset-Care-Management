@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box, Typography, Paper, IconButton, Button, Chip, CircularProgress,
@@ -20,7 +20,7 @@ const TYPE_CONFIG = {
   request_rejected: { icon: <InfoOutlined />,              color: '#F87171', bg: 'rgba(220,38,38,0.13)',  label: 'Rejected' },
   asset_assigned:   { icon: <Inventory2Rounded />,         color: '#4ADE80', bg: 'rgba(22,163,74,0.13)',  label: 'Asset' },
   asset_revoked:    { icon: <Inventory2Rounded />,         color: '#A78BFA', bg: 'rgba(17,24,39,0.13)', label: 'Asset' },
-  warranty_expiry:  { icon: <WarningAmberRounded />,       color: '#FBBF24', bg: 'rgba(217,119,6,0.13)',  label: 'Warranty' },
+  warranty_expiry:  { icon: <WarningAmberRounded />,       color: '#051C12', bg: 'rgba(180,241,5,0.18)',  label: 'Warranty' },
   system:           { icon: <InfoOutlined />,              color: '#94A3B8', bg: 'rgba(71,85,105,0.13)',  label: 'System' },
 };
 

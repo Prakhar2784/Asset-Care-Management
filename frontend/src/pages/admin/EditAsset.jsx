@@ -18,7 +18,7 @@ const SectionLabel = ({ number, title, subtitle }) => (
   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 3, mt: 0.5 }}>
     <Box sx={{
       width: 34, height: 34, borderRadius: "10px",
-      background: "#FBBF24", color: "#111827",
+      background: "#051C12", color: "#FFFFFF",
       display: "grid", placeItems: "center",
       fontWeight: 900, fontSize: 14, flexShrink: 0,
     }}>
@@ -442,7 +442,7 @@ const EditAsset = () => {
             <SectionLabel number="5" title="Document Vault" subtitle="Attach invoice, warranty card, AMC contract, manual and service reports." />
             {docCount > 0 && (
               <Chip label={`${docCount} file${docCount > 1 ? "s" : ""} attached`}
-                size="small" sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, fontSize: 11 }} />
+                size="small" sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, fontSize: 11 }} />
             )}
           </Box>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
@@ -518,7 +518,7 @@ const EditAsset = () => {
           </Button>
           <Button type="submit" variant="contained" disabled={saving}
             startIcon={saving ? <CircularProgress size={18} color="inherit" /> : <SaveRounded />}
-            sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "#F5A623", boxShadow: "none" } }}>
+            sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none", px: 4, py: 1.4, fontSize: 15, "&:hover": { background: "#072F1F", boxShadow: "none" } }}>
             {saving ? "Saving…" : "Save Changes"}
           </Button>
         </Box>

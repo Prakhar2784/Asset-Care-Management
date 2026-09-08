@@ -1,21 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 
 
-/* === ASSETCARE PRO — DARK + LIME DESIGN SYSTEM === */
+/* === IASSETCARE — DARK + LIME DESIGN SYSTEM === */
 :root {
-  --bg-root: #000000;
-  --bg-panel: #0A0A0A;
-  --bg-card: #0A0A0A;
-  --bg-hover: rgba(17,17,17,0.05);
+  --bg-root: #F4F6F5;
+  --bg-panel: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-hover: rgba(5,28,18,0.05);
 
-  --primary: #111111;
-  --secondary: #CBFA57;
+  --primary: #051C12;
+  --secondary: #B4F105;
 
-  --text-main: #111111;
-  --text-muted: #6B6B65;
+  --text-main: #0B130F;
+  --text-muted: #6C7E75;
 
-  --border: rgba(17,17,17,0.10);
-  --border-light: rgba(17,17,17,0.15);
+  --border: #E9EFEF;
+  --border-light: rgba(5,28,18,0.15);
   
   --success-bg: #dcfce7;
   --success-text: #166534;
@@ -24,7 +24,7 @@
   --danger-bg: #fee2e2;
   --danger-text: #991b1b;
   
-  --shadow-subtle: 0 4px 15px rgba(15, 23, 42, 0.05);
+  --shadow-subtle: 0 4px 15px rgba(11, 19, 15, 0.03);
 }
 
 * {
@@ -425,7 +425,6 @@ a {
   background: var(--bg-panel);
   border-top: 1px solid var(--border);
   padding: 80px 24px 24px;
-  margin-top: 64px;
 }
 
 .footer-container {

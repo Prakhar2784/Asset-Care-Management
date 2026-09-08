@@ -16,9 +16,11 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
   .wrapper { max-width:600px; margin:32px auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(15,23,42,0.10); }
   .header { background:#1E3A8A; padding:32px 36px; }
   .header-logo { font-size:22px; font-weight:800; color:#ffffff; letter-spacing:-0.5px; }
-  .header-logo span { color:#5eead4; }
+  .header-logo span { color:#3B82F6; }
   .header-title { font-size:28px; font-weight:800; color:#ffffff; margin-top:12px; letter-spacing:-0.5px; }
   .body { padding:32px 36px; }
+  p { margin:0 0 16px 0; font-size:15px; color:#334155; line-height:1.6; font-weight:500; }
+  p:last-child { margin-bottom:0; }
   .label { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; color:#64748b; margin-bottom:4px; }
   .value { font-size:15px; font-weight:700; color:#0f172a; margin-bottom:16px; }
   .info-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:20px 24px; margin:20px 0; }
@@ -33,7 +35,7 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
   .status-yellow { background:#fef9c3; color:#713f12; }
   .status-blue { background:#dbeafe; color:#1e40af; }
   .footer { background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 36px; text-align:center; }
-  .footer-text { font-size:12px; color:#94a3b8; font-weight:500; margin-bottom:6px; }
+  .footer-text { font-size:12px; color:#94a3b8; font-weight:500; margin-bottom:6px; line-height:1.5; }
   .footer-brand { font-size:13px; font-weight:800; color:#64748b; margin-bottom:4px; }
   .footer-address { font-size:11px; color:#cbd5e1; margin-top:8px; }
 </style>
@@ -41,21 +43,21 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
 <body>
 <!-- Preheader (hidden preview text for email clients) -->
 <div style="display:none;font-size:1px;color:#f8fafc;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-  AssetCare Pro — ${title} — This is an automated notification from your asset management system.
+  IAssetCare — ${title} — This is an automated notification from your asset management system.
 </div>
 <div class="wrapper">
   <div class="header">
-    <div class="header-logo">Asset<span>Care</span> Pro</div>
+    <div class="header-logo">IAsset<span>Care</span></div>
     <div class="header-title">${title}</div>
   </div>
   <div class="body">
     ${bodyHtml}
   </div>
   <div class="footer">
-    <div class="footer-brand">AssetCare Pro — Enterprise Asset Management</div>
+    <div class="footer-brand">IAssetCare — Enterprise Asset Management</div>
     <div class="footer-text">${footerNote || 'This is an automated notification from your organisation\'s asset management system.'}</div>
-    <div class="footer-text">You are receiving this email because you are registered on AssetCare Pro.</div>
-    <div class="footer-address">AssetCare Pro &bull; IT Asset Management Platform &bull; support@assetcarepro.com</div>
+    <div class="footer-text">You are receiving this email because you are registered on IAssetCare.</div>
+    <div class="footer-address">IAssetCare &bull; IT Asset Management Platform &bull; support@iassetcare.com</div>
   </div>
 </div>
 </body>
@@ -109,11 +111,11 @@ const sendEmail = async ({ to, subject, html, text }) => {
     });
 
     // Unique Message-ID prevents duplicate-detection false positives
-    const domain = fromEmail.includes('@') ? fromEmail.split('@')[1] : 'assetcarepro.com';
+    const domain = fromEmail.includes('@') ? fromEmail.split('@')[1] : 'iassetcare.com';
     const messageId = `<${Date.now()}.${Math.random().toString(36).slice(2, 10)}@${domain}>`;
 
     await transporter.sendMail({
-      from: `"AssetCare Pro" <${fromEmail}>`,
+      from: `"IAssetCare" <${fromEmail}>`,
       replyTo: fromEmail,
       to,
       subject,
@@ -130,7 +132,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
         // Normal priority — avoid 1 (high) which spam filters flag
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
-        'X-Mailer': 'AssetCare Pro Notification System',
+        'X-Mailer': 'IAssetCare Notification System',
         // Prevents auto-replies / out-of-office loops back to this sender
         'X-Auto-Response-Suppress': 'All',
       },
@@ -148,9 +150,9 @@ const sendEmail = async ({ to, subject, html, text }) => {
 // 1. Password Reset
 const sendPasswordResetEmail = async (user, resetUrl) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      We received a request to reset the password for your AssetCare Pro account.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      We received a request to reset the password for your IAssetCare account. 
       Click the button below to set a new password. This link expires in <strong>15 minutes</strong>.
     </p>
     <div style="text-align:center;">
@@ -165,8 +167,8 @@ const sendPasswordResetEmail = async (user, resetUrl) => {
     </p>`;
   await sendEmail({
     to: user.email,
-    subject: 'Reset Your AssetCare Pro Password',
-    text: `Hello ${user.name}, click this link to reset your password: ${body.match(/href="([^"]+)"/)?.[1] || ''}. This link expires in 15 minutes.`,
+    subject: 'Reset Your IAssetCare Password',
+    text: `Hello ${user.name}, click this link to reset your password: ${resetUrl}. This link expires in 15 minutes.`,
     html: baseTemplate('Password Reset Request', body, 'This link expires in 15 minutes and can only be used once.')
   });
 };
@@ -174,9 +176,9 @@ const sendPasswordResetEmail = async (user, resetUrl) => {
 // 2. Ticket Created
 const sendTicketCreatedEmail = async (user, ticket, asset) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      Your breakdown ticket has been successfully raised and is now pending authorization.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      Your service request has been successfully registered and is now pending authorization.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Ticket ID</span><span class="info-val">${ticket.ticketId}</span></div>
@@ -185,12 +187,14 @@ const sendTicketCreatedEmail = async (user, ticket, asset) => {
       <div class="info-row"><span class="info-key">Priority</span><span class="info-val">${ticket.priority}</span></div>
       <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="status-badge status-yellow">Pending Approval</span></span></div>
     </div>
-    <p style="font-size:13px;color:#64748b;">You will receive updates as your ticket progresses through the service workflow.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">
+      You will receive updates as your service request progresses through the service workflow.
+    </p>`;
   await sendEmail({
     to: user.email,
-    subject: `Ticket Raised: ${ticket.ticketId}`,
-    text: `Hello ${user.name}, your ticket ${ticket.ticketId} has been submitted and is pending approval. Issue: ${ticket.issue}. Priority: ${ticket.priority}.`,
-    html: baseTemplate('Ticket Raised Successfully', body)
+    subject: `Service Request Registered: ${ticket.ticketId}`,
+    text: `Hello ${user.name}, your service request ${ticket.ticketId} has been submitted and is pending approval. Issue: ${ticket.issue}. Priority: ${ticket.priority}.`,
+    html: baseTemplate('Service Request Registered Successfully', body)
   });
 };
 
@@ -202,9 +206,9 @@ const sendTicketStatusEmail = async (user, ticket, asset, oldStatus) => {
   }[ticket.status] || 'status-blue';
 
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      The status of your breakdown ticket has been updated.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      The status of your service request has been updated.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Ticket ID</span><span class="info-val">${ticket.ticketId}</span></div>
@@ -214,18 +218,18 @@ const sendTicketStatusEmail = async (user, ticket, asset, oldStatus) => {
     </div>`;
   await sendEmail({
     to: user.email,
-    subject: `Ticket Update: ${ticket.ticketId} is now ${ticket.status}`,
-    text: `Hello ${user.name}, your ticket ${ticket.ticketId} status has changed from ${oldStatus} to ${ticket.status}.`,
-    html: baseTemplate('Ticket Status Updated', body)
+    subject: `Service Request Update: ${ticket.ticketId} is now ${ticket.status}`,
+    text: `Hello ${user.name}, your service request ${ticket.ticketId} status has changed from ${oldStatus} to ${ticket.status}.`,
+    html: baseTemplate('Service Request Status Updated', body)
   });
 };
 
 // 4. Ticket Resolved
 const sendTicketResolvedEmail = async (user, ticket, asset) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      Great news! Your breakdown ticket has been <strong style="color:#16a34a;">resolved</strong>.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      Great news! Your service request has been <strong style="color:#16a34a;">resolved</strong>.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Ticket ID</span><span class="info-val">${ticket.ticketId}</span></div>
@@ -234,20 +238,22 @@ const sendTicketResolvedEmail = async (user, ticket, asset) => {
       <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="status-badge status-green">✓ Resolved</span></span></div>
       ${ticket.estimatedCost ? `<div class="info-row"><span class="info-key">Repair Cost</span><span class="info-val">₹ ${ticket.estimatedCost.toLocaleString()}</span></div>` : ''}
     </div>
-    <p style="font-size:13px;color:#64748b;">If you continue to experience issues, please raise a new ticket from your employee portal.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">
+      If you continue to experience issues, please raise a new service request from your employee portal.
+    </p>`;
   await sendEmail({
     to: user.email,
-    subject: `Ticket Resolved: ${ticket.ticketId}`,
-    text: `Hello ${user.name}, your ticket ${ticket.ticketId} has been resolved. Issue: ${ticket.issue}. If you continue to experience issues, please raise a new ticket.`,
-    html: baseTemplate('Your Issue Has Been Resolved', body)
+    subject: `Service Request Resolved: ${ticket.ticketId}`,
+    text: `Hello ${user.name}, your service request ${ticket.ticketId} has been resolved. Issue: ${ticket.issue}. If you continue to experience issues, please raise a new request.`,
+    html: baseTemplate('Your Service Request Has Been Resolved', body)
   });
 };
 
 // 5. Asset Assigned
 const sendAssetAssignedEmail = async (user, asset) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
       A new asset has been assigned to you. Please inspect the asset and confirm its condition.
     </p>
     <div class="info-box">
@@ -257,7 +263,9 @@ const sendAssetAssignedEmail = async (user, asset) => {
       <div class="info-row"><span class="info-key">Department</span><span class="info-val">${asset.department}</span></div>
       <div class="info-row"><span class="info-key">Assigned On</span><span class="info-val">${new Date().toLocaleDateString()}</span></div>
     </div>
-    <p style="font-size:13px;color:#64748b;">You are responsible for the safe use and maintenance of this asset. Report any issues immediately.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">
+      You are responsible for the safe use and maintenance of this asset. Report any issues immediately.
+    </p>`;
   await sendEmail({
     to: user.email,
     subject: `Asset Assigned: ${asset.name}`,
@@ -269,8 +277,8 @@ const sendAssetAssignedEmail = async (user, asset) => {
 // 6. Asset Revoked
 const sendAssetRevokedEmail = async (user, asset) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
       The following asset has been <strong>revoked</strong> from your account. Please return it to the IT department at the earliest.
     </p>
     <div class="info-box">
@@ -282,7 +290,7 @@ const sendAssetRevokedEmail = async (user, asset) => {
   await sendEmail({
     to: user.email,
     subject: `Asset Revoked: ${asset.name} - Action Required`,
-    text: `Hello ${user.name}, the asset ${asset.name} (${asset.serialNumber}) has been revoked from your account. Please return it to the IT department at the earliest.`,
+    text: `Hello ${user.name}, the asset ${asset.name} (&nbsp;${asset.serialNumber}) has been revoked from your account. Please return it to the IT department.`,
     html: baseTemplate('Asset Revoked from Your Account', body)
   });
 };
@@ -290,8 +298,8 @@ const sendAssetRevokedEmail = async (user, asset) => {
 // 7. Approval Approved
 const sendApprovalApprovedEmail = async (user, request) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
       Your device request has been <strong style="color:#16a34a;">approved</strong> by the admin.
     </p>
     <div class="info-box">
@@ -301,11 +309,13 @@ const sendApprovalApprovedEmail = async (user, request) => {
       <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="status-badge status-green">✓ Approved</span></span></div>
       ${request.adminRemarks ? `<div class="info-row"><span class="info-key">Admin Remarks</span><span class="info-val">${request.adminRemarks}</span></div>` : ''}
     </div>
-    <p style="font-size:13px;color:#64748b;">The procurement process will now begin. You will be notified when the asset is ready for assignment.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">
+      The procurement process will now begin. You will be notified when the asset is ready for assignment.
+    </p>`;
   await sendEmail({
     to: user.email,
     subject: `Request Approved: ${request.requestId}`,
-    text: `Hello ${user.name}, your device request ${request.requestId} for ${request.itemRequested} has been approved. The procurement process will now begin.`,
+    text: `Hello ${user.name}, your device request ${request.requestId} for ${request.itemRequested} has been approved.`,
     html: baseTemplate('Your Request Has Been Approved', body)
   });
 };
@@ -313,8 +323,8 @@ const sendApprovalApprovedEmail = async (user, request) => {
 // 8. Approval Rejected
 const sendApprovalRejectedEmail = async (user, request) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
       Unfortunately, your device request has been <strong style="color:#dc2626;">rejected</strong>.
     </p>
     <div class="info-box">
@@ -323,11 +333,13 @@ const sendApprovalRejectedEmail = async (user, request) => {
       <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="status-badge status-red">✗ Rejected</span></span></div>
       ${request.adminRemarks ? `<div class="info-row"><span class="info-key">Reason</span><span class="info-val">${request.adminRemarks}</span></div>` : ''}
     </div>
-    <p style="font-size:13px;color:#64748b;">If you believe this is incorrect, please contact your department head or raise a new request with additional justification.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">
+      If you believe this is incorrect, please contact your department head or raise a new request with additional justification.
+    </p>`;
   await sendEmail({
     to: user.email,
     subject: `Request Update: ${request.requestId} was not approved`,
-    text: `Hello ${user.name}, your device request ${request.requestId} for ${request.itemRequested} was not approved. ${request.adminRemarks ? 'Reason: ' + request.adminRemarks : ''}`,
+    text: `Hello ${user.name}, your device request ${request.requestId} for ${request.itemRequested} was not approved.`,
     html: baseTemplate('Your Request Was Rejected', body)
   });
 };
@@ -336,7 +348,7 @@ const sendApprovalRejectedEmail = async (user, request) => {
 const sendWarrantyExpiryEmail = async (adminEmail, asset, daysLeft) => {
   const urgencyColor = daysLeft <= 7 ? 'status-red' : daysLeft <= 15 ? 'status-yellow' : 'status-blue';
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
+    <p style="margin-top:0;margin-bottom:20px;">
       This is an automated reminder that the warranty for the following asset is expiring soon.
     </p>
     <div class="info-box">
@@ -346,21 +358,23 @@ const sendWarrantyExpiryEmail = async (adminEmail, asset, daysLeft) => {
       <div class="info-row"><span class="info-key">Warranty End</span><span class="info-val">${new Date(asset.warrantyEnd).toLocaleDateString()}</span></div>
       <div class="info-row"><span class="info-key">Days Remaining</span><span class="info-val"><span class="status-badge ${urgencyColor}">${daysLeft} days</span></span></div>
     </div>
-    <p style="font-size:13px;color:#64748b;">Please take action to renew the AMC or arrange replacement before expiry.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">
+      Please take action to renew the AMC or arrange replacement before expiry.
+    </p>`;
   await sendEmail({
     to: adminEmail,
     subject: `Warranty Alert: ${asset.name} expires in ${daysLeft} days`,
-    text: `Warranty expiry alert: Asset ${asset.name} (${asset.serialNumber}) in department ${asset.department} has ${daysLeft} days left on warranty. Warranty end date: ${new Date(asset.warrantyEnd).toLocaleDateString()}.`,
-    html: baseTemplate(`Warranty Expiry Alert`, body, 'Automated warranty monitoring — AssetCare Pro')
+    text: `Warranty expiry alert: Asset ${asset.name} has ${daysLeft} days left on warranty.`,
+    html: baseTemplate(`Warranty Expiry Alert`, body, 'Automated warranty monitoring — IAssetCare')
   });
 };
 
 // 10. Welcome / Account Created
 const sendWelcomeEmail = async (user, tempPassword) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      Welcome to <strong>AssetCare Pro</strong>! Your account has been created successfully.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      Welcome to <strong>IAssetCare</strong>! Your account has been created successfully.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Name</span><span class="info-val">${user.name}</span></div>
@@ -369,22 +383,21 @@ const sendWelcomeEmail = async (user, tempPassword) => {
       <div class="info-row"><span class="info-key">Department</span><span class="info-val">${user.department}</span></div>
       ${tempPassword ? `<div class="info-row"><span class="info-key">Temp Password</span><span class="info-val" style="font-family:monospace;background:#f1f5f9;padding:2px 8px;border-radius:4px;">${tempPassword}</span></div>` : ''}
     </div>
-    ${tempPassword ? '<p style="font-size:13px;color:#dc2626;font-weight:700;">⚠️ Please change your password after your first login.</p>' : ''}`;
+    ${tempPassword ? '<p style="font-size:13px;color:#dc2626;font-weight:700;margin-top:16px;">⚠️ Please change your password after your first login.</p>' : ''}`;
   await sendEmail({
     to: user.email,
-    subject: 'Welcome to AssetCare Pro - Your Account is Ready',
-    text: `Hello ${user.name}, welcome to AssetCare Pro! Your account has been created. Email: ${user.email}, Role: ${user.role}, Department: ${user.department}.${tempPassword ? ' Temporary password: ' + tempPassword + ' - Please change it after your first login.' : ''}`,
-    html: baseTemplate('Welcome to AssetCare Pro', body)
+    subject: 'Welcome to IAssetCare - Your Account is Ready',
+    text: `Hello ${user.name}, welcome to IAssetCare! Your account has been created. Email: ${user.email}, Role: ${user.role}, Department: ${user.department}.`,
+    html: baseTemplate('Welcome to IAssetCare', body)
   });
 };
 
 // 11. Password Changed Notification
 const sendPasswordChangedEmail = async (user) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      Your AssetCare Pro account password was successfully changed.
-      If you made this change, no action is required.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      Your IAssetCare account password was successfully changed. If you made this change, no action is required.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Account</span><span class="info-val">${user.email}</span></div>
@@ -395,8 +408,8 @@ const sendPasswordChangedEmail = async (user) => {
     </p>`;
   await sendEmail({
     to: user.email,
-    subject: 'Your AssetCare Pro Password Has Been Changed',
-    text: `Hello ${user.name}, your AssetCare Pro password was changed on ${new Date().toLocaleString('en-IN')}. If you did not make this change, contact your administrator immediately.`,
+    subject: 'Your IAssetCare Password Has Been Changed',
+    text: `Hello ${user.name}, your IAssetCare password was changed on ${new Date().toLocaleString('en-IN')}.`,
     html: baseTemplate('Password Changed Successfully', body, 'If you did not initiate this change, contact your admin immediately.')
   });
 };
@@ -405,8 +418,8 @@ const sendPasswordChangedEmail = async (user) => {
 const sendContactEmail = async ({ company, name, email, phone, orgSize, inquiryType, message }) => {
   const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      A new contact/demo request has been submitted via the AssetCare Pro website.
+    <p style="margin-top:0;margin-bottom:20px;">
+      A new contact/demo request has been submitted via the IAssetCare website.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Company</span><span class="info-val">${company}</span></div>
@@ -423,17 +436,17 @@ const sendContactEmail = async ({ company, name, email, phone, orgSize, inquiryT
   await sendEmail({
     to: adminEmail,
     subject: `New Contact Request: ${inquiryType} from ${company}`,
-    text: `New contact request from ${name} (${company}). Email: ${email}, Phone: ${phone}, Type: ${inquiryType}. Message: ${message}`,
-    html: baseTemplate('New Demo / Contact Request', body, 'Sent from the AssetCare Pro public contact form.')
+    text: `New contact request from ${name} (${company}). Email: ${email}, Type: ${inquiryType}. Message: ${message}`,
+    html: baseTemplate('New Demo / Contact Request', body, 'Sent from the IAssetCare public contact form.')
   });
 };
 
 // HOD Department Ticket Notification
 const sendHodTicketNotificationEmail = async (hod, ticket, asset, raisedByUser) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${hod.name}</strong>,<br><br>
-      A new breakdown ticket has been raised in your department and requires your authorization.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${hod.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      A new service request has been registered in your department and requires your authorization.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Ticket ID</span><span class="info-val">${ticket.ticketId}</span></div>
@@ -444,22 +457,21 @@ const sendHodTicketNotificationEmail = async (hod, ticket, asset, raisedByUser) 
       <div class="info-row"><span class="info-key">Priority</span><span class="info-val">${ticket.priority}</span></div>
       <div class="info-row"><span class="info-key">Status</span><span class="info-val"><span class="status-badge status-yellow">Pending HOD Approval</span></span></div>
     </div>
-    <p style="font-size:13px;color:#64748b;margin-top:16px;">Please log in to AssetCare Pro to review and authorize this ticket.</p>`;
+    <p style="font-size:13px;color:#64748b;margin-top:16px;">Please log in to IAssetCare to review and authorize this service request.</p>`;
   await sendEmail({
     to: hod.email,
-    subject: `Action Required: New Ticket in Your Department — ${ticket.ticketId}`,
-    text: `Hello ${hod.name}, a new ticket ${ticket.ticketId} was raised by ${raisedByUser?.name || 'an employee'} (${raisedByUser?.department || 'your department'}) for asset "${asset?.name || 'N/A'}". Issue: ${ticket.issue}. Priority: ${ticket.priority}. Please log in to authorize.`,
-    html: baseTemplate('New Department Ticket — Action Required', body, 'You are receiving this because you are the Head of Department for the affected department.')
+    subject: `Action Required: New Service Request in Your Department — ${ticket.ticketId}`,
+    text: `Hello ${hod.name}, a new service request ${ticket.ticketId} was registered by ${raisedByUser?.name || 'an employee'} for asset "${asset?.name || 'N/A'}". Please log in to authorize.`,
+    html: baseTemplate('New Department Service Request — Action Required', body, 'You are receiving this because you are the Head of Department for the affected department.')
   });
 };
 
 // Account Deactivated Notification
 const sendDeactivationEmail = async (user) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      Your <strong>AssetCare Pro</strong> account has been <strong style="color:#dc2626;">deactivated</strong> by your administrator.
-      You will no longer be able to log in to the system.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      Your <strong>IAssetCare</strong> account has been <strong style="color:#dc2626;">deactivated</strong> by your administrator. You will no longer be able to log in to the system.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Account</span><span class="info-val">${user.email}</span></div>
@@ -471,19 +483,18 @@ const sendDeactivationEmail = async (user) => {
     </p>`;
   await sendEmail({
     to: user.email,
-    subject: 'Your AssetCare Pro Account Has Been Deactivated',
-    text: `Hello ${user.name}, your AssetCare Pro account (${user.email}) has been deactivated by your administrator on ${new Date().toLocaleString('en-IN')}. You will no longer be able to log in. If this is a mistake, contact your IT administrator.`,
-    html: baseTemplate('Account Deactivated', body, 'This is an automated notification from AssetCare Pro.')
+    subject: 'Your IAssetCare Account Has Been Deactivated',
+    text: `Hello ${user.name}, your IAssetCare account (${user.email}) has been deactivated.`,
+    html: baseTemplate('Account Deactivated', body, 'This is an automated notification from IAssetCare.')
   });
 };
 
 // Invite Email (admin-sent invite link)
 const sendInviteEmail = async (user, inviteLink) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      You've been invited to join <strong>AssetCare Pro</strong> by your administrator.
-      Click the button below to set your password and activate your account.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      You've been invited to join <strong>IAssetCare</strong> by your administrator. Click the button below to set your password and activate your account.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Name</span><span class="info-val">${user.name}</span></div>
@@ -501,19 +512,18 @@ const sendInviteEmail = async (user, inviteLink) => {
     </p>`;
   await sendEmail({
     to: user.email,
-    subject: `You're invited to AssetCare Pro`,
-    text: `Hello ${user.name}, you've been invited to AssetCare Pro. Set your password here: ${inviteLink}. This link expires in 48 hours.`,
-    html: baseTemplate('You\'re Invited to AssetCare Pro', body, 'Invite link expires in 48 hours.')
+    subject: `You're invited to IAssetCare`,
+    text: `Hello ${user.name}, you've been invited to IAssetCare. Set your password here: ${inviteLink}.`,
+    html: baseTemplate('You\'re Invited to IAssetCare', body, 'Invite link expires in 48 hours.')
   });
 };
 
 // OTP Password Reset Email
 const sendOtpEmail = async (user, otp) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hello <strong>${user.name}</strong>,<br><br>
-      We received a request to reset the password for your AssetCare Pro account.
-      Use the OTP below to verify your identity. This code expires in <strong>10 minutes</strong>.
+    <p style="margin-top:0;margin-bottom:12px;">Hello <strong>${user.name}</strong>,</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      We received a request to reset the password for your IAssetCare account. Use the OTP below to verify your identity. This code expires in <strong>10 minutes</strong>.
     </p>
     <div style="text-align:center;margin:32px 0;">
       <div style="display:inline-block;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;padding:24px 48px;">
@@ -526,41 +536,38 @@ const sendOtpEmail = async (user, otp) => {
       <div class="info-row"><span class="info-key">Expires In</span><span class="info-val">10 minutes</span></div>
     </div>
     <p style="font-size:13px;color:#94a3b8;margin-top:16px;">
-      If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.
-      Never share this OTP with anyone.
+      If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged. Never share this OTP with anyone.
     </p>`;
   await sendEmail({
     to: user.email,
-    subject: 'AssetCare Pro Password Reset OTP',
-    text: `Hello ${user.name}, your OTP to reset your AssetCare Pro password is: ${otp}. This code expires in 10 minutes. Do not share this with anyone.`,
+    subject: 'IAssetCare Password Reset OTP',
+    text: `Hello ${user.name}, your OTP to reset your IAssetCare password is: ${otp}. This code expires in 10 minutes.`,
     html: baseTemplate('Password Reset OTP', body, 'This OTP expires in 10 minutes and can only be used once.')
   });
 };
 
 const sendContactAutoReply = async ({ name, email, company, inquiryType }) => {
   const body = `
-    <p style="font-size:15px;color:#334155;font-weight:600;margin-bottom:20px;">
-      Hi ${name},
-    </p>
-    <p style="font-size:14px;color:#334155;line-height:1.7;margin-bottom:16px;">
-      Thank you for reaching out to <strong>AssetCare Pro</strong>. We have received your <strong>${inquiryType}</strong> request from <strong>${company}</strong> and our team will get back to you within <strong>1 business day</strong>.
+    <p style="margin-top:0;margin-bottom:12px;">Hi ${name},</p>
+    <p style="margin-top:0;margin-bottom:20px;">
+      Thank you for reaching out to <strong>IAssetCare</strong>. We have received your <strong>${inquiryType}</strong> request from <strong>${company}</strong> and our team will get back to you within <strong>1 business day</strong>.
     </p>
     <div class="info-box">
       <div class="info-row"><span class="info-key">Inquiry Type</span><span class="info-val">${inquiryType}</span></div>
       <div class="info-row"><span class="info-key">Company</span><span class="info-val">${company}</span></div>
     </div>
-    <p style="font-size:14px;color:#334155;line-height:1.7;margin-top:20px;">
-      In the meantime, you can explore our product at <strong>assetcarepro.com</strong> or reach us directly:
+    <p style="margin-top:20px;margin-bottom:16px;">
+      In the meantime, you can explore our product at <strong>iassetcare.com</strong> or reach us directly:
     </p>
     <div class="info-box">
-      <div class="info-row"><span class="info-key">Email</span><span class="info-val">support@assetcarepro.com</span></div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val">support@iassetcare.com</span></div>
       <div class="info-row"><span class="info-key">Phone</span><span class="info-val">+91 800-456-7890</span></div>
     </div>`;
   await sendEmail({
     to: email,
-    subject: `We received your request — AssetCare Pro`,
-    text: `Hi ${name}, thank you for contacting AssetCare Pro. We have received your ${inquiryType} request from ${company} and will get back to you within 1 business day.`,
-    html: baseTemplate('Thank You for Reaching Out', body, 'You are receiving this because you submitted a contact form on assetcarepro.com.')
+    subject: `We received your request — IAssetCare`,
+    text: `Hi ${name}, thank you for contacting IAssetCare. We have received your ${inquiryType} request from ${company}.`,
+    html: baseTemplate('Thank You for Reaching Out', body, 'You are receiving this because you submitted a contact form on iassetcare.com.')
   });
 };
 

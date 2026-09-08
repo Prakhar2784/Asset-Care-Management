@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+﻿const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Tenant = require('../models/Tenant');
@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { sendPasswordResetEmail, sendOtpEmail, sendPasswordChangedEmail, sendWelcomeEmail } = require('../services/emailService');
 const { ADMIN_TIER_ROLES } = require('../middleware/authMiddleware');
 
-// ─── Brute-force / timing constants ───────────────────────────────────────────
+// Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Brute-force / timing constants Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 const GENERIC_LOGIN_ERROR = 'Incorrect email or password.';
 const MAX_FAILED_ATTEMPTS = 5;          // lock the account after this many
 const LOCK_MINUTES = 15;
@@ -22,7 +22,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const updateUserById = (user, updates) =>
   user.constructor.findByIdAndUpdate(user._id, updates, { bypassTenantFilter: true });
 
-// Google reCAPTCHA verification — active only when a secret key is configured.
+// Google reCAPTCHA verification Ã¢â‚¬â€ active only when a secret key is configured.
 // Without RECAPTCHA_SECRET_KEY the check is skipped (flag still returned so the
 // frontend can show a CAPTCHA once keys are provisioned).
 const verifyCaptcha = async (token, ip) => {
@@ -41,7 +41,14 @@ const verifyCaptcha = async (token, ip) => {
   }
 };
 
-const generateToken = (id, tenantId) => jwt.sign({ id, tenantId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (id, role, tenantId) => {
+  // Support either (id, role, tenantId) or (id, tenantId)
+  if (tenantId === undefined) {
+    tenantId = role;
+    role = undefined;
+  }
+  return jwt.sign({ id, role, tenantId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+};
 
 // Registered companies keep their users in per-tenant isolated databases, but
 // pre-login requests (login, password reset) carry no tenant context and would
@@ -63,7 +70,9 @@ const findUserAcrossTenants = async (query) => {
       user = await TenantUser.findOne(query).setOptions({ bypassTenantFilter: true });
       if (user) return user;
     } catch (err) {
-      console.error(`[Auth] Cross-tenant user lookup failed for tenant '${t.slug}':`, err.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error(`[Auth] Cross-tenant user lookup failed for tenant '${t.slug}':`, err.message);
+      }
     }
   }
   return null;
@@ -90,7 +99,7 @@ const loginUser = async (req, res) => {
     if (user.lockUntil && user.lockUntil > new Date()) {
       const minutesLeft = Math.max(1, Math.ceil((user.lockUntil - Date.now()) / 60000));
       return res.status(429).json({
-        message: `Too many failed attempts. Account is locked — try again in ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''}.`,
+        message: `Too many failed attempts. Account is locked Ã¢â‚¬â€ try again in ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''}.`,
         lockedUntil: user.lockUntil,
       });
     }
@@ -119,7 +128,7 @@ const loginUser = async (req, res) => {
 
       if (updates.lockUntil) {
         return res.status(429).json({
-          message: `Too many failed attempts. Account is locked — try again in ${LOCK_MINUTES} minutes.`,
+          message: `Too many failed attempts. Account is locked Ã¢â‚¬â€ try again in ${LOCK_MINUTES} minutes.`,
           lockedUntil: updates.lockUntil,
         });
       }
@@ -129,7 +138,7 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // ── Authenticated beyond this point ──────────────────────────────────────
+    // Ã¢â€â‚¬Ã¢â€â‚¬ Authenticated beyond this point Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
     // Deactivated (offboarded / not-yet-activated invite) accounts cannot log in
     if (user.isActive === false) {
       return res.status(403).json({ message: 'This account is deactivated. Contact your administrator, or complete your invite link to activate it.' });
@@ -147,10 +156,21 @@ const loginUser = async (req, res) => {
       }
     }
 
+    const tenant = await Tenant.findOne({ slug: user.tenantId }).setOptions({ bypassTenantFilter: true });
+    if (user.role !== 'super_admin' && user.tenantId !== 'default') {
+      if (tenant && tenant.isActive === false) {
+        return res.status(403).json({
+          message: 'Company account is deactivated. Please contact the platform administrator.',
+          code: 'COMPANY_DEACTIVATED'
+        });
+      }
+    }
+
     // Stamp last login + clear brute-force counters (fire-and-forget)
     updateUserById(user, { lastLogin: new Date(), failedLoginAttempts: 0, lockUntil: null }).catch(() => {});
 
-    const tenant = await Tenant.findOne({ slug: user.tenantId });
+    const now = new Date();
+    const daysRemaining = tenant?.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
 
     res.json({
       _id: user._id, name: user.name, email: user.email,
@@ -160,7 +180,10 @@ const loginUser = async (req, res) => {
       avatar: user.avatar || null,
       phone: user.phone || null,
       isActive: user.isActive,
-      plan: tenant?.plan || 'Basic',
+      plan: tenant?.plan || 'Home User',
+      subscriptionStatus: tenant?.subscriptionStatus || 'Active',
+      planExpiry: tenant?.planExpiry || null,
+      daysRemaining,
       features: tenant?.features || {},
       token: generateToken(user._id, user.tenantId)
     });
@@ -173,10 +196,24 @@ const loginUser = async (req, res) => {
 // GET /api/auth/me
 const getMe = async (req, res) => {
   try {
-    const tenant = await Tenant.findOne({ slug: req.user.tenantId });
+    const tenant = await Tenant.findOne({ slug: req.user.tenantId }).setOptions({ bypassTenantFilter: true });
+    if (req.user.role !== 'super_admin' && req.user.tenantId !== 'default') {
+      if (tenant && tenant.isActive === false) {
+        return res.status(403).json({
+          message: 'Company account is deactivated. Please contact the platform administrator.',
+          code: 'COMPANY_DEACTIVATED'
+        });
+      }
+    }
+    const now = new Date();
+    const daysRemaining = tenant?.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
+
     res.status(200).json({
       ...req.user.toObject(),
-      plan: tenant?.plan || 'Basic',
+      plan: tenant?.plan || 'Home User',
+      subscriptionStatus: tenant?.subscriptionStatus || 'Active',
+      planExpiry: tenant?.planExpiry || null,
+      daysRemaining,
       features: tenant?.features || {},
     });
   } catch (error) {
@@ -194,7 +231,7 @@ const completeOnboarding = async (req, res) => {
   }
 };
 
-// POST /api/auth/forgot-password  — Step 1: send OTP
+// POST /api/auth/forgot-password  Ã¢â‚¬â€ Step 1: send OTP
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -228,7 +265,7 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// POST /api/auth/verify-otp  — Step 2: verify OTP, return a short-lived reset token
+// POST /api/auth/verify-otp  Ã¢â‚¬â€ Step 2: verify OTP, return a short-lived reset token
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -246,7 +283,7 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: 'Invalid or expired OTP. Please try again.' });
     }
 
-    // OTP is valid — generate a password reset token
+    // OTP is valid Ã¢â‚¬â€ generate a password reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
@@ -329,20 +366,15 @@ const verifyResetToken = async (req, res) => {
 // POST /api/auth/register-company
 const registerCompany = async (req, res) => {
   try {
-    const { companyName, slug, adminName, adminEmail, adminPassword, adminPhone, licenseKey } = req.body;
+    const { companyName, slug, adminName, adminEmail, adminPassword, adminPhone, customerType, address, state, city, pinCode, gstNumber, acceptedTerms, licenseKey } = req.body;
     
-    if (!companyName || !slug || !adminName || !adminEmail || !adminPassword || !licenseKey) {
-      return res.status(400).json({ message: 'All fields are required including a valid license key' });
-    }
-
-    // Verify License Key
-    const { verifyLicenseKey } = require('../services/licenseService');
-    if (!verifyLicenseKey(licenseKey, slug)) {
-      return res.status(400).json({ message: 'Invalid license key for this company slug.' });
-    }
+    if (!acceptedTerms) return res.status(400).json({ message: 'Terms and Conditions must be accepted.' });
 
     const Tenant = require('../models/Tenant');
     const Department = require('../models/Department');
+    const { generateLicenseKey } = require('../services/licenseService');
+    // Auto-generate a valid license key if not provided
+    const finalLicenseKey = licenseKey || generateLicenseKey(slug);
 
     // Check if tenant slug already exists
     const tenantExists = await Tenant.findOne({ slug: slug.toLowerCase() });
@@ -350,22 +382,32 @@ const registerCompany = async (req, res) => {
       return res.status(400).json({ message: 'Company URL / Slug is already in use.' });
     }
 
-    // Check if user already exists globally (emails must be unique across all tenants)
+    // Check if user already exists globally
     const userExists = await findUserAcrossTenants({ email: adminEmail });
     if (userExists) {
       return res.status(400).json({ message: 'Admin email already registered.' });
     }
 
-    // Create the Tenant
+    // Create the Tenant in Pending Checkout state
     const tenant = await Tenant.create({
       name: companyName,
       slug: slug.toLowerCase(),
-      plan: 'Basic', // Default to Basic tier
-      limits: { maxAssets: 50, maxUsers: 10 },
-      licenseKey: licenseKey
+      customerType: customerType || 'Business',
+      address: {
+        line: address,
+        state: state,
+        city: city,
+        pin: pinCode,
+        country: 'India'
+      },
+      gstNumber: gstNumber || null,
+      licenseKey: finalLicenseKey,
+      plan: null,
+      subscriptionStatus: 'Pending Checkout',
+      limits: { maxAssets: 0, maxUsers: 0 } // No assets until plan is active
     });
 
-    // We run User and Department creation in the tenant context so the Mongoose plugin captures it correctly
+    // We run User and Department creation in the tenant context
     const { setTenantId } = require('../middleware/tenantContext');
     
     let adminUser;
@@ -397,13 +439,12 @@ const registerCompany = async (req, res) => {
     sendWelcomeEmail(adminUser).catch(() => {});
 
     res.status(201).json({
-      message: 'Company registered successfully!',
+      message: 'Company registered successfully! Redirecting to checkout...',
       tenant: {
         _id: tenant._id,
         name: tenant.name,
         slug: tenant.slug,
-        plan: tenant.plan,
-        limits: tenant.limits
+        subscriptionStatus: tenant.subscriptionStatus
       },
       user: {
         _id: adminUser._id,
@@ -417,18 +458,29 @@ const registerCompany = async (req, res) => {
         phone: adminUser.phone || null,
         isActive: true,
         customPermissions: [],
-        plan: tenant.plan || 'Basic',
-        features: tenant.features || {},
+        plan: null,
+        subscriptionStatus: tenant.subscriptionStatus,
         token: generateToken(adminUser._id, tenant.slug)
       }
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // MongoDB duplicate-key (E11000) — race condition between explicit check and .create()
+    if (error.code === 11000 || (error.message && error.message.includes('E11000'))) {
+      const kv = error.keyValue || {};
+      if (kv.slug || (error.message && error.message.includes('slug'))) {
+        return res.status(400).json({ message: 'Company URL is already in use. Please choose a different company name.' });
+      }
+      if (kv.email || (error.message && error.message.includes('email'))) {
+        return res.status(400).json({ message: 'An account with this email address already exists.' });
+      }
+      return res.status(400).json({ message: 'A duplicate registration conflict occurred. Please try again with different details.' });
+    }
+    console.error('[registerCompany] Error:', error.message);
+    res.status(500).json({ message: 'Registration failed due to a server error. Please try again.' });
   }
 };
 
-// GET /api/auth/tenant-branding
 const getTenantBranding = async (req, res) => {
   try {
     const Tenant = require('../models/Tenant');
@@ -436,7 +488,7 @@ const getTenantBranding = async (req, res) => {
     
     if (!tenant) {
       return res.status(200).json({
-        name: 'AssetCare',
+        name: 'IAssetCare',
         logoUrl: null,
         primaryColor: '#141414',
         secondaryColor: '#CBFA57'

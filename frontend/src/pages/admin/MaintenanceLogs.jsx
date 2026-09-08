@@ -45,9 +45,9 @@ const STATUS_COLOR = {
 
 const KPI_DEFS = [
   { key: "total",    label: "Total Services", color: "text.primary", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
-  { key: "cost",     label: "Total Cost",     color: "#FBBF24", icon: <RupeeIcon sx={{ fontSize: 20 }} /> },
-  { key: "last",     label: "Last Serviced",  color: "#FBBF24", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
-  { key: "next",     label: "Next Due",       color: "#FBBF24", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
+  { key: "cost",     label: "Total Cost",     color: "#B4F105", icon: <RupeeIcon sx={{ fontSize: 20 }} /> },
+  { key: "last",     label: "Last Serviced",  color: "#B4F105", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
+  { key: "next",     label: "Next Due",       color: "#B4F105", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
 ];
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
@@ -312,7 +312,7 @@ export default function MaintenanceLogs() {
                     startIcon={<AddRounded />}
                     onClick={openAdd}
                     sx={{
-                      background: "#FBBF24",
+                      background: "#051C12", color: "#FFFFFF",
                       color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
                     }}
                   >
@@ -693,7 +693,7 @@ export default function MaintenanceLogs() {
             onClick={handleSave}
             disabled={saving}
             sx={{
-              background: "#FBBF24",
+              background: "#051C12", color: "#FFFFFF",
               color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
               minWidth: 120,
             }}

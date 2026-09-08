@@ -4,9 +4,15 @@ const crypto  = require('crypto');
 const bcrypt  = require('bcryptjs');
 const ApiKey  = require('../models/ApiKey');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const { checkFeatureAccess } = require('../middleware/limitMiddleware');
+
+const restApiGuard = checkFeatureAccess(
+  'restApi',
+  'REST API & Webhook Integrations are an exclusive feature of the Large Scale plan. Please upgrade your subscription to unlock API access.'
+);
 
 // GET /api/apikeys — list keys for current tenant (never returns full key)
-router.get('/', protect, authorize('admin'), async (req, res) => {
+router.get('/', protect, authorize('admin'), restApiGuard, async (req, res) => {
   try {
     const keys = await ApiKey.find({ tenantId: req.tenantId })
       .populate('createdBy', 'name')
@@ -19,7 +25,7 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
 });
 
 // POST /api/apikeys — generate new key (returns full key ONCE)
-router.post('/', protect, authorize('admin'), async (req, res) => {
+router.post('/', protect, authorize('admin'), restApiGuard, async (req, res) => {
   try {
     const { name, scopes, expiresAt } = req.body;
     if (!name) return res.status(400).json({ message: 'Key name is required.' });

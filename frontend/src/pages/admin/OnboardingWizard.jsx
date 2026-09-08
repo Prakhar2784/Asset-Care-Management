@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Box, Paper, Stepper, Step, StepLabel, Typography, TextField,
   Button, Grid, MenuItem, CircularProgress, Alert, Chip,
-  FormControl, InputLabel, Select, InputAdornment, IconButton
+  FormControl, InputLabel, Select, InputAdornment, IconButton, Autocomplete
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
@@ -15,6 +15,7 @@ import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { INDIAN_STATES, INDIAN_CITIES } from "../../data/indianPlaces";
 
 const steps = ["Organization Profile", "Add Department", "Add User", "Add Asset"];
 const ROLES = ["employee", "hod", "technician", "admin"];
@@ -22,7 +23,7 @@ const ROLES = ["employee", "hod", "technician", "admin"];
 const cardTheme = createTheme({
   palette: {
     mode: "light",
-    primary: { main: "#FBBF24", contrastText: "#111827" },
+    primary: { main: "#051C12", contrastText: "#FFFFFF" },
     background: { default: "#FFFFFF", paper: "#FFFFFF" },
     text: { primary: "#111827", secondary: "#4B5563" },
     divider: "rgba(17,24,39,0.15)",
@@ -87,6 +88,26 @@ const OnboardingWizard = () => {
     navigate("/admin/dashboard");
   };
 
+  const handlePincodeChange = async (val) => {
+    const cleanPin = val.replace(/[^0-9]/g, '').slice(0, 6);
+    setOrg(prev => ({ ...prev, pin: cleanPin }));
+    
+    if (cleanPin.length === 6) {
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${cleanPin}`);
+        const data = await response.json();
+        if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice && data[0].PostOffice.length > 0) {
+          const firstPO = data[0].PostOffice[0];
+          const city = firstPO.District || firstPO.Division || "";
+          const state = firstPO.State || "";
+          setOrg(prev => ({ ...prev, city, state }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch address details from pincode:", err);
+      }
+    }
+  };
+
   const handleOrgSave = async () => {
     setSaving(true); setError("");
     try {
@@ -111,11 +132,12 @@ const OnboardingWizard = () => {
   const deptFilled = dept.name || dept.code || dept.hodName || dept.hodEmail || dept.hodPhone || dept.location;
 
   const saveCurrentDept = async () => {
-    if (!dept.name || !dept.code || !dept.hodName || !dept.hodEmail) {
-      setError("Please fill department name, code, HOD name and HOD email.");
+    if (!dept.name || !dept.hodName || !dept.hodEmail) {
+      setError("Please fill department name, HOD name and HOD email.");
       return false;
     }
-    await api.post("/departments", { ...dept, status: "Active" });
+    const finalCode = dept.code?.trim() || (dept.name.trim().split(/\s+/).map(w => w[0]).join('') || dept.name.trim().slice(0, 3)).toUpperCase();
+    await api.post("/departments", { ...dept, code: finalCode, status: "Active" });
     setSavedDepts(list => [...list, dept.name]);
     setUser(u => ({ ...u, department: dept.name }));
     setDept(emptyDept);
@@ -233,7 +255,7 @@ const OnboardingWizard = () => {
       }}>
         <Box sx={{ textAlign: "center", mb: 4 }}>
           <Typography fontWeight={900} fontSize={{ xs: 28, sm: 36 }} color="text.primary" letterSpacing="-1px" mb={1}>
-            Welcome to AssetCare Pro
+            Welcome to IAssetCare
           </Typography>
           <Typography color="text.secondary" fontSize={15} sx={{ maxWidth: 480, mx: "auto" }}>
             Let's set up your workspace in a few quick steps. You can skip and finish any step later from Settings.
@@ -250,7 +272,7 @@ const OnboardingWizard = () => {
 
         {active === 0 && (
           <Box>
-            <StepHeader icon={<BusinessRounded sx={{ color: "#FBBF24" }} />} title="Tell us about your organization"
+            <StepHeader icon={<BusinessRounded sx={{ color: "#051C12" }} />} title="Tell us about your organization"
               subtitle="This information appears on invoices, reports and the tenant profile." />
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
@@ -293,16 +315,41 @@ const OnboardingWizard = () => {
                   onChange={e => setOrg({ ...org, addressLine: e.target.value })} />
               </Grid>
               <Grid size={{ xs: 12, sm: 3 }}>
-                <TextField fullWidth label="City" sx={inputSx} value={org.city}
-                  onChange={e => setOrg({ ...org, city: e.target.value })} />
+                <Autocomplete
+                  freeSolo
+                  options={INDIAN_CITIES}
+                  value={org.city}
+                  onChange={(event, newValue) => {
+                    setOrg(prev => ({ ...prev, city: newValue || "" }));
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    setOrg(prev => ({ ...prev, city: newInputValue }));
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="City" sx={inputSx} />
+                  )}
+                />
               </Grid>
               <Grid size={{ xs: 12, sm: 3 }}>
-                <TextField fullWidth label="State" sx={inputSx} value={org.state}
-                  onChange={e => setOrg({ ...org, state: e.target.value })} />
+                <Autocomplete
+                  freeSolo
+                  options={INDIAN_STATES}
+                  value={org.state}
+                  onChange={(event, newValue) => {
+                    setOrg(prev => ({ ...prev, state: newValue || "" }));
+                  }}
+                  onInputChange={(event, newInputValue) => {
+                    setOrg(prev => ({ ...prev, state: newInputValue }));
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="State" sx={inputSx} />
+                  )}
+                />
               </Grid>
               <Grid size={{ xs: 12, sm: 3 }}>
                 <TextField fullWidth label="PIN Code" sx={inputSx} value={org.pin}
-                  onChange={e => setOrg({ ...org, pin: e.target.value })} />
+                  onChange={e => handlePincodeChange(e.target.value)}
+                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 6 } }} />
               </Grid>
               <Grid size={{ xs: 12, sm: 3 }}>
                 <TextField fullWidth label="Country" sx={inputSx} value={org.country}
@@ -314,14 +361,14 @@ const OnboardingWizard = () => {
 
         {active === 1 && (
           <Box>
-            <StepHeader icon={<ApartmentRounded sx={{ color: "#FBBF24" }} />} title="Add your departments"
+            <StepHeader icon={<ApartmentRounded sx={{ color: "#051C12" }} />} title="Add your departments"
               subtitle="Create as many departments as your organization needs — each requires an HOD." />
 
             {savedDepts.length > 0 && (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
                 {savedDepts.map((name, i) => (
                   <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#111827 !important" }} />}
-                    label={name} sx={{ bgcolor: "#FBBF24", color: "#111827", fontWeight: 700 }} />
+                    label={name} sx={{ bgcolor: "#051C12", color: "#111827", fontWeight: 700 }} />
                 ))}
               </Box>
             )}
@@ -332,7 +379,7 @@ const OnboardingWizard = () => {
                   onChange={e => setDept({ ...dept, name: e.target.value })} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="Department Code" sx={inputSx} value={dept.code}
+                <TextField fullWidth label="Department Code" sx={inputSx} value={dept.code}
                   onChange={e => setDept({ ...dept, code: e.target.value })} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
@@ -349,7 +396,7 @@ const OnboardingWizard = () => {
                   slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Location / Floor" sx={inputSx} value={dept.location}
+                <TextField fullWidth label="Department Address" sx={inputSx} value={dept.location}
                   onChange={e => setDept({ ...dept, location: e.target.value })} />
               </Grid>
             </Grid>
@@ -363,14 +410,14 @@ const OnboardingWizard = () => {
 
         {active === 2 && (
           <Box>
-            <StepHeader icon={<PersonAddRounded sx={{ color: "#FBBF24" }} />} title="Add your users"
+            <StepHeader icon={<PersonAddRounded sx={{ color: "#051C12" }} />} title="Add your users"
               subtitle="Onboard as many teammates as you like — each gets their own login and role." />
 
             {savedUsers.length > 0 && (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
                 {savedUsers.map((name, i) => (
                   <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#111827 !important" }} />}
-                    label={name} sx={{ bgcolor: "#FBBF24", color: "#111827", fontWeight: 700 }} />
+                    label={name} sx={{ bgcolor: "#051C12", color: "#111827", fontWeight: 700 }} />
                 ))}
               </Box>
             )}
@@ -436,7 +483,7 @@ const OnboardingWizard = () => {
         {active === 3 && (
           <Box sx={{ textAlign: "center", py: 2 }}>
             <Box sx={{ width: 64, height: 64, borderRadius: "18px", bgcolor: "rgba(251,191,36,0.15)", display: "grid", placeItems: "center", mx: "auto", mb: 2.5 }}>
-              <Inventory2Rounded sx={{ fontSize: 32, color: "#FBBF24" }} />
+              <Inventory2Rounded sx={{ fontSize: 32, color: "#051C12" }} />
             </Box>
             <Typography fontWeight={800} fontSize={18} color="text.primary" mb={1}>Register your first asset</Typography>
             <Typography color="text.secondary" mb={3}>

@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ConfirmationNumberRoundedIcon from "@mui/icons-material/ConfirmationNumberRounded";
 import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
@@ -9,18 +9,18 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 
 const Workflow = () => {
   const steps = [
-    { title: "Employee raises asset breakdown ticket", text: "The employee reports the issue with asset details, problem description, priority and supporting proof.", icon: <ConfirmationNumberRoundedIcon fontSize="large" /> },
+    { title: "Employee registers service request", text: "The employee reports the issue with asset details, problem description, priority and supporting details.", icon: <ConfirmationNumberRoundedIcon fontSize="large" /> },
     { title: "Department HOD reviews and approves request", text: "The department head checks the request and approves repair, replacement or further escalation.", icon: <FactCheckRoundedIcon fontSize="large" /> },
     { title: "Admin checks warranty and vendor details", text: "Admin verifies warranty status, AMC coverage, asset documents and available vendor support.", icon: <AdminPanelSettingsRoundedIcon fontSize="large" /> },
-    { title: "Complaint is registered with OEM/service company", text: "The vendor or OEM complaint is created with complaint number, contact details and service schedule.", icon: <BusinessRoundedIcon fontSize="large" /> },
+    { title: "Request is forwarded to OEM/service company", text: "The vendor or OEM ticket is created with reference number, contact details and service schedule.", icon: <BusinessRoundedIcon fontSize="large" /> },
     { title: "Technician visit and repair status is updated", text: "Technician visit, diagnosis, spare parts, cost estimate and repair progress are updated in the system.", icon: <EngineeringRoundedIcon fontSize="large" /> },
-    { title: "User confirms resolution and ticket is closed", text: "After repair completion, the user confirms resolution and admin closes the ticket with final remarks.", icon: <TaskAltRoundedIcon fontSize="large" /> },
+    { title: "User confirms resolution and request is completed", text: "After repair completion, the user confirms resolution and admin completes the request with final remarks.", icon: <TaskAltRoundedIcon fontSize="large" /> },
   ];
 
   return (
     <>
       <style>{`
-        .workflow-page { min-height: 100vh; background: #0B0D12; }
+        .workflow-page { min-height: 100vh; background: #051C12; }
         .workflow-container { max-width: 1400px; margin: 0 auto; }
         .workflow-hero { padding: 140px 24px 44px; }
 
@@ -31,10 +31,10 @@ const Workflow = () => {
         }
 
         .workflow-summary-card {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 18px; padding: 18px;
-          box-shadow: 0 4px 16px rgba(17,17,17,0.05);
+          box-shadow: 0 4px 16px rgba(5,28,18,0.05);
         }
 
         .workflow-summary-value {
@@ -43,7 +43,7 @@ const Workflow = () => {
           letter-spacing: -1px; line-height: 1;
         }
 
-        .workflow-summary-label { font-size: 13px; font-weight: 700; color: #94A3B8; }
+        .workflow-summary-label { font-size: 13px; font-weight: 700; color: #879A91; }
 
         .workflow-section { padding: 16px 24px 100px; }
 
@@ -54,24 +54,24 @@ const Workflow = () => {
         }
 
         .work-card {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 24px; padding: 32px 28px;
           position: relative; overflow: hidden;
-          box-shadow: 0 4px 16px rgba(17,17,17,0.04);
+          box-shadow: 0 4px 16px rgba(5,28,18,0.04);
         }
 
         .work-number {
           position: absolute; bottom: -20px; right: 14px;
           font-size: 120px; font-weight: 950;
-          color: rgba(17,24,39,0.07); z-index: 0; line-height: 1;
+          color: rgba(5,28,18,0.07); z-index: 0; line-height: 1;
         }
 
         .work-content { position: relative; z-index: 1; }
 
         .work-icon {
           width: 54px; height: 54px;
-          background: #111827; color: #FFFFFF;
+          background: #051C12; color: #B4F105;
           border-radius: 15px;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 18px;
@@ -80,18 +80,19 @@ const Workflow = () => {
         .work-badge {
           display: inline-block;
           padding: 6px 12px;
-          background: rgba(17,17,17,0.06); color: #FFFFFF;
+          background: rgba(180,241,5,0.1); color: #B4F105;
           border-radius: 999px; font-size: 11px; font-weight: 900;
           letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px;
         }
 
         .work-title { font-size: 18px; font-weight: 900; color: #FFFFFF; margin-bottom: 12px; line-height: 1.35; letter-spacing: -0.3px; }
 
-        .work-text { font-size: 14.5px; line-height: 1.65; color: #CBD5E1; font-weight: 500; margin: 0; }
+        .work-text { font-size: 14.5px; line-height: 1.65; color: #879A91; font-weight: 500; margin: 0; }
 
         .workflow-timeline {
           max-width: 1400px; margin: 28px auto 0;
-          background: #111827;
+          background: #072F1F;
+          border: 1px solid rgba(255,255,255,0.05);
           border-radius: 28px; padding: 44px;
           display: grid; grid-template-columns: 0.95fr 1.05fr;
           gap: 38px; align-items: center;
@@ -102,7 +103,7 @@ const Workflow = () => {
           content: "";
           position: absolute; top: -80px; right: -80px;
           width: 240px; height: 240px;
-          background: radial-gradient(circle, rgba(17,24,39,0.10), transparent 70%);
+          background: radial-gradient(circle, rgba(180,241,5,0.10), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -128,36 +129,36 @@ const Workflow = () => {
 
         .timeline-dot {
           width: 36px; height: 36px; border-radius: 10px;
-          background: #111827; color: #FFFFFF;
+          background: #051C12; color: #B4F105;
           display: grid; place-items: center;
           font-weight: 950; font-size: 13px; flex-shrink: 0;
         }
 
-        .timeline-text { font-size: 14px; font-weight: 700; color: #D4D4CE; }
+        .timeline-text { font-size: 14px; font-weight: 700; color: #879A91; }
 
         .workflow-cta {
           max-width: 1400px; margin: 24px auto 0;
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 24px; padding: 32px 36px;
           display: flex; justify-content: space-between; align-items: center;
           gap: 24px; flex-wrap: wrap;
-          box-shadow: 0 8px 24px rgba(17,17,17,0.06);
+          box-shadow: 0 8px 24px rgba(5,28,18,0.06);
         }
 
         .workflow-cta h3 { color: #FFFFFF; font-size: 26px; font-weight: 950; margin: 0 0 7px; letter-spacing: -0.7px; }
 
-        .workflow-cta p { color: #CBD5E1; font-size: 15px; font-weight: 500; margin: 0; line-height: 1.6; }
+        .workflow-cta p { color: #879A91; font-size: 15px; font-weight: 500; margin: 0; line-height: 1.6; }
 
         .workflow-cta-btn {
-          background: #111827; color: #FFFFFF;
+          background: #B4F105; color: #051C12;
           border: none; padding: 14px 24px; border-radius: 999px;
           font-weight: 900; cursor: pointer;
           display: inline-flex; align-items: center; gap: 8px;
           transition: 0.25s ease; font-size: 14px; white-space: nowrap;
         }
 
-        .workflow-cta-btn:hover { background: #222222; transform: translateY(-3px); box-shadow: 0 10px 24px rgba(17,17,17,0.2); }
+        .workflow-cta-btn:hover { background: #c1f824; transform: translateY(-3px); box-shadow: 0 10px 24px rgba(180,241,5,0.2); }
 
         @media (max-width: 900px) {
           .workflow-hero { padding-top: 120px; }
@@ -177,7 +178,7 @@ const Workflow = () => {
             <div style={{ marginBottom: 32 }}>
               <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>System Protocol</div>
               <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Clear approval and service workflow</h1>
-              <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Every breakdown complaint follows a structured process so nothing is missed and every service action is traceable through the system.</p>
+              <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Every service request follows a structured process so nothing is missed and every service action is traceable through the system.</p>
             </div>
             <div className="workflow-summary">
               {[
@@ -212,15 +213,15 @@ const Workflow = () => {
 
           <div className="workflow-timeline">
             <div>
-              <h2>From complaint creation to final service closure.</h2>
-              <p>The workflow ensures every complaint has proper ownership, approval, vendor tracking, technician updates and final closure confirmation.</p>
+              <h2>From request creation to final service completion.</h2>
+              <p>The workflow ensures every service request has proper ownership, approval, vendor tracking, technician updates and final completion confirmation.</p>
             </div>
             <div className="timeline-list">
               {[
                 "User reports issue with asset information",
                 "HOD/Admin verifies repair approval",
-                "Vendor complaint number is recorded",
-                "Technician action and closure proof are saved",
+                "Vendor ticket reference number is recorded",
+                "Technician action and completion proof are saved",
               ].map((item, index) => (
                 <div className="timeline-item" key={item}>
                   <div className="timeline-dot">{String(index + 1).padStart(2, "0")}</div>
@@ -233,7 +234,7 @@ const Workflow = () => {
           <div className="workflow-cta">
             <div>
               <h3>Need a controlled repair approval process?</h3>
-              <p>Use AssetCare Pro to reduce missed complaints, manual follow-ups and unapproved service expenses.</p>
+              <p>Use IAssetCare to reduce missed requests, manual follow-ups and unapproved service expenses.</p>
             </div>
             <Link to="/login" className="workflow-cta-btn">
               Start Workflow <ArrowForwardRoundedIcon fontSize="small" />

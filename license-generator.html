@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IAssetCare - Activation Key Generator</title>
+  <style>
+    :root {
+      --bg-color: #000000;
+      --card-bg: #0A0A0A;
+      --accent-color: #FBBF24;
+      --accent-hover: #F5A623;
+      --text-main: #FFFFFF;
+      --text-muted: #9CA3AF;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Decorative Ambient Glow */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(20px);
+      text-align: center;
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .logo-icon {
+      background: var(--accent-color);
+      color: #000000;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 22px;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #E5E7EB 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-generate {
+      width: 100%;
+      background: var(--accent-color);
+      color: #000000;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 24px;
+    }
+
+    .btn-generate:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-generate:active {
+      transform: translateY(0);
+    }
+
+    .result-container {
+      display: none;
+      background: rgba(251, 191, 36, 0.06);
+      border: 1px dashed rgba(251, 191, 36, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 16px;
+      position: relative;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-align: left;
+    }
+
+    .result-key {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+      word-break: break-all;
+      user-select: all;
+    }
+
+    .btn-copy {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: #FFFFFF;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-copy:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .advanced-toggle {
+      font-size: 12px;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: underline;
+      display: inline-block;
+      margin-top: 16px;
+      transition: color 0.2s ease;
+    }
+
+    .advanced-toggle:hover {
+      color: #FFFFFF;
+    }
+
+    .advanced-section {
+      display: none;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+      animation: fadeIn 0.2s ease forwards;
+    }
+
+    .tip {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="card">
+      <div class="logo-container">
+        <div class="logo-icon">AC</div>
+        <div class="logo-text">IAssetCare</div>
+      </div>
+      <p class="subtitle">Generate commercial activation keys for multi-tenant companies offline securely.</p>
+
+      <div class="form-group">
+        <label for="companySlug">Company Slug</label>
+        <input type="text" id="companySlug" class="input-field" placeholder="e.g. google, microsoft, apple" required>
+        <p class="tip">The organization slug matches the URL path (e.g. <code>http://localhost:5000/google</code> → slug is <code>google</code>).</p>
+      </div>
+
+      <button id="btnGenerate" class="btn-generate">Generate Activation Key</button>
+
+      <div id="resultContainer" class="result-container">
+        <div class="result-label">Activation Key</div>
+        <div id="resultKey" class="result-key">AC-SLUG-HASH</div>
+        <button id="btnCopy" class="btn-copy">Copy Key</button>
+      </div>
+
+      <div class="advanced-toggle" id="advancedToggle">Show Advanced Settings</div>
+
+      <div class="advanced-section" id="advancedSection">
+        <div class="form-group">
+          <label for="licenseSecret">License Secret Key</label>
+          <input type="password" id="licenseSecret" class="input-field" value="assetcare_commercial_license_secret_key_2026">
+          <p class="tip">Must match the <code>LICENSE_SECRET</code> value configured in your backend <code>.env</code> file. Do not change this unless you customized the secret key in the server configurations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const companySlugInput = document.getElementById('companySlug');
+    const licenseSecretInput = document.getElementById('licenseSecret');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const resultContainer = document.getElementById('resultContainer');
+    const resultKey = document.getElementById('resultKey');
+    const btnCopy = document.getElementById('btnCopy');
+    const advancedToggle = document.getElementById('advancedToggle');
+    const advancedSection = document.getElementById('advancedSection');
+
+    // Advanced setting toggle
+    advancedToggle.addEventListener('click', () => {
+      if (advancedSection.style.display === 'block') {
+        advancedSection.style.display = 'none';
+        advancedToggle.textContent = 'Show Advanced Settings';
+      } else {
+        advancedSection.style.display = 'block';
+        advancedToggle.textContent = 'Hide Advanced Settings';
+      }
+    });
+
+    // Copy to clipboard with visual feedback
+    btnCopy.addEventListener('click', () => {
+      const keyText = resultKey.textContent;
+      navigator.clipboard.writeText(keyText).then(() => {
+        btnCopy.textContent = 'Copied!';
+        btnCopy.style.background = 'rgba(251, 191, 36, 0.2)';
+        btnCopy.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+        btnCopy.style.color = '#FBBF24';
+        
+        setTimeout(() => {
+          btnCopy.textContent = 'Copy Key';
+          btnCopy.style.background = 'rgba(255, 255, 255, 0.08)';
+          btnCopy.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+          btnCopy.style.color = '#FFFFFF';
+        }, 2000);
+      });
+    });
+
+    // Cryptographic key generation identical to backend licenseService
+    async function generateLicenseKey(slug, secret) {
+      const cleanSlug = slug.toLowerCase().trim();
+      const encoder = new TextEncoder();
+      const keyData = encoder.encode(secret);
+      const messageData = encoder.encode(cleanSlug);
+      
+      // Import the raw secret key for HMAC
+      const cryptoKey = await window.crypto.subtle.importKey(
+        "raw",
+        keyData,
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        false,
+        ["sign"]
+      );
+      
+      // Sign the slug to get the hash signature
+      const signature = await window.crypto.subtle.sign(
+        "HMAC",
+        cryptoKey,
+        messageData
+      );
+      
+      // Convert buffer signature to hex string
+      const hashArray = Array.from(new Uint8Array(signature));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashSlice = hashHex.slice(0, 16).toUpperCase();
+      
+      return `AC-${cleanSlug.toUpperCase()}-${hashSlice}`;
+    }
+
+    btnGenerate.addEventListener('click', async () => {
+      const slug = companySlugInput.value.trim();
+      const secret = licenseSecretInput.value;
+
+      if (!slug) {
+        alert('Please enter a company slug.');
+        return;
+      }
+
+      try {
+        const key = await generateLicenseKey(slug, secret);
+        resultKey.textContent = key;
+        resultContainer.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alert('Error generating activation key: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

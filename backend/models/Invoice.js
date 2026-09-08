@@ -1,28 +1,43 @@
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema({
-  invoiceNumber:  { type: String },
-  vendor:         { type: String, required: true },
-  vendorEmail:    { type: String },
-  vendorPhone:    { type: String },
-  amount:         { type: Number, default: 0 },
-  invoiceDate:    { type: Date },
-  dueDate:        { type: Date },
-  status:         { type: String, enum: ['Paid', 'Unpaid', 'Overdue', 'Cancelled'], default: 'Unpaid' },
-  assets:         [{ type: mongoose.Schema.Types.ObjectId, ref: 'Asset' }],
-  category:       { type: String },
-  notes:          { type: String },
-  fileUrl:        { type: String },
-  fileName:       { type: String },
-  uploadedBy:     { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  tenantId:       { type: String, required: true, default: 'default' },
+  invoiceNumber: { type: String, required: true, unique: true },
+  tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: true },
+  date: { type: Date, default: Date.now },
+  planName: { type: String, required: true },
+  
+  // Amounts
+  baseAmount: { type: Number, required: true },
+  discountAmount: { type: Number, default: 0 },
+  couponCode: { type: String, default: null },
+  taxableAmount: { type: Number, required: true },
+  
+  // Taxes
+  cgst: { type: Number, default: 0 },
+  sgst: { type: Number, default: 0 },
+  igst: { type: Number, default: 0 },
+  totalAmount: { type: Number, required: true },
+  
+  // Status & Gateway Info
+  status: { type: String, enum: ['Paid', 'Pending', 'Failed', 'Refunded'], default: 'Pending' },
+  paymentReference: { type: String, default: null },
+  razorpayOrderId: { type: String, default: null, index: true },
+  razorpayPaymentId: { type: String, default: null },
+  razorpaySignature: { type: String, default: null },
+  currency: { type: String, default: 'INR' },
+
+  // Customer snapshot at time of invoice
+  customerName: { type: String },
+  companyName: { type: String },
+  address: { type: String },
+  state: { type: String },
+  city: { type: String },
+  pin: { type: String },
+  gstin: { type: String },
+  
+  // Subscription Period
+  periodStart: { type: Date, required: true },
+  periodEnd: { type: Date, required: true }
 }, { timestamps: true });
 
-invoiceSchema.index({ vendor: 1 });
-invoiceSchema.index({ status: 1 });
-invoiceSchema.index({ invoiceDate: -1 });
-invoiceSchema.index({ tenantId: 1 });
-
-const Invoice = mongoose.model('Invoice', invoiceSchema);
-const createTenantModelProxy = require('../middleware/tenantModelProxy');
-module.exports = createTenantModelProxy('Invoice', Invoice);
+module.exports = mongoose.model('Invoice', invoiceSchema);

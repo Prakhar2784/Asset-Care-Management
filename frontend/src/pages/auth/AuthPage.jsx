@@ -12,12 +12,13 @@ import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
 import { useAuth } from "../../context/AuthContext";
 
-const ADMIN_TIER_ROLES = ["admin", "super_admin", "hod", "manager"];
+const ADMIN_TIER_ROLES = ["admin", "hod", "manager"];
 const BASIC_PERMS = ["View Dashboard", "Raise Tickets"];
 
-// Mirrors AdminRoute's access check: admin-tier roles, and employees granted
-// at least one non-basic permission, land on the admin dashboard.
+// Mirrors AdminRoute's access check: super_admin lands on platform console,
+// admin-tier roles and employees with elevated perms land on admin dashboard.
 const landingRouteFor = (session) => {
+  if (session.role === "super_admin") return "/super-admin/console";
   if (session.role === "technician") return "/technician/portal";
   if (ADMIN_TIER_ROLES.includes(session.role)) return "/admin/dashboard";
   const customPerms = session.customPermissions || [];
@@ -59,6 +60,13 @@ const AuthPage = () => {
     };
     checkSetupStatus();
   }, [navigate]);
+
+  // Check for deactivation notice
+  useEffect(() => {
+    if (searchParams.get('deactivated') === '1' || searchParams.get('deactivated') === 'true') {
+      setError("Company account is deactivated. Please contact the platform administrator.");
+    }
+  }, [searchParams]);
 
   // Load remembered email when role tab changes
   useEffect(() => {
@@ -155,13 +163,13 @@ const AuthPage = () => {
     <>
       <style>{`
         :root {
-          --auth-primary: #111827;
-          --auth-secondary: #111827;
-          --auth-bg: #0B0D12;
-          --text-main: #FFFFFF;
-          --text-muted: #9CA3AF;
-          --input-bg: rgba(20,20,20,0.75);
-          --input-border: rgba(17,24,39,0.2);
+          --auth-primary: #051C12;
+          --auth-secondary: #B4F105;
+          --auth-bg: #F4F6F5;
+          --text-main: #0B130F;
+          --text-muted: #6C7E75;
+          --input-bg: #FFFFFF;
+          --input-border: #E9EFEF;
         }
 
         @keyframes fadeInUp {
@@ -181,32 +189,28 @@ const AuthPage = () => {
           align-items: center;
           justify-content: center;
           background:
-            radial-gradient(ellipse at 15% 0%, rgba(17,24,39,0.22) 0%, transparent 55%),
-            radial-gradient(ellipse at 85% 100%, rgba(17,24,39,0.16) 0%, transparent 55%),
+            radial-gradient(ellipse at 15% 0%, rgba(5,28,18,0.08) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 100%, rgba(180,241,5,0.06) 0%, transparent 55%),
             var(--auth-bg);
           background-attachment: fixed;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .auth-container {
           width: 100%;
           max-width: 1200px;
-          background: rgba(255, 255, 255, 0.70);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(17,24,39,0.18);
+          background: #FFFFFF;
+          border: 1.5px solid #E9EFEF;
           border-radius: 36px;
-          box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+          box-shadow: 0 30px 70px rgba(5, 28, 18, 0.05);
           display: flex;
           overflow: hidden;
           animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          border: 1px solid rgba(17,24,39,0.15);
-          backdrop-filter: blur(20px);
         }
 
         .auth-info {
           flex: 1;
-          background: #111827;
+          background: #051C12;
           padding: 70px 50px;
           color: white;
           display: flex;
@@ -224,7 +228,7 @@ const AuthPage = () => {
           right: 24px;
           width: 180px;
           height: 180px;
-          border: 1px dashed rgba(17,24,39,0.22);
+          border: 1px dashed rgba(255,255,255,0.12);
           border-radius: 50%;
           animation: floatSoft 5s ease-in-out infinite;
         }
@@ -236,7 +240,7 @@ const AuthPage = () => {
           right: -20%;
           width: 420px;
           height: 420px;
-          background: radial-gradient(circle, rgba(17,24,39,0.14) 0%, rgba(0,0,0,0) 70%);
+          background: radial-gradient(circle, rgba(180,241,5,0.12) 0%, rgba(0,0,0,0) 70%);
           border-radius: 50%;
         }
 
@@ -246,9 +250,9 @@ const AuthPage = () => {
           border-radius: 16px;
           display: grid;
           place-items: center;
-          background: #111827;
-          box-shadow: 0 14px 28px rgba(17,24,39,0.28);
-          border: 1px solid rgba(17,24,39,0.30);
+          background: #051C12;
+          box-shadow: 0 14px 28px rgba(5,28,18,0.28);
+          border: 1px solid rgba(255,255,255,0.1);
         }
 
         .info-list {
@@ -276,13 +280,13 @@ const AuthPage = () => {
           padding: 8px;
           border-radius: 12px;
           display: flex;
-          color: #FFFFFF;
+          color: #B4F105;
         }
 
         .auth-form-container {
           flex: 1;
           padding: 70px 54px;
-          background: rgba(20,20,20,0.7);
+          background: #FFFFFF;
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -290,11 +294,11 @@ const AuthPage = () => {
 
         .role-toggle {
           display: flex;
-          background: var(--input-bg);
+          background: #F4F6F5;
           padding: 6px;
           border-radius: 18px;
           margin-bottom: 32px;
-          border: 1px solid rgba(17,24,39,0.2);
+          border: 1px solid #E9EFEF;
         }
 
         .role-btn {
@@ -315,9 +319,9 @@ const AuthPage = () => {
         }
 
         .role-btn.active {
-          background: rgba(20,20,20,0.7);
+          background: #051C12;
           color: #FFFFFF;
-          box-shadow: 0 10px 20px rgba(17,17,17,0.08);
+          box-shadow: 0 10px 20px rgba(5,28,18,0.08);
         }
 
         .input-wrapper {
@@ -331,7 +335,7 @@ const AuthPage = () => {
           left: 16px;
           top: 50%;
           transform: translateY(-50%);
-          color: #A0A09A;
+          color: #879A91;
           transition: color 0.3s ease;
           pointer-events: none;
         }
@@ -341,7 +345,7 @@ const AuthPage = () => {
           right: 16px;
           top: 50%;
           transform: translateY(-50%);
-          color: #A0A09A;
+          color: #879A91;
           cursor: pointer;
           background: none;
           border: none;
@@ -376,26 +380,26 @@ const AuthPage = () => {
         }
 
         .auth-input::placeholder {
-          color: #A0A09A;
+          color: #879A91;
           font-weight: 500;
         }
 
         .input-wrapper:focus-within .input-icon {
-          color: #FFFFFF;
+          color: #051C12;
         }
 
         .input-wrapper:focus-within .auth-input {
-          border-color: #FFFFFF;
-          box-shadow: 0 0 0 3px rgba(17,24,39,0.15);
-          background-color: rgba(25,25,25,0.85);
+          border-color: #051C12;
+          box-shadow: 0 0 0 3px rgba(5,28,18,0.05);
+          background-color: #FFFFFF;
         }
 
         .auth-btn {
           width: 100%;
           padding: 18px;
-          background: #FBBF24;
-          color: #111827 !important;
-          -webkit-text-fill-color: #111827;
+          background: #051C12;
+          color: #FFFFFF !important;
+          -webkit-text-fill-color: #FFFFFF;
           border: none;
           border-radius: 16px;
           font-size: 16px;
@@ -404,24 +408,24 @@ const AuthPage = () => {
           cursor: pointer;
           margin-bottom: 24px;
           transition: all 0.3s ease;
-          box-shadow: 0 14px 28px rgba(251,191,36,0.22);
+          box-shadow: 0 14px 28px rgba(5,28,18,0.1);
         }
 
         .auth-btn:hover {
           transform: translateY(-3px);
-          box-shadow: 0 22px 42px rgba(251,191,36,0.32);
-          background: #F5A623;
+          box-shadow: 0 22px 42px rgba(5,28,18,0.18);
+          background: #072F1F;
         }
 
         .auth-btn:disabled {
-          opacity: 1;
+          opacity: 0.5;
           cursor: not-allowed;
           transform: none;
           color: #FFFFFF;
         }
 
         .auth-link {
-          color: #FFFFFF;
+          color: #051C12;
           background: none;
           border: none;
           font-size: 14px;
@@ -433,7 +437,7 @@ const AuthPage = () => {
         }
 
         .auth-link:hover {
-          color: #333333;
+          color: #B4F105;
         }
 
         .error-message { 
@@ -458,8 +462,8 @@ const AuthPage = () => {
         }
 
         .auth-stat-card {
-          background: rgba(20,20,20,0.65);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
           border-radius: 16px;
           padding: 15px;
           text-align: center;
@@ -473,7 +477,7 @@ const AuthPage = () => {
         }
 
         .auth-stat-card span {
-          color: #94A3B8;
+          color: #879A91;
           font-size: 12px;
           font-weight: 800;
         }
@@ -519,9 +523,9 @@ const AuthPage = () => {
             <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
                 <div className="auth-brand-box">
-                  <Inventory2Icon fontSize="large" style={{ color: "#FFFFFF" }} />
+                  <img src="/logo.png" alt="IAssetCare" style={{ width: 40, height: 40, display: 'block', objectFit: 'contain' }} />
                 </div>
-                <h1 style={{ fontSize: "24px", fontWeight: "900", letterSpacing: "-0.5px", margin: 0 }}>AssetCare Pro</h1>
+                <h1 style={{ fontSize: "24px", fontWeight: "900", letterSpacing: "-0.5px", margin: 0 }}>IAssetCare</h1>
               </div>
               <h2 style={{ fontSize: "38px", fontWeight: "950", lineHeight: "1.15", marginBottom: "16px", animation: "fadeInUp 0.5s ease", letterSpacing: "-1.2px" }}>
                 {pageContent[role].leftTitle}
@@ -566,14 +570,14 @@ const AuthPage = () => {
                 style={{
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "14px 18px", marginBottom: "24px",
-                  background: "rgba(251,191,36,0.10)", border: "1.5px solid rgba(251,191,36,0.35)",
+                  background: "rgba(5,28,18,0.04)", border: "1.5px solid rgba(5,28,18,0.12)",
                   borderRadius: "14px", cursor: "pointer", transition: "all 0.2s ease",
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = "rgba(251,191,36,0.18)"}
-                onMouseLeave={e => e.currentTarget.style.background = "rgba(251,191,36,0.10)"}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(5,28,18,0.08)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(5,28,18,0.04)"}
               >
                 <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-muted)" }}>New company?</span>
-                <span style={{ fontSize: "14px", fontWeight: 900, color: "#FBBF24" }}>Get Started Free →</span>
+                <span style={{ fontSize: "14px", fontWeight: 900, color: "#051C12" }}>Get Started →</span>
               </button>
             )}
 
@@ -610,9 +614,9 @@ const AuthPage = () => {
                     </div>
                   </>
                 ) : (
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px", padding: "13px 16px", background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.28)", borderRadius: "14px" }}>
-                    <AdminPanelSettingsRoundedIcon style={{ color: "#FBBF24", fontSize: 20 }} />
-                    <span style={{ color: "#FBBF24", fontWeight: 800, fontSize: "14px", flex: 1 }}>Admin Access</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "24px", padding: "13px 16px", background: "rgba(5,28,18,0.04)", border: "1px solid rgba(5,28,18,0.12)", borderRadius: "14px" }}>
+                    <AdminPanelSettingsRoundedIcon style={{ color: "#051C12", fontSize: 20 }} />
+                    <span style={{ color: "#051C12", fontWeight: 800, fontSize: "14px", flex: 1 }}>Admin Access</span>
                     <button
                       type="button"
                       className="auth-link"

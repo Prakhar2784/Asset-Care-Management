@@ -10,14 +10,11 @@ export const useAppTheme = () => useContext(ThemeContext);
 
 const ThemeProviderInner = ({ children }) => {
   const { currentUser } = useAuth();
-  const storageKey = currentUser?._id ? `theme_${currentUser._id}` : 'theme_guest';
-
-  const [mode, setMode] = useState(() => localStorage.getItem(storageKey) || 'dark');
   const [branding, setBranding] = useState({
-    name: 'AssetCare',
+    name: 'IAssetCare',
     logoUrl: null,
-    primaryColor: '#111827',
-    secondaryColor: '#111827'
+    primaryColor: '#051C12',
+    secondaryColor: '#B4F105'
   });
   const [brandingLoading, setBrandingLoading] = useState(true);
 
@@ -34,8 +31,7 @@ const ThemeProviderInner = ({ children }) => {
 
   useEffect(() => {
     if (!currentUser) {
-      // Logged out — reset to the generic default instead of keeping a stale tenant's branding
-      setBranding({ name: 'AssetCare', logoUrl: null, primaryColor: '#111827', secondaryColor: '#111827' });
+      setBranding({ name: 'IAssetCare', logoUrl: null, primaryColor: '#051C12', secondaryColor: '#B4F105' });
       setBrandingLoading(false);
       return;
     }
@@ -44,63 +40,50 @@ const ThemeProviderInner = ({ children }) => {
     return () => window.removeEventListener('tenant-branding-changed', fetchBranding);
   }, [currentUser?.tenantId]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(storageKey) || 'dark';
-    setMode(saved);
-  }, [storageKey]);
-
+  // Mode is strictly locked to light for Spark Admin theme
+  const mode = 'light';
   const toggleMode = () => {
-    const next = mode === 'light' ? 'dark' : 'light';
-    setMode(next);
-    localStorage.setItem(storageKey, next);
+    // No-op since dark mode is removed
   };
-
-  const isDark = mode === 'dark';
+  const isDark = false;
 
   const theme = useMemo(() => createTheme({
     palette: {
-      mode,
-      ...(isDark ? {
-        primary: { main: '#FBBF24', contrastText: '#111827' },
-        secondary: { main: '#9CA3AF' },
-        background: { default: '#000000', paper: '#111827' },
-        text: { primary: '#FFFFFF', secondary: '#9CA3AF' },
-        divider: 'rgba(255,255,255,0.12)',
-        action: { hover: 'rgba(255,255,255,0.05)', selected: 'rgba(251,191,36,0.12)' },
-      } : {
-        primary: { main: '#FBBF24', contrastText: '#111827' },
-        secondary: { main: '#111827' },
-        background: { default: '#F7F8FA', paper: '#FFFFFF' },
-        text: { primary: '#111827', secondary: '#6B7280' },
-        divider: '#E5E7EB',
-        action: { hover: 'rgba(17,24,39,0.04)', selected: 'rgba(251,191,36,0.12)' },
-      }),
+      mode: 'light',
+      primary: { main: '#051C12', contrastText: '#FFFFFF' },
+      secondary: { main: '#B4F105', contrastText: '#051C12' },
+      background: { default: '#F4F6F5', paper: '#FFFFFF' },
+      text: { primary: '#0B130F', secondary: '#6C7E75' },
+      divider: '#E9EFEF',
+      action: { hover: 'rgba(5, 28, 18, 0.04)', selected: 'rgba(180, 241, 5, 0.12)' },
     },
-    shape: { borderRadius: 14 },
+    shape: { borderRadius: 16 },
     typography: {
-      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+      fontFamily: '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
       fontWeightBold: 700,
     },
     components: {
       MuiCssBaseline: {
         styleOverrides: {
+          '@import': "url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap')",
           body: {
-            background: isDark ? '#000000' : '#F7F8FA',
+            background: '#F4F6F5',
+            color: '#0B130F',
             minHeight: '100vh',
+            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
           },
-          // Themed scrollbar (WebKit + Firefox) instead of the default browser bar
           '*': {
             scrollbarWidth: 'thin',
-            scrollbarColor: isDark ? 'rgba(255,255,255,0.25) transparent' : 'rgba(17,24,39,0.18) transparent',
+            scrollbarColor: 'rgba(5, 28, 18, 0.2) transparent',
           },
           '*::-webkit-scrollbar': { width: 8, height: 8 },
           '*::-webkit-scrollbar-track': { background: 'transparent' },
           '*::-webkit-scrollbar-thumb': {
-            background: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(17,24,39,0.18)',
+            background: 'rgba(5, 28, 18, 0.15)',
             borderRadius: 8,
           },
           '*::-webkit-scrollbar-thumb:hover': {
-            background: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(17,24,39,0.3)',
+            background: 'rgba(5, 28, 18, 0.3)',
           },
         }
       },
@@ -108,44 +91,38 @@ const ThemeProviderInner = ({ children }) => {
         styleOverrides: {
           root: {
             backgroundImage: 'none',
-            ...(isDark ? {
-              background: '#111827',
-              border: '1px solid rgba(255,255,255,0.1)',
-              boxShadow: 'none',
-            } : {
-              background: '#FFFFFF',
-              border: '1px solid #EEF0F3',
-              boxShadow: '0 1px 3px rgba(17,24,39,0.05)',
-            })
+            background: '#FFFFFF',
+            border: '1.5px solid #E9EFEF',
+            boxShadow: '0 10px 30px rgba(11, 19, 15, 0.03)',
+            borderRadius: 16,
           }
         }
       },
       MuiAppBar: { styleOverrides: { root: { backgroundImage: 'none' } } },
       MuiButton: {
         styleOverrides: {
-          root: { textTransform: 'none', fontWeight: 700, borderRadius: 12 },
+          root: { textTransform: 'none', fontWeight: 800, borderRadius: 12 },
           containedPrimary: {
-            background: '#FBBF24',
-            color: '#111827',
+            background: '#051C12',
+            color: '#FFFFFF',
             boxShadow: 'none',
             '&:hover': {
-              background: '#F5A623',
+              background: '#072F1F',
+              boxShadow: 'none',
+            },
+          },
+          containedSecondary: {
+            background: '#B4F105',
+            color: '#051C12',
+            boxShadow: 'none',
+            '&:hover': {
+              background: '#c1f824',
               boxShadow: 'none',
             },
           },
         }
       },
       MuiChip: { styleOverrides: { root: { fontWeight: 700 } } },
-      // Force every Select/TextField-select menu to always open directly
-      // below its field. Without this, MUI's default behavior tries to
-      // align the currently-selected item with the field instead, which can
-      // push the menu upward past the viewport top (overlapping the navbar)
-      // once a later option in the list is selected.
-      // Capping the menu's height (with internal scroll) is just as
-      // important: MUI's Popover still repositions the whole panel upward
-      // whenever it doesn't fit in the remaining space below the field, so a
-      // tall, uncapped list (e.g. 8 department options) reliably triggered
-      // that upward jump on any field in the lower half of the page.
       MuiMenu: {
         defaultProps: {
           variant: 'menu',
@@ -157,7 +134,6 @@ const ThemeProviderInner = ({ children }) => {
           },
         },
       },
-
       MuiSelect: {
         defaultProps: {
           MenuProps: {
@@ -171,15 +147,14 @@ const ThemeProviderInner = ({ children }) => {
           },
         },
       },
-
       MuiTextField: {
         styleOverrides: {
           root: {
             '& .MuiOutlinedInput-root': {
               borderRadius: 12,
-              '& fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.15)' : '#E5E7EB' },
-              '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.3)' : '#D1D5DB' },
-              '&.Mui-focused fieldset': { borderColor: '#FBBF24' },
+              '& fieldset': { borderColor: '#E5E7EB' },
+              '&:hover fieldset': { borderColor: '#D1D5DB' },
+              '&.Mui-focused fieldset': { borderColor: '#051C12' },
             },
           }
         }
@@ -188,10 +163,10 @@ const ThemeProviderInner = ({ children }) => {
         styleOverrides: {
           root: {
             '& .MuiTableCell-root': {
-              background: isDark ? '#111827' : '#F9FAFB',
-              borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
-              color: isDark ? '#9CA3AF' : '#6B7280',
-              fontWeight: 700,
+              background: '#051C12',
+              borderBottom: '1px solid #E9EFEF',
+              color: '#FFFFFF',
+              fontWeight: 800,
               fontSize: 11,
               textTransform: 'uppercase',
               letterSpacing: '0.6px',
@@ -205,12 +180,13 @@ const ThemeProviderInner = ({ children }) => {
             '& .MuiTableRow-root': {
               transition: 'background 0.15s ease',
               '&:hover': {
-                background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(17,24,39,0.02)',
+                background: 'rgba(5, 28, 18, 0.02)',
               },
               '&:last-child td, &:last-child th': { border: 0 },
             },
             '& .MuiTableCell-root': {
-              borderBottom: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #F1F2F4',
+              borderBottom: '1px solid #F1F2F4',
+              color: '#0B130F',
             }
           }
         }
@@ -219,9 +195,9 @@ const ThemeProviderInner = ({ children }) => {
         styleOverrides: {
           root: {
             borderRadius: '16px',
-            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #EEF0F3',
+            border: '1.5px solid #E9EFEF',
             overflow: 'hidden',
-            background: isDark ? '#111827' : '#FFFFFF',
+            background: '#FFFFFF',
             boxShadow: 'none',
           }
         }
@@ -229,20 +205,20 @@ const ThemeProviderInner = ({ children }) => {
       MuiTabs: {
         styleOverrides: {
           indicator: {
-            background: '#FBBF24',
-            height: 2,
-            borderRadius: 2,
+            background: '#051C12',
+            height: 3,
+            borderRadius: 3,
           }
         }
       },
       MuiTab: {
         styleOverrides: {
           root: {
-            fontWeight: 700,
+            fontWeight: 800,
             textTransform: 'none',
             fontSize: 14,
             '&.Mui-selected': {
-              color: isDark ? '#FBBF24' : '#111827',
+              color: '#051C12',
             }
           }
         }
@@ -250,21 +226,21 @@ const ThemeProviderInner = ({ children }) => {
       MuiDivider: {
         styleOverrides: {
           root: {
-            borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+            borderColor: '#E9EFEF',
           }
         }
       },
       MuiLinearProgress: {
         styleOverrides: {
           root: {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E5E7EB',
+            backgroundColor: '#E5E7EB',
             borderRadius: 4,
-            '& .MuiLinearProgress-bar': { background: '#FBBF24', borderRadius: 4 }
+            '& .MuiLinearProgress-bar': { background: '#051C12', borderRadius: 4 }
           }
         }
       },
     },
-  }), [mode, branding]);
+  }), [branding]);
 
   return (
     <ThemeContext.Provider value={{ mode, toggleMode, isDark, branding, brandingLoading }}>

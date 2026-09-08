@@ -62,9 +62,47 @@ const protect = async (req, res, next) => {
 
       setTenantId(tenantId, async () => {
         req.tenantId = tenantId;
-        req.user = await User.findById(decoded.id).select('-password');
+        let user = null;
+        try {
+          // 1. Check control plane (main DB)
+          user = await mongoose.connection.model('User').findById(decoded.id).setOptions({ bypassTenantFilter: true }).select('-password');
+        } catch {}
+
+        // 2. Check tenant isolated DB if not found in control plane
+        if (!user && tenantId && tenantId !== 'default') {
+          try {
+            const { getTenantConnection } = require('../config/tenantDb');
+            const tenantConn = getTenantConnection(tenantId);
+            user = await tenantConn.model('User').findById(decoded.id).setOptions({ bypassTenantFilter: true }).select('-password');
+          } catch {}
+        }
+
+        req.user = user;
         if (!req.user) {
           return res.status(401).json({ message: 'Not authorized, user not found' });
+        }
+
+        // --- Tenant Activation & License Expiry Check ---
+        if (req.user.role !== 'super_admin' && tenantId !== 'default') {
+          const TenantModel = mongoose.model('Tenant');
+          const tenant = await TenantModel.findOne({ slug: tenantId }).setOptions({ bypassTenantFilter: true });
+          if (tenant) {
+            if (tenant.isActive === false) {
+              return res.status(403).json({
+                message: 'Company account is deactivated. Please contact the platform administrator.',
+                code: 'COMPANY_DEACTIVATED'
+              });
+            }
+            if (tenant.planExpiry) {
+              const now = new Date();
+              if (now > new Date(tenant.planExpiry)) {
+                return res.status(403).json({
+                  message: 'Your license has expired. Please renew your subscription to continue using IAssetCare.',
+                  code: 'LICENSE_EXPIRED'
+                });
+              }
+            }
+          }
         }
         next();
       });
@@ -94,7 +132,7 @@ const authorize = (...roles) => {
 
 // ─── Custom permission check (works for any role including employee) ───────────
 // Usage: requirePermission('Register Assets')
-// Usage: requirePermission('View All Assets', 'Register Assets')  ← OR logic
+// Usage: requirePermission('View All Assets', 'Register Assets')  â† OR logic
 const requirePermission = (...features) => {
   return (req, res, next) => {
     const userRole = req.user.role;

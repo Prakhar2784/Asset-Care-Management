@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import api from "../../api/axios";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
@@ -52,7 +52,7 @@ message: form.message.value,
   return (
     <>
       <style>{`
-        .contact-page { min-height: 100vh; background: #0B0D12; }
+        .contact-page { min-height: 100vh; background: #051C12; }
         .contact-container { max-width: 1400px; margin: 0 auto; }
         .contact-hero { padding: 140px 24px 44px; }
 
@@ -63,21 +63,21 @@ message: form.message.value,
         }
 
         .contact-highlight-card {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 18px; padding: 18px;
           display: flex; align-items: center; gap: 14px;
-          box-shadow: 0 4px 16px rgba(17,17,17,0.05);
+          box-shadow: 0 4px 16px rgba(5,28,18,0.05);
         }
 
         .contact-highlight-icon {
           width: 44px; height: 44px; border-radius: 13px;
           display: grid; place-items: center;
-          color: #FFFFFF; background: #111827; flex-shrink: 0;
+          color: #B4F105; background: #051C12; flex-shrink: 0;
         }
 
         .contact-highlight-title { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 3px; }
-        .contact-highlight-text { font-size: 12.5px; font-weight: 600; color: #94A3B8; }
+        .contact-highlight-text { font-size: 12.5px; font-weight: 600; color: #879A91; }
 
         .contact-section { background: transparent; padding: 16px 24px 100px; }
 
@@ -88,41 +88,41 @@ message: form.message.value,
         }
 
         .contact-form-wrapper {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 28px; padding: 10px;
-          box-shadow: 0 8px 32px rgba(17,17,17,0.07);
+          box-shadow: 0 8px 32px rgba(5,28,18,0.07);
         }
 
         .contact-form {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 22px; padding: 38px;
           display: flex; flex-direction: column; gap: 22px;
         }
 
         .form-title h3 { margin: 0 0 8px; color: #FFFFFF; font-size: 26px; font-weight: 950; letter-spacing: -0.8px; }
-        .form-title p { margin: 0; color: #9CA3AF; font-size: 14.5px; font-weight: 500; line-height: 1.6; }
+        .form-title p { margin: 0; color: #879A91; font-size: 14.5px; font-weight: 500; line-height: 1.6; }
 
         .input-group { display: flex; flex-direction: column; gap: 7px; }
 
         .input-label { font-size: 13.5px; font-weight: 900; color: #FFFFFF; }
-        .required-mark { color: #DC2626; margin-left: 3px; }
+        .required-mark { color: #EF4444; margin-left: 3px; }
 
         .contact-input {
           width: 100%; padding: 14px 16px;
           font-size: 14.5px; font-weight: 500;
-          background-color: rgba(20,20,20,0.65);
-          border: 1.5px solid rgba(17,24,39,0.2);
+          background-color: rgba(7,47,31,0.65);
+          border: 1.5px solid rgba(5,28,18,0.2);
           border-radius: 14px; color: #FFFFFF;
           outline: none; transition: all 0.25s ease;
-          font-family: 'Inter', sans-serif;
+          font-family: 'Plus Jakarta Sans', sans-serif;
           box-sizing: border-box; appearance: none; -webkit-appearance: none;
         }
 
-        .contact-input::placeholder { color: #A0A09A; font-weight: 500; }
-        .contact-input:hover { border-color: rgba(17,24,39,0.24); background: rgba(20,20,20,0.7); }
-        .contact-input:focus { background-color: rgba(25,25,25,0.85); border-color: #FFFFFF; box-shadow: 0 0 0 3px rgba(17,24,39,0.15); }
+        .contact-input::placeholder { color: #879A91; font-weight: 500; }
+        .contact-input:hover { border-color: rgba(5,28,18,0.24); background: rgba(7,47,31,0.7); }
+        .contact-input:focus { background-color: rgba(7,47,31,0.85); border-color: #B4F105; box-shadow: 0 0 0 3px rgba(180,241,5,0.15); }
 
         select.contact-input {
           background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFFFFF' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
@@ -131,31 +131,32 @@ message: form.message.value,
         }
 
         .contact-btn {
-          background: #FBBF24; color: #111827;
+          background: #B4F105; color: #051C12;
           padding: 16px; border-radius: 14px;
           font-weight: 900; font-size: 15px;
           border: none; cursor: pointer;
           transition: all 0.25s ease; margin-top: 4px;
           display: flex; align-items: center; justify-content: center; gap: 8px;
-          box-shadow: 0 4px 16px rgba(17,24,39,0.4);
+          box-shadow: 0 4px 16px rgba(5,28,18,0.4);
         }
 
-        .contact-btn:hover:not(:disabled) { background: #F5A623; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(251,191,36,0.4); }
+        .contact-btn:hover:not(:disabled) { background: #c1f824; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(180,241,5,0.4); }
         .contact-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         .contact-btn.success { background: #16A34A; color: #FFFFFF; }
 
         .contact-info { display: flex; flex-direction: column; gap: 18px; }
 
         .contact-side-card {
-          background: #111827; border-radius: 28px; padding: 32px;
+          background: #072F1F; border-radius: 28px; padding: 32px;
           color: #FFFFFF; position: relative; overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.05);
         }
 
         .contact-side-card::before {
           content: "";
           position: absolute; top: -70px; right: -70px;
           width: 200px; height: 200px;
-          background: radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%);
+          background: radial-gradient(circle, rgba(180,241,5,0.14), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -283,7 +284,7 @@ message: form.message.value,
 
                 <div className="input-group">
                   <label className="input-label">Your Message<span className="required-mark">*</span></label>
-                  <textarea name="message" placeholder="Tell us about your organisation, the assets you manage, and what you'd like to achieve with AssetCare Pro..." className="contact-input" style={{ minHeight: 130, resize: "vertical" }} required />
+                  <textarea name="message" placeholder="Tell us about your organisation, the assets you manage, and what you'd like to achieve with IAssetCare..." className="contact-input" style={{ minHeight: 130, resize: "vertical" }} required />
                 </div>
 
                 {submitError && (
@@ -303,7 +304,7 @@ message: form.message.value,
 
             <motion.div variants={stagger} className="contact-info">
               <motion.div variants={fadeUp} className="contact-side-card">
-                <h3>AssetCare Pro</h3>
+                <h3>IAssetCare</h3>
                 <p>Built for organizations that need proper asset tracking, warranty visibility, complaint management and approval-based service control.</p>
                 <div className="side-stats">
                   <div className="side-stat">

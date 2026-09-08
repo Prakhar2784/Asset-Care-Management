@@ -53,7 +53,7 @@ const EmployeePortal = () => {
             <Button
               variant="contained" startIcon={<AddRounded />}
               onClick={() => navigate("/tickets")}
-              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "#F5A623" } }}
+              sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 900, px: 3, py: 1.2, borderRadius: "10px", "&:hover": { background: "#072F1F" } }}
             >
               Report an Issue
             </Button>
@@ -135,7 +135,7 @@ const EmployeePortal = () => {
                     const expired = daysLeft < 0;
                     const soon = !expired && daysLeft <= 90;
                     return (
-                      <Box sx={{ mt: 1.5, display: 'inline-flex', alignItems: 'center', px: 1.2, py: 0.4, borderRadius: 1, bgcolor: expired ? 'rgba(220,38,38,0.13)' : soon ? 'rgba(217,119,6,0.13)' : 'rgba(22,163,74,0.13)', color: expired ? '#F87171' : soon ? '#FBBF24' : '#4ADE80' }}>
+                      <Box sx={{ mt: 1.5, display: 'inline-flex', alignItems: 'center', px: 1.2, py: 0.4, borderRadius: 1, bgcolor: expired ? 'rgba(220,38,38,0.13)' : soon ? 'rgba(180,241,5,0.18)' : 'rgba(22,163,74,0.13)', color: expired ? '#F87171' : soon ? '#051C12' : '#4ADE80' }}>
                         <Typography fontSize={12} fontWeight={700}>
                           {expired ? 'Warranty Expired' : soon ? `Warranty: ${daysLeft}d left` : 'Warranty Valid'}
                         </Typography>

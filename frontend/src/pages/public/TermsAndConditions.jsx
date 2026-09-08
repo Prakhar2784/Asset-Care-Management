@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import GavelRoundedIcon from "@mui/icons-material/GavelRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
@@ -19,14 +19,14 @@ const SECTIONS = [
   {
     id: "acceptance",
     title: "1. Acceptance of Terms",
-    content: `By accessing or using AssetCare Pro ("the Platform"), you confirm that you are at least 18 years of age, have the authority to bind the organisation you represent, and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not access or use the Platform.
+    content: `By accessing or using IAssetCare ("the Platform"), you confirm that you are at least 18 years of age, have the authority to bind the organisation you represent, and agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you must not access or use the Platform.
 
-These Terms apply to all users of the Platform, including administrators, employees, IT support staff, and any other authorised personnel of your organisation.`,
+These Terms apply to all users of the Platform, including administrators, employees, and any other authorised personnel of your organisation.`,
   },
   {
     id: "platform",
     title: "2. Use of the Platform",
-    content: `AssetCare Pro is a professional enterprise asset management system designed for tracking hardware assets, managing warranties, raising service tickets, approving device requests, and maintaining vendor records.
+    content: `IAssetCare is a professional enterprise asset management system designed for tracking hardware assets, managing warranties, raising service requests, approving device requests, and maintaining vendor records.
 
 You agree to use the Platform only for lawful purposes and in accordance with these Terms. You must not:
 
@@ -43,16 +43,16 @@ You agree to use the Platform only for lawful purposes and in accordance with th
 
 Administrator (Admin): Has full access to manage assets, approve requests, configure departments, manage vendors, and generate reports. Admins are responsible for all actions performed under their credentials.
 
-Employee: Has access to view assigned assets, raise breakdown tickets, and submit device requests. Employees may not access other users' data or administrative functions.
+Employee: Has access to view assigned assets, raise service requests, and submit device requests. Employees may not access other users' data or administrative functions.
 
-You are responsible for maintaining the confidentiality of your login credentials. You must notify your system administrator immediately if you become aware of any unauthorised use of your account. AssetCare Pro will not be liable for any loss resulting from unauthorised use of your credentials.`,
+You are responsible for maintaining the confidentiality of your login credentials. You must notify your system administrator immediately if you become aware of any unauthorised use of your account. IAssetCare will not be liable for any loss resulting from unauthorised use of your credentials.`,
   },
   {
     id: "data",
     title: "4. Data Ownership & Privacy",
-    content: `All asset data, employee records, ticket histories, vendor information, and configuration settings entered into the Platform remain the sole property of your organisation.
+    content: `All asset data, employee records, service request histories, vendor information, and configuration settings entered into the Platform remain the sole property of your organisation.
 
-AssetCare Pro acts as a data processor on your behalf. We do not sell, rent, or share your organisational data with third parties, except as required by law or to provide the services you have requested.
+IAssetCare acts as a data processor on your behalf. We do not sell, rent, or share your organisational data with third parties, except as required by law or to provide the services you have requested.
 
 We implement industry-standard security measures including encrypted data transmission (HTTPS), hashed password storage (bcrypt), JWT-based session management, and role-based access controls to protect your data.
 
@@ -61,11 +61,11 @@ You are responsible for ensuring that personal data entered into the Platform �
   {
     id: "ip",
     title: "5. Intellectual Property",
-    content: `The Platform, including its source code, design, architecture, user interface, documentation, and all associated intellectual property, is owned by AssetCare Systems and is protected by applicable intellectual property laws.
+    content: `The Platform, including its source code, design, architecture, user interface, documentation, and all associated intellectual property, is owned by IAssetCare and is protected by applicable intellectual property laws.
 
 You are granted a limited, non-exclusive, non-transferable licence to use the Platform solely for your internal business purposes. This licence does not grant you the right to copy, modify, distribute, sell, or lease any part of the Platform or its underlying software.
 
-The AssetCare Pro name, logo, and all associated trademarks and service marks are the property of AssetCare Systems. Nothing in these Terms grants you any right to use our trademarks without our prior written consent.`,
+The IAssetCare name, logo, and all associated trademarks and service marks are the property of IAssetCare. Nothing in these Terms grants you any right to use our trademarks without our prior written consent.`,
   },
   {
     id: "availability",
@@ -74,12 +74,12 @@ The AssetCare Pro name, logo, and all associated trademarks and service marks ar
 
 We reserve the right to suspend or withdraw access to the Platform, or any part of it, with or without notice for business or operational reasons, including maintenance, upgrades, security events, or technical failures.
 
-Scheduled maintenance windows will be communicated in advance where practicable. AssetCare Systems shall not be liable to you or any third party for any modification, suspension, or discontinuation of the Platform.`,
+Scheduled maintenance windows will be communicated in advance where practicable. IAssetCare shall not be liable to you or any third party for any modification, suspension, or discontinuation of the Platform.`,
   },
   {
     id: "disclaimer",
     title: "7. Disclaimer of Warranties",
-    content: `The Platform is provided on an "as is" and "as available" basis without any warranties of any kind, either express or implied. To the fullest extent permitted by law, AssetCare Systems disclaims all warranties, including but not limited to:
+    content: `The Platform is provided on an "as is" and "as available" basis without any warranties of any kind, either express or implied. To the fullest extent permitted by law, IAssetCare disclaims all warranties, including but not limited to:
 
 • Implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
 • Any warranty that the Platform will meet your specific requirements.
@@ -91,14 +91,14 @@ Some jurisdictions do not allow the exclusion of implied warranties, so the abov
   {
     id: "liability",
     title: "8. Limitation of Liability",
-    content: `To the maximum extent permitted by applicable law, AssetCare Systems and its directors, employees, partners, and agents shall not be liable for:
+    content: `To the maximum extent permitted by applicable law, IAssetCare and its directors, employees, partners, and agents shall not be liable for:
 
 • Any indirect, incidental, special, consequential, or punitive damages.
 • Any loss of profits, revenue, data, goodwill, or other intangible losses.
 • Any damages arising from unauthorised access to or alteration of your data.
 • Any damages arising from interruptions to, or cessation of, the Platform.
 
-In no event shall AssetCare Systems' total liability to you for all claims arising out of or relating to these Terms or your use of the Platform exceed the total amount paid by you to AssetCare Systems in the twelve (12) months preceding the claim, or INR 10,000, whichever is lesser.`,
+In no event shall IAssetCare's total liability to you for all claims arising out of or relating to these Terms or your use of the Platform exceed the total amount paid by you to IAssetCare in the twelve (12) months preceding the claim, or INR 10,000, whichever is lesser.`,
   },
   {
     id: "termination",
@@ -134,11 +134,11 @@ You agree to the exclusive jurisdiction of the courts located in Jaipur, Rajasth
     title: "12. Contact Us",
     content: `If you have any questions, concerns, or requests regarding these Terms and Conditions, please contact us:
 
-AssetCare Systems
+IAssetCare
 Tech Park, Block B, Jaipur, Rajasthan, India – 302022
 
-Email: legal@assetcarepro.com
-Support: support@assetcarepro.com
+Email: legal@iassetcare.com
+Support: support@iassetcare.com
 Phone: +91 800-456-7890
 
 Business Hours: Monday to Friday, 9:00 AM – 6:00 PM IST`,
@@ -154,11 +154,11 @@ const TermsAndConditions = () => {
           background:
             radial-gradient(circle at top left, rgba(17,24,39,0.06), transparent 38%),
             radial-gradient(circle at top right, rgba(17,17,17,0.03), transparent 38%),
-            #0B0D12;
+            #051C12;
         }
 
         .terms-hero {
-          background: #111827;
+          background: #072F1F;
           padding: 160px 24px 72px;
           position: relative;
           overflow: hidden;
@@ -334,8 +334,8 @@ const TermsAndConditions = () => {
         }
 
         .terms-highlight-card {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: #FFFFFF;
+          border: 1.5px solid #E9EFEF;
           border-radius: 22px;
           padding: 28px 24px;
           box-shadow: 0 8px 22px rgba(15,23,42,0.05);
@@ -348,8 +348,8 @@ const TermsAndConditions = () => {
           width: 48px;
           height: 48px;
           border-radius: 14px;
-          background: #111827;
-          color: #FFFFFF;
+          background: #051C12;
+          color: #B4F105;
           display: grid;
           place-items: center;
           flex-shrink: 0;
@@ -358,14 +358,14 @@ const TermsAndConditions = () => {
         .terms-hl-title {
           font-size: 15px;
           font-weight: 900;
-          color: #FFFFFF;
+          color: #0B130F;
           margin-bottom: 5px;
         }
 
         .terms-hl-text {
           font-size: 13px;
           font-weight: 600;
-          color: #94A3B8;
+          color: #6C7E75;
           line-height: 1.5;
         }
 
@@ -425,7 +425,7 @@ const TermsAndConditions = () => {
             </div>
             <h1>Terms &amp; Conditions</h1>
             <p>
-              Please read these Terms and Conditions carefully before using the AssetCare Pro platform. By accessing the system, you agree to be bound by these terms.
+              Please read these Terms and Conditions carefully before using the IAssetCare platform. By accessing the system, you agree to be bound by these terms.
             </p>
             <div className="terms-hero-meta">
               <span className="terms-meta-pill">
@@ -495,7 +495,7 @@ const TermsAndConditions = () => {
         <div className="terms-footer-note">
           <p>
             For questions about these Terms, please <Link to="/contact">contact our support team</Link>. You can also email us at{" "}
-            <a href="mailto:legal@assetcarepro.com">legal@assetcarepro.com</a>.
+            <a href="mailto:legal@iassetcare.com">legal@iassetcare.com</a>.
           </p>
         </div>
       </div>

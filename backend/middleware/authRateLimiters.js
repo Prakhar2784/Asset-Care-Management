@@ -12,11 +12,12 @@
  *   ... rateLimit({ store: new RedisStore({ sendCommand: ... }), ... })
  */
 const { rateLimit } = require('express-rate-limit');
+const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 
-// Login: max 10 requests per IP per minute
+// Login: max 10 requests per IP per minute (500 in dev)
 const loginLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 10,
+  limit: isDev ? 500 : 10,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many login attempts from this device. Please wait a minute and try again.' },
@@ -31,10 +32,10 @@ const forgotLimiter = rateLimit({
   message: { message: 'Too many password reset requests. Please wait 15 minutes and try again.' },
 });
 
-// Company/user registration: max 5 per IP per hour (abuse control)
+// Company/user registration: max 5 per IP per hour (abuse control in prod, relaxed in dev)
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 5,
+  limit: isDev ? 100 : 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many registration attempts. Please try again later.' },

@@ -35,7 +35,7 @@ router.post('/', protect, authorize('admin'), invoiceUpload, async (req, res) =>
 
     let fileUrl = null, fileName = null;
     if (req.file) {
-      fileUrl  = `/uploads/invoices/${req.file.filename}`;
+      fileUrl  = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : `/uploads/invoices/${req.file.filename}`;
       fileName = req.file.originalname;
     }
 
@@ -67,7 +67,7 @@ router.put('/:id', protect, authorize('admin'), invoiceUpload, async (req, res) 
     if (update.assets) update.assets = JSON.parse(update.assets);
     if (update.amount) update.amount = Number(update.amount);
     if (req.file) {
-      update.fileUrl  = `/uploads/invoices/${req.file.filename}`;
+      update.fileUrl  = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : `/uploads/invoices/${req.file.filename}`;
       update.fileName = req.file.originalname;
     }
     const invoice = await Invoice.findByIdAndUpdate(req.params.id, update, { new: true })

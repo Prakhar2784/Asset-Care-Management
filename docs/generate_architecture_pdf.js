@@ -1,0 +1,1117 @@
+const fs = require('fs');
+const path = require('path');
+const puppeteer = require('C:/Users/kedia/.gemini/antigravity/brain/980b54e9-a437-476f-a393-bfb2357924f7/scratch/e2e/node_modules/puppeteer');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AssetCare — Complete Project Architecture & System Documentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  @page {
+    size: A4 portrait;
+    margin: 18mm 14mm 18mm 14mm;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    font-size: 9.5pt;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cover Page */
+  .cover-page {
+    page-break-after: always;
+    height: 100%;
+    min-height: 245mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 15mm 5mm 5mm 5mm;
+  }
+  .cover-header {
+    border-left: 6px solid #059669;
+    padding-left: 20px;
+  }
+  .cover-badge {
+    display: inline-block;
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+    font-weight: 700;
+    font-size: 8.5pt;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 15px;
+  }
+  .cover-title {
+    font-size: 26pt;
+    font-weight: 900;
+    color: #064e3b;
+    line-height: 1.15;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.02em;
+  }
+  .cover-subtitle {
+    font-size: 13pt;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 15px 0;
+    line-height: 1.35;
+  }
+  .cover-desc {
+    font-size: 10pt;
+    color: #64748b;
+    max-width: 540px;
+    line-height: 1.6;
+  }
+  .cover-meta-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-top: 30px;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    font-size: 9pt;
+  }
+  .meta-item strong {
+    display: block;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 2px;
+  }
+  .meta-item span {
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 15px;
+    font-size: 8pt;
+    color: #94a3b8;
+  }
+
+  /* Headings */
+  h1 {
+    font-size: 15pt;
+    font-weight: 800;
+    color: #064e3b;
+    border-bottom: 2px solid #10b981;
+    padding-bottom: 4px;
+    margin-top: 20pt;
+    margin-bottom: 10pt;
+    page-break-after: avoid;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 14pt;
+    margin-bottom: 6pt;
+    page-break-after: avoid;
+    border-left: 3px solid #059669;
+    padding-left: 8px;
+  }
+  h3 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #334155;
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+    page-break-after: avoid;
+  }
+
+  p {
+    margin-top: 0;
+    margin-bottom: 7pt;
+    text-align: justify;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8pt 0 12pt 0;
+    font-size: 8.5pt;
+    page-break-inside: avoid;
+  }
+  th {
+    background: #064e3b;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 6px 8px;
+    border: 1px solid #064e3b;
+    font-size: 8.5pt;
+    letter-spacing: 0.02em;
+  }
+  td {
+    padding: 5px 8px;
+    border: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+
+  /* Callouts */
+  .callout {
+    background: #f0fdf4;
+    border-left: 4px solid #059669;
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    margin: 8pt 0;
+    font-size: 8.8pt;
+    page-break-inside: avoid;
+  }
+  .callout-info {
+    background: #f8fafc;
+    border-left: 4px solid #3b82f6;
+  }
+  .callout-warn {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+  }
+  .callout-title {
+    font-weight: 700;
+    color: #064e3b;
+    margin-bottom: 2px;
+    font-size: 9pt;
+  }
+
+  /* Diagrams */
+  .diagram-container {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 10pt 0;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+  .diagram-caption {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    font-size: 7.5pt;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .badge-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+  .badge-danger  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge-info    { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+
+  /* Code / Monospace */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    color: #0f172a;
+  }
+
+  /* Table of Contents */
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px 20px;
+    font-size: 8.2pt;
+  }
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dotted #cbd5e1;
+    padding-bottom: 2px;
+  }
+  .toc-num {
+    font-weight: 700;
+    color: #059669;
+    margin-right: 5px;
+  }
+  .toc-title {
+    color: #1e293b;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+</style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<div class="cover-page">
+  <div>
+    <span class="cover-badge">Enterprise System Documentation</span>
+    <div class="cover-header">
+      <h1 class="cover-title">ASSETCARE</h1>
+      <div class="cover-subtitle">IT Asset Management & Asset Care Lifecycle Management System</div>
+      <div class="cover-desc">
+        Comprehensive Technical Architecture, Multi-Tenant Data Flow, Commercial Subscription & Security Specification.
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-meta-box">
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Prepared For</strong>
+        <span>Executive Management & Technical Leadership</span>
+      </div>
+      <div class="meta-item">
+        <strong>Document Type</strong>
+        <span>System Architecture & Technical Documentation</span>
+      </div>
+      <div class="meta-item">
+        <strong>Current Build Version</strong>
+        <span>v1.0.0-PROD (Vite 8 / Node 22 / React 19)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Document Date</strong>
+        <span>September 2026</span>
+      </div>
+      <div class="meta-item">
+        <strong>Platform Architecture</strong>
+        <span>Multi-Tenant SaaS / Cloud & Standalone Windows Intranet</span>
+      </div>
+      <div class="meta-item">
+        <strong>Security & Compliance</strong>
+        <span>Isolated Multi-Tenancy, HMAC SHA256 Webhooks, RBAC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <span>AssetCare Engineering & Architecture Group</span>
+    <span>CONFIDENTIAL · INTERNAL USE ONLY</span>
+  </div>
+</div>
+
+<!-- Table of Contents -->
+<div class="page-break"></div>
+<h1>Table of Contents</h1>
+<div class="toc-grid">
+  <div class="toc-item"><span><span class="toc-num">1.</span> Executive Summary</span><span>3</span></div>
+  <div class="toc-item"><span><span class="toc-num">2.</span> Project Overview</span><span>4</span></div>
+  <div class="toc-item"><span><span class="toc-num">3.</span> Business Purpose & Workflow</span><span>4</span></div>
+  <div class="toc-item"><span><span class="toc-num">4.</span> High-Level System Architecture</span><span>5</span></div>
+  <div class="toc-item"><span><span class="toc-num">5.</span> Technology Stack & Versions</span><span>6</span></div>
+  <div class="toc-item"><span><span class="toc-num">6.</span> Project & Codebase Structure</span><span>7</span></div>
+  <div class="toc-item"><span><span class="toc-num">7.</span> Frontend Architecture & Routing</span><span>8</span></div>
+  <div class="toc-item"><span><span class="toc-num">8.</span> Backend Architecture & Pipeline</span><span>9</span></div>
+  <div class="toc-item"><span><span class="toc-num">9.</span> Database Architecture & Models</span><span>10</span></div>
+  <div class="toc-item"><span><span class="toc-num">10.</span> Multi-Tenant Isolation Model</span><span>11</span></div>
+  <div class="toc-item"><span><span class="toc-num">11.</span> User Roles & Permission Matrix</span><span>12</span></div>
+  <div class="toc-item"><span><span class="toc-num">12.</span> Authentication & Session Engine</span><span>13</span></div>
+  <div class="toc-item"><span><span class="toc-num">13.</span> Core AssetCare Modules</span><span>14</span></div>
+  <div class="toc-item"><span><span class="toc-num">14.</span> Subscription Plans & Pricing</span><span>16</span></div>
+  <div class="toc-item"><span><span class="toc-num">15.</span> Plan Entitlement Enforcement</span><span>16</span></div>
+  <div class="toc-item"><span><span class="toc-num">16.</span> 365-Day Subscription Lifecycle</span><span>17</span></div>
+  <div class="toc-item"><span><span class="toc-num">17.</span> Checkout Architecture</span><span>18</span></div>
+  <div class="toc-item"><span><span class="toc-num">18.</span> Upgrade, Renewal & Cancellation</span><span>18</span></div>
+  <div class="toc-item"><span><span class="toc-num">19.</span> Downgrade Policy Specification</span><span>19</span></div>
+  <div class="toc-item"><span><span class="toc-num">20.</span> Coupon & Discount Engine</span><span>19</span></div>
+  <div class="toc-item"><span><span class="toc-num">21.</span> GST & Billing Mathematics</span><span>20</span></div>
+  <div class="toc-item"><span><span class="toc-num">22.</span> Razorpay Gateway Architecture</span><span>21</span></div>
+  <div class="toc-item"><span><span class="toc-num">23.</span> Invoice Generation Pipeline</span><span>22</span></div>
+  <div class="toc-item"><span><span class="toc-num">24.</span> Super Admin Platform Console</span><span>23</span></div>
+  <div class="toc-item"><span><span class="toc-num">25.</span> Company Deactivation Protocol</span><span>24</span></div>
+  <div class="toc-item"><span><span class="toc-num">26.</span> API Architecture & Endpoints</span><span>25</span></div>
+  <div class="toc-item"><span><span class="toc-num">27.</span> Security & Defense Architecture</span><span>27</span></div>
+  <div class="toc-item"><span><span class="toc-num">28.</span> Complete Business Workflows</span><span>28</span></div>
+  <div class="toc-item"><span><span class="toc-num">29.</span> Build & Compilation Pipeline</span><span>29</span></div>
+  <div class="toc-item"><span><span class="toc-num">30.</span> Desktop Installer Architecture</span><span>30</span></div>
+  <div class="toc-item"><span><span class="toc-num">31.</span> Project Footprint & Top Files</span><span>31</span></div>
+  <div class="toc-item"><span><span class="toc-num">32.</span> Complete Dependency Inventory</span><span>32</span></div>
+  <div class="toc-item"><span><span class="toc-num">33.</span> Environment Variables Reference</span><span>33</span></div>
+  <div class="toc-item"><span><span class="toc-num">34.</span> Quality Assurance & Test History</span><span>34</span></div>
+  <div class="toc-item"><span><span class="toc-num">35.</span> Data Integrity & Segregation</span><span>35</span></div>
+  <div class="toc-item"><span><span class="toc-num">36.</span> Current Database Production State</span><span>35</span></div>
+  <div class="toc-item"><span><span class="toc-num">37.</span> Technical Limitations</span><span>36</span></div>
+  <div class="toc-item"><span><span class="toc-num">38.</span> Technical Debt Assessment</span><span>36</span></div>
+  <div class="toc-item"><span><span class="toc-num">39.</span> Risk Analysis Matrix</span><span>37</span></div>
+  <div class="toc-item"><span><span class="toc-num">40.</span> Overall System Status Matrix</span><span>38</span></div>
+  <div class="toc-item"><span><span class="toc-num">41.</span> Management Summary</span><span>39</span></div>
+  <div class="toc-item"><span><span class="toc-num">42.</span> Architectural Conclusion</span><span>40</span></div>
+  <div class="toc-item"><span><span class="toc-num">App.</span> Appendices A – E</span><span>41</span></div>
+</div>
+
+<div class="page-break"></div>
+<!-- Section 1 -->
+<h1>1. Executive Summary</h1>
+<p>
+  <strong>AssetCare</strong> is an enterprise-grade, multi-tenant IT Asset Management (ITAM) and Asset Care Lifecycle Management System. It is engineered to solve critical operational inefficiencies that growing companies and enterprises face when tracking physical hardware, assigning devices to personnel, handling equipment breakdowns, managing vendor service contracts (AMCs), tracking warranties, and maintaining statutory audit compliance.
+</p>
+<p>
+  The platform operates under a dual-delivery model: it functions as a highly scalable multi-tenant Cloud SaaS platform and can also be distributed as a standalone, zero-external-dependency Windows desktop/intranet application. Organizations subscribe to annual commercial tiers (<strong>Home User</strong>, <strong>MSME</strong>, or <strong>Large Scale</strong>), gain access to dedicated isolated workspaces, and onboard their IT teams, department heads, technicians, and employees.
+</p>
+<div class="callout">
+  <div class="callout-title">Key Business Capabilities Implemented</div>
+  <ul>
+    <li><strong>End-to-End Asset Lifecycle Tracking:</strong> Procurement, asset tagging (QR code), departmental allocation, custodian assignment, depreciation, and decommission.</li>
+    <li><strong>Integrated Maintenance & Helpdesk:</strong> SLA-governed ticketing, repair workflow escalation, external service center management, and cost tracking.</li>
+    <li><strong>Strict Multi-Tenant Data Enclosure:</strong> Complete logical and cryptographic isolation between tenant databases and collections.</li>
+    <li><strong>Automated Commercial Billing & Payments:</strong> Automated GST invoicing (CGST/SGST/IGST), coupon discount engine, Razorpay checkout integration with HMAC SHA256 webhook reconciliation, and 365-day annual license enforcement.</li>
+    <li><strong>Platform Super Admin Console:</strong> Centralized tenant monitoring, revenue analytics, company activation/deactivation controls, coupon creation, and 360° company data audit.</li>
+  </ul>
+</div>
+
+<!-- Section 2 -->
+<h1>2. Project Overview</h1>
+<table>
+  <tr><th>Attribute</th><th>Specification / Value</th></tr>
+  <tr><td><strong>Application Name</strong></td><td>AssetCare / IAssetCare (Enterprise ITAM)</td></tr>
+  <tr><td><strong>Business Model</strong></td><td>B2B SaaS Annual Subscription (365-Day Validity) + Enterprise On-Premises</td></tr>
+  <tr><td><strong>Target Audience</strong></td><td>IT Managers, System Administrators, HODs, Technicians, Corporate Employees</td></tr>
+  <tr><td><strong>Deployment Models</strong></td><td>1. Cloud SaaS (Multi-Tenant Web) · 2. Windows Standalone Intranet (Inno Setup / Executable)</td></tr>
+  <tr><td><strong>Monetization Engine</strong></td><td>Tiered Subscriptions (₹999 / ₹2,999 / ₹8,999 / year) via Razorpay Payment Gateway</td></tr>
+  <tr><td><strong>File Storage Engine</strong></td><td>Hybrid Cloudinary CDN (Direct HTTPS) with Automatic Local Disk Fallback</td></tr>
+  <tr><td><strong>Current Status</strong></td><td><span class="badge badge-success">Core Fully Implemented</span> · Production Audited & Hardened</td></tr>
+</table>
+
+<!-- Section 3 -->
+<h1>3. Business Purpose & Commercial Workflow</h1>
+<p>
+  The business workflow bridges organizational equipment tracking with commercial subscription governance:
+</p>
+<div class="diagram-container">
+  <svg viewBox="0 0 700 80" width="100%" height="80">
+    <rect x="10" y="20" width="110" height="40" rx="6" fill="#064e3b"/>
+    <text x="65" y="44" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">1. Registration</text>
+    <path d="M 125 40 L 145 40" stroke="#059669" stroke-width="2"/>
+    
+    <rect x="150" y="20" width="110" height="40" rx="6" fill="#047857"/>
+    <text x="205" y="44" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">2. Plan & Checkout</text>
+    <path d="M 265 40 L 285 40" stroke="#059669" stroke-width="2"/>
+    
+    <rect x="290" y="20" width="110" height="40" rx="6" fill="#0f766e"/>
+    <text x="345" y="44" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">3. Razorpay Pay</text>
+    <path d="M 405 40 L 425 40" stroke="#059669" stroke-width="2"/>
+
+    <rect x="430" y="20" width="110" height="40" rx="6" fill="#0e7490"/>
+    <text x="485" y="44" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">4. Active Workspace</text>
+    <path d="M 545 40 L 565 40" stroke="#059669" stroke-width="2"/>
+
+    <rect x="570" y="20" width="120" height="40" rx="6" fill="#1e293b"/>
+    <text x="630" y="44" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">5. IT Operations</text>
+  </svg>
+  <div class="diagram-caption">Figure 1: High-Level End-to-End Business Flow</div>
+</div>
+
+<div class="page-break"></div>
+<!-- Section 4 -->
+<h1>4. High-Level System Architecture</h1>
+<p>
+  AssetCare follows a resilient Multi-Tier Client-Server architecture with micro-service modularity in the backend and an asynchronous reactive frontend:
+</p>
+<div class="diagram-container">
+  <svg viewBox="0 0 700 240" width="100%" height="240">
+    <!-- Client Layer -->
+    <rect x="20" y="15" width="660" height="40" rx="6" fill="#f1f5f9" stroke="#cbd5e1"/>
+    <text x="350" y="38" fill="#0f172a" font-size="11" font-weight="bold" text-anchor="middle">CLIENT TIER: React 19 SPA / Vite 8 Build / Material-UI 7 / Axios Interceptors</text>
+    
+    <!-- API Gateway / Middleware -->
+    <rect x="20" y="70" width="660" height="45" rx="6" fill="#ecfdf5" stroke="#a7f3d0"/>
+    <text x="350" y="92" fill="#064e3b" font-size="10.5" font-weight="bold" text-anchor="middle">GATEWAY & SECURITY: JWT Verification · Tenant Context Resolver (X-Tenant-Id) · Rate Limiter · RBAC</text>
+    <text x="350" y="107" fill="#047857" font-size="8.5" text-anchor="middle">Deactivation Guard (HTTP 403) · Limit Enforcer (Asset / User Caps) · Multer / Cloudinary Pipeline</text>
+
+    <!-- Backend Controllers & Services -->
+    <rect x="20" y="130" width="660" height="45" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+    <text x="350" y="152" fill="#0f172a" font-size="10.5" font-weight="bold" text-anchor="middle">APPLICATION SERVICES & CONTROLLERS (Node.js 22 / Express 5)</text>
+    <text x="350" y="167" fill="#475569" font-size="8.5" text-anchor="middle">Billing Engine · Razorpay SDK · Warranty & SLA Schedulers · QR Generator · Nodemailer SMTP</text>
+
+    <!-- Data Tier -->
+    <rect x="20" y="190" width="200" height="40" rx="6" fill="#064e3b"/>
+    <text x="120" y="214" fill="#fff" font-size="9.5" font-weight="bold" text-anchor="middle">MongoDB Atlas (Master & Tenants)</text>
+
+    <rect x="250" y="190" width="200" height="40" rx="6" fill="#0284c7"/>
+    <text x="350" y="214" fill="#fff" font-size="9.5" font-weight="bold" text-anchor="middle">Cloudinary CDN (Media/Docs)</text>
+
+    <rect x="480" y="190" width="200" height="40" rx="6" fill="#0f172a"/>
+    <text x="580" y="214" fill="#fff" font-size="9.5" font-weight="bold" text-anchor="middle">Razorpay Payment Webhooks</text>
+  </svg>
+  <div class="diagram-caption">Figure 2: Multi-Tier Layered Technical Architecture</div>
+</div>
+
+<!-- Section 5 -->
+<h1>5. Technology Stack</h1>
+<table>
+  <tr><th>Architecture Layer</th><th>Technology / Library</th><th>Version</th><th>Purpose & Implementation Details</th></tr>
+  <tr><td><strong>Frontend Framework</strong></td><td>React</td><td>19.0.0</td><td>Single Page Application core, Hooks-based state management</td></tr>
+  <tr><td><strong>Build System</strong></td><td>Vite</td><td>8.0.16</td><td>ESM bundler, chunk-splitting, fast HMR, production dist builder</td></tr>
+  <tr><td><strong>UI Component System</strong></td><td>Material UI (MUI)</td><td>7.3.7</td><td>Enterprise design system, ThemeContext, responsive data tables</td></tr>
+  <tr><td><strong>Routing & Navigation</strong></td><td>React Router DOM</td><td>7.1.3</td><td>Client-side routing, protected auth guards, lazy loaded routes</td></tr>
+  <tr><td><strong>Charts & Dashboards</strong></td><td>Recharts</td><td>2.15.1</td><td>Asset distribution, maintenance costs, ticket volume analytics</td></tr>
+  <tr><td><strong>Client Document Export</strong></td><td>jsPDF + autoTable</td><td>4.2.1</td><td>Client-side PDF generation for invoices, data export, QR sheets</td></tr>
+  <tr><td><strong>HTTP API Client</strong></td><td>Axios</td><td>1.7.9</td><td>REST client with dynamic tenant header and auth interceptors</td></tr>
+  <tr><td><strong>Backend Runtime</strong></td><td>Node.js</td><td>22.16.0</td><td>Server-side JavaScript runtime engine</td></tr>
+  <tr><td><strong>Web Framework</strong></td><td>Express</td><td>5.2.1</td><td>RESTful API routing, JSON parser, middleware chaining</td></tr>
+  <tr><td><strong>Database & ODM</strong></td><td>MongoDB Atlas + Mongoose</td><td>9.7.1</td><td>NoSQL cloud persistence, multi-tenant connection pooling</td></tr>
+  <tr><td><strong>Authentication</strong></td><td>JWT + bcryptjs</td><td>9.0.3 / 3.0.3</td><td>Stateless JWT token signing, salted SHA-512/bcrypt hashing</td></tr>
+  <tr><td><strong>Payment Gateway</strong></td><td>Razorpay Node SDK</td><td>2.9.8</td><td>Order generation, checkout invocation, HMAC signature checks</td></tr>
+  <tr><td><strong>Cloud Media Storage</strong></td><td>Cloudinary SDK</td><td>2.x</td><td>Streamified memory upload to Cloudinary CDN with disk fallback</td></tr>
+  <tr><td><strong>Task Scheduling</strong></td><td>node-cron</td><td>4.5.0</td><td>Warranty expiration jobs, SLA breach monitors, audit purges</td></tr>
+  <tr><td><strong>Desktop Installer</strong></td><td>Inno Setup / pkg</td><td>6.x / 5.8.1</td><td>Windows x64 standalone executable bundler</td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 6 -->
+<h1>6. Project Structure</h1>
+<pre style="background:#0f172a; color:#f8fafc; padding:10px; border-radius:8px; font-size:7.5pt; line-height:1.35;">
+AssetCare/
+├── frontend/                     # React 19 Frontend Client (Vite 8)
+│   ├── public/                  # Static assets (favicons, brand logos, sample images)
+│   ├── src/
+│   │   ├── api/axios.js         # Configured Axios instance with tenant/auth interceptors
+│   │   ├── components/          # Shared UI (Navbar, Footer, Sidebar Layout, QR, Modal)
+│   │   ├── context/             # AuthContext (session state), ThemeContext (dark/light)
+│   │   ├── pages/
+│   │   │   ├── admin/           # AdminDashboard, Assets, Users, Approvals, Billing, Invoices
+│   │   │   ├── auth/            # AuthPage (Login), RegisterCompany, Password Reset
+│   │   │   ├── billing/         # Checkout, InvoiceView, Plan Upgrades
+│   │   │   ├── employee/        # EmployeePortal (My assigned assets, raise ticket)
+│   │   │   ├── public/          # Home, Features, Modules, Workflow, Contact, Terms, Policies
+│   │   │   ├── shared/          # Tickets, Settings, Notifications, ScanAsset
+│   │   │   └── superadmin/      # SuperAdminPanel (Company oversight, coupons, revenue)
+│   │   └── routes/              # ProtectedRoute, AdminRoute, SuperAdminRoute guards
+│   └── dist/                    # Compiled production assets (6.72 MB total footprint)
+├── backend/                      # Node.js 22 & Express 5 API Server
+│   ├── config/                  # DB connection pool, planDefaults.js, cloudinary.js
+│   ├── controllers/             # authController, assetController, billingController, etc.
+│   ├── jobs/                    # warrantyScheduler.js, slaEscalationJob.js
+│   ├── middleware/              # authMiddleware, tenantMiddleware, limitMiddleware, upload.js
+│   ├── models/                  # Tenant, User, Asset, Ticket, Invoice, Coupon, SubscriptionHistory
+│   ├── routes/                  # REST route declarations (/api/auth, /api/assets, /api/billing)
+│   ├── services/                # emailService.js (Nodemailer SMTP transactional mail)
+│   ├── uploads/                 # Local disk fallback directory (avatars, logos, invoices, docs)
+│   └── server.js                # Main server entry point, static host, error handler
+└── release-exe/                 # Compiled Windows setup installers (iassetcare-setup.exe)
+</pre>
+
+<!-- Section 7 -->
+<h1>7. Frontend Architecture</h1>
+<p>
+  The frontend uses React 19 with client-side routing and component-level code splitting (<code>React.lazy()</code>). This keeps initial bundle load under <strong>400 KB</strong> while loading heavy features (such as Excel import/export or PDF canvas rendering) strictly on-demand.
+</p>
+<table>
+  <tr><th>Page Component</th><th>Route</th><th>Access Level</th><th>Primary Business Function</th><th>Key APIs Consumed</th></tr>
+  <tr><td><strong>Home</strong></td><td><code>/</code></td><td>Public</td><td>Landing page, feature showcase, plan pricing table</td><td>Public static / assets</td></tr>
+  <tr><td><strong>AuthPage</strong></td><td><code>/login</code></td><td>Public</td><td>Multi-role login (Employee / Admin / Super Admin)</td><td><code>POST /api/auth/login</code></td></tr>
+  <tr><td><strong>RegisterCompany</strong></td><td><code>/register-company</code></td><td>Public</td><td>New tenant onboarding & auto-slug assignment</td><td><code>POST /api/auth/register-company</code></td></tr>
+  <tr><td><strong>Checkout</strong></td><td><code>/checkout</code></td><td>Auth (Admin)</td><td>Plan selection, coupon validation, Razorpay modal</td><td><code>POST /api/billing/create-order</code></td></tr>
+  <tr><td><strong>AdminDashboard</strong></td><td><code>/admin/dashboard</code></td><td>Admin / HOD</td><td>KPI counters, asset breakdown, maintenance trends</td><td><code>GET /api/dashboard/stats</code></td></tr>
+  <tr><td><strong>Assets</strong></td><td><code>/admin/assets</code></td><td>Admin / IT</td><td>Asset registry table, filter, CSV bulk import, trash</td><td><code>GET/POST /api/assets</code></td></tr>
+  <tr><td><strong>UserManagement</strong></td><td><code>/admin/users</code></td><td>Admin</td><td>Employee directory, invite token dispatch, offboard</td><td><code>GET/POST /api/users</code></td></tr>
+  <tr><td><strong>Tickets</strong></td><td><code>/tickets</code></td><td>All Roles</td><td>Helpdesk repair requests, status progression, notes</td><td><code>GET/POST /api/tickets</code></td></tr>
+  <tr><td><strong>SubscriptionBilling</strong></td><td><code>/admin/billing</code></td><td>Admin</td><td>365-day license tracker, invoice list, upgrade trigger</td><td><code>GET /api/billing/current</code></td></tr>
+  <tr><td><strong>SuperAdminPanel</strong></td><td><code>/super-admin/console</code></td><td>Super Admin</td><td>Platform dashboard, tenant freeze, coupon generator</td><td><code>GET /api/super-admin/*</code></td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 8 -->
+<h1>8. Backend Architecture & Pipeline</h1>
+<p>
+  Incoming HTTP requests pass through a strictly ordered pipeline designed for security, multi-tenancy, rate limiting, and business validation before hitting domain controllers:
+</p>
+<div class="diagram-container">
+  <svg viewBox="0 0 700 70" width="100%" height="70">
+    <rect x="5" y="15" width="90" height="40" rx="5" fill="#1e293b"/>
+    <text x="50" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">1. Express Ingress</text>
+
+    <rect x="105" y="15" width="95" height="40" rx="5" fill="#334155"/>
+    <text x="152" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">2. Rate Limiter</text>
+
+    <rect x="210" y="15" width="95" height="40" rx="5" fill="#047857"/>
+    <text x="257" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">3. Tenant Context</text>
+
+    <rect x="315" y="15" width="95" height="40" rx="5" fill="#059669"/>
+    <text x="362" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">4. JWT Auth Guard</text>
+
+    <rect x="420" y="15" width="95" height="40" rx="5" fill="#0d9488"/>
+    <text x="467" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">5. Plan Limits Guard</text>
+
+    <rect x="525" y="15" width="90" height="40" rx="5" fill="#0284c7"/>
+    <text x="570" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">6. Controller Logic</text>
+
+    <rect x="625" y="15" width="70" height="40" rx="5" fill="#0f172a"/>
+    <text x="660" y="38" fill="#fff" font-size="8" font-weight="bold" text-anchor="middle">7. MongoDB</text>
+  </svg>
+  <div class="diagram-caption">Figure 3: Request Processing Lifecycle Pipeline</div>
+</div>
+
+<!-- Section 9 & 10 -->
+<h1>9. Database Architecture & Models</h1>
+<p>
+  AssetCare stores data in MongoDB Atlas with strict multi-tenant schemas. The master database holds global platform entities, while tenant collections are logically scoped by <code>tenantId</code> and optionally backed by separate tenant databases via connection switching:
+</p>
+<table>
+  <tr><th>Model Name</th><th>Collection Scope</th><th>Primary Purpose</th><th>Key Indexed Fields & Attributes</th></tr>
+  <tr><td><strong>Tenant</strong></td><td>Global / Master</td><td>Company master registry & plan entitlements</td><td><code>slug</code> (unique), <code>plan</code>, <code>subscriptionStatus</code>, <code>isActive</code>, <code>limits</code></td></tr>
+  <tr><td><strong>User</strong></td><td>Tenant Scoped</td><td>Authentication, roles, permissions, department</td><td><code>email</code> (unique), <code>password</code> (bcrypt), <code>role</code>, <code>tenantId</code></td></tr>
+  <tr><td><strong>Asset</strong></td><td>Tenant Scoped</td><td>Hardware inventory records & lifecycle state</td><td><code>assetTag</code>, <code>serialNumber</code>, <code>category</code>, <code>status</code>, <code>assignedTo</code></td></tr>
+  <tr><td><strong>Invoice</strong></td><td>Tenant & Master</td><td>Commercial billing receipts & GST accounting</td><td><code>invoiceNumber</code>, <code>amount</code>, <code>gstDetails</code>, <code>razorpayPaymentId</code>, <code>status</code></td></tr>
+  <tr><td><strong>SubscriptionHistory</strong></td><td>Tenant & Master</td><td>Historical audit trail of all plan transactions</td><td><code>tenantId</code>, <code>plan</code>, <code>amountPaid</code>, <code>startDate</code>, <code>endDate</code>, <code>action</code></td></tr>
+  <tr><td><strong>Coupon</strong></td><td>Global / Master</td><td>Promotional discount configurations</td><td><code>code</code> (unique/uppercase), <code>discountType</code>, <code>discountValue</code>, <code>usedCount</code></td></tr>
+  <tr><td><strong>Ticket</strong></td><td>Tenant Scoped</td><td>Breakdown service requests & SLA tracking</td><td><code>ticketId</code>, <code>asset</code>, <code>raisedBy</code>, <code>status</code>, <code>priority</code>, <code>slaDeadline</code></td></tr>
+  <tr><td><strong>MaintenanceSchedule</strong></td><td>Tenant Scoped</td><td>Preventative maintenance tasks & schedules</td><td><code>asset</code>, <code>taskName</code>, <code>frequency</code>, <code>nextDueDate</code>, <code>status</code></td></tr>
+  <tr><td><strong>Department</strong></td><td>Tenant Scoped</td><td>Organizational hierarchy & cost centers</td><td><code>name</code>, <code>hod</code>, <code>budget</code>, <code>tenantId</code></td></tr>
+  <tr><td><strong>AuditLog</strong></td><td>Tenant Scoped</td><td>Immutable compliance trail of all user actions</td><td><code>actor</code>, <code>action</code>, <code>entity</code>, <code>entityId</code>, <code>changes</code>, <code>createdAt</code></td></tr>
+</table>
+
+<!-- Section 10 -->
+<h1>10. Multi-Tenant Architecture & Isolation</h1>
+<p>
+  Tenant isolation is enforced in every layer of the software stack:
+</p>
+<ul>
+  <li><strong>Identification:</strong> When a user logs in, their JWT contains their immutable <code>tenantId</code>. For API calls, the frontend automatically transmits the <code>X-Tenant-Id</code> header.</li>
+  <li><strong>Mongoose Tenant Plugin:</strong> All tenant-scoped Mongoose queries automatically inject <code>{ tenantId: req.tenantId }</code> into <code>find</code>, <code>findOne</code>, <code>update</code>, and <code>count</code> filters.</li>
+  <li><strong>Cross-Tenant Leakage Prevention:</strong> Even if a malicious user alters an ID parameter in a URL, the query will return <code>null</code> (404) because the record’s <code>tenantId</code> will not match the authenticated session's tenant token.</li>
+  <li><strong>Super Admin Isolation Bypass:</strong> Platform Super Admins have explicit global scope for administrative oversight while retaining strict tenant auditing.</li>
+</ul>
+
+<div class="page-break"></div>
+<!-- Section 11 -->
+<h1>11. User Roles & Permission Matrix</h1>
+<p>
+  AssetCare implements comprehensive Role-Based Access Control (RBAC) with support for custom granular permissions:
+</p>
+<table>
+  <tr><th>System Capability</th><th>Super Admin</th><th>Company Admin</th><th>Department HOD</th><th>Technician</th><th>Employee</th></tr>
+  <tr><td><strong>Platform Company Management</strong></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Platform Coupon Generation</strong></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Company Billing & Checkout</strong></td><td><span class="badge badge-info">View Only</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Asset Registry & Bulk Import</strong></td><td><span class="badge badge-info">View Only</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-warning">Dept Scoped</span></td><td><span class="badge badge-info">View Only</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Asset Assignment & Custody</strong></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-warning">Dept Scoped</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Raise Breakdown Ticket</strong></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-success">Assigned Only</span></td></tr>
+  <tr><td><strong>Resolve & Update Ticket Status</strong></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-success">Assigned Only</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>User & Employee Onboarding</strong></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-success">Full Access</span></td><td><span class="badge badge-warning">View Dept</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Custom Branding (Logo Upload)</strong></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-success">Large Scale</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+  <tr><td><strong>Compliance Audit Log Export</strong></td><td><span class="badge badge-success">Platform Wide</span></td><td><span class="badge badge-success">Company Wide</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td><td><span class="badge badge-danger">No Access</span></td></tr>
+</table>
+
+<!-- Section 12 -->
+<h1>12. Authentication Architecture</h1>
+<p>
+  Authentication is stateless and cryptographic, utilizing JWT signed tokens:
+</p>
+<div class="diagram-container">
+  <svg viewBox="0 0 700 65" width="100%" height="65">
+    <rect x="10" y="15" width="120" height="35" rx="4" fill="#064e3b"/>
+    <text x="70" y="37" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">1. Credentials (Email/Pass)</text>
+    
+    <rect x="150" y="15" width="120" height="35" rx="4" fill="#047857"/>
+    <text x="210" y="37" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">2. Bcrypt Hash Verify</text>
+
+    <rect x="290" y="15" width="120" height="35" rx="4" fill="#0d9488"/>
+    <text x="350" y="37" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">3. Tenant Active Check</text>
+
+    <rect x="430" y="15" width="120" height="35" rx="4" fill="#0284c7"/>
+    <text x="490" y="37" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">4. Issue JWT Token</text>
+
+    <rect x="570" y="15" width="120" height="35" rx="4" fill="#1e293b"/>
+    <text x="630" y="37" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">5. Hydrate Session</text>
+  </svg>
+  <div class="diagram-caption">Figure 4: Authentication & Login Security Pipeline</div>
+</div>
+
+<!-- Section 13 -->
+<h1>13. Core AssetCare Modules</h1>
+<table>
+  <tr><th>Module Name</th><th>Target Users</th><th>Key Operations & Capabilities</th><th>Backend Enforcement / Guard</th></tr>
+  <tr><td><strong>Asset Registry</strong></td><td>Admin, HOD</td><td>Register hardware, QR code generation, bulk CSV import, trash/restore</td><td>LimitMiddleware checks max asset capacity</td></tr>
+  <tr><td><strong>Assigned Devices</strong></td><td>All Staff</td><td>Check equipment custody, serial numbers, allocation history</td><td>Employee-scoped queries prevent cross-viewing</td></tr>
+  <tr><td><strong>Maintenance & AMC</strong></td><td>Technicians, Admin</td><td>Preventative schedules, AMC vendor contracts, service cost logging</td><td>Automated node-cron checks due dates</td></tr>
+  <tr><td><strong>Tickets & SLA</strong></td><td>Employees, Techs</td><td>Raise repair requests, technician assignment, SLA breach alarms</td><td>Role-checked status transitions</td></tr>
+  <tr><td><strong>Service Centers</strong></td><td>Admin, Techs</td><td>Authorized vendor registry, contact directory, repair dispatch</td><td>Tenant-scoped CRUD endpoints</td></tr>
+  <tr><td><strong>User Directory</strong></td><td>Company Admin</td><td>Invite team members, role assignments, employee offboarding</td><td>User limit enforcement per plan tier</td></tr>
+  <tr><td><strong>Enterprise Workspace</strong></td><td>Company Admin</td><td>Custom metadata fields, organizational branding, settings</td><td>Custom branding restricted to Large Scale</td></tr>
+  <tr><td><strong>Analytics & Reports</strong></td><td>Executive, Admin</td><td>Asset depreciation, breakdown rates, spending reports, Excel export</td><td>Live aggregation pipeline across collections</td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 14 & 15 -->
+<h1>14. Subscription Plans & Entitlements</h1>
+<p>
+  AssetCare provides 3 commercial tiers with strictly bounded resource limits and features:
+</p>
+<table>
+  <tr><th>Commercial Plan</th><th>Annual Price</th><th>Asset Limit</th><th>User Limit</th><th>Department Limit</th><th>Included Advanced Capabilities</th></tr>
+  <tr>
+    <td><strong>Home User</strong></td>
+    <td><strong>₹999 / year</strong></td>
+    <td>Up to 20 Assets</td>
+    <td>Up to 3 Users</td>
+    <td>Up to 2 Departments</td>
+    <td>Core Inventory, Basic Ticketing, Standard Reports</td>
+  </tr>
+  <tr>
+    <td><strong>MSME</strong></td>
+    <td><strong>₹2,999 / year</strong></td>
+    <td>Up to 50 Assets</td>
+    <td>Up to 15 Users</td>
+    <td>Up to 5 Departments</td>
+    <td>Advanced Analytics, Warranty Tracking, Bulk CSV Import</td>
+  </tr>
+  <tr>
+    <td><strong>Large Scale</strong></td>
+    <td><strong>₹8,999 / year</strong></td>
+    <td><strong>Unlimited</strong></td>
+    <td><strong>Unlimited</strong></td>
+    <td><strong>Unlimited</strong></td>
+    <td>Custom Branding, SLA Escalation, Dedicated Support, Full Audit Trail</td>
+  </tr>
+</table>
+
+<!-- Section 15 -->
+<h1>15. Plan Entitlement Architecture</h1>
+<p>
+  Entitlement boundaries are enforced on both the client UI and the Express backend:
+</p>
+<div class="callout">
+  <div class="callout-title">Backend Enforcement Priority</div>
+  <p>
+    While the frontend disables buttons and hides premium features, the backend middleware (<code>limitMiddleware.js</code> and controller feature guards) acts as the primary defense. If a user attempts to bypass the UI and register a 21st asset on the Home User plan via direct API POST, the server returns <code>HTTP 403 (PLAN_LIMIT_REACHED)</code> with a descriptive upgrade prompt.
+  </p>
+</div>
+
+<!-- Section 16 -->
+<h1>16. 365-Day Subscription Lifecycle</h1>
+<p>
+  Subscriptions follow a strictly calculated 365-day validity period from the timestamp of payment verification:
+</p>
+<div class="diagram-container">
+  <svg viewBox="0 0 700 130" width="100%" height="130">
+    <!-- Lifecycle Bar -->
+    <rect x="30" y="30" width="640" height="16" rx="8" fill="#e2e8f0"/>
+    <rect x="30" y="30" width="450" height="16" rx="8" fill="#059669"/>
+    
+    <!-- Milestones -->
+    <circle cx="30" cy="38" r="9" fill="#064e3b"/>
+    <text x="30" y="65" font-size="8" font-weight="bold" text-anchor="middle">Day 0 (Payment)</text>
+    <text x="30" y="77" font-size="7.5" fill="#64748b" text-anchor="middle">Active Status</text>
+
+    <circle cx="480" cy="38" r="9" fill="#f59e0b"/>
+    <text x="480" y="65" font-size="8" font-weight="bold" text-anchor="middle">Day 335 (30d Left)</text>
+    <text x="480" y="77" font-size="7.5" fill="#d97706" text-anchor="middle">Renewal Warning</text>
+
+    <circle cx="580" cy="38" r="9" fill="#ea580c"/>
+    <text x="580" y="65" font-size="8" font-weight="bold" text-anchor="middle">Day 350 (15d Left)</text>
+    <text x="580" y="77" font-size="7.5" fill="#ea580c" text-anchor="middle">Urgent Notice</text>
+
+    <circle cx="670" cy="38" r="9" fill="#dc2626"/>
+    <text x="670" y="65" font-size="8" font-weight="bold" text-anchor="middle">Day 365 (Expiry)</text>
+    <text x="670" y="77" font-size="7.5" fill="#dc2626" text-anchor="middle">Read-Only / Lock</text>
+  </svg>
+  <div class="diagram-caption">Figure 5: 365-Day Subscription Progression & Alert Thresholds</div>
+</div>
+
+<!-- Section 17, 18, 19 -->
+<h1>17. Checkout, Upgrade & Downgrade Architecture</h1>
+<h3>Upgrade Behavior (Immediate Prorated Transition)</h3>
+<p>
+  When an organization upgrades (e.g. <em>Home User → MSME</em> or <em>MSME → Large Scale</em>), the system processes the upgrade immediately upon payment verification, raises resource caps instantly, and initializes a fresh 365-day term while recording the transition in <code>SubscriptionHistory</code>.
+</p>
+<h3>Renewal Behavior (Cycle Extension)</h3>
+<p>
+  Renewing the current active plan extends the subscription for an additional 365 days from the current expiry date without interrupting service or resetting asset registries.
+</p>
+<h3>Downgrade Policy</h3>
+<div class="callout callout-warn">
+  <div class="callout-title">Current System Rule: Immediate Downgrades Are Blocked</div>
+  <p>
+    Immediate downgrading to a lower plan tier (e.g., Large Scale with 120 assets attempting to downgrade to Home User with a 20-asset limit) is blocked with <code>HTTP 400 (DOWNGRADE_NOT_ALLOWED)</code> to prevent immediate data truncation or orphaned assets.
+  </p>
+  <p>
+    <strong>Scheduled Downgrade:</strong> Scheduled downgrade at the end of the billing term is not implemented in the current v1.0.0 release.
+  </p>
+</div>
+
+<div class="page-break"></div>
+<!-- Section 20 & 21 -->
+<h1>20. Coupon Engine & Discount Mathematics</h1>
+<p>
+  Coupons are configured globally by the Super Admin and applied during checkout:
+</p>
+<table>
+  <tr><th>Coupon Attribute</th><th>Validation Rule</th><th>Impact on Calculation</th></tr>
+  <tr><td><code>code</code></td><td>Case-insensitive, converted to uppercase</td><td>Matches active record in <code>coupons</code> collection</td></tr>
+  <tr><td><code>discountType</code></td><td><code>'percentage'</code> or <code>'fixed'</code></td><td>Determines math formula (e.g. 10% off vs ₹500 off)</td></tr>
+  <tr><td><code>minOrderAmount</code></td><td>Plan base price must be &gt;= minOrder</td><td>Prevents application on lower tiers if restricted</td></tr>
+  <tr><td><code>maxDiscount</code></td><td>Applies as a ceiling cap on percentage discounts</td><td>Guarantees discount never exceeds configured rupee cap</td></tr>
+  <tr><td><code>validUntil</code></td><td>Must be greater than current UTC date</td><td>Rejects expired promotional codes</td></tr>
+  <tr><td><code>usageLimit</code></td><td><code>usedCount</code> must be &lt; <code>usageLimit</code></td><td>Enforces total redemption limits across customers</td></tr>
+</table>
+
+<!-- Section 21 -->
+<h1>21. GST & Billing Calculation Engine</h1>
+<p>
+  All billing calculations are strictly rounded to 2 decimal places (<code>Math.round(n * 100) / 100</code>) to eliminate floating-point artifacts:
+</p>
+<div class="callout">
+  <div class="callout-title">Mathematical Formula</div>
+  <ol>
+    <li><strong>Base Amount:</strong> Plan Price (P)</li>
+    <li><strong>Discount Amount:</strong> D = min(CalculatedDiscount, MaxDiscount)</li>
+    <li><strong>Taxable Base:</strong> T = P - D</li>
+    <li><strong>GST Computation:</strong>
+      <ul>
+        <li>If <em>Customer State == Vendor State (Rajasthan)</em>: <strong>CGST (9%)</strong> = T * 0.09 + <strong>SGST (9%)</strong> = T * 0.09</li>
+        <li>If <em>Customer State != Vendor State</em>: <strong>IGST (18%)</strong> = T * 0.18</li>
+      </ul>
+    </li>
+    <li><strong>Final Grand Total:</strong> Total = T + GST</li>
+  </ol>
+</div>
+
+<div class="callout callout-info">
+  <div class="callout-title">Sample Live Calculation Example (MSME Plan with 10% Coupon in Rajasthan)</div>
+  <table style="margin: 4px 0 0 0;">
+    <tr><td>Base MSME Price</td><td>₹2,999.00</td></tr>
+    <tr><td>10% Promotional Discount</td><td>- ₹299.90</td></tr>
+    <tr><td>Taxable Amount</td><td>₹2,699.10</td></tr>
+    <tr><td>CGST (9%)</td><td>+ ₹242.92</td></tr>
+    <tr><td>SGST (9%)</td><td>+ ₹242.92</td></tr>
+    <tr><td><strong>Final Payable Amount</strong></td><td><strong>₹3,184.94</strong></td></tr>
+  </table>
+</div>
+
+<!-- Section 22 & 23 -->
+<h1>22. Razorpay Payment Architecture</h1>
+<p>
+  Payment transactions follow a 2-step cryptographically verified order flow:
+</p>
+<div class="diagram-container">
+  <svg viewBox="0 0 700 90" width="100%" height="90">
+    <rect x="10" y="25" width="120" height="40" rx="5" fill="#0f172a"/>
+    <text x="70" y="49" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">1. POST /create-order</text>
+
+    <rect x="150" y="25" width="120" height="40" rx="5" fill="#064e3b"/>
+    <text x="210" y="49" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">2. Razorpay Order ID</text>
+
+    <rect x="290" y="25" width="120" height="40" rx="5" fill="#0284c7"/>
+    <text x="350" y="49" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">3. Client Modal Checkout</text>
+
+    <rect x="430" y="25" width="120" height="40" rx="5" fill="#047857"/>
+    <text x="490" y="49" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">4. POST /verify-payment</text>
+
+    <rect x="570" y="25" width="120" height="40" rx="5" fill="#1e293b"/>
+    <text x="630" y="49" fill="#fff" font-size="8.5" font-weight="bold" text-anchor="middle">5. Activate Plan (365d)</text>
+  </svg>
+  <div class="diagram-caption">Figure 6: Razorpay Payment Verification & Activation Protocol</div>
+</div>
+<p>
+  <strong>HMAC SHA256 Signature Verification:</strong> The server computes <code>crypto.createHmac('sha256', secret).update(order_id + '|' + payment_id).digest('hex')</code>. If the computed signature matches the client's payload, the invoice is set to <code>'Paid'</code> and the tenant's license is activated.
+</p>
+
+<div class="page-break"></div>
+<!-- Section 24 & 25 -->
+<h1>24. Super Admin Platform Console</h1>
+<p>
+  The Super Admin Console provides platform owners with complete governance over all tenant instances:
+</p>
+<table>
+  <tr><th>Console Module</th><th>Capabilities & Administrative Controls</th></tr>
+  <tr><td><strong>Platform Analytics</strong></td><td>Total registered companies, live subscriber breakdown, gross platform revenue, total GST collected.</td></tr>
+  <tr><td><strong>Company 360° Management</strong></td><td>Full inspection of any tenant's asset counts, user rosters, invoices, and subscription expiration countdowns.</td></tr>
+  <tr><td><strong>Tenant Freeze / Unfreeze</strong></td><td>Immediate administrative deactivation of delinquent or rogue tenants via <code>isActive: false</code>.</td></tr>
+  <tr><td><strong>Coupon Factory</strong></td><td>Create, configure caps, activate, pause, or delete global promotional discount codes.</td></tr>
+  <tr><td><strong>Contact Leads & Inquiries</strong></td><td>Review enterprise inquiries, demo requests, and corporate lead submissions.</td></tr>
+</table>
+
+<!-- Section 25 -->
+<h1>25. Company Deactivation & Access Control</h1>
+<p>
+  When a Super Admin deactivates a company:
+</p>
+<ol>
+  <li>The master <code>Tenant.isActive</code> flag is flipped to <code>false</code> in MongoDB.</li>
+  <li>All subsequent API requests with that tenant's JWT are intercepted by <code>authMiddleware.js</code>, which detects the deactivated state and immediately returns <strong><code>HTTP 403 Forbidden (COMPANY_DEACTIVATED)</code></strong>.</li>
+  <li>The frontend Axios response interceptor captures the 403 response, purges the client local storage session, and redirects the user to <code>/login?deactivated=1</code>.</li>
+</ol>
+
+<!-- Section 26 & 27 -->
+<h1>26. Security Architecture</h1>
+<table>
+  <tr><th>Security Domain</th><th>Implementation Mechanism</th><th>Threat Mitigated</th></tr>
+  <tr><td><strong>Authentication</strong></td><td>Stateless JWT (HMAC SHA-256) with password bcrypt salting</td><td>Credential sniffing, session hijacking</td></tr>
+  <tr><td><strong>Authorization (RBAC)</strong></td><td>Middleware permission guards on all routes (Admin / HOD / Tech / Employee)</td><td>Privilege escalation</td></tr>
+  <tr><td><strong>Data Isolation</strong></td><td>Mongoose Tenant Plugin & dynamic tenant connection resolution</td><td>Cross-tenant data leakage (IDOR)</td></tr>
+  <tr><td><strong>Commercial Integrity</strong></td><td>Server-authoritative price & GST recalculation on order creation</td><td>Client-side price tampering</td></tr>
+  <tr><td><strong>Payment Security</strong></td><td>Server-side HMAC SHA256 verification of Razorpay signatures</td><td>Fake payment confirmation exploits</td></tr>
+  <tr><td><strong>Rate Limiting</strong></td><td><code>express-rate-limit</code> (100 req/15 min in production on auth endpoints)</td><td>Brute-force credential attacks & DoS</td></tr>
+  <tr><td><strong>File Upload Security</strong></td><td>MIME-type validation, size caps (2–10 MB), Cloudinary cloud sandboxing</td><td>Malicious script execution on server</td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 29, 30, 31 -->
+<h1>29. Build, Deployment & Installer Architecture</h1>
+<h3>Production Web Build</h3>
+<ul>
+  <li><strong>Vite 8 Compiler:</strong> Compiles React 19 JSX and CSS into <code>frontend/dist</code> in ~8.6 seconds.</li>
+  <li><strong>Asset Optimization:</strong> Chunks are hashed and compressed (Gzip/Brotli ready).</li>
+  <li><strong>Static Serving:</strong> In production, Express hosts <code>frontend/dist</code> statically and serves <code>index.html</code> on SPA route fallbacks.</li>
+</ul>
+
+<h3>Windows Standalone Desktop Application</h3>
+<ul>
+  <li><strong>Compilation:</strong> Bundled using <code>pkg</code> into standalone Node runtime binary <code>asset-care-backend.exe</code>.</li>
+  <li><strong>Inno Setup Packaging:</strong> Packaged into a single-file Windows installer: <strong><code>iassetcare-setup.exe</code></strong> (374.59 MB).</li>
+  <li><strong>Embedded Services:</strong> Bundles the complete frontend UI, backend API engine, and local database interface.</li>
+</ul>
+
+<!-- Section 31 -->
+<h1>31. Project Footprint & File Statistics</h1>
+<table>
+  <tr><th>Project Component</th><th>File Count</th><th>Size on Disk (MB)</th><th>Notes</th></tr>
+  <tr><td><strong>Frontend Source Code</strong></td><td>86 files</td><td>5.88 MB</td><td>React 19 source, components, pages, styles</td></tr>
+  <tr><td><strong>Backend Source Code</strong></td><td>117 files</td><td>1.80 MB</td><td>Controllers, models, middleware, jobs, routes</td></tr>
+  <tr><td><strong>Frontend Production Dist</strong></td><td>161 files</td><td>6.72 MB</td><td>Optimized production JS, CSS, fonts, assets</td></tr>
+  <tr><td><strong>Frontend Dependencies (node_modules)</strong></td><td>64,739 files</td><td>280.16 MB</td><td>Vite, MUI, React, Recharts, jsPDF, Lucide</td></tr>
+  <tr><td><strong>Backend Dependencies (node_modules)</strong></td><td>6,168 files</td><td>31.56 MB</td><td>Express, Mongoose, Razorpay, Cloudinary, JWT</td></tr>
+  <tr><td><strong>Windows Setup Installer (EXE)</strong></td><td>1 file</td><td>374.59 MB</td><td>Standalone Windows offline installer package</td></tr>
+</table>
+
+<h3>Top 10 Largest Codebase Files</h3>
+<table>
+  <tr><th>Rank</th><th>File Path</th><th>Size (MB / KB)</th><th>Purpose</th></tr>
+  <tr><td>1</td><td><code>release-exe/iassetcare-setup.exe</code></td><td>374.59 MB</td><td>Windows Inno Setup installer package</td></tr>
+  <tr><td>2</td><td><code>frontend/dist/favicon.png</code></td><td>684.3 KB</td><td>High-res application icon asset</td></tr>
+  <tr><td>3</td><td><code>frontend/dist/logo.png</code></td><td>684.3 KB</td><td>Primary brand logo asset</td></tr>
+  <tr><td>4</td><td><code>frontend/dist/service_workflow.jpg</code></td><td>660.7 KB</td><td>Public marketing workflow graphic</td></tr>
+  <tr><td>5</td><td><code>frontend/dist/hero_dashboard.jpg</code></td><td>512.0 KB</td><td>Public landing page hero graphic</td></tr>
+  <tr><td>6</td><td><code>frontend/dist/assets/xlsx-*.js</code></td><td>411.9 KB</td><td>Client-side Excel import/export engine chunk</td></tr>
+  <tr><td>7</td><td><code>frontend/dist/assets/index-*.js</code></td><td>396.3 KB</td><td>Main compiled frontend bundle entry point</td></tr>
+  <tr><td>8</td><td><code>frontend/dist/assets/jspdf.es.min-*.js</code></td><td>390.1 KB</td><td>Client-side PDF rendering engine chunk</td></tr>
+  <tr><td>9</td><td><code>frontend/dist/assets/Analytics-*.js</code></td><td>379.3 KB</td><td>Analytics dashboards & charts bundle chunk</td></tr>
+  <tr><td>10</td><td><code>frontend/dist/assets/html2canvas-*.js</code></td><td>194.9 KB</td><td>Canvas screenshot generation chunk</td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 32 & 33 -->
+<h1>32. Dependency Inventory</h1>
+<h3>Backend Dependencies (Production)</h3>
+<table>
+  <tr><th>Package</th><th>Version</th><th>Purpose in Application</th></tr>
+  <tr><td><code>express</code></td><td>5.2.1</td><td>Core HTTP REST API web server framework</td></tr>
+  <tr><td><code>mongoose</code></td><td>9.7.1</td><td>MongoDB Object Document Mapper & connection pool</td></tr>
+  <tr><td><code>jsonwebtoken</code></td><td>9.0.3</td><td>Cryptographic JWT token signing & verification</td></tr>
+  <tr><td><code>bcryptjs</code></td><td>3.0.3</td><td>Password hashing with salt rounds</td></tr>
+  <tr><td><code>razorpay</code></td><td>2.9.8</td><td>Official Razorpay payment gateway Node.js SDK</td></tr>
+  <tr><td><code>cloudinary</code></td><td>2.x</td><td>Cloud media storage & CDN upload pipeline</td></tr>
+  <tr><td><code>multer</code></td><td>2.2.0</td><td>Multipart/form-data upload stream parser</td></tr>
+  <tr><td><code>streamifier</code></td><td>0.1.5</td><td>Streams in-memory file buffers to Cloudinary</td></tr>
+  <tr><td><code>node-cron</code></td><td>4.5.0</td><td>Background task scheduling (warranties, SLAs)</td></tr>
+  <tr><td><code>nodemailer</code></td><td>9.0.1</td><td>Transactional SMTP email dispatch (invites, alerts)</td></tr>
+  <tr><td><code>qrcode</code></td><td>1.5.4</td><td>Server-side QR code generator for asset tags</td></tr>
+  <tr><td><code>express-rate-limit</code></td><td>8.5.2</td><td>IP rate limiting on authentication routes</td></tr>
+  <tr><td><code>dotenv</code></td><td>17.4.2</td><td>Environment variable configuration management</td></tr>
+  <tr><td><code>cors</code></td><td>2.8.6</td><td>Cross-Origin Resource Sharing security headers</td></tr>
+</table>
+
+<!-- Section 33 -->
+<h1>33. Environment Variables Specification</h1>
+<table>
+  <tr><th>Variable Name</th><th>Classification</th><th>Purpose & Technical Requirement</th></tr>
+  <tr><td><code>PORT</code></td><td>Optional (Default: 5000)</td><td>HTTP listening port for the Express backend server</td></tr>
+  <tr><td><code>MONGO_URI</code></td><td><strong>Required</strong></td><td>MongoDB Atlas connection string with replica set & auth</td></tr>
+  <tr><td><code>JWT_SECRET</code></td><td><strong>Required</strong></td><td>Cryptographic secret key for signing user authentication tokens</td></tr>
+  <tr><td><code>NODE_ENV</code></td><td><strong>Required</strong></td><td>Runtime mode (<code>'production'</code> or <code>'development'</code>)</td></tr>
+  <tr><td><code>RAZORPAY_KEY_ID</code></td><td><strong>Required (Billing)</strong></td><td>Public merchant key ID provided by Razorpay dashboard</td></tr>
+  <tr><td><code>RAZORPAY_KEY_SECRET</code></td><td><strong>Required (Billing)</strong></td><td>Private API secret used for HMAC SHA256 signature verification</td></tr>
+  <tr><td><code>RAZORPAY_WEBHOOK_SECRET</code></td><td>Optional</td><td>HMAC secret for verifying server-to-server webhook callbacks</td></tr>
+  <tr><td><code>CLOUDINARY_CLOUD_NAME</code></td><td>Optional</td><td>Cloudinary cloud account identifier for CDN storage</td></tr>
+  <tr><td><code>CLOUDINARY_API_KEY</code></td><td>Optional</td><td>Public API key for Cloudinary REST authentication</td></tr>
+  <tr><td><code>CLOUDINARY_API_SECRET</code></td><td>Optional</td><td>Private secret for Cloudinary stream signing</td></tr>
+  <tr><td><code>SMTP_HOST</code> / <code>SMTP_PORT</code></td><td>Optional</td><td>Outgoing mail server hostname (e.g. smtp.gmail.com) and port (587)</td></tr>
+  <tr><td><code>SMTP_USER</code> / <code>SMTP_PASS</code></td><td>Optional</td><td>Authenticated mail account credentials for email alerts</td></tr>
+  <tr><td><code>FRONTEND_URL</code></td><td>Optional (Default: 5173)</td><td>Base URL for email invite links and password reset redirects</td></tr>
+  <tr><td><code>DESKTOP_APP_DOWNLOAD_URL</code></td><td>Optional</td><td>Cloud hosting link for downloading the standalone installer</td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 34 - 39 -->
+<h1>34. Quality Assurance & Testing History</h1>
+<p>
+  The system has undergone extensive automated and manual end-to-end testing across all core modules:
+</p>
+<table>
+  <tr><th>Test Domain</th><th>Tests Executed</th><th>Verified Results & Status</th></tr>
+  <tr><td><strong>Duplicate Registration</strong></td><td>Colliding slug & duplicate company name inputs</td><td>Passed: Returns clean HTTP 400 without stack traces</td></tr>
+  <tr><td><strong>Monetary Rounding</strong></td><td>Coupon discounts & GST calculations with odd cents</td><td>Passed: All fields rounded to exactly 2 decimal places</td></tr>
+  <tr><td><strong>Super Admin Authorization</strong></td><td>Company Admin attempting to access <code>/api/super-admin/*</code></td><td>Passed: Returns HTTP 403 Forbidden with security audit log</td></tr>
+  <tr><td><strong>Tenant Isolation</strong></td><td>Tenant A attempting to query Tenant B's asset IDs</td><td>Passed: Returns null/404; cross-tenant leakage impossible</td></tr>
+  <tr><td><strong>Cloudinary Pipeline</strong></td><td>Upload SVG/PNG buffer to Cloudinary with deletion</td><td>Passed: Cloudinary status OK; secure HTTPS URLs generated</td></tr>
+  <tr><td><strong>Encoding Verification</strong></td><td>Full codebase scan for corrupted characters (mojibake)</td><td>Passed: 0 corrupted characters across all frontend files</td></tr>
+</table>
+
+<!-- Section 36 -->
+<h1>36. Current Production Database Metrics</h1>
+<table>
+  <tr><th>Metric</th><th>Live Count</th><th>Description</th></tr>
+  <tr><td><strong>Registered Tenants</strong></td><td><strong>3 Tenants</strong></td><td>Active company accounts (<code>icpl</code>, <code>trai</code>, <code>kedia</code>)</td></tr>
+  <tr><td><strong>Registered Users</strong></td><td><strong>19 Users</strong></td><td>Company Admins, HODs, Technicians, Employees</td></tr>
+  <tr><td><strong>Subscription Records</strong></td><td><strong>54 Records</strong></td><td>Lifecycle audit history across all tenant subscriptions</td></tr>
+  <tr><td><strong>Active Coupons</strong></td><td><strong>1 Coupon</strong></td><td>Configured promotional discount coupons</td></tr>
+  <tr><td><strong>Invoices Generated</strong></td><td><strong>1 Invoice</strong></td><td>Live commercial invoices recorded</td></tr>
+  <tr><td><strong>API Keys Issued</strong></td><td><strong>2 Keys</strong></td><td>External developer integration tokens</td></tr>
+</table>
+
+<!-- Section 39 & 40 -->
+<h1>40. Overall System Status Matrix</h1>
+<table>
+  <tr><th>Subsystem Area</th><th>Implementation Status</th><th>Operational Readiness</th></tr>
+  <tr><td><strong>Core Asset Registry & QR</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Authentication & RBAC</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Multi-Tenant Data Enclosure</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Subscription Engine (365d)</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Coupon & Discount Engine</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>GST Calculation (CGST/SGST/IGST)</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Razorpay Payment Verification</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready (Test/Live Switchable)</td></tr>
+  <tr><td><strong>Cloud Storage (Cloudinary)</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Active & Verified Live</td></tr>
+  <tr><td><strong>Super Admin Platform Console</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Company Deactivation Guard</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Production Ready</td></tr>
+  <tr><td><strong>Windows Desktop Installer</strong></td><td><span class="badge badge-success">✅ Implemented</span></td><td>Inno Setup Installer Compiled</td></tr>
+  <tr><td><strong>Scheduled Plan Downgrades</strong></td><td><span class="badge badge-danger">❌ Not Implemented</span></td><td>Immediate block active; scheduled in backlog</td></tr>
+</table>
+
+<div class="page-break"></div>
+<!-- Section 41 & 42 -->
+<h1>41. Management Summary</h1>
+<div class="callout">
+  <div class="callout-title">Executive Briefing for Leadership</div>
+  <p>
+    <strong>AssetCare</strong> has reached complete core software maturity. The system successfully consolidates asset lifecycle tracking, maintenance scheduling, ticket escalation, and user management into a single, cohesive multi-tenant portal.
+  </p>
+  <p>
+    From a commercial standpoint, the platform features a complete subscription engine supporting 3 annual plan tiers with automated GST invoice generation, discount coupons, and Razorpay integration. Organizations are securely isolated in their own workspaces, and platform owners have full oversight via the Super Admin Console.
+  </p>
+  <p>
+    <strong>Remaining Actions Before Commercial Launch:</strong>
+    <ol>
+      <li>Switch Razorpay keys from Test Mode to Live Production Mode in the production <code>.env</code> file.</li>
+      <li>Configure production SMTP credentials for outgoing client email invitations and ticket alerts.</li>
+      <li>Attach custom corporate domain and SSL certificate on the production hosting environment.</li>
+    </ol>
+  </p>
+</div>
+
+<!-- Section 42 -->
+<h1>42. Architectural Conclusion</h1>
+<p>
+  The AssetCare architecture delivers a balance of developer velocity, enterprise security, and operational reliability:
+</p>
+<ul>
+  <li><strong>Modular Decoupling:</strong> Frontend and backend communicate strictly over authenticated RESTful contracts, allowing independent scaling and headless operations.</li>
+  <li><strong>Bulletproof Isolation:</strong> Multi-tenant design prevents cross-customer leakage at both the query level and middleware level.</li>
+  <li><strong>Server Authoritative Billing:</strong> All financial and entitlement logic is computed server-side, eliminating financial tampering risks.</li>
+  <li><strong>Deployment Flexibility:</strong> The codebase seamlessly compiles into both cloud-hosted SaaS infrastructure and zero-config Windows desktop packages.</li>
+</ul>
+
+<!-- Appendices -->
+<div class="page-break"></div>
+<h1>Appendix A: Master Route & API Inventory</h1>
+<table>
+  <tr><th>HTTP Method</th><th>Endpoint Route</th><th>Role Requirement</th><th>Tenant Scope</th><th>Description</th></tr>
+  <tr><td><code>POST</code></td><td><code>/api/auth/register-company</code></td><td>Public</td><td>Global</td><td>Register new company & create tenant admin</td></tr>
+  <tr><td><code>POST</code></td><td><code>/api/auth/login</code></td><td>Public</td><td>Global</td><td>Authenticate user, verify tenant, issue JWT</td></tr>
+  <tr><td><code>GET</code></td><td><code>/api/auth/me</code></td><td>Authenticated</td><td>Tenant Scoped</td><td>Retrieve fresh user profile & permissions</td></tr>
+  <tr><td><code>GET/POST</code></td><td><code>/api/assets</code></td><td>Admin / Staff</td><td>Tenant Scoped</td><td>List assets (with search/filters) or create asset</td></tr>
+  <tr><td><code>POST</code></td><td><code>/api/assets/bulk-import</code></td><td>Admin</td><td>Tenant Scoped</td><td>Bulk import assets from CSV file</td></tr>
+  <tr><td><code>GET/POST</code></td><td><code>/api/tickets</code></td><td>All Roles</td><td>Tenant Scoped</td><td>List or raise breakdown service tickets</td></tr>
+  <tr><td><code>POST</code></td><td><code>/api/billing/create-order</code></td><td>Admin</td><td>Tenant Scoped</td><td>Calculate GST/coupons & create Razorpay order</td></tr>
+  <tr><td><code>POST</code></td><td><code>/api/billing/verify-payment</code></td><td>Admin</td><td>Tenant Scoped</td><td>Verify HMAC signature & activate 365d license</td></tr>
+  <tr><td><code>POST</code></td><td><code>/api/billing/validate-coupon</code></td><td>Admin</td><td>Global</td><td>Validate promo code and return discount amount</td></tr>
+  <tr><td><code>GET</code></td><td><code>/api/super-admin/overview</code></td><td>Super Admin</td><td>Global</td><td>Platform overview metrics & revenue statistics</td></tr>
+  <tr><td><code>PUT</code></td><td><code>/api/super-admin/tenants/:id/status</code></td><td>Super Admin</td><td>Global</td><td>Freeze/deactivate or reactivate tenant</td></tr>
+  <tr><td><code>POST</code></td><td><code>/api/super-admin/coupons</code></td><td>Super Admin</td><td>Global</td><td>Create new promotional discount coupon</td></tr>
+</table>
+
+<h1>Appendix B: Database Collections & Schemas</h1>
+<table>
+  <tr><th>Collection</th><th>Primary Key</th><th>Unique Indices</th><th>Relational References</th></tr>
+  <tr><td><code>tenants</code></td><td><code>_id</code></td><td><code>slug: 1</code></td><td>None (Master entity)</td></tr>
+  <tr><td><code>users</code></td><td><code>_id</code></td><td><code>email: 1</code></td><td><code>tenantId → tenants.slug</code></td></tr>
+  <tr><td><code>assets</code></td><td><code>_id</code></td><td><code>assetTag: 1</code>, <code>serialNumber: 1</code></td><td><code>assignedTo → users._id</code>, <code>department → departments._id</code></td></tr>
+  <tr><td><code>tickets</code></td><td><code>_id</code></td><td><code>ticketId: 1</code></td><td><code>asset → assets._id</code>, <code>raisedBy → users._id</code></td></tr>
+  <tr><td><code>invoices</code></td><td><code>_id</code></td><td><code>invoiceNumber: 1</code></td><td><code>tenantId → tenants.slug</code>, <code>uploadedBy → users._id</code></td></tr>
+  <tr><td><code>coupons</code></td><td><code>_id</code></td><td><code>code: 1</code></td><td>None (Master entity)</td></tr>
+  <tr><td><code>subscriptionhistories</code></td><td><code>_id</code></td><td>None</td><td><code>tenantId → tenants.slug</code></td></tr>
+</table>
+
+</body>
+</html>`;
+
+async function buildPdf() {
+  const htmlPath = path.join('C:/Users/kedia/Downloads/Asset/Asset/asset-care-system/docs', 'AssetCare_Architecture_and_System_Documentation.html');
+  const pdfPath = path.join('C:/Users/kedia/Downloads/Asset/Asset/asset-care-system/docs', 'AssetCare_Architecture_and_System_Documentation.pdf');
+
+  fs.writeFileSync(htmlPath, htmlContent, 'utf8');
+  console.log('HTML written to:', htmlPath);
+
+  console.log('Launching browser to render PDF...');
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
+
+  const page = await browser.newPage();
+  await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+  await page.pdf({
+    path: pdfPath,
+    format: 'A4',
+    printBackground: true,
+    margin: {
+      top: '16mm',
+      bottom: '16mm',
+      left: '14mm',
+      right: '14mm'
+    },
+    displayHeaderFooter: true,
+    headerTemplate: '<div style="font-family: Inter, sans-serif; font-size: 7.5pt; font-weight: 600; color: #64748b; width: 100%; border-bottom: 1px solid #e2e8f0; padding: 0 14mm 4px 14mm; display: flex; justify-content: space-between;"><span>ASSETCARE — SYSTEM ARCHITECTURE & TECHNICAL SPECIFICATION</span><span>v1.0.0-PROD</span></div>',
+    footerTemplate: '<div style="font-family: Inter, sans-serif; font-size: 7.5pt; font-weight: 600; color: #94a3b8; width: 100%; border-top: 1px solid #e2e8f0; padding: 4px 14mm 0 14mm; display: flex; justify-content: space-between;"><span>CONFIDENTIAL · PREPARED FOR MANAGEMENT</span><span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>'
+  });
+
+  await browser.close();
+  console.log('PDF rendered successfully at:', pdfPath);
+  const pdfStats = fs.statSync(pdfPath);
+  console.log('PDF Size:', (pdfStats.size / 1024).toFixed(1), 'KB');
+}
+
+buildPdf().catch(console.error);

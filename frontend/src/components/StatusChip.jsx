@@ -28,10 +28,10 @@ const StatusChip = ({ label }) => {
         fontSize: 12,
         borderRadius: "100px",
         px: 1,
-        bgcolor: isDark ? "#FBBF24" : "transparent",
-        color: isDark ? "#111827" : "text.primary",
+        bgcolor: isDark ? "#051C12" : "transparent",
+        color: isDark ? "#FFFFFF" : "text.primary",
         border: "1px solid",
-        borderColor: isDark ? "#FBBF24" : "divider",
+        borderColor: isDark ? "#051C12" : "divider",
       }}
     />
   );

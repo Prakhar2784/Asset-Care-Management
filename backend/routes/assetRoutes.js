@@ -18,6 +18,7 @@ const {
 } = require('../controllers/assetController');
 const { protect, authorize, requirePermission } = require('../middleware/authMiddleware');
 const { assetDocUpload } = require('../middleware/upload');
+const { checkAssetLimit } = require('../middleware/limitMiddleware');
 
 // QR scan — auth only, no permission gate
 router.get('/scan/:id', protect, getScanAsset);
@@ -38,11 +39,11 @@ router.get('/next-tag', protect, async (req, res) => {
 router.get('/myassets',    protect, getMyAssets);
 router.get('/all-active',  protect, getActiveAssets);
 router.get('/trash',       protect, requirePermission('View All Assets'), getDeletedAssets);
-router.post('/bulk-import',protect, requirePermission('Register Assets'), bulkImportAssets);
+router.post('/bulk-import',protect, requirePermission('Register Assets'), checkAssetLimit, bulkImportAssets);
 
 router.route('/')
   .get(protect,  requirePermission('View All Assets', 'Register Assets', 'Edit / Delete Assets', 'Assign Assets'), getAssets)
-  .post(protect, requirePermission('Register Assets'), createAsset);
+  .post(protect, requirePermission('Register Assets'), checkAssetLimit, createAsset);
 
 router.route('/:id')
   .get(protect,    requirePermission('View All Assets', 'Register Assets', 'Edit / Delete Assets', 'Assign Assets'), getAssetById)

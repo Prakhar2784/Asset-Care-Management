@@ -430,9 +430,9 @@ const Assets = () => {
 
   const KPI_CARDS = [
     { label: "Total Assets", value: kpis.total, color: "text.primary", icon: <Inventory2Rounded sx={{ fontSize: 20 }} /> },
-    { label: "Active / In-Use", value: kpis.active, color: "#FBBF24", icon: <CheckCircleRounded sx={{ fontSize: 20 }} /> },
-    { label: "Under Repair", value: kpis.underRepair, color: "#FBBF24", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
-    { label: "Unassigned", value: kpis.unassigned, color: "#FBBF24", icon: <HelpOutlineRounded sx={{ fontSize: 20 }} /> },
+    { label: "Active / In-Use", value: kpis.active, color: "#B4F105", icon: <CheckCircleRounded sx={{ fontSize: 20 }} /> },
+    { label: "Under Repair", value: kpis.underRepair, color: "#B4F105", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
+    { label: "Unassigned", value: kpis.unassigned, color: "#B4F105", icon: <HelpOutlineRounded sx={{ fontSize: 20 }} /> },
   ];
 
   return (
@@ -500,7 +500,7 @@ const Assets = () => {
               variant="contained"
               startIcon={<AddRounded />}
               onClick={() => navigate("/admin/assets/add")}
-              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "#F5A623", boxShadow: "none" } }}
+              sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 900, px: 3, borderRadius: "10px", boxShadow: "none", "&:hover": { background: "#072F1F", boxShadow: "none" } }}
             >
               Add Asset
             </Button>
@@ -573,7 +573,7 @@ const Assets = () => {
 
       {/* Bulk-selection toolbar */}
       {selectedIds.size > 0 && (
-        <Paper sx={{ mb: 2, px: 2.5, py: 1.5, borderRadius: "14px", border: "1.5px solid", borderColor: "#FBBF24", bgcolor: "rgba(251,191,36,0.06)", display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+        <Paper sx={{ mb: 2, px: 2.5, py: 1.5, borderRadius: "14px", border: "1.5px solid", borderColor: "#B4F105", bgcolor: "rgba(180,241,5,0.06)", display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
           <Typography fontWeight={800} fontSize={14} sx={{ flex: 1 }}>
             {selectedIds.size} asset{selectedIds.size > 1 ? "s" : ""} selected
           </Typography>
@@ -594,7 +594,7 @@ const Assets = () => {
               const list = assets.filter(a => selectedIds.has(a._id));
               downloadQrPdf(list, `AssetCare_QR_Selected_${Date.now()}.pdf`);
             }}
-            sx={{ bgcolor: "#111827", color: "#FBBF24", fontWeight: 800, borderRadius: "8px", textTransform: "none", boxShadow: "none" }}
+            sx={{ bgcolor: "#051C12", color: "#B4F105", fontWeight: 800, borderRadius: "8px", textTransform: "none", boxShadow: "none" }}
           >
             Download QR ({selectedIds.size})
           </Button>
@@ -624,7 +624,7 @@ const Assets = () => {
                       checked={filteredAssets.length > 0 && selectedIds.size === filteredAssets.length}
                       indeterminate={selectedIds.size > 0 && selectedIds.size < filteredAssets.length}
                       onChange={toggleSelectAll}
-                      sx={{ color: "text.disabled", "&.Mui-checked": { color: "#FBBF24" }, "&.MuiCheckbox-indeterminate": { color: "#FBBF24" } }}
+                      sx={{ color: "text.disabled", "&.Mui-checked": { color: "#051C12" }, "&.MuiCheckbox-indeterminate": { color: "#051C12" } }}
                     />
                   </TableCell>
                   {["Asset", "Category", "Department", "Location", "Warranty", "Status", "Actions"].map((head) => (
@@ -636,12 +636,12 @@ const Assets = () => {
               </TableHead>
               <TableBody>
                 {paginatedAssets.map((asset) => (
-                  <TableRow key={asset._id} hover selected={selectedIds.has(asset._id)} sx={{ "&:last-child td": { borderBottom: 0 }, cursor: "pointer", "&.Mui-selected": { bgcolor: "rgba(251,191,36,0.06)" }, "&.Mui-selected:hover": { bgcolor: "rgba(251,191,36,0.1)" } }}>
+                  <TableRow key={asset._id} hover selected={selectedIds.has(asset._id)} sx={{ "&:last-child td": { borderBottom: 0 }, cursor: "pointer", "&.Mui-selected": { bgcolor: "rgba(180,241,5,0.04)" }, "&.Mui-selected:hover": { bgcolor: "rgba(180,241,5,0.08)" } }}>
                     <TableCell padding="checkbox" sx={{ pl: 1.5 }} onClick={e => { e.stopPropagation(); toggleSelect(asset._id); }}>
                       <Checkbox
                         size="small"
                         checked={selectedIds.has(asset._id)}
-                        sx={{ color: "text.disabled", "&.Mui-checked": { color: "#FBBF24" } }}
+                        sx={{ color: "text.disabled", "&.Mui-checked": { color: "#051C12" } }}
                       />
                     </TableCell>
                     <TableCell sx={{ py: 1.5 }}>
@@ -668,7 +668,7 @@ const Assets = () => {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="QR Code">
-                          <IconButton size="small" onClick={() => setQrAsset(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#FBBF24", bgcolor: "rgba(251,191,36,0.1)" } }}>
+                          <IconButton size="small" onClick={() => setQrAsset(asset)} sx={{ color: "text.secondary", "&:hover": { color: "#051C12", bgcolor: "rgba(5,28,18,0.06)" } }}>
                             <QrCode2Rounded fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -866,7 +866,7 @@ const Assets = () => {
                     </Button>
                     {a.assignedStatus !== 'Assigned' ? (
                       <Button variant="contained" startIcon={<PersonAddRounded />} onClick={() => { handleOpenAssign(selected); setSelected(null); }}
-                        sx={{ flex: 1, py: 1.2, background: "#FBBF24", color: "#111827", fontWeight: 900, borderRadius: "12px", boxShadow: "none" }}>
+                        sx={{ flex: 1, py: 1.2, background: "#051C12", color: "#FFFFFF", fontWeight: 900, borderRadius: "12px", boxShadow: "none" }}>
                         Assign
                       </Button>
                     ) : (
@@ -949,11 +949,11 @@ const Assets = () => {
               ))}
             </Box>
           )}
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
             <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>Cancel</Button>
             <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
               startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
-              sx={{ background: "#FBBF24", color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+              sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
               {assigning ? "Assigning..." : "Confirm Assignment"}
             </Button>
           </Box>
@@ -986,8 +986,8 @@ const Assets = () => {
         slotProps={{ paper: { sx: { borderRadius: "20px", border: 1, borderColor: "divider" } } }}>
         <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "rgba(251,191,36,0.12)", display: "grid", placeItems: "center" }}>
-              <QrCode2Rounded sx={{ color: "#FBBF24" }} />
+            <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "rgba(180,241,5,0.12)", display: "grid", placeItems: "center" }}>
+              <QrCode2Rounded sx={{ color: "#051C12" }} />
             </Box>
             <Box>
               <Typography fontWeight={900} fontSize={16}>Asset QR Code</Typography>
@@ -1064,7 +1064,7 @@ const Assets = () => {
                   };
                   img.src = qrDataUrl;
                 }}
-                sx={{ bgcolor: "#111827", color: "#FBBF24", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3 }}
+                sx={{ bgcolor: "#051C12", color: "#B4F105", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3 }}
               >
                 Download QR Code
               </Button>
@@ -1073,7 +1073,7 @@ const Assets = () => {
               </Typography>
             </>
           ) : (
-            <Box sx={{ py: 6 }}><CircularProgress sx={{ color: "#FBBF24" }} /></Box>
+            <Box sx={{ py: 6 }}><CircularProgress sx={{ color: "#051C12" }} /></Box>
           )}
         </DialogContent>
       </Dialog>

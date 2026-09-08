@@ -21,46 +21,44 @@ const getTenantConnection = (tenantId) => {
     return tenantConnections[tenantId];
   }
 
-  const baseUri = process.env.MONGO_URI.split('?')[0];
-  const options = process.env.MONGO_URI.split('?')[1] || '';
   const tenantDbName = `assetcare_${tenantId}`;
   
-  // Replace the default database name (last segment) with tenant database name
-  const lastSlashIndex = baseUri.lastIndexOf('/');
-  const baseUriWithoutDb = baseUri.substring(0, lastSlashIndex);
-  const tenantUri = `${baseUriWithoutDb}/${tenantDbName}?${options}`;
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`[Database] Scoping tenant connection to: ${tenantDbName}`);
+  }
 
-  console.log(`[Database] Instantiating isolated connection to: ${tenantDbName}`);
-
-  const connection = mongoose.createConnection(tenantUri, {
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 45000,
-  });
+  // Use the established main connection with useDb to switch database context instantly
+  const connection = mongoose.connection.useDb(tenantDbName, { useCache: true });
 
   // Register and compile schemas on this isolated connection instance
-  connection.model('User', require('../models/User').schema);
-  connection.model('Asset', require('../models/Asset').schema);
-  connection.model('Ticket', require('../models/Ticket').schema);
-  connection.model('Department', require('../models/Department').schema);
-  connection.model('AssetAssignment', require('../models/AssetAssignment').schema);
-  connection.model('Notification', require('../models/Notification').schema);
-  connection.model('AuditLog', require('../models/AuditLog').schema);
-  connection.model('MaintenanceLog', require('../models/MaintenanceLog').schema);
+  if (!connection.models['User']) connection.model('User', require('../models/User').schema);
+  if (!connection.models['Asset']) connection.model('Asset', require('../models/Asset').schema);
+  if (!connection.models['Ticket']) connection.model('Ticket', require('../models/Ticket').schema);
+  if (!connection.models['Department']) connection.model('Department', require('../models/Department').schema);
+  if (!connection.models['AssetAssignment']) connection.model('AssetAssignment', require('../models/AssetAssignment').schema);
+  if (!connection.models['Notification']) connection.model('Notification', require('../models/Notification').schema);
+  if (!connection.models['AuditLog']) connection.model('AuditLog', require('../models/AuditLog').schema);
+  if (!connection.models['MaintenanceLog']) connection.model('MaintenanceLog', require('../models/MaintenanceLog').schema);
   
   // Version 1.5 Enterprise models
-  connection.model('SoftwareLicense', require('../models/SoftwareLicense').schema);
-  connection.model('AMCContract', require('../models/AMCContract').schema);
-  connection.model('WarrantyClaim', require('../models/WarrantyClaim').schema);
-  connection.model('MaintenanceSchedule', require('../models/MaintenanceSchedule').schema);
-  connection.model('TransferRequest', require('../models/TransferRequest').schema);
+  if (!connection.models['SoftwareLicense']) connection.model('SoftwareLicense', require('../models/SoftwareLicense').schema);
+  if (!connection.models['AMCContract']) connection.model('AMCContract', require('../models/AMCContract').schema);
+  if (!connection.models['WarrantyClaim']) connection.model('WarrantyClaim', require('../models/WarrantyClaim').schema);
+  if (!connection.models['MaintenanceSchedule']) connection.model('MaintenanceSchedule', require('../models/MaintenanceSchedule').schema);
+  if (!connection.models['TransferRequest']) connection.model('TransferRequest', require('../models/TransferRequest').schema);
   
   // CMDB Custom Fields model
-  connection.model('CustomField', require('../models/CustomField').schema);
+  if (!connection.models['CustomField']) connection.model('CustomField', require('../models/CustomField').schema);
 
-  connection.model('ServiceCenter', require('../models/ServiceCenter').schema);
+  if (!connection.models['ServiceCenter']) connection.model('ServiceCenter', require('../models/ServiceCenter').schema);
 
   tenantConnections[tenantId] = connection;
   return connection;
 };
 
-module.exports = { getTenantConnection };
+const getTenantModel = (tenantId, modelName) => {
+  const conn = getTenantConnection(tenantId);
+  return conn.model(modelName);
+};
+
+module.exports = { getTenantConnection, getTenantModel };

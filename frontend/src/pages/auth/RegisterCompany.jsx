@@ -10,6 +10,14 @@ import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
+import LocationCityRoundedIcon from "@mui/icons-material/LocationCityRounded";
+import PinDropRoundedIcon from "@mui/icons-material/PinDropRounded";
+import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
+import KeyRoundedIcon from "@mui/icons-material/KeyRounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 
 const RegisterCompany = () => {
   const navigate = useNavigate();
@@ -22,7 +30,15 @@ const RegisterCompany = () => {
     adminEmail: "",
     adminPassword: "",
     adminPhone: "",
-    licenseKey: ""
+    customerType: "Business",
+    address: "",
+    state: "",
+    city: "",
+    pinCode: "",
+    gstNumber: "",
+    licenseKey: "",
+    plan: "Home User",
+    acceptedTerms: true
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -56,12 +72,14 @@ const RegisterCompany = () => {
 
   const handleInputChange = (e) => {
     let { name, value } = e.target;
-    // Slugs must be alphanumeric, periods and lowercase only
     if (name === "slug") {
       value = value.toLowerCase().replace(/[^a-z0-9.-]/g, "");
     }
     if (name === "adminPhone") {
       value = value.replace(/[^0-9]/g, '').slice(0, 10);
+    }
+    if (name === "pinCode") {
+      value = value.replace(/[^0-9]/g, '').slice(0, 6);
     }
     setFormData({ ...formData, [name]: value });
     setError("");
@@ -70,6 +88,11 @@ const RegisterCompany = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (!formData.acceptedTerms) {
+      setError("Please accept the Terms and Conditions to proceed.");
+      return;
+    }
 
     if (!pwRules.every(r => r.pass)) {
       setError("Password must be 8+ chars with uppercase, lowercase, number, and symbol.");
@@ -83,17 +106,13 @@ const RegisterCompany = () => {
       setSuccess(true);
       setLoading(false);
       
-      // Auto login the admin
       const { user } = response.data;
       localStorage.setItem("assetcare_user", JSON.stringify(user));
 
       setTimeout(() => {
-        // Send the new admin through the guided setup wizard (org profile →
-        // department → user → asset) before they reach the dashboard
         navigate(`/onboarding`);
-        // Reload to force axios interceptor and theme context to fetch company branding
         window.location.reload();
-      }, 2000);
+      }, 1800);
       
     } catch (err) {
       setLoading(false);
@@ -107,579 +126,831 @@ const RegisterCompany = () => {
         <style>{`
           .auth-wrapper {
             min-height: 100vh;
-            padding: 120px 24px 60px;
+            padding: 100px 20px 60px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #0B0D12;
             background-attachment: fixed;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             width: 100%;
           }
 
           .auth-container {
             width: 100%;
-            max-width: 1200px;
-            background: rgba(255, 255, 255, 0.70);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(17,24,39,0.18);
-            border-radius: 36px;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+            max-width: 1240px;
+            background: rgba(18, 20, 29, 0.85);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            box-shadow: 0 35px 80px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
             display: flex;
             overflow: hidden;
-            border: 1px solid rgba(17,24,39,0.15);
             color: #ffffff;
           }
 
-        .auth-info {
-          flex: 1.2;
-          background: linear-gradient(135deg, #111111 0%, #050505 100%);
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 60px;
-          position: relative;
-        }
-
-        .auth-info::before {
-          content: '';
-          position: absolute;
-          top: -10%;
-          left: -10%;
-          width: 380px;
-          height: 380px;
-          background: radial-gradient(circle, rgba(17,24,39,0.12) 0%, rgba(0,0,0,0) 70%);
-          border: 1px dashed rgba(17,24,39,0.15);
-          border-radius: 50%;
-        }
-
-        .brand-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          z-index: 2;
-        }
-
-        .brand-logo {
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          background: #111827;
-          display: grid;
-          place-items: center;
-          color: #090909;
-        }
-
-        .brand-name {
-          font-size: 22px;
-          font-weight: 800;
-          letter-spacing: -0.5px;
-        }
-
-        .info-content {
-          max-width: 500px;
-          z-index: 2;
-          margin: auto 0;
-        }
-
-        .info-title {
-          font-size: 40px;
-          font-weight: 800;
-          line-height: 1.2;
-          margin-bottom: 20px;
-          background: linear-gradient(90deg, #FFFFFF 0%, #888888 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .info-desc {
-          color: #909090;
-          line-height: 1.6;
-          margin-bottom: 40px;
-        }
-
-        .feature-card {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 20px;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 16px;
-          backdrop-filter: blur(10px);
-          margin-bottom: 16px;
-        }
-
-        .feature-icon-wrapper {
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          background: rgba(17,24,39,0.1);
-          color: #FFFFFF;
-          display: grid;
-          place-items: center;
-        }
-
-        .feature-details h4 {
-          font-size: 16px;
-          font-weight: 700;
-          margin: 0 0 4px 0;
-        }
-
-        .feature-details p {
-          font-size: 13px;
-          color: #808080;
-          margin: 0;
-        }
-
-        .auth-form-side {
-          flex: 1;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 40px;
-          background: #090909;
-          z-index: 2;
-        }
-
-        .form-card {
-          width: 100%;
-          max-width: 440px;
-        }
-
-        .form-title {
-          font-size: 28px;
-          font-weight: 800;
-          margin-bottom: 8px;
-        }
-
-        .form-sub {
-          color: #888888;
-          font-size: 14px;
-          margin-bottom: 30px;
-        }
-
-        .input-group {
-          position: relative;
-          margin-bottom: 20px;
-        }
-
-        .input-icon {
-          position: absolute;
-          left: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #555555;
-          display: flex;
-          align-items: center;
-        }
-
-        .auth-input {
-          width: 100%;
-          background: #141414;
-          border: 1px solid #222222;
-          padding: 14px 14px 14px 44px;
-          border-radius: 12px;
-          color: #ffffff;
-          font-size: 14px;
-          transition: all 0.3s;
-          outline: none;
-        }
-
-        .auth-input:focus {
-          border-color: #FFFFFF;
-          background: #181818;
-          box-shadow: 0 0 0 4px rgba(17,24,39,0.1);
-        }
-
-        .input-suffix {
-          position: absolute;
-          right: 14px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #555555;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-        }
-
-        .input-suffix:hover {
-          color: #ffffff;
-        }
-
-        .error-banner {
-          background: rgba(244,67,54,0.1);
-          border: 1px solid rgba(244,67,54,0.2);
-          color: #f44336;
-          padding: 12px;
-          border-radius: 10px;
-          font-size: 13px;
-          margin-bottom: 20px;
-          text-align: center;
-        }
-
-        .success-banner {
-          background: rgba(76,175,80,0.1);
-          border: 1px solid rgba(76,175,80,0.2);
-          color: #4caf50;
-          padding: 16px;
-          border-radius: 12px;
-          font-size: 14px;
-          margin-bottom: 20px;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .submit-btn {
-          width: 100%;
-          background: #FBBF24;
-          color: #111827;
-          font-weight: 700;
-          border: none;
-          padding: 14px;
-          border-radius: 12px;
-          cursor: pointer;
-          font-size: 15px;
-          transition: all 0.3s;
-          margin-top: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .submit-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(17,24,39,0.3);
-        }
-
-        .submit-btn:disabled {
-          background: #444444;
-          color: #888888;
-          cursor: not-allowed;
-        }
-
-        .auth-footer {
-          margin-top: 24px;
-          text-align: center;
-          font-size: 13px;
-          color: #666666;
-        }
-
-        .auth-link {
-          color: #FFFFFF;
-          text-decoration: none;
-          font-weight: 600;
-        }
-
-        .auth-link:hover {
-          text-decoration: underline;
-        }
-
-        @media (max-width: 900px) {
           .auth-info {
-            display: none;
+            flex: 1;
+            background: linear-gradient(160deg, #131722 0%, #090B10 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 56px 48px;
+            position: relative;
+            border-right: 1px solid rgba(255, 255, 255, 0.06);
           }
-        }
 
-        .pw-rules {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 6px 14px;
-          background: rgba(20,20,20,0.65);
-          border: 1.5px solid rgba(17,24,39,0.2);
-          border-radius: 14px;
-          padding: 12px 16px;
-          margin-top: 5px;
-          margin-bottom: 20px;
-        }
+          .auth-info::before {
+            content: '';
+            position: absolute;
+            top: -15%;
+            left: -15%;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+          }
 
-        .pw-rule {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 13px;
-          font-weight: 700;
-        }
+          .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 2;
+          }
 
-        .pw-rule.pass { color: #16A34A; }
-        .pw-rule.fail { color: #DC2626; }
+          .brand-logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #1E2433 0%, #111520 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: grid;
+            place-items: center;
+            color: #FBBF24;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+          }
 
-        .pw-dot {
-          width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-        }
+          .brand-name {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+          }
 
-        .pw-rule.pass .pw-dot { background: #16A34A; }
-        .pw-rule.fail .pw-dot { background: #DC2626; }
+          .info-content {
+            max-width: 480px;
+            z-index: 2;
+            margin: 40px 0;
+            position: sticky;
+            top: 130px;
+          }
 
-        .section-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 20px;
-        }
+          .badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            color: #FBBF24;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.3px;
+          }
 
-        .section-num {
-          width: 34px;
-          height: 34px;
-          border-radius: 10px;
-          background: #FBBF24;
-          color: #111827;
-          display: grid;
-          place-items: center;
-          font-weight: 900;
-          font-size: 14px;
-          flex-shrink: 0;
-        }
+          .info-title {
+            font-size: 36px;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #FFFFFF 30%, #A1A1AA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.8px;
+          }
 
-        .section-title {
-          font-size: 16px;
-          font-weight: 800;
-          color: #ffffff;
-          letter-spacing: -0.3px;
-        }
+          .info-desc {
+            color: #9CA3AF;
+            line-height: 1.65;
+            font-size: 14.5px;
+            margin-bottom: 32px;
+          }
 
-        .section-sub {
-          font-size: 12px;
-          font-weight: 500;
-          color: #666666;
-          margin-top: 2px;
-        }
-      `}</style>
+          .feature-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 18px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 14px;
+            transition: all 0.25s ease;
+          }
 
-      {/* LEFT DESIGN SIDE */}
-      <div className="auth-info">
-        <div className="brand-header">
-          <div className="brand-logo">
-            <img src="/favicon.svg" alt="AssetCare" style={{ width: 32, height: 32 }} />
-          </div>
-          <span className="brand-name">AssetCare</span>
-        </div>
+          .feature-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(251, 191, 36, 0.25);
+            transform: translateY(-2px);
+          }
 
-        <div className="info-content">
-          <h1 className="info-title">Launch Your Own Asset Workspace.</h1>
-          <p className="info-desc">
-            Equip your entire organization with isolated ticket management, dynamic inventories, 
-            and complete hardware lifecycle tracking under your corporate identity.
-          </p>
+          .feature-icon-wrapper {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: rgba(251, 191, 36, 0.1);
+            color: #FBBF24;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+          }
 
-          <div className="feature-card">
-            <div className="feature-icon-wrapper">
-              <ApartmentRoundedIcon fontSize="small" />
-            </div>
-            <div className="feature-details">
-              <h4>Isolated Company Profile</h4>
-              <p>Your team members register and operate in a secure, isolated database partition.</p>
-            </div>
-          </div>
+          .feature-details h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 0 4px 0;
+          }
 
-          <div className="feature-card">
-            <div className="feature-icon-wrapper">
-              <LanguageRoundedIcon fontSize="small" />
-            </div>
-            <div className="feature-details">
-              <h4>Custom Corporate Branding</h4>
-              <p>Set corporate colors and upload logos to personalize your dashboard context.</p>
-            </div>
-          </div>
-        </div>
+          .feature-details p {
+            font-size: 13px;
+            color: #88909E;
+            margin: 0;
+            line-height: 1.45;
+          }
 
-        <div style={{ color: "#444444", fontSize: "12px", zIndex: 2 }}>
-          &copy; 2026 AssetCare PaaS. All rights reserved.
-        </div>
-      </div>
+          .auth-form-side {
+            flex: 1.25;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 48px 40px;
+            background: #0D1017;
+            z-index: 2;
+          }
 
-      {/* RIGHT FORM SIDE */}
-      <div className="auth-form-side">
-        <div className="form-card">
-          <h2 className="form-title">Register Company</h2>
-          <p className="form-sub">Create your tenant workspace and primary admin profile.</p>
+          .form-card {
+            width: 100%;
+            max-width: 520px;
+          }
 
-          {error && <div className="error-banner">{error}</div>}
+          .form-header-area {
+            margin-bottom: 28px;
+          }
 
-          {isFirstTime && (
-            <div className="info-banner" style={{
-              background: 'rgba(251, 191, 36, 0.1)',
-              border: '1px solid rgba(251, 191, 36, 0.25)',
-              color: '#FBBF24',
-              padding: '16px',
-              borderRadius: '16px',
-              fontSize: '13.5px',
-              marginBottom: '24px',
-              lineHeight: '1.6',
-              textAlign: 'center'
-            }}>
-              <strong>✨ First-Time Installation Detected</strong>
-              <div style={{ marginTop: '4px', opacity: 0.8 }}>
-                Please register your company organization and primary administrator account to set up your workspace.
+          .form-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+          }
+
+          .form-sub {
+            color: #88909E;
+            font-size: 14px;
+            margin: 0;
+          }
+
+          .form-section-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 22px 20px 14px;
+            margin-bottom: 20px;
+          }
+
+          .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+          }
+
+          .section-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: #FBBF24;
+            color: #111827;
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            font-size: 13px;
+            flex-shrink: 0;
+          }
+
+          .section-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+          }
+
+          .section-sub {
+            font-size: 12px;
+            font-weight: 500;
+            color: #717684;
+            margin-top: 1px;
+          }
+
+          .input-group {
+            position: relative;
+            margin-bottom: 14px;
+          }
+
+          .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+          }
+
+          .auth-input {
+            width: 100%;
+            background: #141721;
+            border: 1px solid #232734;
+            padding: 13px 14px 13px 44px;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 13.5px;
+            transition: all 0.2s ease;
+            outline: none;
+            box-sizing: border-box;
+          }
+
+          .auth-input:focus {
+            border-color: #FBBF24;
+            background: #171B27;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+          }
+
+          .auth-input::placeholder {
+            color: #525866;
+          }
+
+          .input-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+          }
+
+          .input-suffix {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+          }
+
+          .input-suffix:hover {
+            color: #FBBF24;
+          }
+
+          .slug-hint {
+            font-size: 11.5px;
+            color: #717684;
+            margin-top: -8px;
+            margin-bottom: 12px;
+            padding-left: 4px;
+          }
+
+          .slug-highlight {
+            color: #FBBF24;
+            font-weight: 600;
+          }
+
+          .error-banner {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #F87171;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            font-weight: 600;
+          }
+
+          .success-banner {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #4ADE80;
+            padding: 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .terms-wrapper {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .terms-label {
+            font-size: 12.5px;
+            color: #9CA3AF;
+            cursor: pointer;
+            user-select: none;
+          }
+
+          .terms-link {
+            color: #FBBF24;
+            text-decoration: none;
+            font-weight: 600;
+          }
+
+          .terms-link:hover {
+            text-decoration: underline;
+          }
+
+          .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+            color: #0F172A;
+            font-weight: 800;
+            border: none;
+            padding: 15px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+          }
+
+          .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(245, 158, 11, 0.35);
+          }
+
+          .submit-btn:disabled {
+            background: #27272a;
+            color: #71717a;
+            box-shadow: none;
+            cursor: not-allowed;
+          }
+
+          .auth-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 13.5px;
+            color: #88909E;
+          }
+
+          .auth-link {
+            color: #FBBF24;
+            text-decoration: none;
+            font-weight: 700;
+            margin-left: 4px;
+          }
+
+          .auth-link:hover {
+            text-decoration: underline;
+          }
+
+          .pw-rules {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            background: #10131B;
+            border: 1px solid #232734;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-top: -4px;
+            margin-bottom: 14px;
+          }
+
+          .pw-rule {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+          }
+
+          .pw-rule.pass { color: #22C55E; }
+          .pw-rule.fail { color: #EF4444; }
+
+          .pw-dot {
+            width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+          }
+
+          .pw-rule.pass .pw-dot { background: #22C55E; }
+          .pw-rule.fail .pw-dot { background: #EF4444; }
+
+          @media (max-width: 1024px) {
+            .auth-container {
+              flex-direction: column;
+              border-radius: 24px;
+            }
+            .auth-info {
+              padding: 40px 30px;
+              border-right: none;
+              border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            }
+            .auth-form-side {
+              padding: 40px 24px;
+              max-height: none;
+            }
+          }
+        `}</style>
+
+        {/* LEFT DESIGN SIDE */}
+        <div className="auth-info">
+          <div>
+            <div className="brand-header">
+              <div className="brand-logo" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
+                <img src="/logo.png" alt="IAssetCare" style={{ width: 44, height: 44, objectFit: "contain", display: "block" }} />
               </div>
+              <span className="brand-name">IAssetCare</span>
             </div>
-          )}
-          
-          {success && (
-            <div className="success-banner">
-              <CheckCircleOutlineRoundedIcon sx={{ fontSize: 40 }} />
-              <div>
-                <strong>Workspace Created!</strong>
-                <p style={{ margin: "4px 0 0 0", fontSize: "12px", color: "#888888" }}>
-                  Provisioning your dashboard... redirecting shortly.
-                </p>
-              </div>
-            </div>
-          )}
 
-          {!success && (
-            <form onSubmit={handleSubmit}>
-              {/* Company Section */}
-              <div className="section-header">
-                <div className="section-num">1</div>
-                <div>
-                  <div className="section-title">Company Information</div>
-                  <div className="section-sub">Set up your workspace identity and URL slug.</div>
+            <div className="info-content">
+              <div className="badge-tag">
+                <AutoAwesomeRoundedIcon style={{ fontSize: 14 }} /> Enterprise Multi-Tenant PaaS
+              </div>
+              <h1 className="info-title">Launch Your Own Asset Workspace.</h1>
+              <p className="info-desc">
+                Equip your entire organization with isolated ticket management, dynamic hardware inventories, 
+                and complete asset lifecycle tracking under your corporate identity.
+              </p>
+
+              <div className="feature-card">
+                <div className="feature-icon-wrapper">
+                  <ApartmentRoundedIcon fontSize="small" />
+                </div>
+                <div className="feature-details">
+                  <h4>Isolated Database Partition</h4>
+                  <p>Your team members register and operate in a dedicated, isolated tenant partition.</p>
                 </div>
               </div>
-              <div className="input-group">
-                <span className="input-icon"><ApartmentRoundedIcon fontSize="small" /></span>
-                <input
-                  type="text"
-                  name="companyName"
-                  placeholder="Company Name"
-                  className="auth-input"
-                  value={formData.companyName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
 
-              <div className="input-group">
-                <span className="input-icon"><LanguageRoundedIcon fontSize="small" /></span>
-                <input
-                  type="text"
-                  name="slug"
-                  placeholder="Company Slug / URL (e.g., acme)"
-                  className="auth-input"
-                  value={formData.slug}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="input-group">
-                <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
-                <input
-                  type="text"
-                  name="licenseKey"
-                  placeholder="Commercial License Key (AC-SLUG-XXXX)"
-                  className="auth-input"
-                  value={formData.licenseKey}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div style={{ borderBottom: "1px solid #222", margin: "24px 0 24px 0" }}></div>
-
-              {/* Admin Section */}
-              <div className="section-header">
-                <div className="section-num">2</div>
-                <div>
-                  <div className="section-title">Admin Account</div>
-                  <div className="section-sub">Primary administrator credentials for this workspace.</div>
+              <div className="feature-card">
+                <div className="feature-icon-wrapper">
+                  <LanguageRoundedIcon fontSize="small" />
+                </div>
+                <div className="feature-details">
+                  <h4>Corporate Identity & Slug</h4>
+                  <p>Provision dedicated URL workspaces and personalize your dashboard branding context.</p>
                 </div>
               </div>
-              <div className="input-group">
-                <span className="input-icon"><PersonRoundedIcon fontSize="small" /></span>
-                <input
-                  type="text"
-                  name="adminName"
-                  placeholder="Admin Full Name"
-                  className="auth-input"
-                  value={formData.adminName}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
 
-              <div className="input-group">
-                <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
-                <input
-                  type="email"
-                  name="adminEmail"
-                  placeholder="Admin Email Address"
-                  className="auth-input"
-                  value={formData.adminEmail}
-                  onChange={handleInputChange}
-                  required
-                />
+              <div className="feature-card">
+                <div className="feature-icon-wrapper">
+                  <ReceiptLongRoundedIcon fontSize="small" />
+                </div>
+                <div className="feature-details">
+                  <h4>Automated Compliance & GST</h4>
+                  <p>Integrated tax invoicing, commercial licensing, and transparent subscription management.</p>
+                </div>
               </div>
+            </div>
+          </div>
 
-              <div className="input-group">
-                <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
-                <input
-                  type="tel"
-                  name="adminPhone"
-                  placeholder="10-digit mobile number"
-                  className="auth-input"
-                  value={formData.adminPhone}
-                  onChange={handleInputChange}
-                  inputMode="numeric"
-                  maxLength={10}
-                />
+          <div style={{ color: "#64748B", fontSize: "12.5px", zIndex: 2 }}>
+            &copy; 2026 AssetCare PaaS. All rights reserved.
+          </div>
+        </div>
+
+        {/* RIGHT FORM SIDE */}
+        <div className="auth-form-side">
+          <div className="form-card">
+            <div className="form-header-area">
+              <h2 className="form-title">Register Company</h2>
+              <p className="form-sub">Create your dedicated tenant workspace and primary administrator profile.</p>
+            </div>
+
+            {error && <div className="error-banner">{error}</div>}
+
+            {isFirstTime && (
+              <div style={{
+                background: 'rgba(251, 191, 36, 0.1)',
+                border: '1px solid rgba(251, 191, 36, 0.25)',
+                color: '#FBBF24',
+                padding: '14px 16px',
+                borderRadius: '14px',
+                fontSize: '13px',
+                marginBottom: '20px',
+                lineHeight: '1.5'
+              }}>
+                <strong>✨ First-Time Setup Detected</strong>
+                <div style={{ marginTop: '2px', opacity: 0.85 }}>
+                  Register your master organization to initialize the AssetCare workspace.
+                </div>
               </div>
-
-              <div className="input-group" style={{ marginBottom: formData.adminPassword.length > 0 ? "12px" : "20px" }}>
-                <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="adminPassword"
-                  placeholder="Create Admin Password"
-                  className="auth-input"
-                  value={formData.adminPassword}
-                  onChange={handleInputChange}
-                  required
-                />
-                <span 
-                  className="input-suffix"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
-                </span>
+            )}
+            
+            {success && (
+              <div className="success-banner">
+                <CheckCircleOutlineRoundedIcon sx={{ fontSize: 44 }} />
+                <div>
+                  <strong style={{ fontSize: '16px' }}>Workspace Initialized!</strong>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#88909E" }}>
+                    Provisioning your dashboard partition... Redirecting to onboarding.
+                  </p>
+                </div>
               </div>
+            )}
 
-              {formData.adminPassword.length > 0 && (
-                <div className="pw-rules">
-                  {pwRules.map(r => (
-                    <div key={r.label} className={`pw-rule ${r.pass ? 'pass' : 'fail'}`}>
-                      <span className="pw-dot" />
-                      {r.label}
+            {!success && (
+              <form onSubmit={handleSubmit}>
+                
+                {/* SECTION 1: Company Information */}
+                <div className="form-section-card">
+                  <div className="section-header">
+                    <div className="section-num">1</div>
+                    <div>
+                      <div className="section-title">Company Information</div>
+                      <div className="section-sub">Workspace identity, URL slug, and tier plan.</div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-icon"><ApartmentRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="text"
+                      name="companyName"
+                      placeholder="Company Name (e.g., Acme Innovations)"
+                      className="auth-input"
+                      value={formData.companyName}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-icon"><LanguageRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="text"
+                      name="slug"
+                      placeholder="Workspace URL Slug (e.g., acme)"
+                      className="auth-input"
+                      value={formData.slug}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                  {formData.slug && (
+                    <div className="slug-hint">
+                      Workspace URL: <span className="slug-highlight">assetcare.app/{formData.slug}</span>
+                    </div>
+                  )}
+
+                  <div className="input-group">
+                    <span className="input-icon"><KeyRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="text"
+                      name="licenseKey"
+                      placeholder="Commercial License Key (Optional / Auto-generated)"
+                      className="auth-input"
+                      value={formData.licenseKey}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <select
+                      name="plan"
+                      className="auth-input"
+                      style={{ paddingLeft: '16px', appearance: 'none', cursor: 'pointer' }}
+                      value={formData.plan}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="Home User">Home User Plan (₹999/yr — Up to 20 assets)</option>
+                      <option value="MSME">MSME Plan (₹2,999/yr — Up to 50 assets)</option>
+                      <option value="Large Scale">Large Scale Plan (₹8,999/yr — Unlimited assets)</option>
+                    </select>
+                  </div>
+
+                  {(formData.plan === "MSME" || formData.plan === "Large Scale") && (
+                    <div className="input-group">
+                      <span className="input-icon"><ReceiptLongRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        name="gstNumber"
+                        placeholder="GSTIN Number (e.g., 29AAAAA0000A1Z5)"
+                        className="auth-input"
+                        value={formData.gstNumber}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                  )}
                 </div>
-              )}
 
-              <button 
-                type="submit" 
-                className="submit-btn"
-                disabled={loading}
-              >
-                {loading ? "Registering..." : "Launch Workspace"}
-              </button>
-            </form>
-          )}
+                {/* SECTION 2: Location & Billing Address */}
+                <div className="form-section-card">
+                  <div className="section-header">
+                    <div className="section-num">2</div>
+                    <div>
+                      <div className="section-title">Billing & Company Address</div>
+                      <div className="section-sub">Tax invoice address and registered location.</div>
+                    </div>
+                  </div>
 
-          <div className="auth-footer">
-            Already have an active company workspace?{" "}
-            <Link to="/login" className="auth-link">
-              Log In
-            </Link>
+                  <div className="input-group">
+                    <span className="input-icon"><LocationOnRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="text"
+                      name="address"
+                      placeholder="Street / Office Address"
+                      className="auth-input"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-grid-2">
+                    <div className="input-group">
+                      <span className="input-icon"><LocationCityRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        name="city"
+                        placeholder="City"
+                        className="auth-input"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><PinDropRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        name="state"
+                        placeholder="State (e.g., Maharashtra)"
+                        className="auth-input"
+                        value={formData.state}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-icon"><PinDropRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="text"
+                      name="pinCode"
+                      placeholder="6-digit PIN Code"
+                      className="auth-input"
+                      value={formData.pinCode}
+                      onChange={handleInputChange}
+                      maxLength={6}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* SECTION 3: Admin Account */}
+                <div className="form-section-card">
+                  <div className="section-header">
+                    <div className="section-num">3</div>
+                    <div>
+                      <div className="section-title">Primary Administrator</div>
+                      <div className="section-sub">Master credentials to manage this workspace.</div>
+                    </div>
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-icon"><PersonRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="text"
+                      name="adminName"
+                      placeholder="Admin Full Name"
+                      className="auth-input"
+                      value={formData.adminName}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="email"
+                      name="adminEmail"
+                      placeholder="Admin Email Address"
+                      className="auth-input"
+                      value={formData.adminEmail}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-group">
+                    <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
+                    <input
+                      type="tel"
+                      name="adminPhone"
+                      placeholder="10-digit Mobile Number"
+                      className="auth-input"
+                      value={formData.adminPhone}
+                      onChange={handleInputChange}
+                      inputMode="numeric"
+                      maxLength={10}
+                      required
+                    />
+                  </div>
+
+                  <div className="input-group" style={{ marginBottom: formData.adminPassword.length > 0 ? "10px" : "14px" }}>
+                    <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="adminPassword"
+                      placeholder="Create Master Password"
+                      className="auth-input"
+                      value={formData.adminPassword}
+                      onChange={handleInputChange}
+                      required
+                    />
+                    <span 
+                      className="input-suffix"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
+                    </span>
+                  </div>
+
+                  {formData.adminPassword.length > 0 && (
+                    <div className="pw-rules">
+                      {pwRules.map(r => (
+                        <div key={r.label} className={`pw-rule ${r.pass ? 'pass' : 'fail'}`}>
+                          <span className="pw-dot" />
+                          {r.label}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* TERMS & CONDITIONS CHECKBOX */}
+                <div className="terms-wrapper">
+                  <input
+                    type="checkbox"
+                    id="acceptedTerms"
+                    name="acceptedTerms"
+                    checked={formData.acceptedTerms}
+                    onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                    style={{ accentColor: '#FBBF24', width: 16, height: 16, cursor: 'pointer' }}
+                  />
+                  <label htmlFor="acceptedTerms" className="terms-label">
+                    I agree to the <Link to="/terms" className="terms-link" target="_blank">Terms of Service</Link> and <Link to="/privacy-policy" className="terms-link" target="_blank">Privacy Policy</Link>
+                  </label>
+                </div>
+
+                {/* SUBMIT BUTTON */}
+                <button 
+                  type="submit" 
+                  className="submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? "Provisioning Workspace..." : "Launch Workspace"}
+                  {!loading && <ArrowForwardRoundedIcon fontSize="small" />}
+                </button>
+
+              </form>
+            )}
+
+            <div className="auth-footer">
+              Already have an active company workspace?
+              <Link to="/login" className="auth-link">
+                Log In
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   );
 };

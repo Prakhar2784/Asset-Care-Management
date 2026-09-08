@@ -24,7 +24,7 @@ function TabPanel({ value, index, children }) {
   return value === index ? <Box sx={{ pt: 4 }}>{children}</Box> : null;
 }
 
-// ─── Profile Tab ───────────────────────────────────────────────────────────────
+// --- Profile Tab ---
 function ProfileTab() {
   const { currentUser, refreshUser } = useAuth();
   const [name, setName] = useState(currentUser?.name || '');
@@ -201,7 +201,7 @@ function ProfileTab() {
 
 
 
-// ─── Company Settings Tab (admin only) ──────────────────────────────────────────
+// --- Company Settings Tab (admin only) ---
 const INDUSTRIES = ['Technology', 'Manufacturing', 'Healthcare', 'Education', 'Finance', 'Retail', 'Construction', 'Logistics', 'Hospitality', 'Other'];
 
 function CompanySettingsTab({ isAdmin = true }) {
@@ -466,7 +466,7 @@ function CompanySettingsTab({ isAdmin = true }) {
   );
 }
 
-// ─── Custom Fields Tab (admin only) ─────────────────────────────────────────────
+// --- Custom Fields Tab (admin only) ---
 function CustomFieldsTab() {
   const [category, setCategory] = useState('IT Asset');
   const [fields, setFields] = useState([]);
@@ -648,7 +648,7 @@ function CustomFieldsTab() {
   );
 }
 
-// ─── Data & Privacy Tab ────────────────────────────────────────────────────────
+// --- Data & Privacy Tab ---
 function DataTab({ currentUser }) {
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState('');
@@ -860,40 +860,258 @@ function DataTab({ currentUser }) {
   );
 }
 
-// ─── Main Settings Page ─────────────────────────────────────────────────────────
+// --- Main Settings Page ---
+
+function BillingTab() {
+  const navigate = useNavigate();
+  const [tenant, setTenant] = useState(null);
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [orgRes, invRes] = await Promise.all([
+        api.get('/settings/tenant'),
+        api.get('/billing/invoices')
+      ]);
+      setTenant(orgRes.data);
+      setInvoices(invRes.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (window.confirm("Are you sure you want to cancel your subscription? You will be able to use it until it expires, but it will not auto-renew.")) {
+      try {
+        await api.post('/billing/cancel');
+        alert("Subscription cancelled.");
+        fetchData();
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to cancel");
+      }
+    }
+  };
+
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+      <CircularProgress sx={{ color: '#051C12' }} />
+    </Box>
+  );
+  if (!tenant) return <Typography>Error loading billing info.</Typography>;
+
+  const expiry = tenant.planExpiry ? new Date(tenant.planExpiry) : null;
+  const daysRemaining = expiry ? Math.ceil((expiry - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+  
+  // Calculate start date from latest invoice or tenant creation
+  const latestInvoice = invoices.length > 0 ? invoices[0] : null;
+  const startDate = latestInvoice?.periodStart ? new Date(latestInvoice.periodStart) : (tenant.createdAt ? new Date(tenant.createdAt) : null);
+
+  const planPrices = {
+    'Home User': '₹999 / yr',
+    'MSME': '₹2,999 / yr',
+    'Large Scale': '₹8,999 / yr'
+  };
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Typography variant="h6" fontWeight="800">Subscription & Billing</Typography>
+        <Chip 
+          label={tenant.subscriptionStatus || 'Active'} 
+          sx={{ 
+            fontWeight: 800,
+            bgcolor: tenant.subscriptionStatus === 'Active' ? 'rgba(34, 197, 94, 0.15)' : tenant.subscriptionStatus === 'Cancelled' ? 'rgba(249, 115, 22, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            color: tenant.subscriptionStatus === 'Active' ? '#166534' : tenant.subscriptionStatus === 'Cancelled' ? '#9a3412' : '#991b1b',
+          }} 
+        />
+      </Box>
+
+      <Grid container spacing={3} mb={4}>
+        <Grid item xs={12} md={7}>
+          <Paper variant="outlined" sx={{ p: 3.5, borderRadius: '16px', height: '100%', border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="overline" color="text.secondary" fontWeight="800" letterSpacing="0.5px">CURRENT SUBSCRIPTION</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, my: 1 }}>
+              <Typography variant="h4" fontWeight="900" sx={{ color: '#051C12' }}>{tenant.plan || 'No Plan Active'}</Typography>
+              <Typography variant="h6" fontWeight="700" color="text.secondary">({planPrices[tenant.plan] || '—'})</Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" mb={2.5}>
+              Asset Limit: Up to {tenant.limits?.maxAssets === 999999999 ? 'Unlimited' : (tenant.limits?.maxAssets || 20)} Assets
+            </Typography>
+            
+            <Divider sx={{ my: 2 }} />
+            
+            <Grid container spacing={2}>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary" fontWeight="700" display="block">SUBSCRIPTION STATUS</Typography>
+                <Typography variant="body2" fontWeight="700" sx={{ color: tenant.subscriptionStatus === 'Active' ? '#166534' : '#991b1b' }}>
+                  {tenant.subscriptionStatus}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary" fontWeight="700" display="block">REMAINING VALIDITY</Typography>
+                <Typography variant="body2" fontWeight="700" sx={{ color: daysRemaining <= 7 ? '#dc2626' : 'text.primary' }}>
+                  {daysRemaining > 0 ? `${daysRemaining} Days` : 'Expired'}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary" fontWeight="700" display="block">START DATE</Typography>
+                <Typography variant="body2" fontWeight="600">
+                  {startDate ? startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="caption" color="text.secondary" fontWeight="700" display="block">EXPIRY DATE</Typography>
+                <Typography variant="body2" fontWeight="600">
+                  {expiry ? expiry.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                </Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="caption" color="text.secondary" fontWeight="700" display="block">COMMERCIAL LICENSE KEY</Typography>
+                <Typography variant="body2" fontWeight="700" sx={{ fontFamily: 'monospace', bgcolor: 'rgba(5,28,18,0.04)', px: 1, py: 0.5, borderRadius: '6px', display: 'inline-block', mt: 0.5 }}>
+                  {tenant.licenseKey || '—'}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={5}>
+          <Paper variant="outlined" sx={{ p: 3.5, borderRadius: '16px', height: '100%', display: 'flex', flexDirection: 'column', gap: 2, justifyContent: 'center', border: '1px solid', borderColor: 'divider', bgcolor: 'background.default' }}>
+            <Typography variant="subtitle1" fontWeight="800" mb={0.5}>Subscription Actions</Typography>
+            <Button 
+              variant="contained" 
+              fullWidth 
+              onClick={() => navigate('/admin/checkout')}
+              sx={{ py: 1.2, fontWeight: 800, bgcolor: '#051C12', color: '#B4F105', '&:hover': { bgcolor: '#0B3B24' }, borderRadius: '10px' }}
+            >
+              Change / Upgrade Plan
+            </Button>
+            <Button 
+              variant="outlined" 
+              fullWidth 
+              onClick={() => navigate('/admin/checkout')}
+              sx={{ py: 1.2, fontWeight: 700, borderColor: '#051C12', color: '#051C12', borderRadius: '10px' }}
+            >
+              Renew Subscription
+            </Button>
+            {tenant.subscriptionStatus === 'Active' && (
+              <Button 
+                variant="text" 
+                color="error" 
+                fullWidth 
+                onClick={handleCancel}
+                sx={{ py: 1, fontWeight: 700, borderRadius: '10px' }}
+              >
+                Cancel Subscription
+              </Button>
+            )}
+          </Paper>
+        </Grid>
+      </Grid>
+
+      <Typography variant="h6" fontWeight="800" mb={2}>Tax Invoices & Payment History</Typography>
+      <Paper variant="outlined" sx={{ borderRadius: '16px', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+              <th style={{ padding: '14px 18px', fontWeight: 800 }}>Date</th>
+              <th style={{ padding: '14px 18px', fontWeight: 800 }}>Invoice #</th>
+              <th style={{ padding: '14px 18px', fontWeight: 800 }}>Plan</th>
+              <th style={{ padding: '14px 18px', fontWeight: 800 }}>Amount</th>
+              <th style={{ padding: '14px 18px', fontWeight: 800 }}>Status</th>
+              <th style={{ padding: '14px 18px', fontWeight: 800 }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoices.length === 0 ? (
+              <tr><td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#6C7E75' }}>No invoices found.</td></tr>
+            ) : (
+              invoices.map(inv => (
+                <tr key={inv._id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                  <td style={{ padding: '14px 18px' }}>{new Date(inv.date || inv.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                  <td style={{ padding: '14px 18px', fontWeight: 700 }}>{inv.invoiceNumber}</td>
+                  <td style={{ padding: '14px 18px' }}>{inv.planName}</td>
+                  <td style={{ padding: '14px 18px', fontWeight: 700 }}>₹{(inv.totalAmount || 0).toFixed(2)}</td>
+                  <td style={{ padding: '14px 18px' }}>
+                    <Chip size="small" label={inv.status} sx={{ fontWeight: 700, bgcolor: inv.status === 'Paid' ? 'rgba(34,197,94,0.12)' : 'rgba(0,0,0,0.06)', color: inv.status === 'Paid' ? '#166534' : 'inherit' }} />
+                  </td>
+                  <td style={{ padding: '14px 18px' }}>
+                    <Button size="small" variant="outlined" onClick={() => window.open(`/admin/billing/invoice/${inv._id}`, '_blank')} sx={{ borderRadius: '8px', fontWeight: 700, textTransform: 'none' }}>
+                      View Tax Invoice
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </Paper>
+    </Box>
+  );
+}
+
 export default function Settings() {
+
   const { currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isAdmin = currentUser?.role === 'admin';
   const isEmployee = currentUser?.role === 'employee';
   const [searchParams] = useSearchParams();
-  // ?tab=org maps to index 1 only for roles that have the Org Profile tab
-  const orgTabIndex = isAdmin ? 1 : -1;
-  const [tab, setTab] = useState(
-    searchParams.get('tab') === 'org' && orgTabIndex !== -1 ? orgTabIndex : 0
-  );
+  const tabParam = searchParams.get('tab');
 
   const tabs = [
     {
+      key: 'profile',
       label: 'Profile',
       icon: <PersonRounded fontSize="small" />,
       panel: <ProfileTab currentUser={currentUser} />
     },
     ...(isAdmin ? [
       { 
+        key: 'org',
         label: 'Organisation Profile', 
         icon: <BusinessRounded fontSize="small" />,
         panel: <CompanySettingsTab isAdmin={isAdmin} />
       },
+      {
+        key: 'billing',
+        label: 'Billing & Subscription',
+        icon: <ReceiptRounded fontSize="small" />,
+        panel: <BillingTab />
+      },
     ] : []),
     ...(isEmployee ? [] : [
       {
+        key: 'data',
         label: 'My Data',
         icon: <DownloadRounded fontSize="small" />,
         panel: <DataTab currentUser={currentUser} />
       },
     ]),
   ];
+
+  const getInitialIndex = () => {
+    if (tabParam) {
+      const idx = tabs.findIndex(t => t.key === tabParam);
+      if (idx !== -1) return idx;
+    }
+    return 0;
+  };
+
+  const [tab, setTab] = useState(getInitialIndex());
+
+  useEffect(() => {
+    if (tabParam) {
+      const idx = tabs.findIndex(t => t.key === tabParam);
+      if (idx !== -1) setTab(idx);
+    }
+  }, [tabParam, currentUser]);
 
   return (
     <Box>
@@ -903,7 +1121,7 @@ export default function Settings() {
         </Box>
         <Box>
           <Typography variant="h4" fontWeight={900} letterSpacing="-0.5px" sx={{ color: 'text.primary', lineHeight: 1.2 }}>Settings</Typography>
-          <Typography variant="body2" color="text.secondary" mt={0.5}>Manage your profile, preferences, and data</Typography>
+          <Typography variant="body2" color="text.secondary" mt={0.5}>Manage your profile, preferences, organization, and subscription</Typography>
         </Box>
       </Box>
 

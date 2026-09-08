@@ -14,6 +14,9 @@ const checkWarrantyExpiry = async () => {
     const tenants = await Tenant.find({ isActive: true });
 
     for (const tenant of tenants) {
+      // Warranty radar is enabled for MSME and Large Scale plans
+      if (tenant.plan !== 'MSME' && tenant.plan !== 'Large Scale') continue;
+
       await setTenantId(tenant.slug, async () => {
         const now = new Date();
         const in30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);

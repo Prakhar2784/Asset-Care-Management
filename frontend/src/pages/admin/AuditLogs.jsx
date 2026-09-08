@@ -12,14 +12,14 @@ const ACTION_META = {
   ticket_status_changed: { label: 'Status Changed',        color: '#A78BFA', bg: 'rgba(17,24,39,0.12)' },
   ticket_deleted:        { label: 'Ticket Deleted',        color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
   asset_created:         { label: 'Asset Created',         color: '#4ADE80', bg: 'rgba(22,163,74,0.12)' },
-  asset_updated:         { label: 'Asset Updated',         color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
+  asset_updated:         { label: 'Asset Updated',         color: '#051C12', bg: 'rgba(180,241,5,0.18)' },
   asset_deleted:         { label: 'Asset Deleted',         color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
   asset_assigned:        { label: 'Asset Assigned',        color: '#22D3EE', bg: 'rgba(8,145,178,0.12)' },
-  asset_revoked:         { label: 'Asset Revoked',         color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
+  asset_revoked:         { label: 'Asset Revoked',         color: '#051C12', bg: 'rgba(180,241,5,0.18)' },
   request_approved:      { label: 'Request Approved',      color: '#4ADE80', bg: 'rgba(22,163,74,0.12)' },
   request_rejected:      { label: 'Request Rejected',      color: '#F87171', bg: 'rgba(220,38,38,0.12)' },
   user_created:          { label: 'User Created',          color: '#22D3EE', bg: 'rgba(8,145,178,0.12)' },
-  user_updated:          { label: 'User Updated',          color: '#FBBF24', bg: 'rgba(217,119,6,0.12)' },
+  user_updated:          { label: 'User Updated',          color: '#051C12', bg: 'rgba(180,241,5,0.18)' },
 };
 
 const ENTITY_COLORS = {
@@ -74,7 +74,7 @@ const formatChanges = (changes) => {
   );
 };
 
-const ROLE_COLORS = { admin: '#111827', hod: '#A78BFA', employee: '#60A5FA', vendor: '#FBBF24' };
+const ROLE_COLORS = { admin: '#111827', hod: '#A78BFA', employee: '#60A5FA', vendor: '#051C12' };
 
 export default function AuditLogs() {
   const [logs, setLogs] = useState([]);

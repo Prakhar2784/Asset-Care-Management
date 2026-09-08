@@ -10,11 +10,12 @@ const {
 } = require("../controllers/departmentController");
 
 const { protect, authorize } = require("../middleware/authMiddleware");
+const { checkDepartmentLimit } = require("../middleware/limitMiddleware");
 
 router
   .route("/")
   .get(protect, getDepartments)
-  .post(protect, authorize("admin"), createDepartment);
+  .post(protect, authorize("admin"), checkDepartmentLimit, createDepartment);
 
 router
   .route("/:id")

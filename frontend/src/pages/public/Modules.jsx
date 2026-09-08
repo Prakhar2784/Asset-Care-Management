@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
 import VerifiedRoundedIcon from "@mui/icons-material/VerifiedRounded";
@@ -11,20 +11,20 @@ import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 
 const Modules = () => {
   const modules = [
-    { title: "Dashboard", icon: <DashboardRoundedIcon fontSize="large" />, text: "View asset count, active tickets, warranty alerts, pending approvals and vendor performance from one place." },
+    { title: "Dashboard", icon: <DashboardRoundedIcon fontSize="large" />, text: "View asset count, active requests, warranty alerts, pending approvals and vendor performance from one place." },
     { title: "Asset Registry", icon: <Inventory2RoundedIcon fontSize="large" />, text: "Maintain complete asset records with category, department, location, warranty, AMC and ownership details." },
     { title: "Warranty Management", icon: <VerifiedRoundedIcon fontSize="large" />, text: "Track warranty start date, expiry date, AMC coverage, renewal reminders and service eligibility." },
-    { title: "Breakdown Tickets", icon: <BuildRoundedIcon fontSize="large" />, text: "Create issue tickets for faulty assets, assign priority, upload proof and monitor repair progress." },
+    { title: "Service Tickets", icon: <BuildRoundedIcon fontSize="large" />, text: "Create service requests for faulty assets, assign priority, upload proof and monitor repair progress." },
     { title: "Department Approvals", icon: <ApprovalRoundedIcon fontSize="large" />, text: "Route repair, replacement or paid service requests to department heads and admins for approval." },
-    { title: "Service History", icon: <HistoryRoundedIcon fontSize="large" />, text: "Keep complete service history including complaint number, technician notes, repair cost and closure remarks." },
-    { title: "Preventive Maintenance", icon: <SettingsSuggestRoundedIcon fontSize="large" />, text: "Schedule routine maintenance tasks, service reminders and inspection activities to avoid breakdowns." },
-    { title: "Reports & Analytics", icon: <AssessmentRoundedIcon fontSize="large" />, text: "Generate department-wise, vendor-wise, warranty-wise and breakdown reports for better decision-making." },
+    { title: "Service History", icon: <HistoryRoundedIcon fontSize="large" />, text: "Keep complete service history including resolution details, technician notes, repair cost and closure remarks." },
+    { title: "Preventive Maintenance", icon: <SettingsSuggestRoundedIcon fontSize="large" />, text: "Schedule routine maintenance tasks, service reminders and inspection activities to avoid service issues." },
+    { title: "Reports & Analytics", icon: <AssessmentRoundedIcon fontSize="large" />, text: "Generate department-wise, vendor-wise, warranty-wise and request reports for better decision-making." },
   ];
 
   return (
     <>
       <style>{`
-        .modules-page { min-height: 100vh; background: #0B0D12; }
+        .modules-page { min-height: 100vh; background: #051C12; }
         .modules-container { max-width: 1400px; margin: 0 auto; }
         .modules-hero { padding: 140px 24px 44px; }
 
@@ -35,10 +35,10 @@ const Modules = () => {
         }
 
         .modules-summary-card {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 18px; padding: 18px;
-          box-shadow: 0 4px 16px rgba(17,17,17,0.05);
+          box-shadow: 0 4px 16px rgba(5,28,18,0.05);
         }
 
         .modules-summary-value {
@@ -47,7 +47,7 @@ const Modules = () => {
           letter-spacing: -1px; line-height: 1;
         }
 
-        .modules-summary-label { font-size: 13px; font-weight: 700; color: #94A3B8; }
+        .modules-summary-label { font-size: 13px; font-weight: 700; color: #879A91; }
 
         .modules-section { padding: 16px 24px 100px; }
 
@@ -58,24 +58,24 @@ const Modules = () => {
         }
 
         .mod-card {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
+          background: rgba(7,47,31,0.7);
+          border: 1px solid rgba(5,28,18,0.15);
           border-radius: 24px; padding: 32px 28px;
           position: relative; overflow: hidden;
-          box-shadow: 0 4px 16px rgba(17,17,17,0.04);
+          box-shadow: 0 4px 16px rgba(5,28,18,0.04);
         }
 
         .mod-number {
           position: absolute; top: -10px; right: 16px;
           font-size: 96px; font-weight: 950;
-          color: rgba(17,24,39,0.07); z-index: 0; line-height: 1;
+          color: rgba(5,28,18,0.07); z-index: 0; line-height: 1;
         }
 
         .mod-content { position: relative; z-index: 1; }
 
         .mod-icon {
           width: 54px; height: 54px;
-          background: #111827; color: #FFFFFF;
+          background: #051C12; color: #B4F105;
           border-radius: 15px;
           display: flex; align-items: center; justify-content: center;
           margin-bottom: 20px;
@@ -83,18 +83,19 @@ const Modules = () => {
 
         .mod-title { font-size: 19px; font-weight: 900; color: #FFFFFF; margin-bottom: 12px; letter-spacing: -0.3px; }
 
-        .mod-text { font-size: 14.5px; line-height: 1.65; color: #CBD5E1; font-weight: 500; margin-bottom: 24px; }
+        .mod-text { font-size: 14.5px; line-height: 1.65; color: #879A91; font-weight: 500; margin-bottom: 24px; }
 
         .mod-link {
           display: inline-flex; align-items: center; gap: 7px;
-          font-weight: 800; font-size: 13px; color: #FFFFFF;
+          font-weight: 800; font-size: 13px; color: #B4F105;
         }
 
         .mod-arrow { }
 
         .modules-flow {
           max-width: 1400px; margin: 28px auto 0;
-          background: #111827;
+          background: #072F1F;
+          border: 1px solid rgba(255,255,255,0.05);
           border-radius: 28px; padding: 44px;
           display: grid; grid-template-columns: 1fr 1.2fr;
           gap: 38px; align-items: center;
@@ -105,7 +106,7 @@ const Modules = () => {
           content: "";
           position: absolute; top: -80px; left: -80px;
           width: 240px; height: 240px;
-          background: radial-gradient(circle, rgba(17,24,39,0.10), transparent 70%);
+          background: radial-gradient(circle, rgba(180,241,5,0.10), transparent 70%);
           border-radius: 50%; pointer-events: none;
         }
 
@@ -131,12 +132,12 @@ const Modules = () => {
 
         .flow-step-number {
           width: 36px; height: 36px; border-radius: 10px;
-          background: #111827; color: #FFFFFF;
+          background: #051C12; color: #B4F105;
           display: grid; place-items: center;
           font-weight: 950; font-size: 13px; flex-shrink: 0;
         }
 
-        .flow-step-text { font-size: 14px; font-weight: 700; color: #D4D4CE; }
+        .flow-step-text { font-size: 14px; font-weight: 700; color: #879A91; }
 
         @media (max-width: 900px) {
           .modules-hero { padding-top: 120px; }
@@ -189,14 +190,14 @@ const Modules = () => {
           <div className="modules-flow">
             <div>
               <h2>Designed around a complete operational workflow.</h2>
-              <p>AssetCare Pro connects asset registration, warranty tracking, breakdown tickets, approvals, vendor service and final closure into one structured lifecycle.</p>
+              <p>IAssetCare connects asset registration, warranty tracking, service requests, approvals, vendor service and final closure into one structured lifecycle.</p>
             </div>
             <div className="flow-steps">
               {[
                 "Register asset with department, location and warranty details",
-                "Detect warranty expiry, breakdown or service requirement",
-                "Create ticket and route it for approval",
-                "Raise vendor complaint and track closure",
+                "Detect warranty expiry, maintenance or service requirement",
+                "Create request and route it for approval",
+                "Contact vendor and track service completion",
               ].map((step, index) => (
                 <div className="flow-step" key={step}>
                   <div className="flow-step-number">{String(index + 1).padStart(2, "0")}</div>

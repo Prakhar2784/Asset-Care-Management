@@ -20,8 +20,8 @@ import api, { getFileUrl } from "../api/axios";
 import GlobalSearch from "./GlobalSearch";
 
 const DRAWER_W = 256;
-const ACCENT = "#FBBF24";
-const ACCENT_DIM = "rgba(255,255,255,0.55)";
+const ACCENT = "#B4F105";
+const ACCENT_DIM = "#879A91";
 
 const adminMenu = [
   { section: "Overview" },
@@ -42,8 +42,9 @@ const adminMenu = [
   { text: "Departments",      path: "/admin/departments",  icon: <ApartmentRounded />,   perm: "Manage Departments" },
 
   { section: "Admin" },
-  { text: "Users",            path: "/admin/users",        icon: <PeopleRounded />,      perm: "Manage Users" },
-  { text: "Settings",         path: "/settings",           icon: <SettingsRounded /> },
+  { text: "Users",                  path: "/admin/users",              icon: <PeopleRounded />,      perm: "Manage Users" },
+  { text: "Subscription & Billing", path: "/admin/billing",            icon: <ReceiptRounded /> },
+  { text: "Settings",               path: "/settings",                 icon: <SettingsRounded /> },
 ];
 
 const hodMenu = [
@@ -90,7 +91,7 @@ const Sidebar = ({ onClose }) => {
   const isSuperAdmin = currentUser?.role === 'super_admin';
   // Super admin always shows platform identity — never a customer's branding
   const effectiveBranding = isSuperAdmin
-    ? { name: 'AssetCare Pro', logoUrl: null }
+    ? { name: 'IAssetCare', logoUrl: null }
     : branding;
   const logoSrc = effectiveBranding?.logoUrl
     ? (effectiveBranding.logoUrl.startsWith("http") ? effectiveBranding.logoUrl : `${api.defaults.baseURL?.replace(/\/api\/?$/, "")}${effectiveBranding.logoUrl}`)
@@ -144,13 +145,20 @@ const Sidebar = ({ onClose }) => {
     : "Employee Portal";
 
   const handleNav = (path) => { navigate(path); if (onClose) onClose(); };
-  const isActive  = (path) =>
-    location.pathname === path || (path !== "/" && location.pathname.startsWith(path));
+  const isActive  = (path) => {
+    if (path.includes('?')) {
+      return (location.pathname + location.search) === path;
+    }
+    if (path === '/settings' && location.search.includes('tab=')) {
+      return false;
+    }
+    return location.pathname === path || (path !== "/" && location.pathname.startsWith(path));
+  };
 
   return (
     <Box sx={{
       height: "100%",
-      background: "#111827",
+      background: "#051C12",
       display: "flex", flexDirection: "column", overflow: "hidden",
       borderRight: "1px solid rgba(255,255,255,0.06)",
     }}>
@@ -158,19 +166,19 @@ const Sidebar = ({ onClose }) => {
       <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{
-            width: 36, height: 36, borderRadius: "10px", flexShrink: 0, overflow: "hidden",
-            background: logoSrc ? "transparent" : "transparent",
+            width: 38, height: 38, borderRadius: "10px", flexShrink: 0, overflow: "hidden",
+            background: "transparent",
             display: "grid", placeItems: "center",
             boxShadow: "none",
           }}>
             {logoSrc
-              ? <Box component="img" src={logoSrc} alt={effectiveBranding?.name} sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : <Box component="img" src="/favicon.svg" alt="AssetCare" sx={{ width: 28, height: 28 }} />
+              ? <Box component="img" src={logoSrc} alt={effectiveBranding?.name} sx={{ width: "100%", height: "100%", objectFit: "contain" }} />
+              : <Box component="img" src="/logo.png" alt="IAssetCare" sx={{ width: "100%", height: "100%", objectFit: "contain" }} />
             }
           </Box>
           <Box>
             <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#FFFFFF", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
-              {effectiveBranding?.name || "AssetCare Pro"}
+              {effectiveBranding?.name || "IAssetCare"}
             </Typography>
             <Typography sx={{ fontSize: 10, fontWeight: 600, color: ACCENT_DIM, textTransform: "uppercase", letterSpacing: "0.9px" }}>
               {brandLabel}
@@ -186,7 +194,7 @@ const Sidebar = ({ onClose }) => {
             if (item.section) {
               return (
                 <Typography key={`section-${idx}`} sx={{
-                  fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.35)",
+                  fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)",
                   letterSpacing: "1.4px", textTransform: "uppercase",
                   px: 1.5, mt: idx === 0 ? 0 : 2, mb: 0.5,
                 }}>
@@ -201,19 +209,19 @@ const Sidebar = ({ onClose }) => {
                 onClick={() => handleNav(item.path)}
                 sx={{
                   borderRadius: "10px", mb: 0.25, py: 0.85, px: 1.5,
-                  color: active ? "#FFFFFF" : "#9CA3AF",
-                  bgcolor: active ? "rgba(255,255,255,0.1)" : "transparent",
-                  borderLeft: `2px solid ${active ? ACCENT : "transparent"}`,
+                  color: active ? "#FFFFFF" : "#879A91",
+                  bgcolor: active ? "rgba(255,255,255,0.05)" : "transparent",
+                  borderLeft: `3px solid ${active ? ACCENT : "transparent"}`,
                   transition: "all 0.15s ease",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.06)", color: "#FFFFFF" },
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.03)", color: "#FFFFFF" },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 34, color: active ? ACCENT : "#7B8899", "& svg": { fontSize: 18 } }}>
+                <ListItemIcon sx={{ minWidth: 34, color: active ? ACCENT : "#879A91", "& svg": { fontSize: 18 } }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
                   primary={item.text}
-                  slotProps={{ primary: { style: { fontSize: 13, fontWeight: active ? 700 : 500, color: "inherit" } } }}
+                  slotProps={{ primary: { style: { fontSize: 13, fontWeight: active ? 800 : 600, color: "inherit" } } }}
                 />
                 {active && <ChevronRightRounded sx={{ fontSize: 16, color: ACCENT, opacity: 0.7 }} />}
               </ListItemButton>
@@ -223,27 +231,27 @@ const Sidebar = ({ onClose }) => {
       </Box>
 
       {/* User Row */}
-      <Box sx={{ borderTop: "1px solid rgba(17,24,39,0.1)", px: 2, py: 2 }}>
+      <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.06)", px: 2, py: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Avatar src={getFileUrl(currentUser?.avatar) || undefined} sx={{
             width: 34, height: 34,
-            background: "#111827",
+            background: "#072F1F",
             color: "#FFFFFF", fontWeight: 900, fontSize: 12,
-            boxShadow: "0 2px 8px rgba(17,24,39,0.4)",
+            boxShadow: "0 2px 8px rgba(5,28,18,0.25)",
           }}>
             {userInitials}
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#E0E0E0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {userName}
             </Typography>
-            <Typography sx={{ fontSize: 11, color: ACCENT_DIM, textTransform: "capitalize" }}>
+            <Typography sx={{ fontSize: 11, color: "#879A91", textTransform: "capitalize" }}>
               {currentUser?.role || "user"}
             </Typography>
           </Box>
         </Box>
-        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)", textAlign: "center", mt: 1.5, letterSpacing: "0.3px" }}>
-          Powered by AssetCare Pro
+        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)", textAlign: "center", mt: 1.5, letterSpacing: "0.3px" }}>
+          Powered by IAssetCare
         </Typography>
       </Box>
     </Box>
@@ -302,7 +310,7 @@ const Layout = () => {
 
   const pageTitle = Object.entries(PAGE_TITLES).find(([k]) =>
     location.pathname === k || (k !== "/" && location.pathname.startsWith(k))
-  )?.[1] ?? "AssetCare Pro";
+  )?.[1] ?? "IAssetCare";
 
   return (
     <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: "background.default" }}>
@@ -342,12 +350,6 @@ const Layout = () => {
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <Tooltip title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}>
-                <IconButton onClick={toggleMode}
-                  sx={{ color: "text.secondary", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
-                  {isDark ? <LightModeRounded sx={{ fontSize: 20 }} /> : <DarkModeRounded sx={{ fontSize: 20 }} />}
-                </IconButton>
-              </Tooltip>
               <GlobalSearch />
               <IconButton onClick={() => navigate("/notifications")}
                 sx={{ color: "text.secondary", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
@@ -361,15 +363,15 @@ const Layout = () => {
                 src={getFileUrl(currentUser?.avatar) || undefined}
                 sx={{
                   width: 34, height: 34, ml: 0.5, cursor: "pointer",
-                  background: "#111827",
+                  background: "#051C12",
                   color: "#FFFFFF", fontWeight: 900, fontSize: 12,
-                  boxShadow: isDark ? "0 2px 8px rgba(17,24,39,0.4)" : "0 2px 8px rgba(17,24,39,0.25)",
+                  boxShadow: "0 2px 8px rgba(5,28,18,0.15)",
                   "&:hover": { opacity: 0.85 }
                 }}>
                 {userInitials}
               </Avatar>
               <IconButton onClick={() => setLogoutOpen(true)}
-                sx={{ ml: 0.5, color: "text.secondary", "&:hover": { color: "#EF4444", bgcolor: isDark ? "rgba(239,68,68,0.1)" : "#FEE2E2" } }}>
+                sx={{ ml: 0.5, color: "text.secondary", "&:hover": { color: "#EF4444", bgcolor: "#FEE2E2" } }}>
                 <LogoutRounded sx={{ fontSize: 19 }} />
               </IconButton>
             </Box>

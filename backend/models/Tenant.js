@@ -19,8 +19,8 @@ const tenantSchema = new mongoose.Schema({
   },
   plan: { 
     type: String, 
-    enum: ['Basic', 'Pro', 'Enterprise'], 
-    default: 'Basic' 
+    enum: ['Home User', 'MSME', 'Large Scale'], 
+    default: 'Home User' 
   },
   branding: {
     logoUrl: { type: String, default: null },
@@ -62,7 +62,23 @@ const tenantSchema = new mongoose.Schema({
     country:  { type: String, default: 'India' }
   },
   planSeats:   { type: Number, default: 10 },
-  planExpiry:  { type: Date, default: null },
+  planExpiry: { type: Date, default: null },
+  subscriptionStatus: {
+    type: String,
+    enum: ['Active', 'Pending Checkout', 'Expired', 'Cancelled'],
+    default: 'Pending Checkout'
+  },
+
+  // Scheduled downgrade - populated when a customer requests a lower plan at next renewal.
+  // Current subscription stays fully active until planExpiry; cron applies this at expiry.
+  scheduledDowngrade: {
+    plan:          { type: String, default: null },
+    scheduledAt:   { type: Date,   default: null },
+    effectiveDate: { type: Date,   default: null },
+    requestedBy:   { type: String, default: null },
+  },
+
+  customerType: { type: String, enum: ['Individual', 'Business'], default: 'Business' },
   licenseKey:  { type: String, default: null }
 }, {
   timestamps: true 

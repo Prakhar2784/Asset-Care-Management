@@ -137,30 +137,27 @@ export default function ForgotPassword() {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0B0D12;
+            background: #F4F6F5;
             background-attachment: fixed;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             width: 100%;
           }
 
           .auth-container {
             width: 100%;
             max-width: 1200px;
-            background: rgba(255, 255, 255, 0.70);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(17,24,39,0.18);
+            background: #FFFFFF;
+            border: 1.5px solid #E9EFEF;
             border-radius: 36px;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 30px 70px rgba(5, 28, 18, 0.05);
             display: flex;
             overflow: hidden;
-            border: 1px solid rgba(17,24,39,0.15);
-            color: #ffffff;
+            color: #0B130F;
           }
 
         .auth-info {
           flex: 1.2;
-          background: linear-gradient(135deg, #111111 0%, #050505 100%);
+          background: #051C12;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -175,8 +172,8 @@ export default function ForgotPassword() {
           left: -10%;
           width: 380px;
           height: 380px;
-          background: radial-gradient(circle, rgba(17,24,39,0.12) 0%, rgba(0,0,0,0) 70%);
-          border: 1px dashed rgba(17,24,39,0.15);
+          background: radial-gradient(circle, rgba(180,241,5,0.12) 0%, rgba(0,0,0,0) 70%);
+          border: 1px dashed rgba(255,255,255,0.15);
           border-radius: 50%;
         }
 
@@ -191,16 +188,17 @@ export default function ForgotPassword() {
           width: 48px;
           height: 48px;
           border-radius: 12px;
-          background: #111827;
+          background: #B4F105;
           display: grid;
           place-items: center;
-          color: #FFFFFF;
+          color: #051C12;
         }
 
         .brand-name {
           font-size: 22px;
           font-weight: 800;
           letter-spacing: -0.5px;
+          color: #FFFFFF;
         }
 
         .info-content {
@@ -214,13 +212,13 @@ export default function ForgotPassword() {
           font-weight: 800;
           line-height: 1.2;
           margin-bottom: 20px;
-          background: linear-gradient(90deg, #FFFFFF 0%, #888888 100%);
+          background: linear-gradient(90deg, #FFFFFF 0%, #879A91 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
 
         .info-desc {
-          color: #909090;
+          color: #879A91;
           line-height: 1.6;
           margin-bottom: 40px;
         }
@@ -241,8 +239,8 @@ export default function ForgotPassword() {
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          background: rgba(17,24,39,0.1);
-          color: #FFFFFF;
+          background: rgba(180,241,5,0.1);
+          color: #B4F105;
           display: grid;
           place-items: center;
         }
@@ -251,11 +249,12 @@ export default function ForgotPassword() {
           font-size: 16px;
           font-weight: 700;
           margin: 0 0 4px 0;
+          color: #FFFFFF;
         }
 
         .feature-details p {
           font-size: 13px;
-          color: #808080;
+          color: #879A91;
           margin: 0;
         }
 
@@ -265,7 +264,7 @@ export default function ForgotPassword() {
           align-items: center;
           justify-content: center;
           padding: 40px;
-          background: #090909;
+          background: #FFFFFF;
           z-index: 2;
         }
 
@@ -277,11 +276,12 @@ export default function ForgotPassword() {
         .form-title {
           font-size: 28px;
           font-weight: 800;
+          color: #0B130F;
           margin-bottom: 8px;
         }
 
         .form-sub {
-          color: #888888;
+          color: #6C7E75;
           font-size: 14px;
           margin-bottom: 30px;
         }
@@ -296,27 +296,27 @@ export default function ForgotPassword() {
           left: 14px;
           top: 50%;
           transform: translateY(-50%);
-          color: #555555;
+          color: #879A91;
           display: flex;
           align-items: center;
         }
 
         .auth-input {
           width: 100%;
-          background: #141414;
-          border: 1px solid #222222;
+          background: #FFFFFF;
+          border: 1.5px solid #E9EFEF;
           padding: 14px 14px 14px 44px;
           border-radius: 12px;
-          color: #ffffff;
+          color: #0B130F;
           font-size: 14px;
           transition: all 0.3s;
           outline: none;
         }
 
         .auth-input:focus {
-          border-color: #FFFFFF;
-          background: #181818;
-          box-shadow: 0 0 0 4px rgba(17,24,39,0.1);
+          border-color: #051C12;
+          background: #FFFFFF;
+          box-shadow: 0 0 0 3px rgba(5,28,18,0.05);
         }
 
         .error-banner {
@@ -332,8 +332,8 @@ export default function ForgotPassword() {
 
         .submit-btn {
           width: 100%;
-          background: #FBBF24;
-          color: #111827;
+          background: #051C12;
+          color: #FFFFFF;
           font-weight: 700;
           border: none;
           padding: 14px;
@@ -350,12 +350,13 @@ export default function ForgotPassword() {
 
         .submit-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 8px 20px rgba(17,24,39,0.3);
+          box-shadow: 0 8px 20px rgba(5,28,18,0.18);
+          background: #072F1F;
         }
 
         .submit-btn:disabled {
-          background: #444444;
-          color: #888888;
+          background: #E9EFEF;
+          color: #879A91;
           cursor: not-allowed;
         }
 
@@ -363,16 +364,17 @@ export default function ForgotPassword() {
           margin-top: 24px;
           text-align: center;
           font-size: 13px;
-          color: #666666;
+          color: #6C7E75;
         }
 
         .auth-link {
-          color: #FFFFFF;
+          color: #051C12;
           text-decoration: none;
           font-weight: 600;
         }
 
         .auth-link:hover {
+          color: #B4F105;
           text-decoration: underline;
         }
 
@@ -415,16 +417,16 @@ export default function ForgotPassword() {
         }
 
         .step-circle.active {
-          background: #111827;
-          border: 1px solid #111827;
+          background: #051C12;
+          border: 1px solid #051C12;
           color: #ffffff;
-          box-shadow: 0 0 0 4px rgba(17,24,39,0.18);
+          box-shadow: 0 0 0 4px rgba(5,28,18,0.12);
         }
 
         .step-circle.upcoming {
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.14);
-          color: #9CA3AF;
+          background: rgba(5,28,18,0.06);
+          border: 1px solid rgba(5,28,18,0.14);
+          color: #879A91;
         }
 
         .step-label {
@@ -432,9 +434,9 @@ export default function ForgotPassword() {
           font-weight: 700;
         }
 
-        .step-label.active { color: #FBBF24; }
-        .step-label.done { color: #4ADE80; }
-        .step-label.upcoming { color: #5B5B75; }
+        .step-label.active { color: #051C12; }
+        .step-label.done { color: #16a34a; }
+        .step-label.upcoming { color: #879A91; }
 
         .step-line {
           width: 40px;
@@ -444,7 +446,7 @@ export default function ForgotPassword() {
         }
 
         .step-line.done { background: #16a34a; }
-        .step-line.upcoming { background: rgba(255,255,255,0.12); }
+        .step-line.upcoming { background: rgba(5,28,18,0.12); }
 
         @media (max-width: 900px) {
           .auth-info {
@@ -456,10 +458,10 @@ export default function ForgotPassword() {
       {/* LEFT DESIGN SIDE */}
       <div className="auth-info">
         <div className="brand-header">
-          <div className="brand-logo">
-            <Inventory2Icon />
+          <div className="brand-logo" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
+            <img src="/logo.png" alt="IAssetCare" style={{ width: 42, height: 42, display: 'block', objectFit: 'contain' }} />
           </div>
-          <span className="brand-name">AssetCare</span>
+          <span className="brand-name">IAssetCare</span>
         </div>
 
         <div className="info-content">
@@ -575,7 +577,7 @@ export default function ForgotPassword() {
                   disabled={resendCooldown > 0 || loading}
                   onClick={handleSendOtp}
                   style={{
-                    background: 'none', border: 'none', color: resendCooldown > 0 ? '#5B5B75' : '#FBBF24',
+                    background: 'none', border: 'none', color: resendCooldown > 0 ? '#879A91' : '#051C12',
                     fontWeight: 700, cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer'
                   }}
                 >

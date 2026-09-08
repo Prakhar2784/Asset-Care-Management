@@ -1,11 +1,12 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box, Typography, Paper, Grid, Button, Chip, IconButton,
   Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, FormControl, InputLabel,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, Tooltip, Alert, Snackbar, CircularProgress,
-  Tabs, Tab, Divider, Avatar, Switch, FormControlLabel, Badge
+  Tabs, Tab, Divider, Avatar, Switch, FormControlLabel,
+  InputAdornment, Stack, Card, CardContent, TablePagination
 } from '@mui/material';
 import {
   BusinessRounded, AddRounded, PowerSettingsNewRounded,
@@ -15,93 +16,242 @@ import {
   ShieldRounded, RocketLaunchRounded, StarRounded,
   VisibilityRounded, TrendingUpRounded, DnsRounded,
   InboxRounded, EmailRounded, PhoneRounded, BusinessCenterRounded,
-  EditNoteRounded, OpenInNewRounded
+  EditNoteRounded, OpenInNewRounded, LocalOfferRounded,
+  WarningAmberRounded, ErrorOutlineRounded, ScheduleRounded,
+  ReceiptRounded, HistoryRounded, RefreshRounded, EditRounded,
+  AccountBalanceWalletRounded, MonetizationOnRounded, CalendarMonthRounded,
+  LocationOnRounded, AssignmentRounded, SearchRounded,
+  CreditCardRounded, ContentCopyRounded, FilterListRounded,
+  CheckRounded, ArrowForwardRounded, AccountTreeRounded
 } from '@mui/icons-material';
 import api from '../../api/axios';
 
-const ACCENT = '#111827';
-const DARK = '#111827';
+const ACCENT = '#B4F105';
+const DARK = '#051C12';
+const TEXT_MUTED = '#64748B';
 
-const PLAN_COLORS = {
-  Basic: { bg: '#1e3a5f', text: '#60a5fa', label: 'Basic' },
-  Pro: { bg: '#3b1f6e', text: '#a78bfa', label: 'Pro' },
-  Enterprise: { bg: '#1a3a2a', text: '#4ade80', label: 'Enterprise' },
+// Currency formatter for Indian numbering system
+const formatINR = (val) => {
+  if (val === null || val === undefined || isNaN(val)) return '₹0.00';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2
+  }).format(val);
 };
 
-const PLAN_ICONS = {
-  Basic: <RocketLaunchRounded sx={{ fontSize: 14 }} />,
-  Pro: <StarRounded sx={{ fontSize: 14 }} />,
-  Enterprise: <ShieldRounded sx={{ fontSize: 14 }} />,
+const PLAN_BADGE_STYLES = {
+  'Home User': { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
+  'MSME': { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
+  'Large Scale': { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' },
+  'None': { bg: '#F1F5F9', text: '#64748B', border: '#CBD5E1' }
 };
 
 function PlanBadge({ plan }) {
-  const colors = PLAN_COLORS[plan] || PLAN_COLORS['Basic'];
+  const style = PLAN_BADGE_STYLES[plan] || PLAN_BADGE_STYLES['None'];
   return (
-    <Chip
-      icon={PLAN_ICONS[plan]}
-      label={plan}
-      size="small"
+    <Box
+      component="span"
       sx={{
-        bgcolor: colors.bg,
-        color: colors.text,
-        fontWeight: 800,
-        fontSize: 11,
-        height: 22,
-        '& .MuiChip-icon': { color: colors.text, ml: 0.5 }
+        display: 'inline-flex',
+        alignItems: 'center',
+        px: 1.25,
+        py: 0.35,
+        borderRadius: '6px',
+        bgcolor: style.bg,
+        color: style.text,
+        border: `1px solid ${style.border}`,
+        fontWeight: 700,
+        fontSize: '11.5px',
+        letterSpacing: '0.2px'
       }}
-    />
-  );
-}
-
-function UtilBar({ value, color = '#111827', label }) {
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-        <Typography variant="caption" color="text.secondary">{label}</Typography>
-        <Typography variant="caption" fontWeight={700} color={value > 80 ? '#ef4444' : value > 60 ? '#f59e0b' : color}>
-          {value}%
-        </Typography>
-      </Box>
-      <LinearProgress
-        variant="determinate"
-        value={value}
-        sx={{
-          height: 5, borderRadius: 4,
-          bgcolor: 'rgba(255,255,255,0.08)',
-          '& .MuiLinearProgress-bar': {
-            bgcolor: value > 80 ? '#ef4444' : value > 60 ? '#f59e0b' : color,
-            borderRadius: 4,
-          }
-        }}
-      />
+    >
+      {plan || 'None'}
     </Box>
   );
 }
 
-function PlatformStatCard({ icon, label, value, color, sub }) {
+function StatusBadge({ status }) {
+  let bg = '#F1F5F9';
+  let text = '#475569';
+  let border = '#CBD5E1';
+
+  if (status === 'Active') {
+    bg = '#ECFDF5';
+    text = '#059669';
+    border = '#A7F3D0';
+  } else if (status === 'Pending Checkout' || status === 'Pending') {
+    bg = '#FFFBEB';
+    text = '#D97706';
+    border = '#FDE68A';
+  } else if (status === 'Expired') {
+    bg = '#FEF2F2';
+    text = '#DC2626';
+    border = '#FECACA';
+  } else if (status === 'Cancelled' || status === 'Failed') {
+    bg = '#F8FAFC';
+    text = '#64748B';
+    border = '#E2E8F0';
+  } else if (status === 'Paid') {
+    bg = '#F0FDF4';
+    text = '#16A34A';
+    border = '#BBF7D0';
+  }
+
   return (
-    <Paper sx={{
-      p: 2.5, borderRadius: 3, border: '1px solid', borderColor: 'divider',
-      background: 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%)',
-      backdropFilter: 'blur(10px)',
-    }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box sx={{
-          width: 44, height: 44, borderRadius: 2, flexShrink: 0,
-          bgcolor: `${color}20`, color,
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
+    <Box
+      component="span"
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 0.5,
+        px: 1.25,
+        py: 0.35,
+        borderRadius: '6px',
+        bgcolor: bg,
+        color: text,
+        border: `1px solid ${border}`,
+        fontWeight: 700,
+        fontSize: '11.5px',
+        letterSpacing: '0.2px'
+      }}
+    >
+      <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: text }} />
+      {status || 'Unknown'}
+    </Box>
+  );
+}
+
+function UrgencyBadge({ urgency, days }) {
+  if (urgency === 'EXPIRED') {
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1.2, py: 0.3, borderRadius: '6px', bgcolor: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA', fontWeight: 800, fontSize: '11px' }}>
+        <ErrorOutlineRounded sx={{ fontSize: 13 }} /> EXPIRED
+      </Box>
+    );
+  }
+  if (urgency === 'URGENT_15') {
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1.2, py: 0.3, borderRadius: '6px', bgcolor: '#FFF7ED', color: '#EA580C', border: '1px solid #FFEDD5', fontWeight: 800, fontSize: '11px' }}>
+        <WarningAmberRounded sx={{ fontSize: 13 }} /> {days}d (URGENT)
+      </Box>
+    );
+  }
+  if (urgency === 'WARNING_30') {
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1.2, py: 0.3, borderRadius: '6px', bgcolor: '#FFFBEB', color: '#D97706', border: '1px solid #FDE68A', fontWeight: 700, fontSize: '11px' }}>
+        <ScheduleRounded sx={{ fontSize: 13 }} /> {days}d remaining
+      </Box>
+    );
+  }
+  if (urgency === 'PENDING') {
+    return (
+      <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1.2, py: 0.3, borderRadius: '6px', bgcolor: '#F8FAFC', color: '#64748B', border: '1px solid #E2E8F0', fontWeight: 700, fontSize: '11px' }}>
+        Pending Checkout
+      </Box>
+    );
+  }
+  return (
+    <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, px: 1.2, py: 0.3, borderRadius: '6px', bgcolor: '#F0FDF4', color: '#16A34A', border: '1px solid #BBF7D0', fontWeight: 700, fontSize: '11px' }}>
+      <CheckCircleRounded sx={{ fontSize: 13 }} /> {days !== null ? `${days}d remaining` : 'Active'}
+    </Box>
+  );
+}
+
+// Professional, standalone metric KPI card with zero text collision
+function MetricCard({ title, value, subtext, icon, iconBg = '#EFF6FF', iconColor = '#2563EB', badgeText, badgeColor = '#10B981' }) {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2.75,
+        borderRadius: '16px',
+        bgcolor: '#FFFFFF',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        height: '100%',
+        minHeight: 140,
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)'
+        }
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: iconBg,
+            color: iconColor
+          }}
+        >
           {icon}
         </Box>
-        <Box>
-          <Typography variant="h4" fontWeight={900} color="text.primary" letterSpacing="-1px">
-            {value}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" fontWeight={700} textTransform="uppercase" letterSpacing="0.5px">
-            {label}
-          </Typography>
-          {sub && <Typography variant="caption" color="text.disabled" display="block">{sub}</Typography>}
-        </Box>
+        {badgeText && (
+          <Box
+            sx={{
+              px: 1,
+              py: 0.3,
+              borderRadius: '9999px',
+              bgcolor: badgeColor + '18',
+              color: badgeColor,
+              fontWeight: 800,
+              fontSize: '11px'
+            }}
+          >
+            {badgeText}
+          </Box>
+        )}
+      </Box>
+
+      <Box>
+        <Typography
+          variant="caption"
+          sx={{
+            display: 'block',
+            fontWeight: 800,
+            color: TEXT_MUTED,
+            textTransform: 'uppercase',
+            letterSpacing: '0.6px',
+            fontSize: '11px',
+            mb: 0.5
+          }}
+        >
+          {title}
+        </Typography>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 900,
+            color: '#0F172A',
+            letterSpacing: '-0.8px',
+            lineHeight: 1.1,
+            mb: 0.5,
+            wordBreak: 'break-word'
+          }}
+        >
+          {value}
+        </Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: TEXT_MUTED,
+            fontSize: '12px',
+            fontWeight: 500
+          }}
+        >
+          {subtext}
+        </Typography>
       </Box>
     </Paper>
   );
@@ -110,48 +260,102 @@ function PlatformStatCard({ icon, label, value, color, sub }) {
 export default function SuperAdminPanel() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState(0);
+  const [errorState, setErrorState] = useState(false);
+  const [mainTab, setMainTab] = useState(0);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [lastSynced, setLastSynced] = useState(new Date());
+
+  // Expiry monitoring
+  const [expiryList, setExpiryList] = useState([]);
+  const [expiryLoading, setExpiryLoading] = useState(false);
+  const [expiryFilter, setExpiryFilter] = useState('ALL');
+  const [expirySearch, setExpirySearch] = useState('');
+
+  // Coupons
+  const [coupons, setCoupons] = useState([]);
+  const [couponsLoading, setCouponsLoading] = useState(false);
+  const [couponModal, setCouponModal] = useState({ open: false, isEdit: false, data: null });
+  const [couponForm, setCouponForm] = useState({
+    code: '', description: '', discountType: 'fixed', discountValue: '',
+    minOrderValue: 0, maxDiscount: '', applicablePlans: ['ALL'],
+    startDate: new Date().toISOString().split('T')[0], expiryDate: '', maxUsage: '', isActive: true
+  });
 
   // Leads tab
-  const [mainTab, setMainTab] = useState(0);
   const [leads, setLeads] = useState([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
-  const [leadDetail, setLeadDetail] = useState(null);
-  const [leadNotes, setLeadNotes] = useState('');
-  const [leadStatus, setLeadStatus] = useState('New');
-  const [leadSaving, setLeadSaving] = useState(false);
 
   // Dialogs
   const [createOpen, setCreateOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
-  const [usersOpen, setUsersOpen] = useState(false);
-  const [selectedTenant, setSelectedTenant] = useState(null);
-  const [tenantUsers, setTenantUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedTenantDetails, setSelectedTenantDetails] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailTab, setDetailTab] = useState(0);
+  const [copiedKey, setCopiedKey] = useState(false);
+
+  // Search & Filter state for Companies Table
+  const [companySearch, setCompanySearch] = useState('');
+  const [companyPlanFilter, setCompanyPlanFilter] = useState('ALL');
+  const [companyStatusFilter, setCompanyStatusFilter] = useState('ALL');
+  const [companyPage, setCompanyPage] = useState(0);
+  const [companyRowsPerPage, setCompanyRowsPerPage] = useState(10);
+
+  // Transaction Search & Filter state
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+  const [invoiceStatusFilter, setInvoiceStatusFilter] = useState('ALL');
+  const [invoicePage, setInvoicePage] = useState(0);
+  const [invoiceRowsPerPage, setInvoiceRowsPerPage] = useState(10);
 
   // Form state
   const [form, setForm] = useState({
-    name: '', slug: '', plan: 'Basic',
+    name: '', slug: '', plan: 'MSME',
     adminName: '', adminEmail: '', adminPassword: '',
-    maxAssets: '', maxUsers: ''
+    maxAssets: '', maxUsers: '', address: '', city: '', state: 'Maharashtra', pinCode: '', gstNumber: ''
   });
   const [planForm, setPlanForm] = useState({
-    plan: 'Basic', maxAssets: '', maxUsers: '',
-    features: { procurement: false, enterpriseHub: false, customBranding: false, advancedReports: false },
-    planExpiry: '',
+    plan: 'MSME', additionalDays: 365, status: 'Active', notes: ''
   });
   const [saving, setSaving] = useState(false);
+
+  const showSnack = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
+      setErrorState(false);
       const { data: res } = await api.get('/super-admin/platform-stats');
       setData(res);
-    } catch (e) {
-      showSnack('Failed to load platform stats.', 'error');
+      setLastSynced(new Date());
+    } catch {
+      setErrorState(true);
+      showSnack('Failed to load platform stats from backend.', 'error');
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const fetchExpiryMonitoring = useCallback(async () => {
+    setExpiryLoading(true);
+    try {
+      const { data: res } = await api.get('/super-admin/expiry-monitoring');
+      setExpiryList(res);
+    } catch {
+      showSnack('Failed to load expiry monitoring list.', 'error');
+    } finally {
+      setExpiryLoading(false);
+    }
+  }, []);
+
+  const fetchCoupons = useCallback(async () => {
+    setCouponsLoading(true);
+    try {
+      const { data: res } = await api.get('/super-admin/coupons');
+      setCoupons(res);
+    } catch {
+      showSnack('Failed to load coupons.', 'error');
+    } finally {
+      setCouponsLoading(false);
     }
   }, []);
 
@@ -160,700 +364,1157 @@ export default function SuperAdminPanel() {
     try {
       const { data } = await api.get('/super-admin/leads');
       setLeads(data);
-    } catch { setLeads([]); }
-    finally { setLeadsLoading(false); }
+    } catch {
+      setLeads([]);
+    } finally {
+      setLeadsLoading(false);
+    }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
-  useEffect(() => { if (mainTab === 1) fetchLeads(); }, [mainTab, fetchLeads]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  const showSnack = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
+  useEffect(() => {
+    if (mainTab === 2) fetchExpiryMonitoring();
+    if (mainTab === 4) fetchCoupons();
+    if (mainTab === 5) fetchLeads();
+  }, [mainTab, fetchExpiryMonitoring, fetchCoupons, fetchLeads]);
 
-  const handleLeadSave = async () => {
-    setLeadSaving(true);
+  const handleOpenDetails = async (tenantId) => {
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetailTab(0);
+    setCopiedKey(false);
     try {
-      const { data } = await api.patch(`/super-admin/leads/${leadDetail._id}`, { status: leadStatus, notes: leadNotes });
-      setLeads(prev => prev.map(l => l._id === data._id ? data : l));
-      setLeadDetail(data);
-      showSnack('Lead updated.');
-    } catch { showSnack('Failed to update lead.', 'error'); }
-    finally { setLeadSaving(false); }
-  };
-
-  const handleLeadDelete = async (lead) => {
-    if (!window.confirm(`Delete lead from ${lead.company}?`)) return;
-    try {
-      await api.delete(`/super-admin/leads/${lead._id}`);
-      setLeads(prev => prev.filter(l => l._id !== lead._id));
-      if (leadDetail?._id === lead._id) setLeadDetail(null);
-      showSnack('Lead deleted.', 'info');
-    } catch { showSnack('Failed to delete.', 'error'); }
-  };
-
-  const LEAD_STATUS_COLORS = {
-    'New': { bg: '#1e3a5f', text: '#60a5fa' },
-    'Contacted': { bg: '#3b2a00', text: '#fbbf24' },
-    'Demo Scheduled': { bg: '#1a3a2a', text: '#4ade80' },
-    'Converted': { bg: '#14532d', text: '#86efac' },
-    'Not Interested': { bg: '#3b0a0a', text: '#f87171' },
-  };
-
-  const handleCreateCompany = async () => {
-    try {
-      setSaving(true);
-      await api.post('/super-admin/tenants', {
-        name: form.name,
-        slug: form.slug,
-        plan: form.plan,
-        adminName: form.adminName,
-        adminEmail: form.adminEmail,
-        adminPassword: form.adminPassword,
-        maxAssets: form.maxAssets ? Number(form.maxAssets) : undefined,
-        maxUsers: form.maxUsers ? Number(form.maxUsers) : undefined,
-      });
-      showSnack(`Company "${form.name}" provisioned successfully!`);
-      setCreateOpen(false);
-      setForm({ name: '', slug: '', plan: 'Basic', adminName: '', adminEmail: '', adminPassword: '', maxAssets: '', maxUsers: '' });
-      fetchData();
-    } catch (e) {
-      showSnack(e?.response?.data?.message || 'Failed to create company.', 'error');
+      const { data: res } = await api.get(`/super-admin/tenants/${tenantId}/details`);
+      setSelectedTenantDetails(res);
+    } catch {
+      showSnack('Failed to load company details.', 'error');
     } finally {
-      setSaving(false);
+      setDetailLoading(false);
     }
   };
 
-  const handleToggle = async (tenant) => {
+  const handleToggleTenant = async (tenantId) => {
     try {
-      const { data: res } = await api.patch(`/super-admin/tenants/${tenant._id}/toggle`);
+      const { data: res } = await api.patch(`/super-admin/tenants/${tenantId}/toggle`);
       showSnack(res.message);
       fetchData();
-    } catch {
-      showSnack('Failed to update status.', 'error');
-    }
-  };
-
-  const handleDelete = async (tenant) => {
-    if (!window.confirm(`Permanently delete "${tenant.name}"? This action cannot be undone.`)) return;
-    try {
-      await api.delete(`/super-admin/tenants/${tenant._id}`);
-      showSnack(`"${tenant.name}" deleted.`, 'info');
-      fetchData();
+      if (mainTab === 2) fetchExpiryMonitoring();
     } catch (e) {
-      showSnack(e?.response?.data?.message || 'Delete failed.', 'error');
+      showSnack(e.response?.data?.message || 'Action failed', 'error');
     }
   };
 
-  const handlePlanSave = async () => {
+  const handleDeleteTenant = async (tenant) => {
+    if (!window.confirm(`Are you sure you want to permanently delete company "${tenant.name}"?`)) return;
     try {
-      setSaving(true);
-      await api.patch(`/super-admin/tenants/${selectedTenant._id}/plan`, {
-        plan: planForm.plan,
-        maxAssets: planForm.maxAssets !== '' ? Number(planForm.maxAssets) : -1,
-        maxUsers: planForm.maxUsers !== '' ? Number(planForm.maxUsers) : -1,
-        features: planForm.features,
-        planExpiry: planForm.planExpiry || null,
-      });
-      showSnack('Plan updated successfully!');
-      setPlanOpen(false);
+      const { data: res } = await api.delete(`/super-admin/tenants/${tenant._id}`);
+      showSnack(res.message);
       fetchData();
-    } catch {
-      showSnack('Failed to update plan.', 'error');
+      if (mainTab === 2) fetchExpiryMonitoring();
+    } catch (e) {
+      showSnack(e.response?.data?.message || 'Delete failed', 'error');
+    }
+  };
+
+  const handleCreateTenant = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.post('/super-admin/tenants', form);
+      showSnack('Company created successfully!');
+      setCreateOpen(false);
+      setForm({
+        name: '', slug: '', plan: 'MSME', adminName: '', adminEmail: '',
+        adminPassword: '', maxAssets: '', maxUsers: '', address: '', city: '', state: 'Maharashtra', pinCode: '', gstNumber: ''
+      });
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Creation failed.', 'error');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleViewUsers = async (tenant) => {
-    setSelectedTenant(tenant);
-    setUsersOpen(true);
-    setUsersLoading(true);
+  const handleSubscriptionAction = async (e) => {
+    e.preventDefault();
+    if (!selectedTenantDetails?.tenant?._id) return;
+    setSaving(true);
     try {
-      const { data: users } = await api.get(`/super-admin/tenants/${tenant._id}/users`);
-      setTenantUsers(users);
-    } catch {
-      setTenantUsers([]);
+      await api.post(`/super-admin/tenants/${selectedTenantDetails.tenant._id}/subscription-action`, planForm);
+      showSnack('Subscription updated successfully!');
+      setPlanOpen(false);
+      handleOpenDetails(selectedTenantDetails.tenant._id);
+      fetchData();
+      if (mainTab === 2) fetchExpiryMonitoring();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Update failed.', 'error');
     } finally {
-      setUsersLoading(false);
+      setSaving(false);
     }
   };
 
-  if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh', flexDirection: 'column', gap: 2 }}>
-      <CircularProgress sx={{ color: ACCENT }} />
-      <Typography color="text.secondary" fontWeight={600}>Loading Platform Console...</Typography>
-    </Box>
-  );
+  const handleSaveCoupon = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      if (couponModal.isEdit && couponModal.data?._id) {
+        await api.put(`/super-admin/coupons/${couponModal.data._id}`, couponForm);
+        showSnack(`Coupon "${couponForm.code}" updated.`);
+      } else {
+        await api.post('/super-admin/coupons', couponForm);
+        showSnack(`Coupon "${couponForm.code}" created.`);
+      }
+      setCouponModal({ open: false, isEdit: false, data: null });
+      fetchCoupons();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Coupon save failed.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  const { platform, tenants } = data || {};
-  const activeTenants = tenants?.filter(t => t.isActive) || [];
-  const suspendedTenants = tenants?.filter(t => !t.isActive) || [];
+  const handleToggleCoupon = async (couponId) => {
+    try {
+      const { data: res } = await api.patch(`/super-admin/coupons/${couponId}/toggle`);
+      showSnack(res.message);
+      fetchCoupons();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Toggle failed', 'error');
+    }
+  };
+
+  const handleDeleteCoupon = async (coupon) => {
+    if (!window.confirm(`Delete coupon "${coupon.code}"?`)) return;
+    try {
+      const { data: res } = await api.delete(`/super-admin/coupons/${coupon._id}`);
+      showSnack(res.message);
+      fetchCoupons();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Delete failed', 'error');
+    }
+  };
+
+  const openCreateCoupon = () => {
+    setCouponForm({
+      code: '', description: '', discountType: 'fixed', discountValue: '',
+      minOrderValue: 0, maxDiscount: '', applicablePlans: ['ALL'],
+      startDate: new Date().toISOString().split('T')[0], expiryDate: '', maxUsage: '', isActive: true
+    });
+    setCouponModal({ open: true, isEdit: false, data: null });
+  };
+
+  const openEditCoupon = (c) => {
+    setCouponForm({
+      code: c.code,
+      description: c.description || '',
+      discountType: c.discountType,
+      discountValue: c.discountValue,
+      minOrderValue: c.minOrderValue || 0,
+      maxDiscount: c.maxDiscount || '',
+      applicablePlans: c.applicablePlans || ['ALL'],
+      startDate: c.startDate ? new Date(c.startDate).toISOString().split('T')[0] : '',
+      expiryDate: c.expiryDate ? new Date(c.expiryDate).toISOString().split('T')[0] : '',
+      maxUsage: c.maxUsage || '',
+      isActive: c.isActive !== false
+    });
+    setCouponModal({ open: true, isEdit: true, data: c });
+  };
+
+  const copyLicenseKey = (key) => {
+    if (!key) return;
+    navigator.clipboard.writeText(key);
+    setCopiedKey(true);
+    showSnack('License key copied to clipboard.');
+    setTimeout(() => setCopiedKey(false), 3000);
+  };
+
+  const platform = data?.platform || {};
+  const tenants = data?.tenants || [];
+  const recentInvoices = data?.recentInvoices || [];
+
+  // Filtered Companies
+  const filteredTenants = useMemo(() => {
+    return tenants.filter((t) => {
+      const matchesSearch = !companySearch ||
+        t.name?.toLowerCase().includes(companySearch.toLowerCase()) ||
+        t.slug?.toLowerCase().includes(companySearch.toLowerCase()) ||
+        t.contactEmail?.toLowerCase().includes(companySearch.toLowerCase());
+      const matchesPlan = companyPlanFilter === 'ALL' || t.plan === companyPlanFilter;
+      const matchesStatus = companyStatusFilter === 'ALL' || t.subscriptionStatus === companyStatusFilter;
+      return matchesSearch && matchesPlan && matchesStatus;
+    });
+  }, [tenants, companySearch, companyPlanFilter, companyStatusFilter]);
+
+  // Filtered Expiry List
+  const filteredExpiryList = useMemo(() => {
+    return expiryList.filter((item) => {
+      const matchesSearch = !expirySearch ||
+        item.name?.toLowerCase().includes(expirySearch.toLowerCase()) ||
+        item.slug?.toLowerCase().includes(expirySearch.toLowerCase()) ||
+        item.customerName?.toLowerCase().includes(expirySearch.toLowerCase());
+      if (!matchesSearch) return false;
+      if (expiryFilter === 'EXPIRED') return item.urgency === 'EXPIRED';
+      if (expiryFilter === 'URGENT_15') return item.urgency === 'URGENT_15';
+      if (expiryFilter === 'WARNING_30') return item.urgency === 'WARNING_30';
+      if (expiryFilter === 'PENDING') return item.urgency === 'PENDING';
+      if (expiryFilter === 'ACTIVE') return item.urgency === 'ACTIVE';
+      return true;
+    });
+  }, [expiryList, expirySearch, expiryFilter]);
+
+  // Filtered Invoices
+  const filteredInvoices = useMemo(() => {
+    return recentInvoices.filter((inv) => {
+      const matchesSearch = !invoiceSearch ||
+        inv.invoiceNumber?.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
+        inv.companyName?.toLowerCase().includes(invoiceSearch.toLowerCase()) ||
+        inv.razorpayOrderId?.toLowerCase().includes(invoiceSearch.toLowerCase());
+      const matchesStatus = invoiceStatusFilter === 'ALL' || inv.status === invoiceStatusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [recentInvoices, invoiceSearch, invoiceStatusFilter]);
+
+  // Plan Breakdown percentages
+  const planBreakdown = platform.planBreakdown || {};
+  const totalTenantsCount = platform.totalTenants || 0;
+  const homeCount = planBreakdown['Home User'] || 0;
+  const msmeCount = planBreakdown['MSME'] || 0;
+  const largeCount = planBreakdown['Large Scale'] || 0;
+  const homePct = totalTenantsCount > 0 ? ((homeCount / totalTenantsCount) * 100).toFixed(1) : 0;
+  const msmePct = totalTenantsCount > 0 ? ((msmeCount / totalTenantsCount) * 100).toFixed(1) : 0;
+  const largePct = totalTenantsCount > 0 ? ((largeCount / totalTenantsCount) * 100).toFixed(1) : 0;
 
   return (
-    <Box>
-      {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{
-            width: 52, height: 52, borderRadius: 2.5,
-            bgcolor: DARK, display: 'grid', placeItems: 'center',
-            boxShadow: `0 0 0 3px ${ACCENT}40`
-          }}>
-            <DnsRounded sx={{ color: ACCENT, fontSize: 26 }} />
-          </Box>
-          <Box>
-            <Typography variant="h4" fontWeight={900} letterSpacing="-1px" color="text.primary">
-              Platform Console
+    <Box sx={{ p: { xs: 2, md: 3.5 }, bgcolor: '#F8FAFC', minHeight: '100vh' }}>
+      {/* ─── 1. TOP HEADER ────────────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          mb: 3.5,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: 2
+        }}
+      >
+        <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+            <Box
+              sx={{
+                width: 38,
+                height: 38,
+                borderRadius: '10px',
+                bgcolor: DARK,
+                color: ACCENT,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(5, 28, 18, 0.2)'
+              }}
+            >
+              <ShieldRounded sx={{ fontSize: 22 }} />
+            </Box>
+            <Typography variant="h5" sx={{ fontWeight: 900, color: '#0F172A', letterSpacing: '-0.5px' }}>
+              Super Admin Console
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Super Admin · God Mode · All Tenant Operations
-            </Typography>
+            <Chip
+              label="Control Plane"
+              size="small"
+              sx={{
+                bgcolor: '#EFF6FF',
+                color: '#2563EB',
+                fontWeight: 800,
+                fontSize: '11px',
+                border: '1px solid #DBEAFE'
+              }}
+            />
           </Box>
+          <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 500 }}>
+            AssetCare Platform Administration, Tenant Isolation & Commercial Licensing Engine
+          </Typography>
         </Box>
-        <Button
-          id="provision-company-btn"
-          variant="contained"
-          startIcon={<AddRounded />}
-          onClick={() => setCreateOpen(true)}
-          sx={{
-            bgcolor: ACCENT, color: DARK, fontWeight: 900,
-            borderRadius: '10px', px: 3, py: 1.2, fontSize: 14,
-            '&:hover': { bgcolor: '#b8e84e' }
-          }}
-        >
-          Provision New Company
-        </Button>
+
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontWeight: 600, display: { xs: 'none', sm: 'block' } }}>
+            Last synced: {lastSynced.toLocaleTimeString()}
+          </Typography>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshRounded sx={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />}
+            onClick={fetchData}
+            disabled={loading}
+            sx={{
+              borderRadius: '10px',
+              borderColor: '#E2E8F0',
+              color: '#334155',
+              bgcolor: '#FFFFFF',
+              fontWeight: 700,
+              textTransform: 'none',
+              px: 2,
+              '&:hover': { bgcolor: '#F1F5F9', borderColor: '#CBD5E1' }
+            }}
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddRounded />}
+            onClick={() => setCreateOpen(true)}
+            sx={{
+              borderRadius: '10px',
+              bgcolor: DARK,
+              color: '#FFFFFF',
+              fontWeight: 800,
+              textTransform: 'none',
+              px: 2.5,
+              boxShadow: '0 4px 12px rgba(5, 28, 18, 0.15)',
+              '&:hover': { bgcolor: '#0B291C' }
+            }}
+          >
+            Provision Company
+          </Button>
+        </Stack>
       </Box>
 
-      {/* Platform KPI Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        {[
-          { icon: <BusinessRounded />, label: 'Total Companies', value: platform?.totalTenants || 0, color: ACCENT },
-          { icon: <CheckCircleRounded />, label: 'Active', value: platform?.activeTenants || 0, color: '#4ade80' },
-          { icon: <CancelRounded />, label: 'Suspended', value: platform?.suspendedTenants || 0, color: '#ef4444' },
-        ].map(card => (
-          <Grid key={card.label} size={{ xs: 12, sm: 4 }}>
-            <PlatformStatCard {...card} />
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Plan Breakdown */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        {['Basic', 'Pro', 'Enterprise'].map(plan => {
-          const count = platform?.planBreakdown?.[plan] || 0;
-          const pct = platform?.totalTenants > 0 ? ((count / platform.totalTenants) * 100).toFixed(1) : 0;
-          const colors = PLAN_COLORS[plan];
-          return (
-            <Grid key={plan} size={{ xs: 12, md: 4 }}>
-              <Paper sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
-                <Box sx={{ mb: 1.5 }}>{PLAN_ICONS[plan]}</Box>
-                <Typography variant="h3" fontWeight={900} color={colors.text}>{count}</Typography>
-                <Typography fontWeight={700} color="text.secondary">{plan} Plan</Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={Number(pct)}
-                  sx={{
-                    mt: 1.5, height: 6, borderRadius: 4,
-                    bgcolor: 'rgba(255,255,255,0.06)',
-                    '& .MuiLinearProgress-bar': { bgcolor: colors.text, borderRadius: 4 }
-                  }}
-                />
-                <Typography variant="caption" color="text.disabled">{pct}% of tenants</Typography>
-              </Paper>
-            </Grid>
-          );
-        })}
-      </Grid>
-
-      {/* Main Tabs — Companies / Leads */}
-      <Tabs
-        value={mainTab}
-        onChange={(_, v) => setMainTab(v)}
-        sx={{ mb: 3, '& .MuiTab-root': { fontWeight: 700, fontSize: 13, textTransform: 'none' }, '& .MuiTabs-indicator': { bgcolor: ACCENT } }}
+      {/* ─── NAVIGATION TABS ────────────────────────────────────────────────────── */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: '14px',
+          border: '1px solid #E2E8F0',
+          bgcolor: '#FFFFFF',
+          mb: 3.5,
+          p: 0.5
+        }}
       >
-        <Tab label="Companies" icon={<BusinessRounded sx={{ fontSize: 16 }} />} iconPosition="start" />
-        <Tab label={`Sales Leads ${leads.length > 0 ? `(${leads.filter(l => l.status === 'New').length} new)` : ''}`} icon={<InboxRounded sx={{ fontSize: 16 }} />} iconPosition="start" />
-      </Tabs>
+        <Tabs
+          value={mainTab}
+          onChange={(_, v) => setMainTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            minHeight: 48,
+            '& .MuiTabs-indicator': {
+              bgcolor: DARK,
+              height: 3,
+              borderRadius: '3px 3px 0 0'
+            },
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontWeight: 700,
+              fontSize: '13.5px',
+              color: '#64748B',
+              minHeight: 48,
+              px: 2.5,
+              '&.Mui-selected': {
+                color: '#0F172A',
+                fontWeight: 900
+              }
+            }
+          }}
+        >
+          <Tab
+            icon={<BarChartRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label="Overview & Financials"
+          />
+          <Tab
+            icon={<BusinessRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label={`Companies (${totalTenantsCount})`}
+          />
+          <Tab
+            icon={<ScheduleRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label={`Expiry Monitoring (${platform.expiringIn30 || 0})`}
+          />
+          <Tab
+            icon={<ReceiptRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label={`Transactions (${platform.paidInvoicesCount || 0})`}
+          />
+          <Tab
+            icon={<LocalOfferRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label={`Promotions & Coupons (${platform.totalCoupons || 0})`}
+          />
+          <Tab
+            icon={<InboxRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label={`Contact Inquiries (${leads.length})`}
+          />
+        </Tabs>
+      </Paper>
 
-      {/* Companies sub-tabs */}
-      {mainTab === 0 && <Tabs
-        value={tab}
-        onChange={(_, v) => setTab(v)}
-        sx={{ mb: 3, '& .MuiTab-root': { fontWeight: 600, fontSize: 12, textTransform: 'none' }, '& .MuiTabs-indicator': { bgcolor: '#60a5fa' } }}
-      >
-        <Tab id="tab-all" label={`All (${tenants?.length || 0})`} />
-        <Tab id="tab-active" label={`Active (${activeTenants.length})`} />
-        <Tab id="tab-suspended" label={`Suspended (${suspendedTenants.length})`} />
-      </Tabs>}
+      {/* Error state */}
+      {errorState && (
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={fetchData}>
+              Retry
+            </Button>
+          }
+          sx={{ mb: 3, borderRadius: '12px' }}
+        >
+          Unable to load live platform statistics. Please check database connectivity and retry.
+        </Alert>
+      )}
 
-      {/* Company Table */}
-      {mainTab === 0 && <Paper sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: 'action.hover' }}>
-                {['Company', 'Plan', 'Status', 'Asset Limit', 'User Limit', 'Plan Expiry', 'Joined', 'Actions'].map(h => (
-                  <TableCell key={h} sx={{ fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.7px', py: 1.5, color: 'text.secondary', whiteSpace: 'nowrap' }}>
-                    {h}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {(tab === 0 ? tenants : tab === 1 ? activeTenants : suspendedTenants)?.map(t => (
-                <TableRow key={t._id} hover sx={{ opacity: t.isActive ? 1 : 0.55 }}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: t.branding?.primaryColor || '#1976d2', fontSize: 13, fontWeight: 900 }}>
-                        {t.name.substring(0, 1)}
-                      </Avatar>
-                      <Box>
-                        <Typography fontWeight={700} fontSize={14} color="text.primary">{t.name}</Typography>
-                        <Typography fontSize={11} color="text.disabled">slug: {t.slug}</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell><PlanBadge plan={t.plan} /></TableCell>
-                  <TableCell>
-                    <Chip
-                      label={t.isActive ? 'Active' : 'Suspended'}
-                      size="small"
-                      sx={{
-                        bgcolor: t.isActive ? '#14532d' : '#450a0a',
-                        color: t.isActive ? '#4ade80' : '#f87171',
-                        fontWeight: 700, fontSize: 11, height: 22
-                      }}
+      {/* ─── TAB 0: EXECUTIVE OVERVIEW & FINANCIALS ─────────────────────────────────── */}
+      {mainTab === 0 && (
+        <Box>
+          {loading && !data ? (
+            <Box sx={{ p: 8, textAlign: 'center' }}>
+              <CircularProgress size={40} sx={{ color: DARK, mb: 2 }} />
+              <Typography variant="body2" color="text.secondary">
+                Loading live platform telemetry and billing data...
+              </Typography>
+            </Box>
+          ) : (
+            <>
+              {/* PRIMARY 9 KPI CARDS */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#334155', mb: 2, letterSpacing: '0.3px', textTransform: 'uppercase', fontSize: '12px' }}>
+                  Platform Health & Subscriptions
+                </Typography>
+                <Grid container spacing={2.5}>
+                  <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                    <MetricCard
+                      title="Total Companies"
+                      value={platform.totalTenants ?? 'N/A'}
+                      subtext="All registered tenants"
+                      icon={<BusinessRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#EFF6FF"
+                      iconColor="#2563EB"
                     />
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontWeight={700} fontSize={13}>
-                      {t.limits.maxAssets === -1 ? 'Unlimited' : t.limits.maxAssets}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontWeight={700} fontSize={13}>
-                      {t.limits.maxUsers === -1 ? 'Unlimited' : t.limits.maxUsers}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontSize={12} color={t.planExpiry && new Date(t.planExpiry) < new Date() ? '#ef4444' : 'text.secondary'} whiteSpace="nowrap">
-                      {t.planExpiry ? new Date(t.planExpiry).toLocaleDateString('en-IN') : '—'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography fontSize={12} color="text.secondary" whiteSpace="nowrap">
-                      {new Date(t.createdAt).toLocaleDateString('en-IN')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title="Change Plan">
-                        <IconButton size="small" onClick={() => {
-                          setSelectedTenant(t);
-                          setPlanForm({
-                            plan: t.plan,
-                            maxAssets: t.limits.maxAssets === -1 ? '' : t.limits.maxAssets,
-                            maxUsers: t.limits.maxUsers === -1 ? '' : t.limits.maxUsers,
-                            features: {
-                              procurement: !!t.features?.procurement,
-                              enterpriseHub: !!t.features?.enterpriseHub,
-                              customBranding: !!t.features?.customBranding,
-                              advancedReports: !!t.features?.advancedReports,
-                            },
-                            planExpiry: t.planExpiry ? new Date(t.planExpiry).toISOString().split('T')[0] : '',
-                          });
-                          setPlanOpen(true);
-                        }} sx={{ color: '#a78bfa' }}>
-                          <UpgradeRounded sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t.isActive ? 'Suspend' : 'Activate'}>
-                        <IconButton size="small" onClick={() => handleToggle(t)} sx={{ color: t.isActive ? '#f59e0b' : '#4ade80' }}>
-                          <PowerSettingsNewRounded sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete Company">
-                        <IconButton size="small" onClick={() => handleDelete(t)} sx={{ color: '#ef4444' }}>
-                          <DeleteRounded sx={{ fontSize: 17 }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(tab === 0 ? tenants : tab === 1 ? activeTenants : suspendedTenants)?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} sx={{ textAlign: 'center', py: 6, color: 'text.disabled' }}>
-                    No companies found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>}
+                  </Grid>
 
-      {/* ─── Sales Leads Panel ─── */}
-      {mainTab === 1 && (
-        <Box sx={{ display: 'flex', gap: 2.5, alignItems: 'flex-start' }}>
-          {/* Lead list */}
-          <Box sx={{ flex: '0 0 380px', minWidth: 0 }}>
-            {leadsLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress /></Box>
-            ) : leads.length === 0 ? (
-              <Paper sx={{ p: 5, textAlign: 'center', borderRadius: 3 }}>
-                <InboxRounded sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
-                <Typography color="text.disabled" fontWeight={600}>No leads yet</Typography>
-                <Typography variant="caption" color="text.disabled">Submissions from the Contact page will appear here</Typography>
-              </Paper>
-            ) : leads.map(lead => {
-              const sc = LEAD_STATUS_COLORS[lead.status] || LEAD_STATUS_COLORS['New'];
-              const isSelected = leadDetail?._id === lead._id;
-              return (
-                <Paper
-                  key={lead._id}
-                  onClick={() => { setLeadDetail(lead); setLeadNotes(lead.notes || ''); setLeadStatus(lead.status); }}
+                  <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                    <MetricCard
+                      title="Active Subscriptions"
+                      value={platform.activeSubscriptions ?? 'N/A'}
+                      subtext={`of ${platform.totalTenants || 0} companies (${totalTenantsCount > 0 ? ((platform.activeSubscriptions / totalTenantsCount) * 100).toFixed(1) : 0}%)`}
+                      icon={<CheckCircleRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#ECFDF5"
+                      iconColor="#059669"
+                      badgeText="Active"
+                      badgeColor="#059669"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                    <MetricCard
+                      title="Pending Checkout"
+                      value={platform.pendingCheckout ?? 'N/A'}
+                      subtext="Awaiting plan purchase"
+                      icon={<ScheduleRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#FFFBEB"
+                      iconColor="#D97706"
+                      badgeText="Pending"
+                      badgeColor="#D97706"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                    <MetricCard
+                      title="Expiring ≤ 30 Days"
+                      value={platform.expiringIn30 ?? 'N/A'}
+                      subtext="Renewal window open"
+                      icon={<WarningAmberRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#FFF7ED"
+                      iconColor="#EA580C"
+                      badgeText={platform.expiringIn30 > 0 ? 'Warning' : 'Good'}
+                      badgeColor={platform.expiringIn30 > 0 ? '#EA580C' : '#10B981'}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4} lg={2.4}>
+                    <MetricCard
+                      title="Expiring ≤ 15 Days"
+                      value={platform.expiringIn15 ?? 'N/A'}
+                      subtext="Urgent action required"
+                      icon={<ErrorOutlineRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#FEF2F2"
+                      iconColor="#DC2626"
+                      badgeText={platform.expiringIn15 > 0 ? 'Urgent' : 'Zero'}
+                      badgeColor={platform.expiringIn15 > 0 ? '#DC2626' : '#10B981'}
+                    />
+                  </Grid>
+
+                  {/* Revenue & Tax Row */}
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <MetricCard
+                      title="Total Platform Revenue"
+                      value={formatINR(platform.totalRevenue)}
+                      subtext={`From ${platform.paidInvoicesCount || 0} paid transactions`}
+                      icon={<MonetizationOnRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#F0FDF4"
+                      iconColor="#16A34A"
+                      badgeText="Gross Paid"
+                      badgeColor="#16A34A"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <MetricCard
+                      title="Total GST Collected"
+                      value={formatINR(platform.totalTax)}
+                      subtext={`Taxable base: ${formatINR(platform.totalTaxable)}`}
+                      icon={<ReceiptRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#F5F3FF"
+                      iconColor="#7C3AED"
+                      badgeText="18% GST"
+                      badgeColor="#7C3AED"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <MetricCard
+                      title="Expired Subscriptions"
+                      value={platform.expiredSubscriptions ?? 'N/A'}
+                      subtext="In grace period or expired"
+                      icon={<CancelRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#F8FAFC"
+                      iconColor="#64748B"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <MetricCard
+                      title="Cancelled Subscriptions"
+                      value={platform.cancelledSubscriptions ?? 'N/A'}
+                      subtext="Deactivated tenant accounts"
+                      icon={<PowerSettingsNewRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#F8FAFC"
+                      iconColor="#64748B"
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+
+              {/* ─── PLAN DISTRIBUTION & REVENUE SUMMARY ────────────────────────────── */}
+              <Grid container spacing={3} sx={{ mb: 4 }}>
+                {/* Plan Distribution */}
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      borderRadius: '16px',
+                      bgcolor: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      height: '100%'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+                          Subscription Plan Breakdown
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+                          Distribution across {totalTenantsCount} registered companies
+                        </Typography>
+                      </Box>
+                      <AccountTreeRounded sx={{ color: TEXT_MUTED }} />
+                    </Box>
+
+                    <Stack spacing={3}>
+                      {/* MSME */}
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <PlanBadge plan="MSME" />
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#334155', fontSize: '13px' }}>
+                              ₹2,999 / year
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>
+                            {`${msmeCount} companies (${msmePct}%)`}
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={Number(msmePct)}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            bgcolor: '#F5F3FF',
+                            '& .MuiLinearProgress-bar': { bgcolor: '#7C3AED', borderRadius: 4 }
+                          }}
+                        />
+                      </Box>
+
+                      {/* Large Scale */}
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <PlanBadge plan="Large Scale" />
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#334155', fontSize: '13px' }}>
+                              ₹8,999 / year
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>
+                            {`${largeCount} companies (${largePct}%)`}
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={Number(largePct)}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            bgcolor: '#ECFDF5',
+                            '& .MuiLinearProgress-bar': { bgcolor: '#059669', borderRadius: 4 }
+                          }}
+                        />
+                      </Box>
+
+                      {/* Home User */}
+                      <Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <PlanBadge plan="Home User" />
+                            <Typography variant="body2" sx={{ fontWeight: 700, color: '#334155', fontSize: '13px' }}>
+                              ₹999 / year
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>
+                            {`${homeCount} companies (${homePct}%)`}
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={Number(homePct)}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            bgcolor: '#EFF6FF',
+                            '& .MuiLinearProgress-bar': { bgcolor: '#2563EB', borderRadius: 4 }
+                          }}
+                        />
+                      </Box>
+                    </Stack>
+                  </Paper>
+                </Grid>
+
+                {/* Platform Utilization & Coupons Summary */}
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      borderRadius: '16px',
+                      bgcolor: '#FFFFFF',
+                      border: '1px solid #E2E8F0',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+                          Financial & Coupon Telemetry
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+                          Real-time transaction compliance & promo engine
+                        </Typography>
+                      </Box>
+                      <CreditCardRounded sx={{ color: TEXT_MUTED }} />
+                    </Box>
+
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
+                            PAID INVOICES
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 900, color: '#16A34A', mt: 0.5 }}>
+                            {platform.paidInvoicesCount ?? 0}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                            Settled via Razorpay
+                          </Typography>
+                        </Box>
+                      </Grid>
+
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
+                            PENDING PAYMENTS
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 900, color: '#D97706', mt: 0.5 }}>
+                            {platform.pendingInvoicesCount ?? 0}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                            Orders awaiting capture
+                          </Typography>
+                        </Box>
+                      </Grid>
+
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
+                            ACTIVE COUPONS
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 900, color: '#7C3AED', mt: 0.5 }}>
+                            {platform.activeCoupons ?? 0}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                            of {platform.totalCoupons || 0} configured codes
+                          </Typography>
+                        </Box>
+                      </Grid>
+
+                      <Grid item xs={6}>
+                        <Box sx={{ p: 2, borderRadius: '12px', bgcolor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
+                            COUPON USAGE
+                          </Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A', mt: 0.5 }}>
+                            {platform.totalCouponUsage ?? 0}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                            Total checkout redemptions
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
+
+                    <Button
+                      variant="outlined"
+                      endIcon={<ArrowForwardRounded />}
+                      onClick={() => setMainTab(4)}
+                      sx={{
+                        borderRadius: '10px',
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        color: DARK,
+                        borderColor: '#E2E8F0',
+                        '&:hover': { bgcolor: '#F8FAFC', borderColor: DARK }
+                      }}
+                    >
+                      Manage Promotional Coupons
+                    </Button>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+              {/* RECENT TRANSACTIONS PREVIEW */}
+              <Paper
+                elevation={0}
+                sx={{
+                  borderRadius: '16px',
+                  bgcolor: '#FFFFFF',
+                  border: '1px solid #E2E8F0',
+                  overflow: 'hidden'
+                }}
+              >
+                <Box
                   sx={{
-                    p: 2, mb: 1.5, borderRadius: 2.5, cursor: 'pointer',
-                    border: '1px solid',
-                    borderColor: isSelected ? '#a78bfa' : 'divider',
-                    bgcolor: isSelected ? 'rgba(167,139,250,0.07)' : 'background.paper',
-                    transition: 'all 0.15s',
-                    '&:hover': { borderColor: '#a78bfa' },
+                    p: 2.5,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    borderBottom: '1px solid #E2E8F0'
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
-                    <Typography fontWeight={800} fontSize={14} noWrap sx={{ flex: 1 }}>{lead.company}</Typography>
-                    <Chip label={lead.status} size="small"
-                      sx={{ bgcolor: sc.bg, color: sc.text, fontWeight: 700, fontSize: 10, height: 20, ml: 1, flexShrink: 0 }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+                      Recent Payments & Invoices
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+                      Latest commercial subscription transactions recorded in the platform
+                    </Typography>
                   </Box>
-                  <Typography fontSize={12} color="text.secondary" noWrap>{lead.name} · {lead.email}</Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                    <Typography fontSize={11} color="text.disabled">{lead.inquiryType}</Typography>
-                    <Typography fontSize={11} color="text.disabled">{new Date(lead.createdAt).toLocaleDateString('en-IN')}</Typography>
-                  </Box>
-                </Paper>
-              );
-            })}
-          </Box>
-
-          {/* Lead detail pane */}
-          {leadDetail ? (
-            <Paper sx={{ flex: 1, borderRadius: 3, p: 3, border: '1px solid', borderColor: 'divider', minWidth: 0 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
-                <Box>
-                  <Typography variant="h6" fontWeight={900}>{leadDetail.company}</Typography>
-                  <Typography variant="caption" color="text.disabled">
-                    Received {new Date(leadDetail.createdAt).toLocaleString('en-IN')}
-                  </Typography>
+                  <Button
+                    variant="text"
+                    endIcon={<ArrowForwardRounded />}
+                    onClick={() => setMainTab(3)}
+                    sx={{ textTransform: 'none', fontWeight: 700, color: '#2563EB' }}
+                  >
+                    View All Transactions
+                  </Button>
                 </Box>
-                <Tooltip title="Delete Lead">
-                  <IconButton size="small" onClick={() => handleLeadDelete(leadDetail)} sx={{ color: '#ef4444' }}>
-                    <DeleteRounded sx={{ fontSize: 17 }} />
-                  </IconButton>
-                </Tooltip>
-              </Box>
 
-              <Grid container spacing={1.5} sx={{ mb: 2.5 }}>
-                {[
-                  { icon: <PersonRounded sx={{ fontSize: 15 }} />, label: 'Contact', val: leadDetail.name },
-                  { icon: <EmailRounded sx={{ fontSize: 15 }} />, label: 'Email', val: leadDetail.email },
-                  { icon: <PhoneRounded sx={{ fontSize: 15 }} />, label: 'Phone', val: leadDetail.phone || '—' },
-                  { icon: <PeopleRounded sx={{ fontSize: 15 }} />, label: 'Org Size', val: leadDetail.orgSize || '—' },
-                  { icon: <BusinessCenterRounded sx={{ fontSize: 15 }} />, label: 'Inquiry', val: leadDetail.inquiryType },
-                ].map(({ icon, label, val }) => (
-                  <Grid key={label} size={{ xs: 12, sm: 6 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, borderRadius: 2, bgcolor: 'action.hover' }}>
-                      <Box sx={{ color: 'text.secondary', flexShrink: 0 }}>{icon}</Box>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography fontSize={10} fontWeight={700} color="text.disabled" textTransform="uppercase" letterSpacing="0.5px">{label}</Typography>
-                        <Typography fontSize={13} fontWeight={600} noWrap>{val}</Typography>
-                      </Box>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-
-              <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'action.hover', mb: 2.5 }}>
-                <Typography fontSize={10} fontWeight={700} color="text.disabled" textTransform="uppercase" letterSpacing="0.5px" mb={0.5}>Message</Typography>
-                <Typography fontSize={13} color="text.primary" sx={{ lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{leadDetail.message}</Typography>
-              </Box>
-
-              <Divider sx={{ mb: 2.5 }} />
-
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid size={{ xs: 12, sm: 5 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel>Status</InputLabel>
-                    <Select value={leadStatus} label="Status" onChange={e => setLeadStatus(e.target.value)}>
-                      {['New', 'Contacted', 'Demo Scheduled', 'Converted', 'Not Interested'].map(s => (
-                        <MenuItem key={s} value={s}>{s}</MenuItem>
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px', py: 1.5 }}>Date</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>Invoice #</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>Company</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>Plan</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>Taxable</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>GST (18%)</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>Total Amount</TableCell>
+                        <TableCell sx={{ fontWeight: 800, color: '#475569', fontSize: '12px' }}>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {recentInvoices.slice(0, 5).map((inv) => (
+                        <TableRow key={inv._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                          <TableCell sx={{ color: '#334155', fontSize: '12.5px', py: 1.5 }}>
+                            {inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : '—'}
+                          </TableCell>
+                          <TableCell sx={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F172A', fontSize: '12px' }}>
+                            {inv.invoiceNumber}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#0F172A', fontSize: '12.5px' }}>
+                            {inv.companyName}
+                          </TableCell>
+                          <TableCell><PlanBadge plan={inv.planName} /></TableCell>
+                          <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>{formatINR(inv.taxableAmount)}</TableCell>
+                          <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>{formatINR((inv.cgst || 0) + (inv.sgst || 0) + (inv.igst || 0))}</TableCell>
+                          <TableCell sx={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>{formatINR(inv.totalAmount)}</TableCell>
+                          <TableCell><StatusBadge status={inv.status} /></TableCell>
+                        </TableRow>
                       ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 7 }}>
-                  <TextField fullWidth size="small" label="Internal Notes" multiline rows={2}
-                    value={leadNotes} onChange={e => setLeadNotes(e.target.value)}
-                    placeholder="e.g. Called on 5 Jul, scheduling demo next week..." />
-                </Grid>
-              </Grid>
-
-              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-                <Button variant="contained" onClick={handleLeadSave} disabled={leadSaving}
-                  startIcon={<EditNoteRounded />}
-                  sx={{ bgcolor: '#a78bfa', color: '#1a0533', fontWeight: 800, borderRadius: '8px' }}>
-                  {leadSaving ? 'Saving...' : 'Save Update'}
-                </Button>
-                <Button variant="outlined" startIcon={<OpenInNewRounded />}
-                  onClick={() => { setCreateOpen(true); }}
-                  sx={{ fontWeight: 700, borderRadius: '8px', borderColor: '#4ade80', color: '#4ade80', '&:hover': { borderColor: '#4ade80', bgcolor: 'rgba(74,222,128,0.08)' } }}>
-                  Provision as Company
-                </Button>
-                <Button variant="text" startIcon={<EmailRounded />}
-                  href={`mailto:${leadDetail.email}?subject=AssetCare Pro Demo — ${leadDetail.company}`}
-                  sx={{ fontWeight: 700, borderRadius: '8px', color: '#60a5fa' }}>
-                  Reply via Email
-                </Button>
-              </Box>
-            </Paper>
-          ) : (
-            <Paper sx={{ flex: 1, borderRadius: 3, p: 6, border: '1px solid', borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 1 }}>
-              <InboxRounded sx={{ fontSize: 48, color: 'text.disabled' }} />
-              <Typography color="text.disabled" fontWeight={600}>Select a lead to view details</Typography>
-            </Paper>
+                      {recentInvoices.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} align="center" sx={{ py: 4, color: TEXT_MUTED }}>
+                            No payment transactions recorded yet.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            </>
           )}
         </Box>
       )}
 
-      {/* ─── Create Company Dialog ─── */}
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: '16px', bgcolor: 'background.paper' } } }}>
-        <DialogTitle sx={{ fontWeight: 900, fontSize: 20 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: ACCENT, display: 'grid', placeItems: 'center' }}>
-              <BusinessRounded sx={{ fontSize: 18, color: DARK }} />
-            </Box>
-            Provision New Company
-          </Box>
-        </DialogTitle>
-        <Divider />
-        <DialogContent sx={{ pt: 3 }}>
-          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1.5} textTransform="uppercase" letterSpacing="0.7px">
-            Company Details
-          </Typography>
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField id="company-name" fullWidth label="Company Name" value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} size="small" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField id="company-slug" fullWidth label="Slug (unique ID)" value={form.slug}
-                onChange={e => setForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))}
-                size="small" helperText="e.g. acme-corp (no spaces)" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Plan</InputLabel>
-                <Select id="company-plan" value={form.plan} label="Plan" onChange={e => setForm(f => ({ ...f, plan: e.target.value }))}>
-                  <MenuItem value="Basic">Basic</MenuItem>
-                  <MenuItem value="Pro">Pro</MenuItem>
-                  <MenuItem value="Enterprise">Enterprise</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <TextField id="max-assets" fullWidth label="Max Assets" type="number" value={form.maxAssets}
-                onChange={e => setForm(f => ({ ...f, maxAssets: e.target.value }))} size="small" helperText="Leave blank for plan default" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <TextField id="max-users" fullWidth label="Max Users" type="number" value={form.maxUsers}
-                onChange={e => setForm(f => ({ ...f, maxUsers: e.target.value }))} size="small" helperText="Leave blank for plan default" />
-            </Grid>
-          </Grid>
-          <Divider sx={{ mb: 2 }} />
-          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1.5} textTransform="uppercase" letterSpacing="0.7px">
-            Admin Account
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField id="admin-name" fullWidth label="Admin Full Name" value={form.adminName}
-                onChange={e => setForm(f => ({ ...f, adminName: e.target.value }))} size="small" />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField id="admin-email" fullWidth label="Admin Email" type="email" value={form.adminEmail}
-                onChange={e => setForm(f => ({ ...f, adminEmail: e.target.value }))} size="small" />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <TextField id="admin-password" fullWidth label="Temporary Password" type="password" value={form.adminPassword}
-                onChange={e => setForm(f => ({ ...f, adminPassword: e.target.value }))} size="small" />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 1 }}>
-          <Button onClick={() => setCreateOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700 }}>Cancel</Button>
-          <Button
-            id="confirm-provision-btn"
-            variant="contained"
-            onClick={handleCreateCompany}
-            disabled={saving || !form.name || !form.slug || !form.adminEmail || !form.adminName || !form.adminPassword}
-            sx={{ bgcolor: ACCENT, color: DARK, fontWeight: 900, borderRadius: '8px', px: 3 }}
-          >
-            {saving ? 'Provisioning...' : 'Provision Company'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ─── Plan Update Dialog ─── */}
-      <Dialog open={planOpen} onClose={() => setPlanOpen(false)} maxWidth="sm" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: '16px' } } }}>
-        <DialogTitle fontWeight={900} sx={{ pb: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 34, height: 34, borderRadius: '9px', bgcolor: '#3b1f6e', display: 'grid', placeItems: 'center' }}>
-              <UpgradeRounded sx={{ fontSize: 18, color: '#a78bfa' }} />
-            </Box>
-            Configure Plan — {selectedTenant?.name}
-          </Box>
-        </DialogTitle>
-        <Divider sx={{ mt: 2 }} />
-        <DialogContent sx={{ pt: 2.5 }}>
-          {/* Tier + Limits */}
-          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1.5} textTransform="uppercase" letterSpacing="0.7px" fontSize={11}>
-            Plan Tier &amp; Limits
-          </Typography>
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Plan Tier</InputLabel>
-                <Select value={planForm.plan} label="Plan Tier"
-                  onChange={e => {
-                    const defaults = { Basic: { maxAssets: 50, maxUsers: 10 }, Pro: { maxAssets: 500, maxUsers: 50 }, Enterprise: { maxAssets: '', maxUsers: '' } };
-                    const d = defaults[e.target.value];
-                    setPlanForm(f => ({ ...f, plan: e.target.value, maxAssets: d.maxAssets, maxUsers: d.maxUsers }));
-                  }}>
-                  <MenuItem value="Basic">Basic</MenuItem>
-                  <MenuItem value="Pro">Pro</MenuItem>
-                  <MenuItem value="Enterprise">Enterprise (Custom)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <TextField fullWidth label="Max Assets" type="number" size="small"
-                value={planForm.maxAssets}
-                helperText="Leave blank for unlimited"
-                onChange={e => setPlanForm(f => ({ ...f, maxAssets: e.target.value }))} />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              <TextField fullWidth label="Max Users" type="number" size="small"
-                value={planForm.maxUsers}
-                helperText="Leave blank for unlimited"
-                onChange={e => setPlanForm(f => ({ ...f, maxUsers: e.target.value }))} />
-            </Grid>
-          </Grid>
-
-          <Divider sx={{ mb: 2.5 }} />
-
-          {/* Feature Flags */}
-          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1} textTransform="uppercase" letterSpacing="0.7px" fontSize={11}>
-            Feature Access (Custom Overrides)
-          </Typography>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0.5, mb: 2.5 }}>
-            {[
-              { key: 'procurement', label: 'Procurement Module (PR / PO / GRN)' },
-              { key: 'enterpriseHub', label: 'Enterprise Hub (Warehouse, AMC)' },
-              { key: 'customBranding', label: 'Custom Branding & SMTP' },
-              { key: 'advancedReports', label: 'Advanced Reports & Excel Export' },
-            ].map(({ key, label }) => (
-              <FormControlLabel
-                key={key}
-                control={
-                  <Switch
-                    size="small"
-                    checked={!!planForm.features?.[key]}
-                    onChange={e => setPlanForm(f => ({ ...f, features: { ...f.features, [key]: e.target.checked } }))}
-                    sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: '#a78bfa' }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: '#a78bfa' } }}
-                  />
-                }
-                label={<Typography fontSize={13} fontWeight={500}>{label}</Typography>}
+      {/* ─── TAB 1: REGISTERED COMPANIES (FULL MANAGEMENT) ────────────────────────── */}
+      {mainTab === 1 && (
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: '16px',
+            bgcolor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Filter Bar */}
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', flex: 1, minWidth: 280 }}>
+              <TextField
+                size="small"
+                placeholder="Search by company name, slug, or email..."
+                value={companySearch}
+                onChange={(e) => setCompanySearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRounded sx={{ fontSize: 20, color: TEXT_MUTED }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ minWidth: 280, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
               />
-            ))}
+
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Plan Filter</InputLabel>
+                <Select
+                  value={companyPlanFilter}
+                  label="Plan Filter"
+                  onChange={(e) => setCompanyPlanFilter(e.target.value)}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="ALL">All Plans</MenuItem>
+                  <MenuItem value="Home User">Home User</MenuItem>
+                  <MenuItem value="MSME">MSME</MenuItem>
+                  <MenuItem value="Large Scale">Large Scale</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel>Status Filter</InputLabel>
+                <Select
+                  value={companyStatusFilter}
+                  label="Status Filter"
+                  onChange={(e) => setCompanyStatusFilter(e.target.value)}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="ALL">All Statuses</MenuItem>
+                  <MenuItem value="Active">Active</MenuItem>
+                  <MenuItem value="Pending Checkout">Pending Checkout</MenuItem>
+                  <MenuItem value="Expired">Expired</MenuItem>
+                  <MenuItem value="Cancelled">Cancelled</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 600 }}>
+              Showing {filteredTenants.length} of {tenants.length} companies
+            </Typography>
           </Box>
 
-          <Divider sx={{ mb: 2.5 }} />
-
-          {/* Plan Expiry */}
-          <Typography variant="subtitle2" fontWeight={800} color="text.secondary" mb={1.5} textTransform="uppercase" letterSpacing="0.7px" fontSize={11}>
-            Subscription Expiry
-          </Typography>
-          <TextField
-            fullWidth size="small" type="date"
-            value={planForm.planExpiry}
-            helperText="Leave blank for no expiry"
-            onChange={e => setPlanForm(f => ({ ...f, planExpiry: e.target.value }))}
-          />
-        </DialogContent>
-        <DialogActions sx={{ p: 2.5, pt: 1 }}>
-          <Button onClick={() => setPlanOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700 }}>Cancel</Button>
-          <Button variant="contained" onClick={handlePlanSave} disabled={saving}
-            sx={{ bgcolor: '#a78bfa', color: '#1a0533', fontWeight: 900, borderRadius: '8px', px: 3 }}>
-            {saving ? 'Saving...' : 'Save Configuration'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ─── Tenant Users Dialog ─── */}
-      <Dialog open={usersOpen} onClose={() => setUsersOpen(false)} maxWidth="md" fullWidth
-        slotProps={{ paper: { sx: { borderRadius: '16px' } } }}>
-        <DialogTitle fontWeight={900}>
-          Users — {selectedTenant?.name}
-        </DialogTitle>
-        <DialogContent>
-          {usersLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}><CircularProgress /></Box>
-          ) : (
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    {['Name', 'Email', 'Role', 'Department', 'Status'].map(h => (
-                      <TableCell key={h} sx={{ fontWeight: 800, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.7px' }}>{h}</TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {tenantUsers.map(u => (
-                    <TableRow key={u._id} hover>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Avatar sx={{ width: 26, height: 26, fontSize: 11, fontWeight: 700, bgcolor: "rgba(17,24,39,0.12)", color: ACCENT }}>
-                            {u.name?.substring(0, 1)}
-                          </Avatar>
-                          <Typography fontSize={13} fontWeight={600}>{u.name}</Typography>
-                        </Box>
+          <TableContainer>
+            <Table size="small">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569', py: 1.5 }}>Company</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Customer Type</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Plan</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Subscription Status</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Expiry Date</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Days Left</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Limits</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Active</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }} align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredTenants
+                  .slice(companyPage * companyRowsPerPage, companyPage * companyRowsPerPage + companyRowsPerPage)
+                  .map((t) => (
+                    <TableRow key={t._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                      <TableCell sx={{ py: 1.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                          {t.name}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: TEXT_MUTED, fontFamily: 'monospace' }}>
+                          /{t.slug} {t.contactEmail ? `• ${t.contactEmail}` : ''}
+                        </Typography>
                       </TableCell>
-                      <TableCell><Typography fontSize={12} color="text.secondary">{u.email}</Typography></TableCell>
-                      <TableCell>
-                        <Chip label={u.role} size="small"
-                          sx={{ fontWeight: 700, fontSize: 11, height: 20, textTransform: 'capitalize' }} />
+                      <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>
+                        {t.customerType || 'Business'}
                       </TableCell>
-                      <TableCell><Typography fontSize={12}>{u.department}</Typography></TableCell>
+                      <TableCell><PlanBadge plan={t.plan} /></TableCell>
+                      <TableCell><StatusBadge status={t.subscriptionStatus} /></TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>
+                        {t.planExpiry ? new Date(t.planExpiry).toLocaleDateString('en-IN') : 'N/A'}
+                      </TableCell>
                       <TableCell>
-                        <Chip
-                          label={u.isActive ? 'Active' : 'Inactive'}
+                        {t.daysRemaining !== null ? (
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: t.daysRemaining <= 15 ? '#DC2626' : '#334155' }}>
+                            {t.daysRemaining} days
+                          </Typography>
+                        ) : '—'}
+                      </TableCell>
+                      <TableCell sx={{ color: TEXT_MUTED, fontSize: '12px' }}>
+                        {`${t.limits?.maxAssets || 0} assets / ${t.limits?.maxUsers || 0} users`}
+                      </TableCell>
+                      <TableCell>
+                        <Switch
                           size="small"
+                          checked={t.isActive}
+                          onChange={() => handleToggleTenant(t._id)}
                           sx={{
-                            bgcolor: u.isActive ? '#14532d' : '#450a0a',
-                            color: u.isActive ? '#4ade80' : '#f87171',
-                            fontWeight: 700, fontSize: 11, height: 20
+                            '& .MuiSwitch-switchBase.Mui-checked': { color: DARK },
+                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: DARK }
                           }}
                         />
                       </TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={1} justifyContent="flex-end">
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleOpenDetails(t._id)}
+                            sx={{
+                              textTransform: 'none',
+                              fontWeight: 700,
+                              borderRadius: '8px',
+                              borderColor: '#E2E8F0',
+                              color: '#334155',
+                              '&:hover': { borderColor: DARK, bgcolor: '#F8FAFC' }
+                            }}
+                          >
+                            Inspect 360°
+                          </Button>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteTenant(t)}
+                            sx={{ borderRadius: '8px' }}
+                          >
+                            <DeleteRounded fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
                     </TableRow>
                   ))}
-                  {tenantUsers.length === 0 && (
+                {filteredTenants.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={9} align="center" sx={{ py: 6, color: TEXT_MUTED }}>
+                      No companies match the specified search or filter criteria.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={filteredTenants.length}
+            rowsPerPage={companyRowsPerPage}
+            page={companyPage}
+            onPageChange={(_, p) => setCompanyPage(p)}
+            onRowsPerPageChange={(e) => {
+              setCompanyRowsPerPage(parseInt(e.target.value, 10));
+              setCompanyPage(0);
+            }}
+          />
+        </Paper>
+      )}
+
+      {/* ─── TAB 2: SUBSCRIPTION EXPIRY MONITORING ───────────────────────────────── */}
+      {mainTab === 2 && (
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: '16px',
+            bgcolor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+                Subscription Expiry Radar
+              </Typography>
+              <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+                Real-time tracking sorted by renewal urgency (expired & approaching deadlines first)
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={1.5} flexWrap="wrap">
+              <TextField
+                size="small"
+                placeholder="Search company or admin..."
+                value={expirySearch}
+                onChange={(e) => setExpirySearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRounded sx={{ fontSize: 18, color: TEXT_MUTED }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Urgency</InputLabel>
+                <Select
+                  value={expiryFilter}
+                  label="Urgency"
+                  onChange={(e) => setExpiryFilter(e.target.value)}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="ALL">All Urgencies</MenuItem>
+                  <MenuItem value="EXPIRED">Expired</MenuItem>
+                  <MenuItem value="URGENT_15">≤ 15 Days</MenuItem>
+                  <MenuItem value="WARNING_30">≤ 30 Days</MenuItem>
+                  <MenuItem value="ACTIVE">Active</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Box>
+
+          {expiryLoading ? (
+            <Box sx={{ p: 8, textAlign: 'center' }}>
+              <CircularProgress size={36} sx={{ color: DARK, mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">
+                Analyzing tenant subscription expirations...
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569', py: 1.5 }}>Urgency Level</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Company</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Customer Name</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Plan</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Start Date</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Expiry Date</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Contact Info</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }} align="right">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredExpiryList.map((row) => (
+                    <TableRow key={row._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                      <TableCell sx={{ py: 1.5 }}>
+                        <UrgencyBadge urgency={row.urgency} days={row.daysRemaining} />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                          {row.name}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                          /{row.slug}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ color: '#334155', fontWeight: 600, fontSize: '12.5px' }}>
+                        {row.customerName}
+                      </TableCell>
+                      <TableCell><PlanBadge plan={row.plan} /></TableCell>
+                      <TableCell><StatusBadge status={row.subscriptionStatus} /></TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>
+                        {row.startDate ? new Date(row.startDate).toLocaleDateString('en-IN') : 'N/A'}
+                      </TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>
+                        {row.expiryDate ? new Date(row.expiryDate).toLocaleDateString('en-IN') : 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption" sx={{ color: '#334155', display: 'block', fontWeight: 600 }}>
+                          {row.contactEmail || 'No email'}
+                        </Typography>
+                        {row.contactPhone && (
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                            {row.contactPhone}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleOpenDetails(row._id)}
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            borderRadius: '8px',
+                            borderColor: '#E2E8F0',
+                            color: '#334155',
+                            '&:hover': { borderColor: DARK, bgcolor: '#F8FAFC' }
+                          }}
+                        >
+                          Manage
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {filteredExpiryList.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, color: 'text.disabled' }}>
-                        No users found in this tenant.
+                      <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
+                        <CheckCircleRounded sx={{ fontSize: 36, color: '#10B981', mb: 1, display: 'block', mx: 'auto' }} />
+                        <Typography variant="body1" sx={{ fontWeight: 700, color: '#0F172A' }}>
+                          No companies currently expiring within 30 days
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: TEXT_MUTED }}>
+                          All commercial customer subscriptions are active and healthy.
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   )}
@@ -861,24 +1522,1025 @@ export default function SuperAdminPanel() {
               </Table>
             </TableContainer>
           )}
+        </Paper>
+      )}
+
+      {/* ─── TAB 3: TRANSACTIONS & REVENUE INVOICES ───────────────────────────────── */}
+      {mainTab === 3 && (
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: '16px',
+            bgcolor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #E2E8F0', display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+                Commercial Invoices & Transactions
+              </Typography>
+              <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+                Complete audit ledger of billing orders, GST compliance, and payment gateway references
+              </Typography>
+            </Box>
+
+            <Stack direction="row" spacing={1.5} flexWrap="wrap">
+              <TextField
+                size="small"
+                placeholder="Search invoice #, company, order ID..."
+                value={invoiceSearch}
+                onChange={(e) => setInvoiceSearch(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRounded sx={{ fontSize: 18, color: TEXT_MUTED }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ minWidth: 260, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <FormControl size="small" sx={{ minWidth: 150 }}>
+                <InputLabel>Payment Status</InputLabel>
+                <Select
+                  value={invoiceStatusFilter}
+                  label="Payment Status"
+                  onChange={(e) => setInvoiceStatusFilter(e.target.value)}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="ALL">All Statuses</MenuItem>
+                  <MenuItem value="Paid">Paid</MenuItem>
+                  <MenuItem value="Pending">Pending</MenuItem>
+                  <MenuItem value="Failed">Failed</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+          </Box>
+
+          <TableContainer>
+            <Table size="small">
+              <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569', py: 1.5 }}>Date</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Invoice #</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Company</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Plan</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Base Amount</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Discount</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>GST (18%)</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Total Paid</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Gateway Reference</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredInvoices
+                  .slice(invoicePage * invoiceRowsPerPage, invoicePage * invoiceRowsPerPage + invoiceRowsPerPage)
+                  .map((inv) => (
+                    <TableRow key={inv._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                      <TableCell sx={{ color: '#334155', fontSize: '12px', py: 1.5 }}>
+                        {inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : '—'}
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: 'monospace', fontWeight: 800, color: '#0F172A', fontSize: '12px' }}>
+                        {inv.invoiceNumber}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#0F172A', fontSize: '12.5px' }}>
+                        {inv.companyName}
+                      </TableCell>
+                      <TableCell><PlanBadge plan={inv.planName} /></TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12px' }}>{formatINR(inv.baseAmount)}</TableCell>
+                      <TableCell sx={{ color: inv.discountAmount > 0 ? '#16A34A' : '#64748B', fontSize: '12px', fontWeight: inv.discountAmount > 0 ? 700 : 400 }}>
+                        {inv.discountAmount > 0 ? `- ${formatINR(inv.discountAmount)}` : '₹0.00'}
+                      </TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12px' }}>
+                        {formatINR((inv.cgst || 0) + (inv.sgst || 0) + (inv.igst || 0))}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 900, color: '#0F172A', fontSize: '13px' }}>
+                        {formatINR(inv.totalAmount)}
+                      </TableCell>
+                      <TableCell><StatusBadge status={inv.status} /></TableCell>
+                      <TableCell>
+                        <Typography variant="caption" sx={{ fontFamily: 'monospace', color: TEXT_MUTED, display: 'block' }}>
+                          {inv.razorpayPaymentId !== '—' ? `Pay: ${inv.razorpayPaymentId}` : '—'}
+                        </Typography>
+                        {inv.razorpayOrderId !== '—' && (
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace', color: '#94A3B8' }}>
+                            Order: {inv.razorpayOrderId}
+                          </Typography>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                {filteredInvoices.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={10} align="center" sx={{ py: 6, color: TEXT_MUTED }}>
+                      No invoices found matching search.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component="div"
+            count={filteredInvoices.length}
+            rowsPerPage={invoiceRowsPerPage}
+            page={invoicePage}
+            onPageChange={(_, p) => setInvoicePage(p)}
+            onRowsPerPageChange={(e) => {
+              setInvoiceRowsPerPage(parseInt(e.target.value, 10));
+              setInvoicePage(0);
+            }}
+          />
+        </Paper>
+      )}
+
+      {/* ─── TAB 4: PROMOTIONS & COUPON MANAGEMENT ENGINE ────────────────────────── */}
+      {mainTab === 4 && (
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: '16px',
+            bgcolor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+                Promotional Coupons & Discount Engine
+              </Typography>
+              <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+                Configure promo codes, percentage / flat discounts, validity dates, minimum order thresholds, and plan limits
+              </Typography>
+            </Box>
+
+            <Button
+              variant="contained"
+              startIcon={<AddRounded />}
+              onClick={openCreateCoupon}
+              sx={{
+                bgcolor: DARK,
+                color: '#FFFFFF',
+                borderRadius: '10px',
+                fontWeight: 800,
+                textTransform: 'none',
+                px: 2.5,
+                '&:hover': { bgcolor: '#0B291C' }
+              }}
+            >
+              Create Coupon
+            </Button>
+          </Box>
+
+          {couponsLoading ? (
+            <Box sx={{ p: 8, textAlign: 'center' }}>
+              <CircularProgress size={36} sx={{ color: DARK, mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">
+                Loading promo codes...
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569', py: 1.5 }}>Coupon Code</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Discount</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Min Order / Max Cap</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Applicable Plans</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Validity Period</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Usage Count</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Active</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }} align="right">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {coupons.map((c) => (
+                    <TableRow key={c._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                      <TableCell sx={{ py: 1.5 }}>
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            px: 1.25,
+                            py: 0.35,
+                            borderRadius: '6px',
+                            bgcolor: '#F1F5F9',
+                            color: '#0F172A',
+                            fontFamily: 'monospace',
+                            fontWeight: 900,
+                            fontSize: '12px',
+                            border: '1px solid #CBD5E1'
+                          }}
+                        >
+                          {c.code}
+                        </Box>
+                      </TableCell>
+                      <TableCell sx={{ color: '#334155', fontSize: '12.5px', maxWidth: 220 }}>
+                        {c.description || '—'}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 800, color: '#0F172A', fontSize: '13px' }}>
+                        {c.discountType === 'percentage' ? `${c.discountValue}% OFF` : `${formatINR(c.discountValue)} FLAT`}
+                      </TableCell>
+                      <TableCell sx={{ color: TEXT_MUTED, fontSize: '12px' }}>
+                        {`Min: ${formatINR(c.minOrderValue || 0)}`}
+                        {c.maxDiscount ? ` • Cap: ${formatINR(c.maxDiscount)}` : ''}
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                          {c.applicablePlans?.map((p) => (
+                            <PlanBadge key={p} plan={p} />
+                          ))}
+                        </Stack>
+                      </TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12px' }}>
+                        {c.startDate ? new Date(c.startDate).toLocaleDateString('en-IN') : 'Now'}
+                        {' → '}
+                        {c.expiryDate ? new Date(c.expiryDate).toLocaleDateString('en-IN') : 'No Expiry'}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 700, color: '#0F172A', fontSize: '12.5px' }}>
+                        {`${c.usedCount || 0} / ${c.maxUsage || '∞'}`}
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          size="small"
+                          checked={c.isActive}
+                          onChange={() => handleToggleCoupon(c._id)}
+                          sx={{
+                            '& .MuiSwitch-switchBase.Mui-checked': { color: DARK },
+                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: DARK }
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                          <IconButton size="small" onClick={() => openEditCoupon(c)}>
+                            <EditRounded fontSize="small" sx={{ color: '#334155' }} />
+                          </IconButton>
+                          <IconButton size="small" color="error" onClick={() => handleDeleteCoupon(c)}>
+                            <DeleteRounded fontSize="small" />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {coupons.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={9} align="center" sx={{ py: 6, color: TEXT_MUTED }}>
+                        No promotional coupons created yet. Click "+ Create Coupon" above.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Paper>
+      )}
+
+      {/* ─── TAB 5: CONTACT INQUIRIES & DEMO LEADS ─────────────────────────────────── */}
+      {mainTab === 5 && (
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: '16px',
+            bgcolor: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ p: 2.5, borderBottom: '1px solid #E2E8F0' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#0F172A', fontSize: '16px' }}>
+              Inbound Platform Inquiries & Sales Leads
+            </Typography>
+            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>
+              Messages and demo requests submitted through the public website
+            </Typography>
+          </Box>
+
+          {leadsLoading ? (
+            <Box sx={{ p: 8, textAlign: 'center' }}>
+              <CircularProgress size={36} sx={{ color: DARK, mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">
+                Loading inquiries...
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table size="small">
+                <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569', py: 1.5 }}>Date</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Name</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Company / Type</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Message</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {leads.map((lead) => (
+                    <TableRow key={lead._id} hover sx={{ '&:last-child td': { border: 0 } }}>
+                      <TableCell sx={{ color: '#475569', fontSize: '12px', py: 1.5 }}>
+                        {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-IN') : '—'}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 800, color: '#0F172A', fontSize: '12.5px' }}>
+                        {lead.name}
+                      </TableCell>
+                      <TableCell sx={{ color: '#2563EB', fontSize: '12.5px' }}>
+                        {lead.email}
+                      </TableCell>
+                      <TableCell sx={{ color: '#334155', fontSize: '12.5px' }}>
+                        {lead.company || lead.type || '—'}
+                      </TableCell>
+                      <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>
+                        {lead.message || '—'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {leads.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ py: 6, color: TEXT_MUTED }}>
+                        No inbound leads recorded.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Paper>
+      )}
+
+      {/* ─── MODAL: 360° COMPANY INSPECTION & DETAILS ─────────────────────────────── */}
+      <Dialog
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+      >
+        <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A' }}>
+              {selectedTenantDetails?.tenant?.name || 'Company Profile'}
+            </Typography>
+            <Typography variant="caption" sx={{ color: TEXT_MUTED, fontFamily: 'monospace' }}>
+              {`Slug: /${selectedTenantDetails?.tenant?.slug || ''} • Tenant ID: ${selectedTenantDetails?.tenant?._id || ''}`}
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<UpgradeRounded />}
+            onClick={() => {
+              setPlanForm({
+                plan: selectedTenantDetails?.tenant?.plan || 'MSME',
+                additionalDays: 365,
+                status: selectedTenantDetails?.tenant?.subscriptionStatus || 'Active',
+                notes: ''
+              });
+              setPlanOpen(true);
+            }}
+            sx={{
+              borderRadius: '10px',
+              bgcolor: DARK,
+              color: '#FFFFFF',
+              fontWeight: 800,
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#0B291C' }
+            }}
+          >
+            Manage Subscription
+          </Button>
+        </DialogTitle>
+
+        <DialogContent dividers sx={{ p: 0 }}>
+          {detailLoading ? (
+            <Box sx={{ p: 6, textAlign: 'center' }}>
+              <CircularProgress size={36} sx={{ color: DARK, mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">Loading 360° records...</Typography>
+            </Box>
+          ) : (
+            <Box>
+              <Tabs
+                value={detailTab}
+                onChange={(_, v) => setDetailTab(v)}
+                sx={{
+                  px: 3,
+                  borderBottom: '1px solid #E2E8F0',
+                  '& .MuiTabs-indicator': { bgcolor: DARK }
+                }}
+              >
+                <Tab label="Profile & License" sx={{ textTransform: 'none', fontWeight: 700 }} />
+                <Tab label={`Invoices (${selectedTenantDetails?.invoices?.length || 0})`} sx={{ textTransform: 'none', fontWeight: 700 }} />
+                <Tab label={`History Log (${selectedTenantDetails?.history?.length || 0})`} sx={{ textTransform: 'none', fontWeight: 700 }} />
+                <Tab label={`Users (${selectedTenantDetails?.users?.length || 0})`} sx={{ textTransform: 'none', fontWeight: 700 }} />
+              </Tabs>
+
+              {/* Subtab 0: Profile */}
+              {detailTab === 0 && (
+                <Box sx={{ p: 3 }}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: TEXT_MUTED, textTransform: 'uppercase' }}>
+                        COMPANY IDENTITY
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 800, color: '#0F172A', mt: 0.5 }}>
+                        {selectedTenantDetails?.tenant?.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 0.5 }}>
+                        Customer Type: <strong>{selectedTenantDetails?.tenant?.customerType || 'Business'}</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 0.5 }}>
+                        Address: {selectedTenantDetails?.tenant?.address?.line || 'N/A'}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#475569' }}>
+                        {`${selectedTenantDetails?.tenant?.address?.city || ''}, ${selectedTenantDetails?.tenant?.address?.state || ''} ${selectedTenantDetails?.tenant?.address?.pin || ''}`}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 1 }}>
+                        GSTIN: <strong>{selectedTenantDetails?.tenant?.gstNumber || 'None'}</strong>
+                      </Typography>
+                    </Grid>
+
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: TEXT_MUTED, textTransform: 'uppercase' }}>
+                        SUBSCRIPTION & COMMERCIAL LICENSE
+                      </Typography>
+                      <Box sx={{ mt: 0.5, display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <PlanBadge plan={selectedTenantDetails?.tenant?.plan} />
+                        <StatusBadge status={selectedTenantDetails?.tenant?.subscriptionStatus} />
+                      </Box>
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 1.5 }}>
+                        <strong>Plan Expiry:</strong>{' '}
+                        {selectedTenantDetails?.tenant?.planExpiry
+                          ? new Date(selectedTenantDetails.tenant.planExpiry).toLocaleDateString('en-IN')
+                          : 'N/A'}
+                        {selectedTenantDetails?.tenant?.daysRemaining !== null && selectedTenantDetails?.tenant?.daysRemaining !== undefined
+                          ? ` (${selectedTenantDetails.tenant.daysRemaining} days left)`
+                          : ''}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 1 }}>
+                        <strong>Commercial License Key:</strong>
+                      </Typography>
+                      <Box
+                        sx={{
+                          p: 1,
+                          mt: 0.5,
+                          borderRadius: '8px',
+                          bgcolor: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ fontFamily: 'monospace', fontWeight: 700, color: '#0F172A', wordBreak: 'break-all' }}>
+                          {selectedTenantDetails?.tenant?.licenseKey || 'None'}
+                        </Typography>
+                        {selectedTenantDetails?.tenant?.licenseKey && (
+                          <IconButton size="small" onClick={() => copyLicenseKey(selectedTenantDetails.tenant.licenseKey)}>
+                            {copiedKey ? <CheckRounded fontSize="small" color="success" /> : <ContentCopyRounded fontSize="small" />}
+                          </IconButton>
+                        )}
+                      </Box>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
+
+              {/* Subtab 1: Invoices */}
+              {detailTab === 1 && (
+                <TableContainer sx={{ maxHeight: 320 }}>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 800 }}>Invoice #</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Date</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Plan</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Taxable</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>GST</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Total</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(selectedTenantDetails?.invoices || []).map((inv) => (
+                        <TableRow key={inv._id} hover>
+                          <TableCell sx={{ fontFamily: 'monospace', fontWeight: 800 }}>{inv.invoiceNumber}</TableCell>
+                          <TableCell>{inv.date ? new Date(inv.date).toLocaleDateString('en-IN') : '—'}</TableCell>
+                          <TableCell><PlanBadge plan={inv.planName} /></TableCell>
+                          <TableCell>{formatINR(inv.taxableAmount)}</TableCell>
+                          <TableCell>{formatINR((inv.cgst || 0) + (inv.sgst || 0) + (inv.igst || 0))}</TableCell>
+                          <TableCell sx={{ fontWeight: 800 }}>{formatINR(inv.totalAmount)}</TableCell>
+                          <TableCell><StatusBadge status={inv.status} /></TableCell>
+                        </TableRow>
+                      ))}
+                      {(!selectedTenantDetails?.invoices || selectedTenantDetails.invoices.length === 0) && (
+                        <TableRow>
+                          <TableCell colSpan={7} align="center" sx={{ py: 4, color: TEXT_MUTED }}>
+                            No invoice records for this company.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              {/* Subtab 2: History */}
+              {detailTab === 2 && (
+                <TableContainer sx={{ maxHeight: 320 }}>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 800 }}>Date</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Action</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Previous Plan</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>New Plan</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Notes</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(selectedTenantDetails?.history || []).map((h) => (
+                        <TableRow key={h._id} hover>
+                          <TableCell>{h.createdAt ? new Date(h.createdAt).toLocaleDateString('en-IN') : '—'}</TableCell>
+                          <TableCell sx={{ fontWeight: 700 }}>{h.action}</TableCell>
+                          <TableCell><PlanBadge plan={h.previousPlan} /></TableCell>
+                          <TableCell><PlanBadge plan={h.newPlan} /></TableCell>
+                          <TableCell sx={{ color: TEXT_MUTED, fontSize: '12px' }}>{h.notes || '—'}</TableCell>
+                        </TableRow>
+                      ))}
+                      {(!selectedTenantDetails?.history || selectedTenantDetails.history.length === 0) && (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center" sx={{ py: 4, color: TEXT_MUTED }}>
+                            No subscription history logs recorded.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+
+              {/* Subtab 3: Users */}
+              {detailTab === 3 && (
+                <TableContainer sx={{ maxHeight: 320 }}>
+                  <Table size="small">
+                    <TableHead sx={{ bgcolor: '#F8FAFC' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 800 }}>User Name</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Email Address</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Role</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Department</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Status</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {(selectedTenantDetails?.users || []).map((u) => (
+                        <TableRow key={u._id} hover>
+                          <TableCell sx={{ fontWeight: 700 }}>{u.name}</TableCell>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>
+                            <Chip label={u.role} size="small" sx={{ fontWeight: 700, fontSize: '11px' }} />
+                          </TableCell>
+                          <TableCell>{u.department || 'General'}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={u.isActive !== false ? 'Active' : 'Inactive'}
+                              size="small"
+                              sx={{
+                                bgcolor: u.isActive !== false ? '#ECFDF5' : '#FEF2F2',
+                                color: u.isActive !== false ? '#059669' : '#DC2626',
+                                fontWeight: 700,
+                                fontSize: '11px'
+                              }}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {(!selectedTenantDetails?.users || selectedTenantDetails.users.length === 0) && (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center" sx={{ py: 4, color: TEXT_MUTED }}>
+                            No user accounts found in this company workspace.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </Box>
+          )}
         </DialogContent>
+
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setUsersOpen(false)} sx={{ fontWeight: 700 }}>Close</Button>
+          <Button
+            onClick={() => setDetailOpen(false)}
+            sx={{ borderRadius: '8px', textTransform: 'none', fontWeight: 700, color: '#334155' }}
+          >
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar */}
+      {/* ─── MODAL: MANAGE / OVERRIDE SUBSCRIPTION ───────────────────────────────── */}
+      <Dialog
+        open={planOpen}
+        onClose={() => setPlanOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}
+      >
+        <form onSubmit={handleSubscriptionAction}>
+          <DialogTitle sx={{ fontWeight: 900, color: '#0F172A' }}>
+            Override Company Subscription
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={2.5} sx={{ mt: 1 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Subscription Plan</InputLabel>
+                <Select
+                  value={planForm.plan}
+                  label="Subscription Plan"
+                  onChange={(e) => setPlanForm({ ...planForm, plan: e.target.value })}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="Home User">Home User (₹999 / 20 Assets)</MenuItem>
+                  <MenuItem value="MSME">MSME (₹2,999 / 50 Assets)</MenuItem>
+                  <MenuItem value="Large Scale">Large Scale (₹8,999 / Unlimited)</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Extend Validity (Additional Days)"
+                value={planForm.additionalDays}
+                onChange={(e) => setPlanForm({ ...planForm, additionalDays: e.target.value })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <FormControl fullWidth size="small">
+                <InputLabel>Subscription Status</InputLabel>
+                <Select
+                  value={planForm.status}
+                  label="Subscription Status"
+                  onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="Active">Active</MenuItem>
+                  <MenuItem value="Pending Checkout">Pending Checkout</MenuItem>
+                  <MenuItem value="Suspended">Suspended</MenuItem>
+                  <MenuItem value="Expired">Expired</MenuItem>
+                  <MenuItem value="Cancelled">Cancelled</MenuItem>
+                </Select>
+              </FormControl>
+
+              <TextField
+                fullWidth
+                size="small"
+                label="Audit Notes"
+                multiline
+                rows={2}
+                value={planForm.notes}
+                onChange={(e) => setPlanForm({ ...planForm, notes: e.target.value })}
+                placeholder="Reason for override..."
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setPlanOpen(false)} sx={{ textTransform: 'none', fontWeight: 700, color: '#334155' }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={saving}
+              sx={{
+                borderRadius: '10px',
+                bgcolor: DARK,
+                color: '#FFFFFF',
+                fontWeight: 800,
+                textTransform: 'none',
+                '&:hover': { bgcolor: '#0B291C' }
+              }}
+            >
+              {saving ? 'Updating...' : 'Save Changes'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* ─── MODAL: PROVISION NEW COMPANY ────────────────────────────────────────── */}
+      <Dialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}
+      >
+        <form onSubmit={handleCreateTenant}>
+          <DialogTitle sx={{ fontWeight: 900, color: '#0F172A' }}>
+            Provision New Company Workspace
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="Company Name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="URL Workspace Slug (e.g. acme)"
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, '') })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <FormControl fullWidth size="small">
+                <InputLabel>Commercial Plan</InputLabel>
+                <Select
+                  value={form.plan}
+                  label="Commercial Plan"
+                  onChange={(e) => setForm({ ...form, plan: e.target.value })}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="Home User">Home User (₹999 / 20 Assets)</MenuItem>
+                  <MenuItem value="MSME">MSME (₹2,999 / 50 Assets)</MenuItem>
+                  <MenuItem value="Large Scale">Large Scale (₹8,999 / Unlimited)</MenuItem>
+                </Select>
+              </FormControl>
+
+              <Divider sx={{ my: 0.5 }}>Administrator Credentials</Divider>
+
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="Primary Admin Name"
+                value={form.adminName}
+                onChange={(e) => setForm({ ...form, adminName: e.target.value })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <TextField
+                fullWidth
+                size="small"
+                required
+                type="email"
+                label="Admin Email"
+                value={form.adminEmail}
+                onChange={(e) => setForm({ ...form, adminEmail: e.target.value })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <TextField
+                fullWidth
+                size="small"
+                required
+                type="password"
+                label="Admin Password"
+                value={form.adminPassword}
+                onChange={(e) => setForm({ ...form, adminPassword: e.target.value })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setCreateOpen(false)} sx={{ textTransform: 'none', fontWeight: 700, color: '#334155' }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={saving}
+              sx={{
+                borderRadius: '10px',
+                bgcolor: DARK,
+                color: '#FFFFFF',
+                fontWeight: 800,
+                textTransform: 'none',
+                '&:hover': { bgcolor: '#0B291C' }
+              }}
+            >
+              {saving ? 'Provisioning...' : 'Provision Company'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* ─── MODAL: CREATE / EDIT COUPON ────────────────────────────────────────── */}
+      <Dialog
+        open={couponModal.open}
+        onClose={() => setCouponModal({ open: false, isEdit: false, data: null })}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}
+      >
+        <form onSubmit={handleSaveCoupon}>
+          <DialogTitle sx={{ fontWeight: 900, color: '#0F172A' }}>
+            {couponModal.isEdit ? `Edit Coupon: ${couponForm.code}` : 'Create Promotional Coupon'}
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="Coupon Code (e.g. WELCOME50)"
+                value={couponForm.code}
+                onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <TextField
+                fullWidth
+                size="small"
+                label="Description"
+                value={couponForm.description}
+                onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel>Discount Type</InputLabel>
+                    <Select
+                      value={couponForm.discountType}
+                      label="Discount Type"
+                      onChange={(e) => setCouponForm({ ...couponForm, discountType: e.target.value })}
+                      sx={{ borderRadius: '10px' }}
+                    >
+                      <MenuItem value="fixed">Fixed Amount (₹ Flat)</MenuItem>
+                      <MenuItem value="percentage">Percentage (% Off)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    required
+                    type="number"
+                    label={couponForm.discountType === 'percentage' ? 'Discount Percentage (%)' : 'Discount Value (₹)'}
+                    value={couponForm.discountValue}
+                    onChange={(e) => setCouponForm({ ...couponForm, discountValue: e.target.value })}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                  />
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    label="Minimum Order Value (₹)"
+                    value={couponForm.minOrderValue}
+                    onChange={(e) => setCouponForm({ ...couponForm, minOrderValue: e.target.value })}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="number"
+                    label="Max Discount Cap (₹)"
+                    value={couponForm.maxDiscount}
+                    onChange={(e) => setCouponForm({ ...couponForm, maxDiscount: e.target.value })}
+                    helperText="Optional cap for % discounts"
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                  />
+                </Grid>
+              </Grid>
+
+              {/* Applicable Plans */}
+              <FormControl fullWidth size="small">
+                <InputLabel>Applicable Plans</InputLabel>
+                <Select
+                  multiple
+                  value={couponForm.applicablePlans || ['ALL']}
+                  label="Applicable Plans"
+                  onChange={(e) => {
+                    const val = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                    setCouponForm({ ...couponForm, applicablePlans: val.length === 0 ? ['ALL'] : val });
+                  }}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} size="small" sx={{ fontWeight: 700 }} />
+                      ))}
+                    </Box>
+                  )}
+                  sx={{ borderRadius: '10px' }}
+                >
+                  <MenuItem value="ALL">ALL (All Plans)</MenuItem>
+                  <MenuItem value="Home User">Home User</MenuItem>
+                  <MenuItem value="MSME">MSME</MenuItem>
+                  <MenuItem value="Large Scale">Large Scale</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Date Inputs with Explicit Labels Above to Prevent Overlap */}
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', mb: 0.5, display: 'block' }}>
+                      Start Date
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={couponForm.startDate}
+                      onChange={(e) => setCouponForm({ ...couponForm, startDate: e.target.value })}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#334155', mb: 0.5, display: 'block' }}>
+                      Expiry Date
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={couponForm.expiryDate}
+                      onChange={(e) => setCouponForm({ ...couponForm, expiryDate: e.target.value })}
+                      helperText="Leave blank for lifetime validity"
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <TextField
+                fullWidth
+                size="small"
+                type="number"
+                label="Maximum Total Redemptions"
+                value={couponForm.maxUsage}
+                onChange={(e) => setCouponForm({ ...couponForm, maxUsage: e.target.value })}
+                helperText="Leave empty for unlimited redemptions"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setCouponModal({ open: false, isEdit: false, data: null })} sx={{ textTransform: 'none', fontWeight: 700, color: '#334155' }}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={saving}
+              sx={{
+                borderRadius: '10px',
+                bgcolor: DARK,
+                color: '#FFFFFF',
+                fontWeight: 800,
+                textTransform: 'none',
+                '&:hover': { bgcolor: '#0B291C' }
+              }}
+            >
+              {saving ? 'Saving...' : couponModal.isEdit ? 'Update Coupon' : 'Create Coupon'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* Global Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
-        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert severity={snackbar.severity} variant="filled" sx={{ fontWeight: 700 }}>
+        <Alert severity={snackbar.severity} sx={{ borderRadius: '10px', fontWeight: 700 }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
     </Box>
   );
 }
-

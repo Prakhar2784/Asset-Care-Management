@@ -38,7 +38,12 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "20mb" }));
+app.use(express.json({ 
+  limit: "20mb",
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(resolveTenantContext);
 const uploadsPath = process.pkg
@@ -46,9 +51,10 @@ const uploadsPath = process.pkg
   : path.join(__dirname, 'uploads');
 app.use('/uploads', express.static(uploadsPath));
 
+const isDevEnv = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: isDevEnv ? 5000 : 100,
   message: { message: "Too many requests. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
@@ -56,6 +62,7 @@ const authLimiter = rateLimit({
 
 // Routes
 app.use("/api/auth", authLimiter, require("./routes/authRoutes"));
+app.use("/api/billing", require("./routes/billingRoutes"));
 app.use("/api/assets", require("./routes/assetRoutes"));
 app.use("/api/tickets", require("./routes/ticketRoutes"));
 // app.use("/api/device-requests", require("./routes/deviceRequestRoutes"));
@@ -77,6 +84,7 @@ app.use("/api/maintenance", require("./routes/maintenanceRoutes"));
 app.use("/api/invoices",    require("./routes/invoiceRoutes"));
 app.use("/api/apikeys",     require("./routes/apiKeyRoutes"));
 app.use("/api/service-centers", require("./routes/serviceCenterRoutes"));
+app.use("/api/reports",     require("./routes/reportRoutes"));
 
 // Health Check
 app.get("/api/health", (req, res) => {
@@ -93,17 +101,17 @@ app.get("/download/desktop-app", (req, res) => {
   }
 
   const possiblePaths = [
-    path.join(__dirname, "../asset-care-setup.exe"), // Development path
-    path.join(path.dirname(process.execPath), "asset-care-setup.exe"), // Next to running binary path
-    path.join(__dirname, "asset-care-setup.exe"), // Inside backend/
-    path.join(__dirname, "dist/asset-care-setup.exe"), // Inside backend/dist/
-    path.join(path.dirname(process.execPath), "../asset-care-setup.exe") // Relative to running folder parent
+    path.join(__dirname, "../iassetcare-setup.exe"), // Development path
+    path.join(path.dirname(process.execPath), "iassetcare-setup.exe"), // Next to running binary path
+    path.join(__dirname, "iassetcare-setup.exe"), // Inside backend/
+    path.join(__dirname, "dist/iassetcare-setup.exe"), // Inside backend/dist/
+    path.join(path.dirname(process.execPath), "../iassetcare-setup.exe") // Relative to running folder parent
   ];
   
   const fs = require('fs');
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
-      return res.download(p, "asset-care-setup.exe");
+      return res.download(p, "iassetcare-setup.exe");
     }
   }
   
@@ -159,7 +167,7 @@ app.listen(PORT, () => {
   console.log(`Local Access: http://localhost:${PORT}`);
   if (addresses.length > 0) {
     addresses.forEach(ip => {
-      console.log(`👉 Intranet Access (For Employees): http://${ip}:${PORT}`);
+      console.log(`ðŸ‘‰ Intranet Access (For Employees): http://${ip}:${PORT}`);
     });
   }
   console.log(`======================================================\n`);
@@ -173,4 +181,4 @@ app.listen(PORT, () => {
   } catch (err) {
     console.error("Could not automatically open browser:", err.message);
   }
-});
+});

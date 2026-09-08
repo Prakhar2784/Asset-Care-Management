@@ -52,10 +52,6 @@ const TechnicianPortal = () => {
   
   const [logForm, setLogForm] = useState(EMPTY_LOG_FORM);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -74,6 +70,10 @@ const TechnicianPortal = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleAction = async (ticketId, newStatus) => {
     try {
@@ -165,8 +165,8 @@ const TechnicianPortal = () => {
   );
 
   const kpis = [
-    { label: "My Assigned Tasks", value: myAssigned.length,      color: "#FBBF24", icon: <ConfirmationNumberRounded /> },
-    { label: "In Progress",       value: inProgressRepairs.length, color: "#FBBF24", icon: <BuildCircleRounded /> },
+    { label: "My Assigned Tasks", value: myAssigned.length,      color: "#B4F105", icon: <ConfirmationNumberRounded /> },
+    { label: "In Progress",       value: inProgressRepairs.length, color: "#B4F105", icon: <BuildCircleRounded /> },
     { label: "Resolved by Me",    value: completedRepairs.length, color: "#10B981", icon: <TaskAltRounded /> }
   ];
 
@@ -268,13 +268,13 @@ const TechnicianPortal = () => {
                 startIcon={<AddRounded />}
                 onClick={openAddLog}
                 sx={{
-                  background: "#FBBF24",
-                  color: "#111827",
+                  background: "#051C12",
+                  color: "#FFFFFF",
                   fontWeight: 800,
                   borderRadius: "8px",
                   boxShadow: "none",
                   textTransform: "none",
-                  '&:hover': { bgcolor: '#F59E0B', boxShadow: 'none' }
+                  '&:hover': { bgcolor: '#072F1F', boxShadow: 'none' }
                 }}
               >
                 Add Log
@@ -452,9 +452,10 @@ const TechnicianPortal = () => {
               onClick={handleSaveLog}
               disabled={submittingLog}
               sx={{
-                background: "#FBBF24",
-                color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
+                background: "#051C12",
+                color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
                 minWidth: 120,
+                '&:hover': { bgcolor: '#072F1F', boxShadow: 'none' }
               }}
             >
               {submittingLog ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : editLog ? "Save Changes" : "Record Log"}

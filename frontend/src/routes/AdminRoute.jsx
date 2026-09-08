@@ -19,11 +19,19 @@ const PATH_PERMISSIONS = {
 };
 
 const AdminRoute = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
   const location = useLocation();
+
+  if (loading) {
+    return null;
+  }
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (currentUser.role === "super_admin") {
+    return <Navigate to="/super-admin/console" replace />;
   }
 
   const isOnboardingAssetStep = new URLSearchParams(location.search).get("onboarding") === "1";
