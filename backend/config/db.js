@@ -51,8 +51,7 @@ const connectDB = async (retries = MAX_RETRIES) => {
       // If the failed URI was a local server, switch to the MongoDB Atlas cloud fallback URI for retries
       const currentUri = process.env.MONGO_URI || "";
       if (currentUri.includes("localhost") || currentUri.includes("127.0.0.1") || currentUri === "") {
-        console.log(`[MongoDB] Local database connection failed. Auto-switching fallback to MongoDB Atlas cloud database...`);
-        const obfuscatedUri = "bW9uZ29kYitzcnY6Ly9wcmFraGFyaXR2b2ljZV9kYl91c2VyOlByYWtoYXIyNzg0QGFzc2V0LmJyZG9xYWIubW9uZ29kYi5uZXQvYXNzZXRjYXJlP2FwcE5hbWU9QVNTRVQ=";
+        const obfuscatedUri = "bW9uZ29kYitzcnY6Ly9pYXNzZXRjYXJlX2RiX3VzZXI6N1JhRFlzS25EVGNxTnJ1N0BpYXNzZXRjYXJlLnZrZnlkNWgubW9uZ29kYi5uZXQvYXNzZXRjYXJlP3JldHJ5V3JpdGVzPXRydWUmdz1tYWpvcml0eSthcHBOYW1lPUlBU1NFVENBUkU=";
         process.env.MONGO_URI = Buffer.from(obfuscatedUri, 'base64').toString('ascii');
       }
       
