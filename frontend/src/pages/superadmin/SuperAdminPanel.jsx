@@ -314,7 +314,7 @@ export default function SuperAdminPanel() {
     maxAssets: '', maxUsers: '', address: '', city: '', state: 'Maharashtra', pinCode: '', gstNumber: ''
   });
   const [planForm, setPlanForm] = useState({
-    plan: 'MSME', additionalDays: 365, status: 'Active', notes: ''
+    plan: 'MSME', expiryDate: '', status: 'Active', notes: ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -466,7 +466,12 @@ export default function SuperAdminPanel() {
     if (!selectedTenantDetails?.tenant?._id) return;
     setSaving(true);
     try {
-      await api.post(`/super-admin/tenants/${selectedTenantDetails.tenant._id}/subscription-action`, planForm);
+      await api.post(`/super-admin/tenants/${selectedTenantDetails.tenant._id}/subscription-action`, {
+        plan: planForm.plan,
+        newExpiryDate: planForm.expiryDate,
+        status: planForm.status,
+        notes: planForm.notes
+      });
       showSnack('Subscription updated successfully!');
       setPlanOpen(false);
       handleOpenDetails(selectedTenantDetails.tenant._id);
@@ -2001,9 +2006,12 @@ export default function SuperAdminPanel() {
             variant="contained"
             startIcon={<UpgradeRounded />}
             onClick={() => {
+              const currentExpiry = selectedTenantDetails?.tenant?.planExpiry
+                ? new Date(selectedTenantDetails.tenant.planExpiry).toISOString().split('T')[0]
+                : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
               setPlanForm({
                 plan: selectedTenantDetails?.tenant?.plan || 'MSME',
-                additionalDays: 365,
+                expiryDate: currentExpiry,
                 status: selectedTenantDetails?.tenant?.subscriptionStatus || 'Active',
                 notes: ''
               });
@@ -2282,10 +2290,11 @@ export default function SuperAdminPanel() {
               <TextField
                 fullWidth
                 size="small"
-                type="number"
-                label="Extend Validity (Additional Days)"
-                value={planForm.additionalDays}
-                onChange={(e) => setPlanForm({ ...planForm, additionalDays: e.target.value })}
+                type="date"
+                label="Subscription Expiry Date"
+                InputLabelProps={{ shrink: true }}
+                value={planForm.expiryDate || ''}
+                onChange={(e) => setPlanForm({ ...planForm, expiryDate: e.target.value })}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
               />
 
