@@ -32,7 +32,7 @@ export default function ResetPassword() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');a
+  const [error, setError] = useState('');
 
   const ruleResults = rules.map(r => ({ ...r, passed: r.test(password) }));
   const allRulesPassed = ruleResults.every(r => r.passed);
