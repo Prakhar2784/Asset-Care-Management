@@ -36,6 +36,9 @@ const { resolveTenantContext } = require("./middleware/tenantMiddleware");
 
 const app = express();
 
+// Trust reverse proxy (Hostinger / Nginx / Cloudflare)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json({ 
@@ -58,6 +61,7 @@ const authLimiter = rateLimit({
   message: { message: "Too many requests. Please try again after 15 minutes." },
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
 });
 
 // Routes

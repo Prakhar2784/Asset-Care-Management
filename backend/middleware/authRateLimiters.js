@@ -20,6 +20,7 @@ const loginLimiter = rateLimit({
   limit: isDev ? 500 : 10,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { message: 'Too many login attempts from this device. Please wait a minute and try again.' },
 });
 
@@ -29,6 +30,7 @@ const forgotLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { message: 'Too many password reset requests. Please wait 15 minutes and try again.' },
 });
 
@@ -38,6 +40,7 @@ const registerLimiter = rateLimit({
   limit: isDev ? 100 : 5,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { message: 'Too many registration attempts. Please try again later.' },
 });
 
