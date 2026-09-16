@@ -322,7 +322,7 @@ message: form.message.value,
                 <div className="info-icon"><EmailRoundedIcon /></div>
                 <div>
                   <div className="info-label">Direct Email</div>
-                  <div className="info-text">support@assetcarepro.com</div>
+                  <div className="info-text">iassetcare@icpljpr.com</div>
                 </div>
               </motion.div>
 
@@ -330,7 +330,7 @@ message: form.message.value,
                 <div className="info-icon"><PhoneRoundedIcon /></div>
                 <div>
                   <div className="info-label">Support Hotline</div>
-                  <div className="info-text">+91 800-456-7890</div>
+                  <div className="info-text">+91 90270 07508</div>
                 </div>
               </motion.div>
 
@@ -343,7 +343,7 @@ message: form.message.value,
               </motion.div>
 
               <motion.div variants={fadeUp} className="support-note">
-                <strong>Response Time:</strong> Our team typically responds within <strong>1 business day</strong>. For urgent support, call our hotline directly at <strong>+91 800-456-7890</strong>.
+                <strong>Response Time:</strong> Our team typically responds within <strong>1 business day</strong>. For urgent support, call our hotline directly at <strong>+91 90270 07508</strong>.
               </motion.div>
             </motion.div>
           </motion.div>

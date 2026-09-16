@@ -137,9 +137,8 @@ You agree to the exclusive jurisdiction of the courts located in Jaipur, Rajasth
 IAssetCare
 Tech Park, Block B, Jaipur, Rajasthan, India – 302022
 
-Email: legal@iassetcare.com
-Support: support@iassetcare.com
-Phone: +91 800-456-7890
+Email: iassetcare@icpljpr.com
+Phone: +91 90270 07508
 
 Business Hours: Monday to Friday, 9:00 AM – 6:00 PM IST`,
   },
@@ -495,7 +494,7 @@ const TermsAndConditions = () => {
         <div className="terms-footer-note">
           <p>
             For questions about these Terms, please <Link to="/contact">contact our support team</Link>. You can also email us at{" "}
-            <a href="mailto:legal@iassetcare.com">legal@iassetcare.com</a>.
+            <a href="mailto:iassetcare@icpljpr.com">iassetcare@icpljpr.com</a>.
           </p>
         </div>
       </div>

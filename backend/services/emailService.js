@@ -57,7 +57,7 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
     <div class="footer-brand">IAssetCare — Enterprise Asset Management</div>
     <div class="footer-text">${footerNote || 'This is an automated notification from your organisation\'s asset management system.'}</div>
     <div class="footer-text">You are receiving this email because you are registered on IAssetCare.</div>
-    <div class="footer-address">IAssetCare &bull; IT Asset Management Platform &bull; support@iassetcare.com</div>
+    <div class="footer-address">IAssetCare &bull; IT Asset Management Platform &bull; iassetcare@icpljpr.com</div>
   </div>
 </div>
 </body>
@@ -560,8 +560,8 @@ const sendContactAutoReply = async ({ name, email, company, inquiryType }) => {
       In the meantime, you can explore our product at <strong>iassetcare.com</strong> or reach us directly:
     </p>
     <div class="info-box">
-      <div class="info-row"><span class="info-key">Email</span><span class="info-val">support@iassetcare.com</span></div>
-      <div class="info-row"><span class="info-key">Phone</span><span class="info-val">+91 800-456-7890</span></div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val">iassetcare@icpljpr.com</span></div>
+      <div class="info-row"><span class="info-key">Phone</span><span class="info-val">+91 90270 07508</span></div>
     </div>`;
   await sendEmail({
     to: email,

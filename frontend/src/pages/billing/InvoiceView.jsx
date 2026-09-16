@@ -129,7 +129,7 @@ export default function InvoiceView() {
 
         <Box mt={8} textAlign="center">
           <Typography variant="body2" color="text.secondary">
-            Thank you for subscribing to IAssetCare. For billing inquiries, contact billing@iassetcare.com.
+            Thank you for subscribing to IAssetCare. For billing inquiries, contact iassetcare@icpljpr.com.
           </Typography>
         </Box>
       </Paper>

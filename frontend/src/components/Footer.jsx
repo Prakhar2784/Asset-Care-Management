@@ -198,11 +198,11 @@ const Footer = () => {
             <h4>Contact</h4>
             <div className="footer-contact-item">
               <div className="footer-contact-icon"><EmailRoundedIcon fontSize="small" /></div>
-              <div>admin@iassetcare.com<br />support@iassetcare.com</div>
+              <div>iassetcare@icpljpr.com</div>
             </div>
             <div className="footer-contact-item">
               <div className="footer-contact-icon"><PhoneRoundedIcon fontSize="small" /></div>
-              <div>+91 800-456-7890</div>
+              <div>+91 90270 07508</div>
             </div>
           </div>
         </div>
