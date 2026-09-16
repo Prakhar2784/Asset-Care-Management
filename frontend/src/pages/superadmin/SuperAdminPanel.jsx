@@ -371,6 +371,29 @@ export default function SuperAdminPanel() {
     }
   }, []);
 
+  const handleUpdateLeadStatus = async (leadId, newStatus) => {
+    try {
+      await api.patch(`/super-admin/leads/${leadId}`, { status: newStatus });
+      setLeads((prev) =>
+        prev.map((l) => (l._id === leadId ? { ...l, status: newStatus } : l))
+      );
+      showSnack('Inquiry status updated successfully.');
+    } catch {
+      showSnack('Failed to update status.', 'error');
+    }
+  };
+
+  const handleDeleteLead = async (leadId) => {
+    if (!window.confirm('Are you sure you want to delete this contact inquiry?')) return;
+    try {
+      await api.delete(`/super-admin/leads/${leadId}`);
+      setLeads((prev) => prev.filter((l) => l._id !== leadId));
+      showSnack('Inquiry deleted successfully.');
+    } catch {
+      showSnack('Failed to delete inquiry.', 'error');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -1840,33 +1863,112 @@ export default function SuperAdminPanel() {
                     <TableCell sx={{ fontWeight: 800, color: '#475569', py: 1.5 }}>Date</TableCell>
                     <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Name</TableCell>
                     <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Phone Number</TableCell>
                     <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Company / Type</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Message</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569', minWidth: 200 }}>Message</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#475569' }}>Status</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 800, color: '#475569' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {leads.map((lead) => (
                     <TableRow key={lead._id} hover sx={{ '&:last-child td': { border: 0 } }}>
-                      <TableCell sx={{ color: '#475569', fontSize: '12px', py: 1.5 }}>
+                      <TableCell sx={{ color: '#475569', fontSize: '12px', py: 1.5, whiteSpace: 'nowrap' }}>
                         {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString('en-IN') : '—'}
                       </TableCell>
                       <TableCell sx={{ fontWeight: 800, color: '#0F172A', fontSize: '12.5px' }}>
                         {lead.name}
                       </TableCell>
                       <TableCell sx={{ color: '#2563EB', fontSize: '12.5px' }}>
-                        {lead.email}
+                        <a href={`mailto:${lead.email}`} style={{ color: '#2563EB', textDecoration: 'none' }}>
+                          {lead.email}
+                        </a>
+                      </TableCell>
+                      <TableCell sx={{ fontSize: '12.5px' }}>
+                        {lead.phone ? (
+                          <Box
+                            component="a"
+                            href={`tel:${lead.phone}`}
+                            sx={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              color: '#059669',
+                              fontWeight: 700,
+                              textDecoration: 'none',
+                              '&:hover': { textDecoration: 'underline' }
+                            }}
+                          >
+                            <PhoneRounded sx={{ fontSize: '14px' }} />
+                            {lead.phone}
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" sx={{ color: '#94A3B8', fontStyle: 'italic' }}>
+                            —
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell sx={{ color: '#334155', fontSize: '12.5px' }}>
-                        {lead.company || lead.type || '—'}
+                        <Typography sx={{ fontSize: '12.5px', fontWeight: 600 }}>{lead.company || '—'}</Typography>
+                        {(lead.inquiryType || lead.type) && (
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                            {lead.inquiryType || lead.type}
+                          </Typography>
+                        )}
                       </TableCell>
-                      <TableCell sx={{ color: '#475569', fontSize: '12.5px' }}>
+                      <TableCell sx={{ color: '#475569', fontSize: '12.5px', maxWidth: 300, wordBreak: 'break-word' }}>
                         {lead.message || '—'}
+                      </TableCell>
+                      <TableCell sx={{ py: 1 }}>
+                        <Select
+                          size="small"
+                          value={lead.status || 'New'}
+                          onChange={(e) => handleUpdateLeadStatus(lead._id, e.target.value)}
+                          sx={{
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            height: 30,
+                            borderRadius: '8px',
+                            bgcolor:
+                              lead.status === 'Converted' ? '#ECFDF5' :
+                              lead.status === 'Demo Scheduled' ? '#EFF6FF' :
+                              lead.status === 'Contacted' ? '#FFFBEB' :
+                              lead.status === 'Not Interested' ? '#FEF2F2' : '#F1F5F9',
+                            color:
+                              lead.status === 'Converted' ? '#059669' :
+                              lead.status === 'Demo Scheduled' ? '#2563EB' :
+                              lead.status === 'Contacted' ? '#D97706' :
+                              lead.status === 'Not Interested' ? '#DC2626' : '#475569',
+                            '& .MuiSelect-select': { py: 0.5, px: 1 }
+                          }}
+                        >
+                          <MenuItem value="New">New</MenuItem>
+                          <MenuItem value="Contacted">Contacted</MenuItem>
+                          <MenuItem value="Demo Scheduled">Demo Scheduled</MenuItem>
+                          <MenuItem value="Converted">Converted</MenuItem>
+                          <MenuItem value="Not Interested">Not Interested</MenuItem>
+                        </Select>
+                      </TableCell>
+                      <TableCell align="center" sx={{ py: 1 }}>
+                        <Tooltip title="Delete Inquiry">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDeleteLead(lead._id)}
+                            sx={{
+                              color: '#EF4444',
+                              bgcolor: '#FEF2F2',
+                              '&:hover': { bgcolor: '#FEE2E2' }
+                            }}
+                          >
+                            <DeleteRounded sx={{ fontSize: '16px' }} />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                     </TableRow>
                   ))}
                   {leads.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} align="center" sx={{ py: 6, color: TEXT_MUTED }}>
+                      <TableCell colSpan={8} align="center" sx={{ py: 6, color: TEXT_MUTED }}>
                         No inbound leads recorded.
                       </TableCell>
                     </TableRow>
