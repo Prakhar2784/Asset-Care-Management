@@ -207,13 +207,6 @@ const Home = () => {
               <Link to="/login" className="h-btn-primary">
                 Access Dashboard <ArrowForwardRoundedIcon fontSize="small" />
               </Link>
-              <a 
-                href={(import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "/download/desktop-app") || "/download/desktop-app"} 
-                className="h-btn-outline" 
-                style={{ borderColor: "#B4F105", color: "#B4F105" }}
-              >
-                Download Desktop App
-              </a>
               <Link to="/modules" className="h-btn-outline">View Modules</Link>
             </motion.div>
 
