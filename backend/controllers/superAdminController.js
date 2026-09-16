@@ -292,12 +292,14 @@ const manageTenantSubscription = async (req, res) => {
     const prevPlan = tenant.plan;
     let historyAction = action || 'Admin Override';
 
-    if (plan && plan !== tenant.plan) {
+    if (plan) {
       tenant.plan = plan;
-      const planCfg = billingConfig.PLANS[Object.keys(billingConfig.PLANS).find(k => billingConfig.PLANS[k].name === plan)];
-      if (planCfg) {
-        tenant.limits.maxAssets = planCfg.maxAssets;
-      }
+      const { getPlanDefaults } = require('../config/planDefaults');
+      const planDefaults = getPlanDefaults(plan);
+      tenant.limits = tenant.limits || {};
+      tenant.limits.maxAssets = planDefaults.maxAssets;
+      tenant.limits.maxUsers = planDefaults.maxUsers;
+      tenant.features = { ...(tenant.features || {}), ...(planDefaults.features || {}) };
     }
 
     if (status) {
