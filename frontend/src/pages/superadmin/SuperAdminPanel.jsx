@@ -1343,7 +1343,7 @@ export default function SuperAdminPanel() {
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', flex: 1, minWidth: 280 }}>
               <TextField
                 size="small"
-                placeholder="Search by company name, slug, or email..."
+                placeholder="Search company name, slug, or email..."
                 value={companySearch}
                 onChange={(e) => setCompanySearch(e.target.value)}
                 InputProps={{
@@ -1353,7 +1353,7 @@ export default function SuperAdminPanel() {
                     </InputAdornment>
                   )
                 }}
-                sx={{ minWidth: 280, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                sx={{ minWidth: { xs: 240, sm: 320, md: 380 }, '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
               />
 
               <FormControl size="small" sx={{ minWidth: 150 }}>
