@@ -309,11 +309,15 @@ export default function MaintenanceLogs() {
                   </Box>
                   <Button
                     variant="contained"
-                    startIcon={<AddRounded />}
+                    startIcon={<AddRounded sx={{ color: "#FFFFFF" }} />}
                     onClick={openAdd}
                     sx={{
-                      background: "#051C12", color: "#FFFFFF",
-                      color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
+                      background: "#051C12",
+                      color: "#FFFFFF !important",
+                      fontWeight: 800,
+                      borderRadius: "12px",
+                      boxShadow: "none",
+                      "&:hover": { background: "#0B291C" }
                     }}
                   >
                     Add Log
@@ -693,9 +697,13 @@ export default function MaintenanceLogs() {
             onClick={handleSave}
             disabled={saving}
             sx={{
-              background: "#051C12", color: "#FFFFFF",
-              color: "#111827", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
+              background: "#051C12",
+              color: "#FFFFFF !important",
+              fontWeight: 800,
+              borderRadius: "12px",
+              boxShadow: "none",
               minWidth: 120,
+              "&:hover": { background: "#0B291C" }
             }}
           >
             {saving ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : editLog ? "Save Changes" : "Add Log"}

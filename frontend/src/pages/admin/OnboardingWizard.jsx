@@ -367,8 +367,8 @@ const OnboardingWizard = () => {
             {savedDepts.length > 0 && (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
                 {savedDepts.map((name, i) => (
-                  <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#111827 !important" }} />}
-                    label={name} sx={{ bgcolor: "#051C12", color: "#111827", fontWeight: 700 }} />
+                  <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#B4F105 !important" }} />}
+                    label={name} sx={{ bgcolor: "#051C12", color: "#FFFFFF", fontWeight: 700 }} />
                 ))}
               </Box>
             )}
@@ -416,8 +416,8 @@ const OnboardingWizard = () => {
             {savedUsers.length > 0 && (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
                 {savedUsers.map((name, i) => (
-                  <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#111827 !important" }} />}
-                    label={name} sx={{ bgcolor: "#051C12", color: "#111827", fontWeight: 700 }} />
+                  <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#B4F105 !important" }} />}
+                    label={name} sx={{ bgcolor: "#051C12", color: "#FFFFFF", fontWeight: 700 }} />
                 ))}
               </Box>
             )}
