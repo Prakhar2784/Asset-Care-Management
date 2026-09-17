@@ -462,24 +462,35 @@ const AuthPage = () => {
         }
 
         .auth-stat-card {
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
+          background: #F8FAFA;
+          border: 1.5px solid #E2E8F0;
           border-radius: 16px;
-          padding: 15px;
+          padding: 16px 12px;
           text-align: center;
+          transition: all 0.25s ease;
+        }
+
+        .auth-stat-card:hover {
+          background: #F0FDF4;
+          border-color: #B4F105;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(5,28,18,0.06);
         }
 
         .auth-stat-card h4 {
-          color: #FFFFFF;
+          color: #051C12;
           font-size: 22px;
           font-weight: 950;
           margin: 0 0 4px;
+          letter-spacing: -0.5px;
         }
 
         .auth-stat-card span {
-          color: #879A91;
+          color: #475569;
           font-size: 12px;
           font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         @media (max-width: 900px) {
