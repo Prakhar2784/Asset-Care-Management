@@ -52,50 +52,57 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="format-detection" content="telephone=no,date=no,address=no,email=no">
 <title>${title}</title>
-<style>
-  body { margin:0; padding:0; background-color:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
-  .wrapper { max-width:600px; margin:32px auto; background-color:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(15,23,42,0.08); border:1px solid #e2e8f0; }
-  .header { background-color:#072F1F; padding:32px 36px; border-bottom:3px solid #B4F105; }
-  .header-logo { font-size:22px; font-weight:900; color:#ffffff; letter-spacing:-0.5px; }
-  .header-logo span { color:#B4F105; }
-  .header-title { font-size:24px; font-weight:800; color:#ffffff; margin-top:10px; letter-spacing:-0.4px; line-height:1.25; }
-  .body { padding:32px 36px; background-color:#ffffff; }
-  p { margin:0 0 16px 0; font-size:15px; color:#334155; line-height:1.65; font-weight:500; }
-  p:last-child { margin-bottom:0; }
-  .btn { display:inline-block; background-color:#072F1F; color:#ffffff !important; text-decoration:none; font-weight:800; font-size:14px; padding:14px 32px; border-radius:10px; margin:20px 0 8px; letter-spacing:0.3px; }
-  .footer { background-color:#f8fafc; border-top:1px solid #e2e8f0; padding:24px 36px; text-align:center; }
-  .footer-brand { font-size:13px; font-weight:800; color:#475569; margin-bottom:6px; letter-spacing:-0.2px; }
-  .footer-text { font-size:12px; color:#64748b; font-weight:500; margin-bottom:6px; line-height:1.55; }
-  .footer-contact { font-size:12px; color:#334155; font-weight:600; margin-top:8px; }
-  .footer-contact a { color:#059669; text-decoration:none; font-weight:700; }
-  .footer-address { font-size:11px; color:#94a3b8; margin-top:8px; line-height:1.4; }
-</style>
 </head>
-<body>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
 <!-- Preheader for email clients -->
 <div style="display:none;font-size:1px;color:#f8fafc;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
   IAssetCare — ${title} — Official Notification
 </div>
-<div class="wrapper">
-  <div class="header">
-    <div class="header-logo">IAsset<span>Care</span></div>
-    <div class="header-title">${title}</div>
-  </div>
-  <div class="body">
-    ${bodyHtml}
-  </div>
-  <div class="footer">
-    <div class="footer-brand">IAssetCare — Enterprise IT Asset Management</div>
-    <div class="footer-text">${footerNote || 'This is an automated notification from your organisation\'s asset management system.'}</div>
-    <div class="footer-text">You are receiving this email because you are a registered user on IAssetCare.</div>
-    <div class="footer-contact">
-      Email: <a href="mailto:iassetcare@icpljpr.com">iassetcare@icpljpr.com</a> &bull; Helpline: <strong>+91 90270 07508</strong>
-    </div>
-    <div class="footer-address">
-      IAssetCare &bull; Tech Park, Block B, Jaipur, Rajasthan, India – 302022
-    </div>
-  </div>
-</div>
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width:100%;background-color:#f1f5f9;padding:32px 12px;margin:0;">
+  <tr>
+    <td align="center" style="padding:0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,0.08);border:1px solid #e2e8f0;border-collapse:separate;">
+        <!-- Header -->
+        <tr>
+          <td style="background-color:#072F1F;padding:32px 36px;border-bottom:3px solid #B4F105;">
+            <div style="font-size:22px;font-weight:900;color:#ffffff;letter-spacing:-0.5px;line-height:1.2;">
+              IAsset<span style="color:#B4F105;">Care</span>
+            </div>
+            <div style="font-size:22px;font-weight:800;color:#ffffff;margin-top:10px;letter-spacing:-0.4px;line-height:1.3;">
+              ${title}
+            </div>
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:32px 36px;background-color:#ffffff;font-size:15px;color:#334155;line-height:1.65;font-weight:500;">
+            ${bodyHtml}
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:24px 36px;text-align:center;">
+            <div style="font-size:13px;font-weight:800;color:#475569;margin-bottom:6px;letter-spacing:-0.2px;">
+              IAssetCare — Enterprise IT Asset Management
+            </div>
+            <div style="font-size:12px;color:#64748b;font-weight:500;margin-bottom:6px;line-height:1.55;">
+              ${footerNote || 'This is an automated notification from your organisation\'s asset management system.'}
+            </div>
+            <div style="font-size:12px;color:#64748b;font-weight:500;margin-bottom:8px;line-height:1.55;">
+              You are receiving this email because you are a registered user on IAssetCare.
+            </div>
+            <div style="font-size:12px;color:#334155;font-weight:600;margin-top:8px;">
+              Email: <a href="mailto:iassetcare@icpljpr.com" style="color:#059669;text-decoration:none;font-weight:700;">iassetcare@icpljpr.com</a> &bull; Helpline: <strong style="color:#0f172a;">+91 90270 07508</strong>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.4;">
+              IAssetCare &bull; Tech Park, Block B, Jaipur, Rajasthan, India – 302022
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>`;
 
