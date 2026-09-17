@@ -34,6 +34,8 @@ import {
   Tabs,
   Tab,
   Chip,
+  Avatar,
+  DialogActions,
 } from "@mui/material";
 import {
   AddRounded,
@@ -905,59 +907,222 @@ const Assets = () => {
       </Dialog>
 
       {/* Assign Employee Dialog */}
-      <Dialog open={assignDialogOpen} onClose={() => setAssignDialogOpen(false)} fullWidth maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: "24px", overflow: "hidden", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
-        <DialogTitle sx={{ p: 0 }}>
-          <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
-                <PersonAddRounded sx={{ color: "#fff" }} />
-              </Box>
-              <Box>
-                <Typography fontWeight={900} fontSize={18}>Assign to Employee</Typography>
-                <Typography fontSize={12} color="text.secondary">{assignAssetTarget?.name}</Typography>
-              </Box>
+      <Dialog
+        open={assignDialogOpen}
+        onClose={() => setAssignDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            overflow: "hidden",
+            boxShadow: "0 25px 60px rgba(5, 28, 18, 0.25)",
+            border: "1px solid #E2E8F0"
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            p: 2.5,
+            px: 3,
+            bgcolor: "#051C12",
+            color: "#FFFFFF",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "10px",
+                bgcolor: "rgba(180, 241, 5, 0.15)",
+                color: "#B4F105",
+                display: "grid",
+                placeItems: "center"
+              }}
+            >
+              <PersonAddRounded sx={{ fontSize: 22 }} />
             </Box>
-            <IconButton onClick={() => setAssignDialogOpen(false)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
+            <Box>
+              <Typography fontWeight={900} fontSize={17} sx={{ color: "#FFFFFF", lineHeight: 1.2 }}>
+                Assign to Employee
+              </Typography>
+              <Typography fontSize={12} sx={{ color: "rgba(255, 255, 255, 0.7)", fontWeight: 500 }}>
+                {assignAssetTarget?.name} {assignAssetTarget?.serialNumber ? `(${assignAssetTarget.serialNumber})` : ''}
+              </Typography>
+            </Box>
           </Box>
+          <IconButton
+            onClick={() => setAssignDialogOpen(false)}
+            size="small"
+            sx={{
+              color: "rgba(255, 255, 255, 0.7)",
+              bgcolor: "rgba(255, 255, 255, 0.08)",
+              borderRadius: "8px",
+              "&:hover": { bgcolor: "rgba(255, 255, 255, 0.18)", color: "#FFFFFF" }
+            }}
+          >
+            <CloseRounded fontSize="small" />
+          </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Typography fontSize={14} color="text.secondary" mb={2} mt={0.5}>
-            Select a registered employee to assign this asset. Only active employees are shown.
+
+        <DialogContent sx={{ p: 3.5, bgcolor: "#FFFFFF" }}>
+          <Typography fontSize={13} sx={{ color: "#64748B", mb: 2.5, fontWeight: 500, lineHeight: 1.5 }}>
+            Select a registered employee from your organization to assign this asset. Only active accounts are shown.
           </Typography>
+
           <Autocomplete
             options={employees}
-            getOptionLabel={(e) => `${e.name} — ${e.email} (${e.department})`}
+            getOptionLabel={(e) => `${e.name} (${e.email})`}
             value={selectedEmployee}
             onChange={(_, val) => setSelectedEmployee(val)}
-            renderInput={(params) => <TextField {...params} label="Select Employee" fullWidth sx={inputStyles} />}
+            PaperComponent={({ children, ...paperProps }) => (
+              <Paper
+                {...paperProps}
+                elevation={8}
+                sx={{
+                  borderRadius: '12px',
+                  mt: 1,
+                  border: '1px solid #E2E8F0',
+                  boxShadow: '0 16px 36px rgba(0,0,0,0.15)',
+                  '& .MuiAutocomplete-listbox': {
+                    p: 1
+                  }
+                }}
+              >
+                {children}
+              </Paper>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Search & Select Employee"
+                placeholder="Type name, email or department..."
+                fullWidth
+                size="medium"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '12px',
+                    bgcolor: '#F8FAFC',
+                    '&:hover': { bgcolor: '#FFFFFF' }
+                  }
+                }}
+              />
+            )}
             renderOption={(props, e) => (
-              <Box component="li" {...props} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start !important', py: 1.5 }}>
-                <Typography fontWeight={700} fontSize={14}>{e.name}</Typography>
-                <Typography fontSize={12} color="text.secondary">{e.email} · {e.department} · {e.role}</Typography>
+              <Box
+                component="li"
+                {...props}
+                key={e._id || e.email}
+                sx={{
+                  p: '10px 14px !important',
+                  borderRadius: '8px',
+                  mb: 0.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 1.5,
+                  '&:hover': { bgcolor: '#F1F5F9' },
+                  '&.Mui-focused': { bgcolor: '#F1F5F9' }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Avatar
+                    sx={{
+                      width: 34,
+                      height: 34,
+                      fontSize: '13px',
+                      fontWeight: 700,
+                      bgcolor: '#051C12',
+                      color: '#B4F105'
+                    }}
+                  >
+                    {e.name?.charAt(0)?.toUpperCase()}
+                  </Avatar>
+                  <Box>
+                    <Typography sx={{ fontWeight: 700, fontSize: '13.5px', color: '#0F172A' }}>
+                      {e.name}
+                    </Typography>
+                    <Typography sx={{ fontSize: '12px', color: '#64748B' }}>
+                      {e.email} {e.department ? `· ${e.department}` : ''}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Chip
+                  label={e.role?.replace('_', ' ')?.toUpperCase() || 'USER'}
+                  size="small"
+                  sx={{
+                    fontSize: '10.5px',
+                    fontWeight: 700,
+                    bgcolor: '#F1F5F9',
+                    color: '#475569',
+                    height: 22
+                  }}
+                />
               </Box>
             )}
           />
+
           {selectedEmployee && (
-            <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: "action.hover", border: "1px solid", borderColor: "divider" }}>
-              <Typography fontSize={13} fontWeight={700} mb={1}>Assignment Preview</Typography>
-              {[['Name', selectedEmployee.name], ['Email', selectedEmployee.email], ['Department', selectedEmployee.department], ['Role', selectedEmployee.role]].map(([k, v]) => (
-                <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
-                  <Typography fontSize={13} color="text.secondary">{k}</Typography>
-                  <Typography fontSize={13} fontWeight={600}>{v}</Typography>
-                </Box>
-              ))}
+            <Box
+              sx={{
+                mt: 2.5,
+                p: 2,
+                borderRadius: '12px',
+                bgcolor: '#F8FAFC',
+                border: '1px solid #E2E8F0'
+              }}
+            >
+              <Typography fontSize={12} fontWeight={800} color="#64748B" sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', mb: 1.5 }}>
+                Assignment Confirmation Details
+              </Typography>
+              <Stack spacing={1}>
+                {[
+                  ['Employee Name', selectedEmployee.name],
+                  ['Email Address', selectedEmployee.email],
+                  ['Department', selectedEmployee.department || 'General'],
+                  ['Role', selectedEmployee.role]
+                ].map(([k, v]) => (
+                  <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                    <Typography fontSize={13} color="#64748B" fontWeight={500}>{k}</Typography>
+                    <Typography fontSize={13} fontWeight={700} color="#0F172A">{v}</Typography>
+                  </Box>
+                ))}
+              </Stack>
             </Box>
           )}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
-            <Button onClick={() => setAssignDialogOpen(false)} sx={{ color: "text.secondary", fontWeight: 700 }}>Cancel</Button>
-            <Button variant="contained" disabled={!selectedEmployee || assigning} onClick={handleAssignSubmit}
-              startIcon={assigning ? <CircularProgress size={16} color="inherit" /> : <PersonAddRounded />}
-              sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
-              {assigning ? "Assigning..." : "Confirm Assignment"}
-            </Button>
-          </Box>
         </DialogContent>
+
+        <DialogActions sx={{ px: 3.5, py: 2.5, bgcolor: '#F8FAFC', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+          <Button
+            onClick={() => setAssignDialogOpen(false)}
+            sx={{ color: '#64748B', fontWeight: 700, textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            disabled={!selectedEmployee || assigning}
+            onClick={handleAssignSubmit}
+            startIcon={assigning ? <CircularProgress size={16} sx={{ color: '#FFFFFF' }} /> : <PersonAddRounded />}
+            sx={{
+              background: "#051C12",
+              color: "#FFFFFF",
+              fontWeight: 800,
+              borderRadius: "10px",
+              boxShadow: "0 4px 12px rgba(5, 28, 18, 0.2)",
+              textTransform: 'none',
+              px: 3,
+              py: 1,
+              "&:hover": { background: "#0B291C" }
+            }}
+          >
+            {assigning ? "Assigning..." : "Confirm Assignment"}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar({ ...snackbar, open: false })} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
