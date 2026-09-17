@@ -1,45 +1,49 @@
 import { useState, useEffect } from "react";
-import {
-  Box, Paper, Stepper, Step, StepLabel, Typography, TextField,
-  Button, Grid, MenuItem, CircularProgress, Alert, Chip,
-  FormControl, InputLabel, Select, InputAdornment, IconButton, Autocomplete
-} from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import {
-  ApartmentRounded, BusinessRounded, PersonAddRounded, Inventory2Rounded,
-  ArrowForwardRounded, CheckCircleRounded, AddRounded, Visibility, VisibilityOff,
-  BadgeRounded
-} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { INDIAN_STATES, INDIAN_CITIES } from "../../data/indianPlaces";
 
-const steps = ["Organization Profile", "Add Department", "Add User", "Add Asset"];
+import ApartmentRoundedIcon from "@mui/icons-material/ApartmentRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
+import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
+import LocationCityRoundedIcon from "@mui/icons-material/LocationCityRounded";
+import PinDropRoundedIcon from "@mui/icons-material/PinDropRounded";
+import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
+import BadgeRoundedIcon from "@mui/icons-material/BadgeRounded";
+import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
+import BusinessCenterRoundedIcon from "@mui/icons-material/BusinessCenterRounded";
+
+const steps = [
+  { label: "Organization Profile", short: "Org Profile" },
+  { label: "Add Department", short: "Department" },
+  { label: "Add User", short: "Users" },
+  { label: "Add Asset", short: "Assets" }
+];
+
 const ROLES = ["employee", "hod", "technician", "admin"];
-
-const cardTheme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#051C12", contrastText: "#FFFFFF" },
-    background: { default: "#FFFFFF", paper: "#FFFFFF" },
-    text: { primary: "#111827", secondary: "#4B5563" },
-    divider: "rgba(17,24,39,0.15)",
-  },
-  shape: { borderRadius: 14 },
-  components: {
-    MuiButton: { styleOverrides: { root: { textTransform: "none", fontWeight: 700 } } },
-  },
-});
-
-const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
-
 const STORAGE_KEY = "assetcare_onboarding_draft";
 
 const loadDraft = () => {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
 };
 
 const OnboardingWizard = () => {
@@ -52,11 +56,23 @@ const OnboardingWizard = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const [org, setOrg] = useState(draft.org ?? {
-    name: "", industry: "", employeeCount: "", phone: "", website: "", contactEmail: "",
-    gstNumber: "", panNumber: "",
-    addressLine: "", city: "", state: "", pin: "", country: "India"
-  });
+  const [org, setOrg] = useState(
+    draft.org ?? {
+      name: "",
+      industry: "",
+      employeeCount: "",
+      phone: "",
+      website: "",
+      contactEmail: "",
+      gstNumber: "",
+      panNumber: "",
+      addressLine: "",
+      city: "",
+      state: "",
+      pin: "",
+      country: "India"
+    }
+  );
 
   const emptyDept = { name: "", code: "", hodName: "", hodEmail: "", hodPhone: "", location: "" };
   const [dept, setDept] = useState(draft.dept ?? emptyDept);
@@ -77,21 +93,25 @@ const OnboardingWizard = () => {
   }, [active, org, dept, savedDepts, user, savedUsers]);
 
   const departmentOptions = [
-    ...existingDepts.map(d => d.name),
-    ...savedDepts.filter(n => !existingDepts.some(d => d.name === n))
+    ...existingDepts.map((d) => d.name),
+    ...savedDepts.filter((n) => !existingDepts.some((d) => d.name === n))
   ];
 
   const finish = async () => {
-    await api.patch("/auth/complete-onboarding");
-    await refreshUser();
-    localStorage.removeItem(STORAGE_KEY);
-    navigate("/admin/dashboard");
+    try {
+      await api.patch("/auth/complete-onboarding");
+      await refreshUser();
+      localStorage.removeItem(STORAGE_KEY);
+      navigate("/admin/dashboard");
+    } catch {
+      navigate("/admin/dashboard");
+    }
   };
 
   const handlePincodeChange = async (val) => {
-    const cleanPin = val.replace(/[^0-9]/g, '').slice(0, 6);
-    setOrg(prev => ({ ...prev, pin: cleanPin }));
-    
+    const cleanPin = val.replace(/[^0-9]/g, "").slice(0, 6);
+    setOrg((prev) => ({ ...prev, pin: cleanPin }));
+
     if (cleanPin.length === 6) {
       try {
         const response = await fetch(`https://api.postalpincode.in/pincode/${cleanPin}`);
@@ -100,7 +120,7 @@ const OnboardingWizard = () => {
           const firstPO = data[0].PostOffice[0];
           const city = firstPO.District || firstPO.Division || "";
           const state = firstPO.State || "";
-          setOrg(prev => ({ ...prev, city, state }));
+          setOrg((prev) => ({ ...prev, city, state }));
         }
       } catch (err) {
         console.error("Failed to fetch address details from pincode:", err);
@@ -108,8 +128,10 @@ const OnboardingWizard = () => {
     }
   };
 
-  const handleOrgSave = async () => {
-    setSaving(true); setError("");
+  const handleOrgSave = async (e) => {
+    if (e) e.preventDefault();
+    setSaving(true);
+    setError("");
     try {
       await api.put("/settings/tenant", {
         name: org.name || null,
@@ -120,91 +142,113 @@ const OnboardingWizard = () => {
         contactEmail: org.contactEmail || null,
         gstNumber: org.gstNumber || null,
         panNumber: org.panNumber || null,
-        address: { line: org.addressLine || null, city: org.city || null, state: org.state || null, pin: org.pin || null, country: org.country || "India" }
+        address: {
+          line: org.addressLine || null,
+          city: org.city || null,
+          state: org.state || null,
+          pin: org.pin || null,
+          country: org.country || "India"
+        }
       });
       window.dispatchEvent(new Event("tenant-branding-changed"));
       setActive(1);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save organization profile.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const deptFilled = dept.name || dept.code || dept.hodName || dept.hodEmail || dept.hodPhone || dept.location;
 
   const saveCurrentDept = async () => {
     if (!dept.name || !dept.hodName || !dept.hodEmail) {
-      setError("Please fill department name, HOD name and HOD email.");
+      setError("Please fill department name, HOD name, and HOD email.");
       return false;
     }
-    const finalCode = dept.code?.trim() || (dept.name.trim().split(/\s+/).map(w => w[0]).join('') || dept.name.trim().slice(0, 3)).toUpperCase();
+    const finalCode =
+      dept.code?.trim() ||
+      (dept.name.trim().split(/\s+/).map((w) => w[0]).join("") || dept.name.trim().slice(0, 3)).toUpperCase();
     await api.post("/departments", { ...dept, code: finalCode, status: "Active" });
-    setSavedDepts(list => [...list, dept.name]);
-    setUser(u => ({ ...u, department: dept.name }));
+    setSavedDepts((list) => [...list, dept.name]);
+    setUser((u) => ({ ...u, department: dept.name }));
     setDept(emptyDept);
     return true;
   };
 
   const handleAddAnotherDept = async () => {
-    setSaving(true); setError("");
+    setSaving(true);
+    setError("");
     try {
       await saveCurrentDept();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create department.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleDeptContinue = async () => {
-    setSaving(true); setError("");
+    setSaving(true);
+    setError("");
     try {
       if (deptFilled) {
         const ok = await saveCurrentDept();
         if (!ok) return;
       } else if (savedDepts.length === 0 && existingDepts.length === 0) {
-        setError("Add at least one department, or use Skip this step.");
+        setError("Add at least one department, or click 'Skip this step'.");
         return;
       }
       setActive(2);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create department.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const userFilled = user.name || user.email || user.password || user.phone || user.employeeId;
 
   const saveCurrentUser = async () => {
     if (!user.name || !user.email || !user.password) {
-      setError("Please fill user name, email and password.");
+      setError("Please fill user name, email, and password.");
       return false;
     }
     await api.post("/users", user);
-    setSavedUsers(list => [...list, user.name]);
+    setSavedUsers((list) => [...list, user.name]);
     setUser(emptyUser);
     return true;
   };
 
   const handleAddAnotherUser = async () => {
-    setSaving(true); setError("");
+    setSaving(true);
+    setError("");
     try {
       await saveCurrentUser();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create user.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleUserContinue = async () => {
-    setSaving(true); setError("");
+    setSaving(true);
+    setError("");
     try {
       if (userFilled) {
         const ok = await saveCurrentUser();
         if (!ok) return;
       } else if (savedUsers.length === 0) {
-        setError("Add at least one user, or use Skip this step.");
+        setError("Add at least one user, or click 'Skip this step'.");
         return;
       }
       setActive(3);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to create user.");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const skip = async () => {
@@ -212,7 +256,7 @@ const OnboardingWizard = () => {
     if (active === steps.length - 1) {
       await finish();
     } else {
-      setActive(a => a + 1);
+      setActive((a) => a + 1);
     }
   };
 
@@ -220,312 +264,1168 @@ const OnboardingWizard = () => {
     navigate("/admin/assets/add?onboarding=1");
   };
 
-  const StepHeader = ({ icon, title, subtitle }) => (
-    <Box sx={{ mb: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 0.5 }}>
-        <Box sx={{ width: 34, height: 34, borderRadius: "10px", bgcolor: "rgba(251,191,36,0.15)", display: "grid", placeItems: "center" }}>
-          {icon}
-        </Box>
-        <Typography fontWeight={800} fontSize={17} color="text.primary">{title}</Typography>
-      </Box>
-      {subtitle && <Typography fontSize={13} color="text.secondary" sx={{ ml: "46px" }}>{subtitle}</Typography>}
-    </Box>
-  );
-
   return (
     <>
-    <Navbar />
-    <Box sx={{
-      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", p: 3,
-      pt: { xs: 14, sm: 16 }, pb: 8,
-      position: "relative", overflow: "hidden",
-      background: (theme) => theme.palette.mode === "dark"
-        ? "radial-gradient(circle at 12% 8%, rgba(251,191,36,0.35) 0%, rgba(0,0,0,0) 40%), radial-gradient(circle at 88% 92%, rgba(251,191,36,0.22) 0%, rgba(0,0,0,0) 45%), #000000"
-        : "radial-gradient(circle at 12% 8%, rgba(251,191,36,0.35) 0%, rgba(0,0,0,0) 40%), radial-gradient(circle at 88% 92%, rgba(251,191,36,0.2) 0%, rgba(0,0,0,0) 45%), #F7F8FA",
-    }}>
-      <ThemeProvider theme={cardTheme}>
-      <Paper sx={{
-        width: "100%", maxWidth: 900, borderRadius: "24px", p: { xs: 3, sm: 6 },
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(24px) saturate(150%)",
-        WebkitBackdropFilter: "blur(24px) saturate(150%)",
-        border: "1px solid",
-        borderColor: "rgba(17,24,39,0.08)",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-      }}>
-        <Box sx={{ textAlign: "center", mb: 4 }}>
-          <Typography fontWeight={900} fontSize={{ xs: 28, sm: 36 }} color="text.primary" letterSpacing="-1px" mb={1}>
-            Welcome to IAssetCare
-          </Typography>
-          <Typography color="text.secondary" fontSize={15} sx={{ maxWidth: 480, mx: "auto" }}>
-            Let's set up your workspace in a few quick steps. You can skip and finish any step later from Settings.
-          </Typography>
-        </Box>
+      <Navbar />
+      <div className="auth-wrapper">
+        <div className="auth-container">
+          <style>{`
+            .auth-wrapper {
+              min-height: 100vh;
+              padding: 110px 20px 60px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: #0B0D12;
+              background-attachment: fixed;
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              width: 100%;
+            }
 
-        <Stepper activeStep={active} sx={{ mb: 5 }}>
-          {steps.map(label => (
-            <Step key={label}><StepLabel>{label}</StepLabel></Step>
-          ))}
-        </Stepper>
+            .auth-container {
+              width: 100%;
+              max-width: 1240px;
+              background: rgba(18, 20, 29, 0.85);
+              backdrop-filter: blur(28px);
+              -webkit-backdrop-filter: blur(28px);
+              border: 1px solid rgba(255, 255, 255, 0.08);
+              border-radius: 32px;
+              box-shadow: 0 35px 80px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+              display: flex;
+              overflow: hidden;
+              color: #ffffff;
+            }
 
-        {error && <Alert severity="error" sx={{ mb: 3, borderRadius: "12px" }}>{error}</Alert>}
+            .auth-info {
+              flex: 1;
+              background: linear-gradient(160deg, #131722 0%, #090B10 100%);
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              padding: 56px 48px;
+              position: relative;
+              border-right: 1px solid rgba(255, 255, 255, 0.06);
+            }
 
-        {active === 0 && (
-          <Box>
-            <StepHeader icon={<BusinessRounded sx={{ color: "#051C12" }} />} title="Tell us about your organization"
-              subtitle="This information appears on invoices, reports and the tenant profile." />
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Company Name" sx={inputSx} value={org.name}
-                  onChange={e => setOrg({ ...org, name: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Industry" sx={inputSx} value={org.industry}
-                  onChange={e => setOrg({ ...org, industry: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth type="number" label="Employee Count" sx={inputSx} value={org.employeeCount}
-                  onChange={e => setOrg({ ...org, employeeCount: e.target.value })}
-                  onKeyDown={(e) => { if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault(); }}
-                  onWheel={(e) => e.target.blur()} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Website" sx={inputSx} value={org.website}
-                  onChange={e => setOrg({ ...org, website: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Phone" sx={inputSx} value={org.phone}
-                  onChange={e => setOrg({ ...org, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) })}
-                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Contact Email" sx={inputSx} value={org.contactEmail}
-                  onChange={e => setOrg({ ...org, contactEmail: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="GST Number" sx={inputSx} value={org.gstNumber}
-                  onChange={e => setOrg({ ...org, gstNumber: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="PAN Number" sx={inputSx} value={org.panNumber}
-                  onChange={e => setOrg({ ...org, panNumber: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Address Line" sx={inputSx} value={org.addressLine}
-                  onChange={e => setOrg({ ...org, addressLine: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Autocomplete
-                  freeSolo
-                  options={INDIAN_CITIES}
-                  value={org.city}
-                  onChange={(event, newValue) => {
-                    setOrg(prev => ({ ...prev, city: newValue || "" }));
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    setOrg(prev => ({ ...prev, city: newInputValue }));
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} label="City" sx={inputSx} />
-                  )}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <Autocomplete
-                  freeSolo
-                  options={INDIAN_STATES}
-                  value={org.state}
-                  onChange={(event, newValue) => {
-                    setOrg(prev => ({ ...prev, state: newValue || "" }));
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    setOrg(prev => ({ ...prev, state: newInputValue }));
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} label="State" sx={inputSx} />
-                  )}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <TextField fullWidth label="PIN Code" sx={inputSx} value={org.pin}
-                  onChange={e => handlePincodeChange(e.target.value)}
-                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 6 } }} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 3 }}>
-                <TextField fullWidth label="Country" sx={inputSx} value={org.country}
-                  onChange={e => setOrg({ ...org, country: e.target.value })} />
-              </Grid>
-            </Grid>
-          </Box>
-        )}
+            .auth-info::before {
+              content: '';
+              position: absolute;
+              top: -15%;
+              left: -15%;
+              width: 450px;
+              height: 450px;
+              background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, rgba(0,0,0,0) 70%);
+              border-radius: 50%;
+              pointer-events: none;
+            }
 
-        {active === 1 && (
-          <Box>
-            <StepHeader icon={<ApartmentRounded sx={{ color: "#051C12" }} />} title="Add your departments"
-              subtitle="Create as many departments as your organization needs — each requires an HOD." />
+            .brand-header {
+              display: flex;
+              align-items: center;
+              gap: 14px;
+              z-index: 2;
+            }
 
-            {savedDepts.length > 0 && (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
-                {savedDepts.map((name, i) => (
-                  <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#B4F105 !important" }} />}
-                    label={name} sx={{ bgcolor: "#051C12", color: "#FFFFFF", fontWeight: 700 }} />
-                ))}
-              </Box>
-            )}
+            .brand-logo {
+              width: 46px;
+              height: 46px;
+              border-radius: 14px;
+              background: linear-gradient(135deg, #1E2433 0%, #111520 100%);
+              border: 1px solid rgba(255, 255, 255, 0.1);
+              display: grid;
+              place-items: center;
+              color: #FBBF24;
+              box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            }
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="Department Name" sx={inputSx} value={dept.name}
-                  onChange={e => setDept({ ...dept, name: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Department Code" sx={inputSx} value={dept.code}
-                  onChange={e => setDept({ ...dept, code: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="HOD Name" sx={inputSx} value={dept.hodName}
-                  onChange={e => setDept({ ...dept, hodName: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="HOD Email" sx={inputSx} value={dept.hodEmail}
-                  onChange={e => setDept({ ...dept, hodEmail: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="HOD Phone" sx={inputSx} value={dept.hodPhone}
-                  onChange={e => setDept({ ...dept, hodPhone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) })}
-                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Department Address" sx={inputSx} value={dept.location}
-                  onChange={e => setDept({ ...dept, location: e.target.value })} />
-              </Grid>
-            </Grid>
+            .brand-name {
+              font-size: 22px;
+              font-weight: 800;
+              letter-spacing: -0.5px;
+              color: #FFFFFF;
+            }
 
-            <Button startIcon={<AddRounded />} onClick={handleAddAnotherDept} disabled={saving}
-              sx={{ mt: 2.5, fontWeight: 700, color: "text.primary", border: "1px solid", borderColor: "divider", borderRadius: "10px", px: 2 }}>
-              Add Another Department
-            </Button>
-          </Box>
-        )}
+            .info-content {
+              max-width: 480px;
+              z-index: 2;
+              margin: 40px 0;
+              position: sticky;
+              top: 130px;
+            }
 
-        {active === 2 && (
-          <Box>
-            <StepHeader icon={<PersonAddRounded sx={{ color: "#051C12" }} />} title="Add your users"
-              subtitle="Onboard as many teammates as you like — each gets their own login and role." />
+            .badge-tag {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: rgba(251, 191, 36, 0.12);
+              border: 1px solid rgba(251, 191, 36, 0.25);
+              color: #FBBF24;
+              padding: 6px 14px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 700;
+              margin-bottom: 20px;
+              letter-spacing: 0.3px;
+            }
 
-            {savedUsers.length > 0 && (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 2.5 }}>
-                {savedUsers.map((name, i) => (
-                  <Chip key={i} icon={<CheckCircleRounded sx={{ fontSize: 16, color: "#B4F105 !important" }} />}
-                    label={name} sx={{ bgcolor: "#051C12", color: "#FFFFFF", fontWeight: 700 }} />
-                ))}
-              </Box>
-            )}
+            .info-title {
+              font-size: 34px;
+              font-weight: 800;
+              line-height: 1.25;
+              margin-bottom: 16px;
+              background: linear-gradient(135deg, #FFFFFF 30%, #A1A1AA 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              letter-spacing: -0.8px;
+            }
 
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="Full Name" sx={inputSx} value={user.name}
-                  onChange={e => setUser({ ...user, name: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="Email Address" type="email" sx={inputSx} value={user.email}
-                  onChange={e => setUser({ ...user, email: e.target.value })} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth required label="Temporary Password" type={showPass ? "text" : "password"} sx={inputSx} value={user.password}
-                  onChange={e => setUser({ ...user, password: e.target.value })}
-                  helperText="User can change this after first login"
-                  slotProps={{ input: { endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setShowPass(s => !s)}>
-                        {showPass ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                      </IconButton>
-                    </InputAdornment>
-                  ) } }} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Employee ID" sx={inputSx} value={user.employeeId}
-                  onChange={e => setUser({ ...user, employeeId: e.target.value })}
-                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><BadgeRounded sx={{ fontSize: 18, color: "text.disabled" }} /></InputAdornment> } }} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth sx={inputSx}>
-                  <InputLabel>Department</InputLabel>
-                  <Select label="Department" value={user.department} onChange={e => setUser({ ...user, department: e.target.value })}>
-                    <MenuItem value="">No Department</MenuItem>
-                    {departmentOptions.map(name => <MenuItem key={name} value={name}>{name}</MenuItem>)}
-                    <MenuItem value="Others">Others</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <FormControl fullWidth sx={inputSx}>
-                  <InputLabel>Role</InputLabel>
-                  <Select label="Role" value={user.role} onChange={e => setUser({ ...user, role: e.target.value })}>
-                    {ROLES.map(r => <MenuItem key={r} value={r} sx={{ textTransform: "capitalize" }}>{r.replace(/_/g, " ")}</MenuItem>)}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField fullWidth label="Phone" sx={inputSx} value={user.phone}
-                  onChange={e => setUser({ ...user, phone: e.target.value.replace(/[^0-9]/g, '').slice(0, 10) })}
-                  slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 10 } }} />
-              </Grid>
-            </Grid>
+            .info-desc {
+              color: #9CA3AF;
+              line-height: 1.65;
+              font-size: 14.5px;
+              margin-bottom: 32px;
+            }
 
-            <Button startIcon={<AddRounded />} onClick={handleAddAnotherUser} disabled={saving}
-              sx={{ mt: 2.5, fontWeight: 700, color: "text.primary", border: "1px solid", borderColor: "divider", borderRadius: "10px", px: 2 }}>
-              Add Another User
-            </Button>
-          </Box>
-        )}
+            .feature-card {
+              display: flex;
+              align-items: flex-start;
+              gap: 16px;
+              padding: 16px 18px;
+              background: rgba(255, 255, 255, 0.03);
+              border: 1px solid rgba(255, 255, 255, 0.06);
+              border-radius: 18px;
+              backdrop-filter: blur(12px);
+              margin-bottom: 14px;
+              transition: all 0.25s ease;
+            }
 
-        {active === 3 && (
-          <Box sx={{ textAlign: "center", py: 2 }}>
-            <Box sx={{ width: 64, height: 64, borderRadius: "18px", bgcolor: "rgba(251,191,36,0.15)", display: "grid", placeItems: "center", mx: "auto", mb: 2.5 }}>
-              <Inventory2Rounded sx={{ fontSize: 32, color: "#051C12" }} />
-            </Box>
-            <Typography fontWeight={800} fontSize={18} color="text.primary" mb={1}>Register your first asset</Typography>
-            <Typography color="text.secondary" mb={3}>
-              Add a laptop, chair, or any equipment to start tracking it. You can always add more later.
-            </Typography>
-            <Button variant="contained" size="large" endIcon={<ArrowForwardRounded />} onClick={goAddAsset}
-              sx={{ borderRadius: "12px", fontWeight: 800, px: 4, boxShadow: "none" }}>
-              Add Asset Now
-            </Button>
-          </Box>
-        )}
+            .feature-card:hover {
+              background: rgba(255, 255, 255, 0.05);
+              border-color: rgba(251, 191, 36, 0.25);
+              transform: translateY(-2px);
+            }
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 5, pt: 3, borderTop: "1px solid", borderColor: "divider" }}>
-          <Button onClick={skip} sx={{ fontWeight: 700, color: "text.secondary" }}>
-            {active === steps.length - 1 ? "Skip & Finish Later" : "Skip this step"}
-          </Button>
-          {active < 3 && (
-            <Button
-              variant="contained"
-              disabled={saving}
-              onClick={active === 0 ? handleOrgSave : active === 1 ? handleDeptContinue : handleUserContinue}
-              endIcon={saving ? <CircularProgress size={16} color="inherit" /> : <ArrowForwardRounded />}
-              sx={{ borderRadius: "12px", fontWeight: 800, px: 3.5, boxShadow: "none" }}
-            >
-              Save &amp; Continue
-            </Button>
-          )}
-          {active === 3 && (
-            <Button
-              variant="text"
-              onClick={finish}
-              endIcon={<CheckCircleRounded />}
-              sx={{ fontWeight: 800, color: "text.primary" }}
-            >
-              Finish Setup
-            </Button>
-          )}
-        </Box>
-      </Paper>
-      </ThemeProvider>
-    </Box>
-    <Footer />
+            .feature-icon-wrapper {
+              width: 40px;
+              height: 40px;
+              border-radius: 12px;
+              background: rgba(251, 191, 36, 0.1);
+              color: #FBBF24;
+              display: grid;
+              place-items: center;
+              flex-shrink: 0;
+            }
+
+            .feature-details h4 {
+              font-size: 14.5px;
+              font-weight: 700;
+              color: #FFFFFF;
+              margin: 0 0 4px 0;
+            }
+
+            .feature-details p {
+              font-size: 12.5px;
+              color: #88909E;
+              margin: 0;
+              line-height: 1.45;
+            }
+
+            .auth-form-side {
+              flex: 1.35;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: flex-start;
+              padding: 48px 40px;
+              background: #0D1017;
+              z-index: 2;
+            }
+
+            .form-card {
+              width: 100%;
+              max-width: 580px;
+            }
+
+            .form-header-area {
+              margin-bottom: 24px;
+            }
+
+            .form-title {
+              font-size: 26px;
+              font-weight: 800;
+              margin-bottom: 6px;
+              letter-spacing: -0.5px;
+              color: #FFFFFF;
+            }
+
+            .form-sub {
+              color: #88909E;
+              font-size: 13.5px;
+              margin: 0;
+            }
+
+            /* Stepper Navigation */
+            .wizard-stepper {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 8px;
+              margin-bottom: 28px;
+              padding: 10px 14px;
+              background: rgba(255, 255, 255, 0.02);
+              border: 1px solid rgba(255, 255, 255, 0.06);
+              border-radius: 16px;
+            }
+
+            .wizard-step-item {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              padding: 6px 12px;
+              border-radius: 10px;
+              font-size: 12.5px;
+              font-weight: 700;
+              color: #6B7280;
+              transition: all 0.2s ease;
+            }
+
+            .wizard-step-item.active {
+              background: rgba(251, 191, 36, 0.12);
+              color: #FBBF24;
+              border: 1px solid rgba(251, 191, 36, 0.25);
+            }
+
+            .wizard-step-item.completed {
+              color: #34D399;
+            }
+
+            .step-dot {
+              width: 22px;
+              height: 22px;
+              border-radius: 50%;
+              display: grid;
+              place-items: center;
+              font-size: 11px;
+              font-weight: 800;
+              background: #1F2937;
+              color: #9CA3AF;
+            }
+
+            .wizard-step-item.active .step-dot {
+              background: #FBBF24;
+              color: #0B0D12;
+            }
+
+            .wizard-step-item.completed .step-dot {
+              background: #059669;
+              color: #FFFFFF;
+            }
+
+            .form-section-card {
+              background: rgba(255, 255, 255, 0.02);
+              border: 1px solid rgba(255, 255, 255, 0.06);
+              border-radius: 20px;
+              padding: 24px 22px 16px;
+              margin-bottom: 22px;
+            }
+
+            .section-header {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 20px;
+            }
+
+            .section-num {
+              width: 32px;
+              height: 32px;
+              border-radius: 10px;
+              background: #FBBF24;
+              color: #111827;
+              display: grid;
+              place-items: center;
+              font-weight: 900;
+              font-size: 13.5px;
+              flex-shrink: 0;
+            }
+
+            .section-title {
+              font-size: 15.5px;
+              font-weight: 800;
+              color: #ffffff;
+              letter-spacing: -0.2px;
+            }
+
+            .section-sub {
+              font-size: 12px;
+              font-weight: 500;
+              color: #717684;
+              margin-top: 2px;
+            }
+
+            .input-group {
+              position: relative;
+              margin-bottom: 14px;
+            }
+
+            .input-icon {
+              position: absolute;
+              left: 14px;
+              top: 50%;
+              transform: translateY(-50%);
+              color: #6B7280;
+              display: flex;
+              align-items: center;
+              pointer-events: none;
+              z-index: 1;
+            }
+
+            .auth-input {
+              width: 100%;
+              background: #141721;
+              border: 1px solid #232734;
+              padding: 13px 14px 13px 44px;
+              border-radius: 12px;
+              color: #ffffff;
+              font-size: 13.5px;
+              transition: all 0.2s ease;
+              outline: none;
+              box-sizing: border-box;
+            }
+
+            .auth-input:focus {
+              border-color: #FBBF24;
+              background: #171B27;
+              box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+            }
+
+            .auth-input::placeholder {
+              color: #525866;
+            }
+
+            .input-grid-2 {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 12px;
+            }
+
+            .input-suffix {
+              position: absolute;
+              right: 14px;
+              top: 50%;
+              transform: translateY(-50%);
+              color: #6B7280;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+            }
+
+            .input-suffix:hover {
+              color: #FBBF24;
+            }
+
+            .error-banner {
+              background: rgba(239, 68, 68, 0.1);
+              border: 1px solid rgba(239, 68, 68, 0.25);
+              color: #F87171;
+              padding: 12px 16px;
+              border-radius: 12px;
+              font-size: 13px;
+              margin-bottom: 20px;
+              font-weight: 600;
+            }
+
+            .chip-container {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 8px;
+              margin-bottom: 18px;
+            }
+
+            .saved-badge {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              background: rgba(16, 185, 129, 0.12);
+              border: 1px solid rgba(16, 185, 129, 0.25);
+              color: #34D399;
+              padding: 5px 12px;
+              border-radius: 8px;
+              font-size: 12px;
+              font-weight: 700;
+            }
+
+            .add-more-btn {
+              width: 100%;
+              background: rgba(255, 255, 255, 0.03);
+              border: 1px dashed rgba(255, 255, 255, 0.15);
+              color: #E5E7EB;
+              padding: 12px;
+              border-radius: 12px;
+              font-size: 13px;
+              font-weight: 700;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 8px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              margin-bottom: 20px;
+            }
+
+            .add-more-btn:hover {
+              background: rgba(251, 191, 36, 0.08);
+              border-color: #FBBF24;
+              color: #FBBF24;
+            }
+
+            .asset-hero-card {
+              text-align: center;
+              padding: 36px 20px;
+              background: rgba(255, 255, 255, 0.02);
+              border: 1px solid rgba(255, 255, 255, 0.06);
+              border-radius: 20px;
+              margin-bottom: 24px;
+            }
+
+            .asset-icon-box {
+              width: 68px;
+              height: 68px;
+              border-radius: 20px;
+              background: rgba(251, 191, 36, 0.12);
+              color: #FBBF24;
+              display: grid;
+              place-items: center;
+              margin: 0 auto 16px;
+              border: 1px solid rgba(251, 191, 36, 0.25);
+            }
+
+            .action-bar {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-top: 24px;
+              padding-top: 20px;
+              border-top: 1px solid rgba(255, 255, 255, 0.06);
+              gap: 12px;
+            }
+
+            .skip-btn {
+              background: transparent;
+              border: none;
+              color: #88909E;
+              font-size: 13.5px;
+              font-weight: 700;
+              cursor: pointer;
+              padding: 10px 16px;
+              border-radius: 10px;
+              transition: all 0.2s ease;
+            }
+
+            .skip-btn:hover {
+              color: #FFFFFF;
+              background: rgba(255, 255, 255, 0.05);
+            }
+
+            .primary-btn {
+              background: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
+              color: #0B0D12;
+              border: none;
+              padding: 13px 26px;
+              border-radius: 12px;
+              font-size: 14px;
+              font-weight: 800;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              box-shadow: 0 8px 24px rgba(251, 191, 36, 0.25);
+              transition: all 0.2s ease;
+            }
+
+            .primary-btn:hover {
+              transform: translateY(-1px);
+              box-shadow: 0 12px 28px rgba(251, 191, 36, 0.35);
+            }
+
+            .primary-btn:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+              transform: none;
+            }
+
+            @media (max-width: 960px) {
+              .auth-container {
+                flex-direction: column;
+              }
+              .auth-info {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                padding: 40px 24px;
+              }
+              .auth-form-side {
+                padding: 40px 24px;
+              }
+              .input-grid-2 {
+                grid-template-columns: 1fr;
+              }
+              .wizard-stepper {
+                flex-wrap: wrap;
+              }
+            }
+          `}</style>
+
+          {/* LEFT INFO PANEL */}
+          <div className="auth-info">
+            <div className="brand-header">
+              <div className="brand-logo">
+                <ShieldRoundedIcon />
+              </div>
+              <div className="brand-name">IAssetCare</div>
+            </div>
+
+            <div className="info-content">
+              <div className="badge-tag">
+                <AutoAwesomeRoundedIcon sx={{ fontSize: 14 }} /> Step {active + 1} of 4 · Workspace Setup
+              </div>
+
+              {active === 0 && (
+                <>
+                  <h1 className="info-title">Organization Profile</h1>
+                  <p className="info-desc">
+                    Establish your corporate identity, tax GSTIN/PAN details, and master registered office location.
+                  </p>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><BusinessRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Corporate Identity</h4>
+                      <p>Company name, industry vertical, and workforce size parameters.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><ReceiptLongRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Tax & Invoicing</h4>
+                      <p>GSTIN and PAN configurations for compliant billing invoices.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><LocationOnRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Master Facility Address</h4>
+                      <p>Primary operational headquarters for site asset assignment.</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {active === 1 && (
+                <>
+                  <h1 className="info-title">Add Departments</h1>
+                  <p className="info-desc">
+                    Structure your organizational units and assign Head of Departments (HODs) for lifecycle governance.
+                  </p>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><ApartmentRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Department Hierarchy</h4>
+                      <p>Create dedicated partitions for IT, Operations, HR, and Engineering.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><PersonRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>HOD Ownership</h4>
+                      <p>Designate departmental approval leaders for equipment requisitions.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><BadgeRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Asset Tag Prefixes</h4>
+                      <p>Smart auto-generated departmental codes for tracking.</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {active === 2 && (
+                <>
+                  <h1 className="info-title">Add Team Users</h1>
+                  <p className="info-desc">
+                    Onboard initial administrators, technicians, HODs, and employees to your tenant partition.
+                  </p>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><PeopleRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Role-Based Access Control</h4>
+                      <p>Assign Admin, HOD, Technician, or Employee permission tiers.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><LockRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Secure First-Run Creds</h4>
+                      <p>Provision temporary master logins that users customize on entry.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><ApartmentRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Unit Alignment</h4>
+                      <p>Link employees directly to their respective department partitions.</p>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {active === 3 && (
+                <>
+                  <h1 className="info-title">Add First Asset</h1>
+                  <p className="info-desc">
+                    Initialize your physical asset repository with telemetry tracking, QR barcodes, and warranty monitoring.
+                  </p>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><Inventory2RoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Hardware Inventory</h4>
+                      <p>Track serial numbers, models, purchase cost, and vendors.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><BadgeRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Instant QR Code Tags</h4>
+                      <p>Auto-generate printable QR stickers for physical tagging.</p>
+                    </div>
+                  </div>
+                  <div className="feature-card">
+                    <div className="feature-icon-wrapper"><CheckCircleRoundedIcon /></div>
+                    <div className="feature-details">
+                      <h4>Ready to Launch</h4>
+                      <p>Your enterprise asset lifecycle workspace is fully primed.</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div style={{ color: "#717684", fontSize: "12px", zIndex: 2 }}>
+              © {new Date().getFullYear()} IAssetCare Enterprise PaaS. All rights reserved.
+            </div>
+          </div>
+
+          {/* RIGHT FORM SIDE */}
+          <div className="auth-form-side">
+            <div className="form-card">
+              <div className="form-header-area">
+                <div className="form-title">Workspace Onboarding</div>
+                <div className="form-sub">Quickly set up your company profile, departments, users, and assets.</div>
+              </div>
+
+              {/* 4-Step Stepper Header */}
+              <div className="wizard-stepper">
+                {steps.map((s, idx) => {
+                  const isActive = active === idx;
+                  const isCompleted = active > idx;
+                  return (
+                    <div
+                      key={s.label}
+                      className={`wizard-step-item ${isActive ? "active" : ""} ${isCompleted ? "completed" : ""}`}
+                    >
+                      <div className="step-dot">{isCompleted ? "✓" : idx + 1}</div>
+                      <span>{s.short}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {error && <div className="error-banner">{error}</div>}
+
+              {/* ─── STEP 0: ORGANIZATION PROFILE ─── */}
+              {active === 0 && (
+                <form onSubmit={handleOrgSave}>
+                  <div className="form-section-card">
+                    <div className="section-header">
+                      <div className="section-num">1</div>
+                      <div>
+                        <div className="section-title">Organization Identity</div>
+                        <div className="section-sub">Company details, industry, and workforce size.</div>
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><ApartmentRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        name="name"
+                        placeholder="Company Legal Name (e.g., Acme Innovations Ltd)"
+                        className="auth-input"
+                        value={org.name}
+                        onChange={(e) => setOrg({ ...org, name: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><BusinessCenterRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="industry"
+                          placeholder="Industry (e.g. IT, Manufacturing)"
+                          className="auth-input"
+                          value={org.industry}
+                          onChange={(e) => setOrg({ ...org, industry: e.target.value })}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><PeopleRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="number"
+                          name="employeeCount"
+                          placeholder="Employee Count"
+                          className="auth-input"
+                          value={org.employeeCount}
+                          onChange={(e) => setOrg({ ...org, employeeCount: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="tel"
+                          name="phone"
+                          placeholder="Primary Phone Number"
+                          className="auth-input"
+                          value={org.phone}
+                          maxLength={10}
+                          onChange={(e) => setOrg({ ...org, phone: e.target.value.replace(/[^0-9]/g, "").slice(0, 10) })}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><LanguageRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="website"
+                          placeholder="Website (e.g., https://acme.com)"
+                          className="auth-input"
+                          value={org.website}
+                          onChange={(e) => setOrg({ ...org, website: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="email"
+                        name="contactEmail"
+                        placeholder="Official Billing Contact Email"
+                        className="auth-input"
+                        value={org.contactEmail}
+                        onChange={(e) => setOrg({ ...org, contactEmail: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-section-card">
+                    <div className="section-header">
+                      <div className="section-num">2</div>
+                      <div>
+                        <div className="section-title">Taxation & Registered Location</div>
+                        <div className="section-sub">Tax identifier codes and registered headquarters address.</div>
+                      </div>
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><ReceiptLongRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="gstNumber"
+                          placeholder="GSTIN Number (15 Digits)"
+                          className="auth-input"
+                          value={org.gstNumber}
+                          onChange={(e) => setOrg({ ...org, gstNumber: e.target.value.toUpperCase() })}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><BadgeRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="panNumber"
+                          placeholder="PAN Number (10 Digits)"
+                          className="auth-input"
+                          value={org.panNumber}
+                          onChange={(e) => setOrg({ ...org, panNumber: e.target.value.toUpperCase() })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><LocationOnRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        name="addressLine"
+                        placeholder="Street / Office Address Line"
+                        className="auth-input"
+                        value={org.addressLine}
+                        onChange={(e) => setOrg({ ...org, addressLine: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><PinDropRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="pin"
+                          placeholder="6-Digit PIN Code (Auto-fetch)"
+                          className="auth-input"
+                          value={org.pin}
+                          maxLength={6}
+                          onChange={(e) => handlePincodeChange(e.target.value)}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><LocationCityRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="city"
+                          placeholder="City"
+                          className="auth-input"
+                          value={org.city}
+                          onChange={(e) => setOrg({ ...org, city: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><LocationOnRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="state"
+                          placeholder="State (e.g., Maharashtra)"
+                          className="auth-input"
+                          value={org.state}
+                          onChange={(e) => setOrg({ ...org, state: e.target.value })}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><LanguageRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          name="country"
+                          placeholder="Country"
+                          className="auth-input"
+                          value={org.country}
+                          onChange={(e) => setOrg({ ...org, country: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="action-bar">
+                    <button type="button" className="skip-btn" onClick={skip}>
+                      Skip this step
+                    </button>
+                    <button type="submit" className="primary-btn" disabled={saving}>
+                      {saving ? "Saving Profile..." : "Save & Continue"}
+                      {!saving && <ArrowForwardRoundedIcon fontSize="small" />}
+                    </button>
+                  </div>
+                </form>
+              )}
+
+              {/* ─── STEP 1: ADD DEPARTMENT ─── */}
+              {active === 1 && (
+                <div>
+                  <div className="form-section-card">
+                    <div className="section-header">
+                      <div className="section-num">1</div>
+                      <div>
+                        <div className="section-title">Department Configuration</div>
+                        <div className="section-sub">Create organizational units and assign designated HODs.</div>
+                      </div>
+                    </div>
+
+                    {savedDepts.length > 0 && (
+                      <div className="chip-container">
+                        {savedDepts.map((name, i) => (
+                          <span key={i} className="saved-badge">
+                            <CheckCircleRoundedIcon sx={{ fontSize: 14 }} /> {name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="input-group">
+                      <span className="input-icon"><ApartmentRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        placeholder="Department Name (e.g. Information Technology)"
+                        className="auth-input"
+                        value={dept.name}
+                        onChange={(e) => setDept({ ...dept, name: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><PinDropRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="text"
+                        placeholder="Department Code (Optional, e.g. IT)"
+                        className="auth-input"
+                        value={dept.code}
+                        onChange={(e) => setDept({ ...dept, code: e.target.value.toUpperCase() })}
+                      />
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><PersonRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          placeholder="HOD Full Name"
+                          className="auth-input"
+                          value={dept.hodName}
+                          onChange={(e) => setDept({ ...dept, hodName: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="email"
+                          placeholder="HOD Email Address"
+                          className="auth-input"
+                          value={dept.hodEmail}
+                          onChange={(e) => setDept({ ...dept, hodEmail: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="tel"
+                          placeholder="HOD Phone Number"
+                          className="auth-input"
+                          value={dept.hodPhone}
+                          maxLength={10}
+                          onChange={(e) => setDept({ ...dept, hodPhone: e.target.value.replace(/[^0-9]/g, "").slice(0, 10) })}
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><LocationOnRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          placeholder="Department Location / Floor"
+                          className="auth-input"
+                          value={dept.location}
+                          onChange={(e) => setDept({ ...dept, location: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="button" className="add-more-btn" onClick={handleAddAnotherDept} disabled={saving}>
+                    <AddRoundedIcon fontSize="small" /> + Add Another Department
+                  </button>
+
+                  <div className="action-bar">
+                    <button type="button" className="skip-btn" onClick={skip}>
+                      Skip this step
+                    </button>
+                    <button type="button" className="primary-btn" onClick={handleDeptContinue} disabled={saving}>
+                      {saving ? "Saving..." : "Save & Continue"}
+                      {!saving && <ArrowForwardRoundedIcon fontSize="small" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── STEP 2: ADD USER ─── */}
+              {active === 2 && (
+                <div>
+                  <div className="form-section-card">
+                    <div className="section-header">
+                      <div className="section-num">1</div>
+                      <div>
+                        <div className="section-title">Team Member Account</div>
+                        <div className="section-sub">Add administrators, technicians, HODs, or employees.</div>
+                      </div>
+                    </div>
+
+                    {savedUsers.length > 0 && (
+                      <div className="chip-container">
+                        {savedUsers.map((name, i) => (
+                          <span key={i} className="saved-badge">
+                            <CheckCircleRoundedIcon sx={{ fontSize: 14 }} /> {name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <span className="input-icon"><PersonRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          className="auth-input"
+                          value={user.name}
+                          onChange={(e) => setUser({ ...user, name: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div className="input-group">
+                        <span className="input-icon"><BadgeRoundedIcon fontSize="small" /></span>
+                        <input
+                          type="text"
+                          placeholder="Employee ID (e.g. EMP001)"
+                          className="auth-input"
+                          value={user.employeeId}
+                          onChange={(e) => setUser({ ...user, employeeId: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="email"
+                        placeholder="User Email Address"
+                        className="auth-input"
+                        value={user.email}
+                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
+                      <input
+                        type={showPass ? "text" : "password"}
+                        placeholder="Temporary Password"
+                        className="auth-input"
+                        value={user.password}
+                        onChange={(e) => setUser({ ...user, password: e.target.value })}
+                        required
+                      />
+                      <span className="input-suffix" onClick={() => setShowPass(!showPass)}>
+                        {showPass ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
+                      </span>
+                    </div>
+
+                    <div className="input-grid-2">
+                      <div className="input-group">
+                        <select
+                          className="auth-input"
+                          style={{ paddingLeft: "16px", appearance: "none", cursor: "pointer" }}
+                          value={user.department}
+                          onChange={(e) => setUser({ ...user, department: e.target.value })}
+                        >
+                          <option value="" style={{ background: "#141721" }}>Select Department</option>
+                          {departmentOptions.map((name) => (
+                            <option key={name} value={name} style={{ background: "#141721" }}>{name}</option>
+                          ))}
+                          <option value="Others" style={{ background: "#141721" }}>Others</option>
+                        </select>
+                      </div>
+
+                      <div className="input-group">
+                        <select
+                          className="auth-input"
+                          style={{ paddingLeft: "16px", appearance: "none", cursor: "pointer" }}
+                          value={user.role}
+                          onChange={(e) => setUser({ ...user, role: e.target.value })}
+                        >
+                          {ROLES.map((r) => (
+                            <option key={r} value={r} style={{ background: "#141721", textTransform: "capitalize" }}>
+                              {r.replace(/_/g, " ").toUpperCase()}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="input-group">
+                      <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
+                      <input
+                        type="tel"
+                        placeholder="Mobile Phone Number"
+                        className="auth-input"
+                        value={user.phone}
+                        maxLength={10}
+                        onChange={(e) => setUser({ ...user, phone: e.target.value.replace(/[^0-9]/g, "").slice(0, 10) })}
+                      />
+                    </div>
+                  </div>
+
+                  <button type="button" className="add-more-btn" onClick={handleAddAnotherUser} disabled={saving}>
+                    <AddRoundedIcon fontSize="small" /> + Add Another User
+                  </button>
+
+                  <div className="action-bar">
+                    <button type="button" className="skip-btn" onClick={skip}>
+                      Skip this step
+                    </button>
+                    <button type="button" className="primary-btn" onClick={handleUserContinue} disabled={saving}>
+                      {saving ? "Saving..." : "Save & Continue"}
+                      {!saving && <ArrowForwardRoundedIcon fontSize="small" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── STEP 3: ADD ASSET ─── */}
+              {active === 3 && (
+                <div>
+                  <div className="asset-hero-card">
+                    <div className="asset-icon-box">
+                      <Inventory2RoundedIcon sx={{ fontSize: 34 }} />
+                    </div>
+                    <h3 style={{ fontSize: "20px", fontWeight: 800, margin: "0 0 8px 0", color: "#FFFFFF" }}>
+                      Register Your First Equipment Asset
+                    </h3>
+                    <p style={{ fontSize: "13.5px", color: "#88909E", maxWidth: "420px", margin: "0 auto 24px", lineHeight: 1.6 }}>
+                      Add laptops, servers, machinery, or office equipment into your active workspace registry with telemetry &amp; QR codes.
+                    </p>
+
+                    <button
+                      type="button"
+                      className="primary-btn"
+                      style={{ margin: "0 auto", padding: "14px 28px" }}
+                      onClick={goAddAsset}
+                    >
+                      <AddRoundedIcon fontSize="small" /> Add Asset Now
+                      <ArrowForwardRoundedIcon fontSize="small" />
+                    </button>
+                  </div>
+
+                  <div className="action-bar">
+                    <button type="button" className="skip-btn" onClick={skip}>
+                      Skip &amp; Finish Later
+                    </button>
+                    <button type="button" className="primary-btn" onClick={finish}>
+                      <CheckCircleRoundedIcon fontSize="small" /> Finish Setup
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      <Footer />
     </>
   );
 };
