@@ -184,7 +184,7 @@ export default function Checkout() {
         setCouponSuccess('');
       }
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to calculate subscription pricing.';
+      const msg = err.response?.data?.message || err.response?.data?.error || (typeof err.response?.data === 'string' && err.response?.data.length < 100 ? err.response?.data : null) || 'Failed to calculate subscription pricing. Please try selecting the plan again.';
       setError(msg);
       // Keep previous breakdown if coupon failed, or recalculate without coupon
       if (coupon) {

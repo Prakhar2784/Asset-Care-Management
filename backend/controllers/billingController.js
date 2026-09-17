@@ -36,7 +36,11 @@ const assertNoDowngrade = (tenant, selectedPlanName) => {
 
 // Utility to calculate billing math using dynamic DB coupons (with config fallback)
 const computeBilling = async (planKey, couponCode, customerState) => {
-  const plan = billingConfig.PLANS[planKey] || Object.values(billingConfig.PLANS).find(p => p.name.toLowerCase() === (planKey || '').toLowerCase());
+  const cleanKey = (planKey || 'HOME_USER').toString().trim().toUpperCase().replace(/\s+/g, '_');
+  const plan = billingConfig.PLANS[cleanKey] || 
+               billingConfig.PLANS[planKey] || 
+               Object.values(billingConfig.PLANS).find(p => p.name.toLowerCase() === (planKey || '').toString().toLowerCase()) ||
+               billingConfig.PLANS.HOME_USER;
   if (!plan) throw new Error('Invalid plan selected');
 
   const baseAmount = plan.price;
