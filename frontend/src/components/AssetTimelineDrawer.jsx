@@ -1,4 +1,4 @@
-﻿// frontend/src/components/AssetTimelineDrawer.jsx
+// frontend/src/components/AssetTimelineDrawer.jsx
 // Complete event history for a single asset — tickets, assignments, transfers, maintenance, audit logs
 import { useState, useEffect } from 'react';
 import {
@@ -12,8 +12,8 @@ import {
 } from '@mui/icons-material';
 import api from '../api/axios';
 
-const ACCENT = '#111827';
-const DARK = '#111827';
+const ACCENT = '#B4F105';
+const DARK = '#051C12';
 
 const ICON_MAP = {
   ticket: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />,
@@ -77,7 +77,7 @@ function TimeEvent({ event, last }) {
 
         <Paper sx={{
           p: 1.8, borderRadius: 2.5, border: '1px solid', borderColor: 'divider',
-          '&:hover': { borderColor: event.color || ACCENT, bgcolor: `${event.color || ACCENT}05` },
+          '&:hover': { borderColor: event.color || '#051C12', bgcolor: `${event.color || '#051C12'}05` },
           transition: 'all 0.2s',
           bgcolor: 'background.paper'
         }}>
@@ -139,30 +139,30 @@ export default function AssetTimelineDrawer({ open, assetId, assetName, onClose 
       {/* Header */}
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', bgcolor: DARK }}>
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-          <Box sx={{ width: 40, height: 40, borderRadius: 1.5, bgcolor: `${ACCENT}18`, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-            <ManageHistoryRounded sx={{ color: ACCENT, fontSize: 20 }} />
+          <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'rgba(180, 241, 5, 0.15)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+            <ManageHistoryRounded sx={{ color: ACCENT, fontSize: 22 }} />
           </Box>
           <Box>
-            <Typography fontWeight={900} fontSize={16} color="white">Asset Timeline</Typography>
-            <Typography variant="caption" color="#888" sx={{ maxWidth: 320, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <Typography fontWeight={900} fontSize={16} sx={{ color: '#FFFFFF', letterSpacing: '-0.2px' }}>Asset Timeline</Typography>
+            <Typography variant="caption" sx={{ color: '#94A3B8', maxWidth: 320, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600 }}>
               {assetName || 'Loading...'}
             </Typography>
           </Box>
         </Box>
-        <IconButton onClick={onClose} sx={{ color: '#666', '&:hover': { color: 'white' } }}>
+        <IconButton onClick={onClose} sx={{ color: '#94A3B8', '&:hover': { color: '#FFFFFF', bgcolor: 'rgba(255,255,255,0.08)' } }}>
           <CloseRounded />
         </IconButton>
       </Box>
 
       {/* Asset Quick Info */}
       {asset && (
-        <Box sx={{ px: 2.5, py: 1.8, bgcolor: DARK, borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <Box sx={{ px: 2.5, py: 1.8, bgcolor: DARK, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip label={asset.category} size="small" sx={{ bgcolor: `${ACCENT}18`, color: ACCENT, fontWeight: 700, fontSize: 11 }} />
-            <Chip label={asset.department} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#aaa', fontWeight: 600, fontSize: 11 }} />
-            <Chip label={asset.status} size="small" sx={{ bgcolor: asset.status === 'Active' ? '#14532d' : '#450a0a', color: asset.status === 'Active' ? '#4ade80' : '#f87171', fontWeight: 700, fontSize: 11 }} />
+            <Chip label={asset.category} size="small" sx={{ bgcolor: 'rgba(180, 241, 5, 0.15)', color: ACCENT, fontWeight: 700, fontSize: 11 }} />
+            <Chip label={asset.department} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#E2E8F0', fontWeight: 600, fontSize: 11 }} />
+            <Chip label={asset.status} size="small" sx={{ bgcolor: asset.status === 'Active' ? '#064E3B' : '#7F1D1D', color: asset.status === 'Active' ? '#34D399' : '#F87171', fontWeight: 700, fontSize: 11 }} />
             {asset.serialNumber && (
-              <Chip label={`SN: ${asset.serialNumber}`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.06)', color: '#777', fontWeight: 600, fontSize: 11 }} />
+              <Chip label={`SN: ${asset.serialNumber}`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#CBD5E1', fontWeight: 600, fontSize: 11 }} />
             )}
           </Box>
         </Box>
@@ -172,14 +172,14 @@ export default function AssetTimelineDrawer({ open, assetId, assetName, onClose 
       {data && (
         <Box sx={{ px: 2.5, py: 1.5, display: 'flex', gap: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', flexWrap: 'wrap' }}>
           {[
-            { label: 'Total Events', value: events.length, color: ACCENT },
-            { label: 'Tickets', value: counts.tickets, color: '#f87171' },
-            { label: 'Assignments', value: counts.assignments, color: '#60a5fa' },
-            { label: 'Maintenance', value: counts.maintenance, color: '#f59e0b' },
+            { label: 'Total Events', value: events.length, color: '#051C12' },
+            { label: 'Tickets', value: counts.tickets, color: '#DC2626' },
+            { label: 'Assignments', value: counts.assignments, color: '#2563EB' },
+            { label: 'Maintenance', value: counts.maintenance, color: '#D97706' },
           ].map(s => (
             <Box key={s.label} textAlign="left">
               <Typography fontWeight={900} fontSize={16} color={s.color} sx={{ lineHeight: 1.2 }}>{s.value ?? 0}</Typography>
-              <Typography variant="caption" color="text.disabled" fontWeight={700} fontSize={9.5} textTransform="uppercase" letterSpacing="0.2px">{s.label}</Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={700} fontSize={9.5} textTransform="uppercase" letterSpacing="0.2px">{s.label}</Typography>
             </Box>
           ))}
         </Box>
