@@ -1,4 +1,4 @@
-﻿// backend/routes/superAdminRoutes.js
+// backend/routes/superAdminRoutes.js
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
@@ -18,6 +18,7 @@ const {
   toggleCouponStatus,
   deleteCoupon,
 } = require('../controllers/superAdminController');
+const { generateLicenseKey } = require('../services/licenseService');
 const ContactLead = require('../models/ContactLead');
 
 // Super Admin guard - must be logged in and have role 'super_admin'
@@ -33,6 +34,18 @@ router.use(protect, superAdminGuard);
 // ─── Platform & Expiry Analytics ───────────────────────────────────────────
 router.get('/platform-stats', getPlatformStats);
 router.get('/expiry-monitoring', getExpiryMonitoring);
+
+// ─── Commercial License Key Generation ─────────────────────────────────
+router.get('/generate-key/:slug', (req, res) => {
+  try {
+    const slug = (req.params.slug || '').toLowerCase().trim().replace(/[^a-z0-9-]/g, '');
+    if (!slug) return res.status(400).json({ message: 'Valid company workspace slug is required.' });
+    const licenseKey = generateLicenseKey(slug);
+    res.json({ slug, licenseKey });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // ─── Tenant / Company Management ───────────────────────────────────────────
 router.post('/tenants', createTenant);

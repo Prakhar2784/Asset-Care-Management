@@ -1,4 +1,4 @@
-﻿const crypto = require('crypto');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Tenant = require('../models/Tenant');
@@ -372,12 +372,13 @@ const registerCompany = async (req, res) => {
 
     const Tenant = require('../models/Tenant');
     const Department = require('../models/Department');
-    const { generateLicenseKey } = require('../services/licenseService');
-    // Auto-generate a valid license key if not provided
-    const finalLicenseKey = licenseKey || generateLicenseKey(slug);
+    const { generateLicenseKey, verifyLicenseKey } = require('../services/licenseService');
+    const { getPlanDefaults } = require('../config/planDefaults');
+
+    const cleanSlug = slug.toLowerCase().trim();
 
     // Check if tenant slug already exists
-    const tenantExists = await Tenant.findOne({ slug: slug.toLowerCase() });
+    const tenantExists = await Tenant.findOne({ slug: cleanSlug });
     if (tenantExists) {
       return res.status(400).json({ message: 'Company URL / Slug is already in use.' });
     }
@@ -388,10 +389,29 @@ const registerCompany = async (req, res) => {
       return res.status(400).json({ message: 'Admin email already registered.' });
     }
 
-    // Create the Tenant in Pending Checkout state
+    const trimmedKey = (licenseKey || '').trim().toUpperCase();
+    let isPreActivated = false;
+    let finalLicenseKey = '';
+    let selectedPlan = req.body.plan || 'Home User';
+
+    if (trimmedKey) {
+      // Validate the provided license key against this slug
+      if (!verifyLicenseKey(trimmedKey, cleanSlug)) {
+        return res.status(400).json({ message: 'Invalid Commercial License Key for this workspace URL.' });
+      }
+      isPreActivated = true;
+      finalLicenseKey = trimmedKey;
+      selectedPlan = req.body.plan || 'MSME';
+    } else {
+      finalLicenseKey = generateLicenseKey(cleanSlug);
+    }
+
+    const planDefaults = getPlanDefaults(selectedPlan);
+
+    // Create the Tenant
     const tenant = await Tenant.create({
       name: companyName,
-      slug: slug.toLowerCase(),
+      slug: cleanSlug,
       customerType: customerType || 'Business',
       address: {
         line: address,
@@ -402,10 +422,24 @@ const registerCompany = async (req, res) => {
       },
       gstNumber: gstNumber || null,
       licenseKey: finalLicenseKey,
-      plan: null,
-      subscriptionStatus: 'Pending Checkout',
-      limits: { maxAssets: 0, maxUsers: 0 } // No assets until plan is active
+      plan: isPreActivated ? selectedPlan : null,
+      planExpiry: isPreActivated ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) : null,
+      subscriptionStatus: isPreActivated ? 'Active' : 'Pending Checkout',
+      limits: isPreActivated ? { maxAssets: planDefaults.maxAssets, maxUsers: planDefaults.maxUsers } : { maxAssets: 0, maxUsers: 0 },
+      features: isPreActivated ? planDefaults.features : {}
     });
+
+    if (isPreActivated) {
+      const SubscriptionHistory = require('../models/SubscriptionHistory');
+      await SubscriptionHistory.create({
+        tenantId: tenant._id,
+        action: 'License Key Activation',
+        previousPlan: 'None',
+        newPlan: selectedPlan,
+        amountPaid: 0,
+        notes: `Upfront commercial license key activation for ${cleanSlug}`,
+      }).catch(() => {});
+    }
 
     // We run User and Department creation in the tenant context
     const { setTenantId } = require('../middleware/tenantContext');
@@ -439,7 +473,10 @@ const registerCompany = async (req, res) => {
     sendWelcomeEmail(adminUser).catch(() => {});
 
     res.status(201).json({
-      message: 'Company registered successfully! Redirecting to checkout...',
+      message: isPreActivated
+        ? 'Company registered and activated successfully!'
+        : 'Company registered successfully! Redirecting to checkout...',
+      isActivated: isPreActivated,
       tenant: {
         _id: tenant._id,
         name: tenant.name,
@@ -455,10 +492,10 @@ const registerCompany = async (req, res) => {
         tenantId: adminUser.tenantId,
         onboardingDone: adminUser.onboardingDone,
         avatar: null,
-        phone: adminUser.phone || null,
+        phone: adminPhone || null,
         isActive: true,
         customPermissions: [],
-        plan: null,
+        plan: isPreActivated ? selectedPlan : null,
         subscriptionStatus: tenant.subscriptionStatus,
         token: generateToken(adminUser._id, tenant.slug)
       }

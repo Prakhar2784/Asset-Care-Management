@@ -22,7 +22,7 @@ import {
   AccountBalanceWalletRounded, MonetizationOnRounded, CalendarMonthRounded,
   LocationOnRounded, AssignmentRounded, SearchRounded,
   CreditCardRounded, ContentCopyRounded, FilterListRounded,
-  CheckRounded, ArrowForwardRounded, AccountTreeRounded
+  CheckRounded, ArrowForwardRounded, AccountTreeRounded, VpnKeyRounded, KeyRounded
 } from '@mui/icons-material';
 import api from '../../api/axios';
 
@@ -318,6 +318,14 @@ export default function SuperAdminPanel() {
   });
   const [saving, setSaving] = useState(false);
 
+  // Key Generator Modal State
+  const [keyGenOpen, setKeyGenOpen] = useState(false);
+  const [keyGenSlug, setKeyGenSlug] = useState('');
+  const [generatedKey, setGeneratedKey] = useState('');
+  const [keyGenLoading, setKeyGenLoading] = useState(false);
+  const [keyCopied, setKeyCopied] = useState(false);
+  const [instructionsCopied, setInstructionsCopied] = useState(false);
+
   const showSnack = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
 
   const fetchData = useCallback(async () => {
@@ -562,6 +570,44 @@ export default function SuperAdminPanel() {
     setTimeout(() => setCopiedKey(false), 3000);
   };
 
+  const handleGenerateKey = async (slugVal) => {
+    const rawSlug = slugVal !== undefined ? slugVal : keyGenSlug;
+    const clean = (rawSlug || '').toLowerCase().trim().replace(/[^a-z0-9-]/g, '');
+    if (!clean) {
+      showSnack('Please enter a valid company workspace slug.', 'warning');
+      return;
+    }
+    setKeyGenLoading(true);
+    try {
+      const { data: res } = await api.get(`/super-admin/generate-key/${clean}`);
+      setGeneratedKey(res.licenseKey);
+      setKeyGenSlug(res.slug);
+      showSnack('Commercial License Key generated successfully!');
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Failed to generate license key.', 'error');
+    } finally {
+      setKeyGenLoading(false);
+    }
+  };
+
+  const copyKeyText = (k) => {
+    if (!k) return;
+    navigator.clipboard.writeText(k);
+    setKeyCopied(true);
+    showSnack('License Key copied to clipboard!');
+    setTimeout(() => setKeyCopied(false), 3000);
+  };
+
+  const copyClientInstructions = () => {
+    if (!generatedKey || !keyGenSlug) return;
+    const regUrl = `${window.location.origin}/register-company`;
+    const text = `Hello,\n\nHere are your registration details for AssetCare:\n\n• Registration URL: ${regUrl}\n• Workspace URL (Slug): ${keyGenSlug}\n• Commercial License Key: ${generatedKey}\n\nSteps:\n1. Open ${regUrl}\n2. Enter your Company Name and Workspace Slug: "${keyGenSlug}"\n3. Enter the License Key: "${generatedKey}"\n4. Complete your admin profile and submit.\n\nYour workspace will be immediately pre-activated (no checkout required).\n\nAssetCare Platform Team`;
+    navigator.clipboard.writeText(text);
+    setInstructionsCopied(true);
+    showSnack('Client registration instructions copied to clipboard!');
+    setTimeout(() => setInstructionsCopied(false), 3000);
+  };
+
   const platform = data?.platform || {};
   const tenants = data?.tenants || [];
   const recentInvoices = data?.recentInvoices || [];
@@ -689,6 +735,28 @@ export default function SuperAdminPanel() {
             }}
           >
             {loading ? 'Refreshing...' : 'Refresh'}
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<VpnKeyRounded />}
+            onClick={() => {
+              setKeyGenOpen(true);
+              setGeneratedKey('');
+              setKeyGenSlug('');
+            }}
+            sx={{
+              borderRadius: '10px',
+              borderColor: '#0F172A',
+              color: '#0F172A',
+              bgcolor: '#FFFFFF',
+              fontWeight: 800,
+              textTransform: 'none',
+              px: 2,
+              '&:hover': { bgcolor: '#F1F5F9', borderColor: '#000000' }
+            }}
+          >
+            Key Generator
           </Button>
 
           <Button
@@ -2639,6 +2707,217 @@ export default function SuperAdminPanel() {
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      {/* ─── LICENSE KEY GENERATOR DIALOG ────────────────────────────────────── */}
+      <Dialog
+        open={keyGenOpen}
+        onClose={() => setKeyGenOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '18px',
+            boxShadow: '0 25px 60px rgba(5, 28, 18, 0.25)',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            bgcolor: DARK,
+            color: '#FFFFFF',
+            py: 2.5,
+            px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5
+          }}
+        >
+          <Box
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: '10px',
+              bgcolor: 'rgba(180, 241, 5, 0.15)',
+              color: ACCENT,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <VpnKeyRounded sx={{ fontSize: 22 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 900, fontSize: '18px', lineHeight: 1.2 }}>
+              Commercial License Key Generator
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.7)', fontWeight: 500 }}>
+              Generate an upfront activation key for self-registering clients
+            </Typography>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 3.5, bgcolor: '#FFFFFF' }}>
+          <Stack spacing={2.5}>
+            <Alert severity="info" sx={{ borderRadius: '12px', fontSize: '12.5px', '& .MuiAlert-icon': { fontSize: 20 } }}>
+              Provide the client with their agreed <strong>Workspace Slug</strong> and <strong>License Key</strong>. When they register at <code>/register-company</code> using this key, their account activates instantly (1-Year validity, bypasses checkout).
+            </Alert>
+
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', mb: 0.8, display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Client Workspace Slug (URL)
+              </Typography>
+              <Stack direction="row" spacing={1.5}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="e.g. tatamotors, acme-corp"
+                  value={keyGenSlug}
+                  onChange={(e) => {
+                    const clean = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                    setKeyGenSlug(clean);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleGenerateKey();
+                    }
+                  }}
+                  helperText={keyGenSlug ? `Workspace URL: assetcare.app/${keyGenSlug}` : 'Enter the agreed company slug'}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                />
+                <Button
+                  variant="contained"
+                  disabled={!keyGenSlug || keyGenLoading}
+                  onClick={() => handleGenerateKey()}
+                  sx={{
+                    borderRadius: '10px',
+                    bgcolor: DARK,
+                    color: '#FFFFFF',
+                    fontWeight: 800,
+                    textTransform: 'none',
+                    px: 3,
+                    height: 40,
+                    whiteSpace: 'nowrap',
+                    '&:hover': { bgcolor: '#0B291C' }
+                  }}
+                >
+                  {keyGenLoading ? <CircularProgress size={18} sx={{ color: '#FFFFFF' }} /> : 'Generate'}
+                </Button>
+              </Stack>
+            </Box>
+
+            {generatedKey && (
+              <Box
+                sx={{
+                  p: 2.5,
+                  borderRadius: '14px',
+                  bgcolor: '#F8FAFC',
+                  border: '1.5px solid #E2E8F0'
+                }}
+              >
+                <Typography variant="caption" sx={{ fontWeight: 800, color: '#64748B', display: 'block', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Generated Commercial License Key
+                </Typography>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '8px',
+                    bgcolor: '#0F172A',
+                    color: ACCENT,
+                    fontFamily: 'monospace',
+                    fontWeight: 800,
+                    fontSize: '15px',
+                    letterSpacing: '1px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                    wordBreak: 'break-all'
+                  }}
+                >
+                  <span>{generatedKey}</span>
+                  <Tooltip title={keyCopied ? "Copied!" : "Copy Key"}>
+                    <IconButton
+                      size="small"
+                      onClick={() => copyKeyText(generatedKey)}
+                      sx={{ color: keyCopied ? ACCENT : '#FFFFFF', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
+                    >
+                      {keyCopied ? <CheckRounded fontSize="small" /> : <ContentCopyRounded fontSize="small" />}
+                    </IconButton>
+                  </Tooltip>
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                <Typography variant="caption" sx={{ fontWeight: 800, color: '#64748B', display: 'block', mb: 1, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Ready-to-Send Client Registration Details
+                </Typography>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: '8px',
+                    bgcolor: '#FFFFFF',
+                    border: '1px solid #CBD5E1',
+                    fontSize: '12px',
+                    color: '#334155',
+                    fontFamily: 'monospace',
+                    whiteSpace: 'pre-wrap',
+                    lineHeight: 1.6
+                  }}
+                >
+{`Registration URL: ${window.location.origin}/register-company
+Workspace Slug  : ${keyGenSlug}
+License Key     : ${generatedKey}`}
+                </Box>
+
+                <Stack direction="row" spacing={1.5} sx={{ mt: 2 }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={keyCopied ? <CheckRounded /> : <ContentCopyRounded />}
+                    onClick={() => copyKeyText(generatedKey)}
+                    sx={{
+                      borderRadius: '10px',
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      borderColor: '#CBD5E1',
+                      color: '#0F172A'
+                    }}
+                  >
+                    {keyCopied ? "Key Copied" : "Copy License Key"}
+                  </Button>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    startIcon={instructionsCopied ? <CheckRounded /> : <ContentCopyRounded />}
+                    onClick={copyClientInstructions}
+                    sx={{
+                      borderRadius: '10px',
+                      textTransform: 'none',
+                      fontWeight: 800,
+                      bgcolor: DARK,
+                      color: '#FFFFFF',
+                      '&:hover': { bgcolor: '#0B291C' }
+                    }}
+                  >
+                    {instructionsCopied ? "Instructions Copied" : "Copy Client Instructions"}
+                  </Button>
+                </Stack>
+              </Box>
+            )}
+          </Stack>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 2.5, bgcolor: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
+          <Button
+            onClick={() => setKeyGenOpen(false)}
+            sx={{ textTransform: 'none', fontWeight: 700, color: '#64748B' }}
+          >
+            Close
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Global Snackbar */}

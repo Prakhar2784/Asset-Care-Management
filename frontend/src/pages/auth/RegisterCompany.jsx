@@ -728,12 +728,17 @@ const RegisterCompany = () => {
                     <input
                       type="text"
                       name="licenseKey"
-                      placeholder="Commercial License Key (Optional / Auto-generated)"
+                      placeholder="Activation / License Key (If provided by Sales)"
                       className="auth-input"
                       value={formData.licenseKey}
                       onChange={handleInputChange}
                     />
                   </div>
+                  {formData.licenseKey && (
+                    <div style={{ fontSize: '11.5px', color: '#B4F105', marginTop: '-8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <AutoAwesomeRoundedIcon sx={{ fontSize: 14 }} /> Valid license key pre-activates your workspace immediately (no checkout required).
+                    </div>
+                  )}
 
                   <div className="input-group">
                     <select
