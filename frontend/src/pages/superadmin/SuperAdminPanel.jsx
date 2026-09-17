@@ -289,6 +289,8 @@ export default function SuperAdminPanel() {
   const [createOpen, setCreateOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedTenantId, setSelectedTenantId] = useState(null);
+  const [selectedTenant, setSelectedTenant] = useState(null);
   const [selectedTenantDetails, setSelectedTenantDetails] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailTab, setDetailTab] = useState(0);
@@ -413,6 +415,18 @@ export default function SuperAdminPanel() {
   }, [mainTab, fetchExpiryMonitoring, fetchCoupons, fetchLeads]);
 
   const handleOpenDetails = async (tenantId) => {
+    setSelectedTenantId(tenantId);
+    const existing = (data?.tenants || []).find(t => t._id === tenantId) || (expiryList || []).find(t => t._id === tenantId);
+    if (existing) {
+      setSelectedTenant(existing);
+      setSelectedTenantDetails({
+        tenant: existing,
+        stats: { totalPaid: 0, totalInvoices: 0, userCount: 0 },
+        users: [],
+        invoices: [],
+        history: []
+      });
+    }
     setDetailOpen(true);
     setDetailLoading(true);
     setDetailTab(0);
@@ -420,6 +434,9 @@ export default function SuperAdminPanel() {
     try {
       const { data: res } = await api.get(`/super-admin/tenants/${tenantId}/details`);
       setSelectedTenantDetails(res);
+      if (res?.tenant) {
+        setSelectedTenant(res.tenant);
+      }
     } catch {
       showSnack('Failed to load company details.', 'error');
     } finally {
@@ -470,11 +487,15 @@ export default function SuperAdminPanel() {
   };
 
   const handleSubscriptionAction = async (e) => {
-    e.preventDefault();
-    if (!selectedTenantDetails?.tenant?._id) return;
+    if (e && e.preventDefault) e.preventDefault();
+    const targetTenantId = selectedTenantDetails?.tenant?._id || selectedTenantId || selectedTenant?._id;
+    if (!targetTenantId) {
+      showSnack('Unable to identify selected company. Please try re-opening Company Profile.', 'error');
+      return;
+    }
     setSaving(true);
     try {
-      await api.post(`/super-admin/tenants/${selectedTenantDetails.tenant._id}/subscription-action`, {
+      await api.post(`/super-admin/tenants/${targetTenantId}/subscription-action`, {
         plan: planForm.plan,
         newExpiryDate: planForm.expiryDate,
         status: planForm.status,
@@ -482,7 +503,7 @@ export default function SuperAdminPanel() {
       });
       showSnack('Subscription updated successfully!');
       setPlanOpen(false);
-      handleOpenDetails(selectedTenantDetails.tenant._id);
+      handleOpenDetails(targetTenantId);
       fetchData();
       if (mainTab === 2) fetchExpiryMonitoring();
     } catch (err) {
@@ -2110,13 +2131,14 @@ export default function SuperAdminPanel() {
             variant="contained"
             startIcon={<UpgradeRounded />}
             onClick={() => {
-              const currentExpiry = selectedTenantDetails?.tenant?.planExpiry
-                ? new Date(selectedTenantDetails.tenant.planExpiry).toISOString().split('T')[0]
+              const currentTenant = selectedTenantDetails?.tenant || selectedTenant;
+              const currentExpiry = currentTenant?.planExpiry
+                ? new Date(currentTenant.planExpiry).toISOString().split('T')[0]
                 : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
               setPlanForm({
-                plan: selectedTenantDetails?.tenant?.plan || 'MSME',
+                plan: currentTenant?.plan || 'MSME',
                 expiryDate: currentExpiry,
-                status: selectedTenantDetails?.tenant?.subscriptionStatus || 'Active',
+                status: currentTenant?.subscriptionStatus || 'Active',
                 notes: ''
               });
               setPlanOpen(true);
@@ -2369,89 +2391,97 @@ export default function SuperAdminPanel() {
         onClose={() => setPlanOpen(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}
+        PaperProps={{
+          component: 'form',
+          onSubmit: handleSubscriptionAction,
+          sx: { borderRadius: '18px', p: 1 }
+        }}
       >
-        <form onSubmit={handleSubscriptionAction}>
-          <DialogTitle sx={{ fontWeight: 900, color: '#0F172A' }}>
-            Override Company Subscription
-          </DialogTitle>
-          <DialogContent>
-            <Stack spacing={2.5} sx={{ mt: 1 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Subscription Plan</InputLabel>
-                <Select
-                  value={planForm.plan}
-                  label="Subscription Plan"
-                  onChange={(e) => setPlanForm({ ...planForm, plan: e.target.value })}
-                  sx={{ borderRadius: '10px' }}
-                >
-                  <MenuItem value="Home User">Home User (₹999 / 20 Assets)</MenuItem>
-                  <MenuItem value="MSME">MSME (₹2,999 / 50 Assets)</MenuItem>
-                  <MenuItem value="Large Scale">Large Scale (₹8,999 / Unlimited)</MenuItem>
-                </Select>
-              </FormControl>
+        <DialogTitle sx={{ fontWeight: 900, color: '#0F172A' }}>
+          Override Company Subscription
+          {(selectedTenantDetails?.tenant?.name || selectedTenant?.name) && (
+            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 600, mt: 0.3 }}>
+              {selectedTenantDetails?.tenant?.name || selectedTenant?.name} (/{selectedTenantDetails?.tenant?.slug || selectedTenant?.slug || ''})
+            </Typography>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2.5} sx={{ mt: 1 }}>
+            <FormControl fullWidth size="small">
+              <InputLabel>Subscription Plan</InputLabel>
+              <Select
+                value={planForm.plan}
+                label="Subscription Plan"
+                onChange={(e) => setPlanForm({ ...planForm, plan: e.target.value })}
+                sx={{ borderRadius: '10px' }}
+              >
+                <MenuItem value="Home User">Home User (₹999 / 20 Assets)</MenuItem>
+                <MenuItem value="MSME">MSME (₹2,999 / 50 Assets)</MenuItem>
+                <MenuItem value="Large Scale">Large Scale (₹8,999 / Unlimited)</MenuItem>
+              </Select>
+            </FormControl>
 
-              <TextField
-                fullWidth
-                size="small"
-                type="date"
-                label="Subscription Expiry Date"
-                InputLabelProps={{ shrink: true }}
-                value={planForm.expiryDate || ''}
-                onChange={(e) => setPlanForm({ ...planForm, expiryDate: e.target.value })}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-              />
+            <TextField
+              fullWidth
+              size="small"
+              type="date"
+              label="Subscription Expiry Date"
+              InputLabelProps={{ shrink: true }}
+              value={planForm.expiryDate || ''}
+              onChange={(e) => setPlanForm({ ...planForm, expiryDate: e.target.value })}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+            />
 
-              <FormControl fullWidth size="small">
-                <InputLabel>Subscription Status</InputLabel>
-                <Select
-                  value={planForm.status}
-                  label="Subscription Status"
-                  onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
-                  sx={{ borderRadius: '10px' }}
-                >
-                  <MenuItem value="Active">Active</MenuItem>
-                  <MenuItem value="Pending Checkout">Pending Checkout</MenuItem>
-                  <MenuItem value="Suspended">Suspended</MenuItem>
-                  <MenuItem value="Expired">Expired</MenuItem>
-                  <MenuItem value="Cancelled">Cancelled</MenuItem>
-                </Select>
-              </FormControl>
+            <FormControl fullWidth size="small">
+              <InputLabel>Subscription Status</InputLabel>
+              <Select
+                value={planForm.status}
+                label="Subscription Status"
+                onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
+                sx={{ borderRadius: '10px' }}
+              >
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Pending Checkout">Pending Checkout</MenuItem>
+                <MenuItem value="Suspended">Suspended</MenuItem>
+                <MenuItem value="Expired">Expired</MenuItem>
+                <MenuItem value="Cancelled">Cancelled</MenuItem>
+              </Select>
+            </FormControl>
 
-              <TextField
-                fullWidth
-                size="small"
-                label="Audit Notes"
-                multiline
-                rows={2}
-                value={planForm.notes}
-                onChange={(e) => setPlanForm({ ...planForm, notes: e.target.value })}
-                placeholder="Reason for override..."
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-              />
-            </Stack>
-          </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setPlanOpen(false)} sx={{ textTransform: 'none', fontWeight: 700, color: '#334155' }}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={saving}
-              sx={{
-                borderRadius: '10px',
-                bgcolor: DARK,
-                color: '#FFFFFF',
-                fontWeight: 800,
-                textTransform: 'none',
-                '&:hover': { bgcolor: '#0B291C' }
-              }}
-            >
-              {saving ? 'Updating...' : 'Save Changes'}
-            </Button>
-          </DialogActions>
-        </form>
+            <TextField
+              fullWidth
+              size="small"
+              label="Audit Notes"
+              multiline
+              rows={2}
+              value={planForm.notes}
+              onChange={(e) => setPlanForm({ ...planForm, notes: e.target.value })}
+              placeholder="Reason for override..."
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setPlanOpen(false)} sx={{ textTransform: 'none', fontWeight: 700, color: '#334155' }}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            onClick={handleSubscriptionAction}
+            variant="contained"
+            disabled={saving}
+            sx={{
+              borderRadius: '10px',
+              bgcolor: DARK,
+              color: '#FFFFFF',
+              fontWeight: 800,
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#0B291C' }
+            }}
+          >
+            {saving ? 'Updating...' : 'Save Changes'}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* ─── MODAL: PROVISION NEW COMPANY ────────────────────────────────────────── */}
