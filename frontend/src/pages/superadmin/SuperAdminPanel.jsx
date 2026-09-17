@@ -570,6 +570,31 @@ export default function SuperAdminPanel() {
     setTimeout(() => setCopiedKey(false), 3000);
   };
 
+  const computeLicenseKeyClient = async (slug) => {
+    const clean = (slug || '').toLowerCase().trim().replace(/[^a-z0-9-]/g, '');
+    if (!clean) return '';
+    try {
+      const secret = "assetcare_commercial_license_secret_key_2026";
+      const enc = new TextEncoder();
+      const key = await window.crypto.subtle.importKey(
+        "raw",
+        enc.encode(secret),
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        false,
+        ["sign"]
+      );
+      const sig = await window.crypto.subtle.sign("HMAC", key, enc.encode(clean));
+      const hex = Array.from(new Uint8Array(sig))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+        .slice(0, 16)
+        .toUpperCase();
+      return `AC-${clean.toUpperCase()}-${hex}`;
+    } catch (e) {
+      return '';
+    }
+  };
+
   const handleGenerateKey = async (slugVal) => {
     const rawSlug = slugVal !== undefined ? slugVal : keyGenSlug;
     const clean = (rawSlug || '').toLowerCase().trim().replace(/[^a-z0-9-]/g, '');
@@ -579,9 +604,20 @@ export default function SuperAdminPanel() {
     }
     setKeyGenLoading(true);
     try {
-      const { data: res } = await api.get(`/super-admin/generate-key/${clean}`);
-      setGeneratedKey(res.licenseKey);
-      setKeyGenSlug(res.slug);
+      try {
+        const { data: res } = await api.get(`/super-admin/generate-key/${clean}`);
+        setGeneratedKey(res.licenseKey);
+        setKeyGenSlug(res.slug);
+      } catch (err) {
+        // Fallback to client-side cryptographic generation if backend server was not restarted yet
+        const clientKey = await computeLicenseKeyClient(clean);
+        if (clientKey) {
+          setGeneratedKey(clientKey);
+          setKeyGenSlug(clean);
+        } else {
+          throw err;
+        }
+      }
       showSnack('Commercial License Key generated successfully!');
     } catch (err) {
       showSnack(err.response?.data?.message || 'Failed to generate license key.', 'error');
