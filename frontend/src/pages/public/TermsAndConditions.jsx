@@ -158,9 +158,10 @@ const TermsAndConditions = () => {
 
         .terms-hero {
           background: #072F1F;
-          padding: 160px 24px 72px;
+          padding: 130px 24px 60px;
           position: relative;
           overflow: hidden;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .terms-hero::before {
@@ -170,16 +171,21 @@ const TermsAndConditions = () => {
           right: -100px;
           width: 500px;
           height: 500px;
-          background: radial-gradient(circle, rgba(17,24,39,0.14), transparent 70%);
+          background: radial-gradient(circle, rgba(180,241,5,0.08), transparent 70%);
           border-radius: 50%;
           pointer-events: none;
         }
 
-        .terms-hero-inner {
-          max-width: 860px;
+        .terms-hero-container {
+          max-width: 1200px;
           margin: 0 auto;
           position: relative;
           z-index: 1;
+        }
+
+        .terms-hero-inner {
+          max-width: 860px;
+          margin-bottom: 40px;
         }
 
         .terms-hero-badge {
@@ -188,8 +194,8 @@ const TermsAndConditions = () => {
           gap: 8px;
           padding: 8px 18px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.15);
-          border: 1px solid rgba(255,255,255,0.35);
+          background: rgba(255,255,255,0.12);
+          border: 1px solid rgba(255,255,255,0.25);
           color: #FFFFFF;
           font-size: 13px;
           font-weight: 800;
@@ -200,7 +206,7 @@ const TermsAndConditions = () => {
         }
 
         .terms-hero h1 {
-          font-size: clamp(36px, 5vw, 58px);
+          font-size: clamp(36px, 5vw, 56px);
           font-weight: 950;
           color: #FFFFFF;
           letter-spacing: -1.5px;
@@ -210,11 +216,11 @@ const TermsAndConditions = () => {
 
         .terms-hero p {
           color: #CBD5E1;
-          font-size: 18px;
+          font-size: 17px;
           font-weight: 500;
           line-height: 1.7;
-          margin: 0 0 28px;
-          max-width: 640px;
+          margin: 0 0 24px;
+          max-width: 680px;
         }
 
         .terms-hero-meta {
@@ -233,10 +239,65 @@ const TermsAndConditions = () => {
           color: rgba(255,255,255,0.85);
         }
 
+        .terms-highlights {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 18px;
+          width: 100%;
+          margin-top: 12px;
+        }
+
+        .terms-highlight-card {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          border-radius: 20px;
+          padding: 24px 20px;
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+          display: flex;
+          align-items: flex-start;
+          gap: 16px;
+          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .terms-highlight-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(180, 241, 5, 0.4);
+          box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+        }
+
+        .terms-hl-icon {
+          width: 46px;
+          height: 46px;
+          border-radius: 14px;
+          background: rgba(180, 241, 5, 0.15);
+          border: 1px solid rgba(180, 241, 5, 0.3);
+          color: #B4F105;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+        }
+
+        .terms-hl-title {
+          font-size: 15px;
+          font-weight: 800;
+          color: #FFFFFF;
+          margin-bottom: 5px;
+          letter-spacing: -0.2px;
+        }
+
+        .terms-hl-text {
+          font-size: 13px;
+          font-weight: 500;
+          color: #94A3B8;
+          line-height: 1.55;
+        }
+
         .terms-body {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 72px 24px 100px;
+          padding: 60px 24px 100px;
           display: grid;
           grid-template-columns: 260px 1fr;
           gap: 56px;
@@ -323,51 +384,6 @@ const TermsAndConditions = () => {
           font-weight: 800;
         }
 
-        .terms-highlights {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 20px;
-          max-width: 1200px;
-          margin: 0 auto 0;
-          padding: 0 24px 72px;
-        }
-
-        .terms-highlight-card {
-          background: #FFFFFF;
-          border: 1.5px solid #E9EFEF;
-          border-radius: 22px;
-          padding: 28px 24px;
-          box-shadow: 0 8px 22px rgba(15,23,42,0.05);
-          display: flex;
-          align-items: flex-start;
-          gap: 16px;
-        }
-
-        .terms-hl-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 14px;
-          background: #051C12;
-          color: #B4F105;
-          display: grid;
-          place-items: center;
-          flex-shrink: 0;
-        }
-
-        .terms-hl-title {
-          font-size: 15px;
-          font-weight: 900;
-          color: #0B130F;
-          margin-bottom: 5px;
-        }
-
-        .terms-hl-text {
-          font-size: 13px;
-          font-weight: 600;
-          color: #6C7E75;
-          line-height: 1.5;
-        }
-
         .terms-footer-note {
           max-width: 1200px;
           margin: 0 auto;
@@ -412,55 +428,57 @@ const TermsAndConditions = () => {
       <div className="terms-page">
         {/* Hero */}
         <div className="terms-hero">
-          <motion.div
-            className="terms-hero-inner"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="terms-hero-badge">
-              <GavelRoundedIcon fontSize="small" />
-              Legal Agreement
-            </div>
-            <h1>Terms &amp; Conditions</h1>
-            <p>
-              Please read these Terms and Conditions carefully before using the IAssetCare platform. By accessing the system, you agree to be bound by these terms.
-            </p>
-            <div className="terms-hero-meta">
-              <span className="terms-meta-pill">
-                <PolicyRoundedIcon fontSize="small" />
-                Effective Date: 1 January 2026
-              </span>
-              <span className="terms-meta-pill">
-                <VerifiedUserRoundedIcon fontSize="small" />
-                Last Updated: 24 June 2026
-              </span>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Highlight Cards */}
-        <motion.div
-          className="terms-highlights"
-          initial="hidden"
-          animate="visible"
-          variants={stagger}
-        >
-          {[
-            { icon: <SecurityRoundedIcon />, title: "Data Security", text: "Your organisational data is encrypted in transit and at rest at all times." },
-            { icon: <VerifiedUserRoundedIcon />, title: "Role-Based Access", text: "Strict admin and employee access controls protect sensitive information." },
-            { icon: <GavelRoundedIcon />, title: "Legal Compliance", text: "Platform usage is governed under Indian law with Jaipur jurisdiction." },
-            { icon: <PolicyRoundedIcon />, title: "Your Data, Your Rights", text: "You own all data entered into the platform. We never sell or share it." },
-          ].map((item, i) => (
-            <motion.div key={i} variants={fadeUp} className="terms-highlight-card">
-              <div className="terms-hl-icon">{item.icon}</div>
-              <div>
-                <div className="terms-hl-title">{item.title}</div>
-                <div className="terms-hl-text">{item.text}</div>
+          <div className="terms-hero-container">
+            <motion.div
+              className="terms-hero-inner"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="terms-hero-badge">
+                <GavelRoundedIcon fontSize="small" />
+                Legal Agreement
+              </div>
+              <h1>Terms &amp; Conditions</h1>
+              <p>
+                Please read these Terms and Conditions carefully before using the IAssetCare platform. By accessing the system, you agree to be bound by these terms.
+              </p>
+              <div className="terms-hero-meta">
+                <span className="terms-meta-pill">
+                  <PolicyRoundedIcon fontSize="small" />
+                  Effective Date: 1 January 2026
+                </span>
+                <span className="terms-meta-pill">
+                  <VerifiedUserRoundedIcon fontSize="small" />
+                  Last Updated: 24 June 2026
+                </span>
               </div>
             </motion.div>
-          ))}
-        </motion.div>
+
+            {/* Highlight Cards */}
+            <motion.div
+              className="terms-highlights"
+              initial="hidden"
+              animate="visible"
+              variants={stagger}
+            >
+              {[
+                { icon: <SecurityRoundedIcon />, title: "Data Security", text: "Your organisational data is encrypted in transit and at rest at all times." },
+                { icon: <VerifiedUserRoundedIcon />, title: "Role-Based Access", text: "Strict admin and employee access controls protect sensitive information." },
+                { icon: <GavelRoundedIcon />, title: "Legal Compliance", text: "Platform usage is governed under Indian law with Jaipur jurisdiction." },
+                { icon: <PolicyRoundedIcon />, title: "Your Data, Your Rights", text: "You own all data entered into the platform. We never sell or share it." },
+              ].map((item, i) => (
+                <motion.div key={i} variants={fadeUp} className="terms-highlight-card">
+                  <div className="terms-hl-icon">{item.icon}</div>
+                  <div>
+                    <div className="terms-hl-title">{item.title}</div>
+                    <div className="terms-hl-text">{item.text}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
 
         {/* Body: TOC + Sections */}
         <div className="terms-body">
