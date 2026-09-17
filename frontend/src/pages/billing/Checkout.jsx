@@ -293,10 +293,12 @@ export default function Checkout() {
         couponCode: appliedCoupon || couponCode || '',
       });
 
+      console.log('[CHECKOUT] Order created successfully:', data);
+
       // Ensure Razorpay SDK is ready
       const isLoaded = await loadRazorpayScript();
       if (!isLoaded || !window.Razorpay) {
-        throw new Error('Razorpay payment gateway failed to load. Please verify your internet connection.');
+        throw new Error('Razorpay payment gateway failed to load. Please disable ad-blockers or check internet connection.');
       }
 
       // Step 2: Initialize Razorpay Checkout Modal
@@ -318,6 +320,7 @@ export default function Checkout() {
         handler: async function (response) {
           try {
             setPaying(true);
+            console.log('[CHECKOUT] Payment success response:', response);
             // Step 3: Server-side cryptographic signature verification
             await api.post('/billing/checkout/verify', {
               razorpay_order_id: response.razorpay_order_id,
@@ -338,25 +341,29 @@ export default function Checkout() {
               window.location.href = '/settings?tab=billing';
             }, 1500);
           } catch (verifyErr) {
+            console.error('[CHECKOUT] Verification error:', verifyErr);
             setError(verifyErr.response?.data?.message || 'Payment signature verification failed on backend.');
             setPaying(false);
           }
         },
         modal: {
           ondismiss: function () {
+            console.log('[CHECKOUT] Modal dismissed');
             setPaying(false);
-            setError('Payment checkout cancelled. Your subscription remains unchanged.');
           },
         },
       };
 
+      console.log('[CHECKOUT] Opening Razorpay modal with options:', { ...options, handler: 'function' });
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (resp) {
+        console.error('[CHECKOUT] Payment failed:', resp);
         setError(resp.error?.description || 'Payment transaction failed. Please retry.');
         setPaying(false);
       });
       rzp.open();
     } catch (err) {
+      console.error('[CHECKOUT] Error in handleSubscribe:', err);
       setError(err.response?.data?.message || err.message || 'Payment initialization failed');
       setPaying(false);
     }
