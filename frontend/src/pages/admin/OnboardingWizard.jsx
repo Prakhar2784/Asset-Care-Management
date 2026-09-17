@@ -982,12 +982,13 @@ const OnboardingWizard = () => {
                       <div className="input-group">
                         <span className="input-icon"><PeopleRoundedIcon fontSize="small" /></span>
                         <input
-                          type="number"
+                          type="text"
                           name="employeeCount"
                           placeholder="Employee Count"
                           className="auth-input"
+                          inputMode="numeric"
                           value={org.employeeCount}
-                          onChange={(e) => setOrg({ ...org, employeeCount: e.target.value })}
+                          onChange={(e) => setOrg({ ...org, employeeCount: e.target.value.replace(/[^0-9]/g, "").slice(0, 7) })}
                         />
                       </div>
                     </div>
@@ -1002,6 +1003,7 @@ const OnboardingWizard = () => {
                           className="auth-input"
                           value={org.phone}
                           maxLength={10}
+                          inputMode="numeric"
                           onChange={(e) => setOrg({ ...org, phone: e.target.value.replace(/[^0-9]/g, "").slice(0, 10) })}
                         />
                       </div>
@@ -1048,8 +1050,9 @@ const OnboardingWizard = () => {
                           name="gstNumber"
                           placeholder="GSTIN Number (15 Digits)"
                           className="auth-input"
+                          maxLength={15}
                           value={org.gstNumber}
-                          onChange={(e) => setOrg({ ...org, gstNumber: e.target.value.toUpperCase() })}
+                          onChange={(e) => setOrg({ ...org, gstNumber: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 15) })}
                         />
                       </div>
                       <div className="input-group">
@@ -1059,8 +1062,9 @@ const OnboardingWizard = () => {
                           name="panNumber"
                           placeholder="PAN Number (10 Digits)"
                           className="auth-input"
+                          maxLength={10}
                           value={org.panNumber}
-                          onChange={(e) => setOrg({ ...org, panNumber: e.target.value.toUpperCase() })}
+                          onChange={(e) => setOrg({ ...org, panNumber: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) })}
                         />
                       </div>
                     </div>

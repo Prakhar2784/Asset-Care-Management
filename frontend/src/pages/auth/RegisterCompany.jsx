@@ -81,6 +81,9 @@ const RegisterCompany = () => {
     if (name === "pinCode") {
       value = value.replace(/[^0-9]/g, '').slice(0, 6);
     }
+    if (name === "gstNumber") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 15);
+    }
     setFormData({ ...formData, [name]: value });
     setError("");
   };
