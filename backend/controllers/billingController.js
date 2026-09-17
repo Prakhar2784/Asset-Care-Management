@@ -205,6 +205,7 @@ const activateVerifiedPayment = async ({ invoice, paymentId, signature, gateway 
 
 exports.calculateCheckout = async (req, res) => {
   try {
+    console.log('[CALCULATE CHECKOUT REQ]', { body: req.body, tenantId: req.tenantId });
     const { planKey, couponCode } = req.body;
     const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
@@ -223,6 +224,7 @@ exports.calculateCheckout = async (req, res) => {
       totalAmount: breakdown.totalAmount
     });
   } catch (error) {
+    console.error('[CALCULATE CHECKOUT ERROR]', error.message);
     res.status(400).json({ message: error.message });
   }
 };
@@ -233,6 +235,7 @@ exports.calculateCheckout = async (req, res) => {
  */
 exports.createRazorpayOrder = async (req, res) => {
   try {
+    console.log('[CREATE RAZORPAY ORDER REQ]', { body: req.body, tenantId: req.tenantId });
     const { planKey, planName, plan, couponCode } = req.body;
     const selectedPlan = planKey || planName || plan;
     const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
