@@ -472,7 +472,7 @@ const Home = () => {
       {/* ─── 1. HERO & METRICS SECTION ────────────────────────────────────────────── */}
       <section style={{
         paddingTop: "140px",
-        paddingBottom: "80px",
+        paddingBottom: "55px",
         borderBottom: "1px solid var(--border-light)"
       }}>
         <div className="midnight-container midnight-hero-grid" style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: "56px", alignItems: "center" }}>
@@ -643,7 +643,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section style={{ padding: "80px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
+      <section style={{ padding: "55px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
         <div className="midnight-container midnight-split-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "56px", alignItems: "center" }}>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp}>
             <span className="midnight-badge" style={{ backgroundColor: "#171B2E", color: "#7777C7", border: "1px solid rgba(119, 119, 199, 0.35)", marginBottom: "16px" }}>
@@ -693,7 +693,7 @@ const Home = () => {
       </section>
 
       {/* ─── 4. SECTION 2 — SERVICE MANAGEMENT ───────────────────────────────────── */}
-      <section style={{ padding: "80px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
+      <section style={{ padding: "55px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
         <div className="midnight-container midnight-split-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "56px", alignItems: "center" }}>
           <motion.div className="midnight-card" style={{ padding: 0, overflow: "hidden", borderRadius: "var(--radius-lg)" }} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
             <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-light)", backgroundColor: "var(--bg-surface-subtle)" }}>
@@ -760,7 +760,7 @@ const Home = () => {
       </section>
 
       {/* ─── 5. FEATURES GRID (CORE MODULES) ─────────────────────────────────────── */}
-      <section style={{ padding: "80px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
+      <section style={{ padding: "55px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
         <div className="midnight-container">
           <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 54px" }}>
             <span className="midnight-badge" style={{ backgroundColor: "#171B2E", color: "#7777C7", border: "1px solid rgba(119, 119, 199, 0.35)", marginBottom: "16px" }}>
