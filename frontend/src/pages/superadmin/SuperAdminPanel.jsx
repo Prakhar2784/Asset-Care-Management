@@ -828,21 +828,8 @@ export default function SuperAdminPanel() {
       >
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-            <Box
-              sx={{
-                width: 38,
-                height: 38,
-                borderRadius: '10px',
-                bgcolor: '#050404',
-                border: '1px solid rgba(119, 119, 199, 0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
-                flexShrink: 0
-              }}
-            >
-              <img src="/logo_home.png" alt="IAssetCare" style={{ width: 24, height: 24, display: 'block', objectFit: 'contain' }} />
+            <Box sx={{ width: 44, height: 44, borderRadius: '12px', display: 'grid', placeItems: 'center', bgcolor: 'rgba(17,24,39,0.12)', flexShrink: 0 }}>
+              <DnsRounded sx={{ color: 'text.primary' }} />
             </Box>
             <Typography variant="h5" sx={{ fontWeight: 900, color: '#0F172A', letterSpacing: '-0.5px' }}>
               Super Admin Console
