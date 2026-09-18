@@ -652,9 +652,9 @@ const AuthPage = () => {
               {view === "login" && (
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", marginBottom: "26px" }}>
                   <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "#94A3B8", fontSize: "13.5px", cursor: "pointer", fontWeight: "500" }}>
-                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: "#7777C7", width: "15px", height: "15px" }} /> Remember me
+                    <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} style={{ accentColor: "#7777C7", width: "15px", height: "15px", cursor: "pointer" }} /> Remember me
                   </label>
-                  <button type="button" className="auth-link" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
+                  <Link to="/forgot-password" className="auth-link" style={{ cursor: "pointer" }}>Forgot Password?</Link>
                 </div>
               )}
 
