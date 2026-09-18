@@ -160,6 +160,7 @@ const Sidebar = ({ onClose }) => {
       background: "#000000",
       display: "flex", flexDirection: "column", overflow: "hidden",
       borderRight: "1px solid #1F2422",
+      borderRadius: 0,
     }}>
       {/* Brand */}
       <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid #1F2422" }}>
@@ -353,14 +354,14 @@ const Layout = () => {
 
       {!isMobile && (
         <Drawer variant="permanent"
-          sx={{ width: DRAWER_W, flexShrink: 0, "& .MuiDrawer-paper": { width: DRAWER_W, border: 0, bgcolor: "transparent" } }}>
+          sx={{ width: DRAWER_W, flexShrink: 0, "& .MuiDrawer-paper": { width: DRAWER_W, border: 0, bgcolor: "transparent", borderRadius: 0 } }}>
           <Sidebar />
         </Drawer>
       )}
 
       {isMobile && (
         <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}
-          slotProps={{ paper: { sx: { width: DRAWER_W, bgcolor: "transparent", border: 0 } } }}>
+          slotProps={{ paper: { sx: { width: DRAWER_W, bgcolor: "transparent", border: 0, borderRadius: 0 } } }}>
           <Sidebar onClose={() => setDrawerOpen(false)} />
         </Drawer>
       )}

@@ -96,6 +96,13 @@ const ThemeProviderInner = ({ children }) => {
           }
         }
       },
+      MuiDrawer: {
+        styleOverrides: {
+          paper: {
+            borderRadius: 0,
+          }
+        }
+      },
       MuiCard: {
         styleOverrides: {
           root: {
