@@ -130,8 +130,10 @@ const ThemeProviderInner = ({ children }) => {
             backgroundImage: 'none',
             background: '#FFFFFF',
             color: '#0A0A0A',
+            border: 'none',
             borderBottom: '1px solid #D9E0DF',
             boxShadow: 'none',
+            borderRadius: 0,
           }
         }
       },

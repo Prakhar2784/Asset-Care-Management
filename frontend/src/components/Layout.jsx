@@ -370,8 +370,10 @@ const Layout = () => {
 
         <AppBar position="sticky" elevation={0} sx={{
           bgcolor: "#FFFFFF",
+          border: "none",
           borderBottom: "1px solid #E3E7E5",
           color: "#0A0A0A",
+          borderRadius: 0,
         }}>
           <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: "60px !important", display: "flex", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
