@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
@@ -58,15 +59,21 @@ const generateToken = (id, role, tenantId) => {
 // operations hit the right database).
 const findUserAcrossTenants = async (query) => {
   const { getTenantConnection } = require('../config/tenantDb');
-  let user = await User.findOne(query).setOptions({ bypassTenantFilter: true });
-  if (user) return user;
-  const tenants = await Tenant.find({}).select('slug');
+  // 1. Always check master control-plane database directly first (for SuperAdmin & platform owners)
+  let user = null;
+  try {
+    const MainUserModel = mongoose.connection.model('User');
+    user = await MainUserModel.findOne(query).setOptions({ bypassTenantFilter: true });
+    if (user) return user;
+  } catch (e) {}
+
+  // 2. Search every tenant's isolated database
+  const TenantModel = mongoose.connection.model('Tenant');
+  const tenants = await TenantModel.find({}).select('slug');
   for (const t of tenants) {
     if (!t.slug || t.slug === 'default') continue;
     try {
       const TenantUser = getTenantConnection(t.slug).model('User');
-      // bypassTenantFilter: the ambient request context is 'default', which
-      // would otherwise inject tenantId='default' into this tenant-DB query
       user = await TenantUser.findOne(query).setOptions({ bypassTenantFilter: true });
       if (user) return user;
     } catch (err) {
@@ -82,14 +89,17 @@ const findUserAcrossTenants = async (query) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password, role, captchaToken } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
+
     // Look up the user globally (control-plane DB + every tenant DB) to
     // identify which tenant they belong to
-    const user = await findUserAcrossTenants({ email });
+    const user = await findUserAcrossTenants({ email: cleanEmail });
 
     // Unknown email: burn one bcrypt comparison anyway so the response time
     // does not distinguish "no such account" from "wrong password"
     if (!user) {
-      await bcrypt.compare(password, DUMMY_HASH);
+      await bcrypt.compare(cleanPassword, DUMMY_HASH);
       return res.status(401).json({ message: GENERIC_LOGIN_ERROR });
     }
 
@@ -115,7 +125,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'CAPTCHA verification required.', captchaRequired: true });
     }
 
-    if (!(await user.matchPassword(password))) {
+    if (!(await user.matchPassword(cleanPassword))) {
       const attempts = user.failedLoginAttempts + 1;
       const updates = { failedLoginAttempts: attempts };
       if (attempts >= MAX_FAILED_ATTEMPTS) {
@@ -185,10 +195,10 @@ const loginUser = async (req, res) => {
       planExpiry: tenant?.planExpiry || null,
       daysRemaining,
       features: tenant?.features || {},
-      token: generateToken(user._id, user.tenantId)
+      token: generateToken(user._id, user.role, user.tenantId)
     });
   } catch (error) {
-    console.error('[Auth] Login error:', error.message); // never log credentials
+    console.error('[Auth] Login error stack:', error); // never log credentials
     res.status(500).json({ message: 'Login failed. Please try again.' });
   }
 };

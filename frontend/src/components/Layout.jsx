@@ -11,7 +11,7 @@ import {
   NotificationsRounded, LogoutRounded, HistoryRounded, AssessmentRounded,
   SettingsRounded, ChevronRightRounded, PeopleRounded, ShoppingCartRounded,
   DnsRounded, TrendingUpRounded, LightModeRounded, DarkModeRounded,
-  ReceiptRounded, VpnKeyRounded, BuildRounded, StorefrontRounded
+  ReceiptRounded, VpnKeyRounded, BuildRounded, StorefrontRounded, CloseRounded
 } from "@mui/icons-material";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -20,8 +20,7 @@ import api, { getFileUrl } from "../api/axios";
 import GlobalSearch from "./GlobalSearch";
 
 const DRAWER_W = 256;
-const ACCENT = "#B4F105";
-const ACCENT_DIM = "#879A91";
+const ACCENT = "#7777C7";
 
 const adminMenu = [
   { section: "Overview" },
@@ -158,12 +157,12 @@ const Sidebar = ({ onClose }) => {
   return (
     <Box sx={{
       height: "100%",
-      background: "#051C12",
+      background: "#000000",
       display: "flex", flexDirection: "column", overflow: "hidden",
-      borderRight: "1px solid rgba(255,255,255,0.06)",
+      borderRight: "1px solid #1F2422",
     }}>
       {/* Brand */}
-      <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <Box sx={{ px: 3, pt: 3.5, pb: 3, borderBottom: "1px solid #1F2422" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box sx={{
             width: 38, height: 38, borderRadius: "10px", flexShrink: 0, overflow: "hidden",
@@ -180,7 +179,7 @@ const Sidebar = ({ onClose }) => {
             <Typography sx={{ fontSize: 14, fontWeight: 900, color: "#FFFFFF", letterSpacing: "-0.3px", lineHeight: 1.2 }}>
               {effectiveBranding?.name || "IAssetCare"}
             </Typography>
-            <Typography sx={{ fontSize: 10, fontWeight: 600, color: ACCENT_DIM, textTransform: "uppercase", letterSpacing: "0.9px" }}>
+            <Typography sx={{ fontSize: 10, fontWeight: 600, color: ACCENT, textTransform: "uppercase", letterSpacing: "0.9px" }}>
               {brandLabel}
             </Typography>
           </Box>
@@ -194,8 +193,7 @@ const Sidebar = ({ onClose }) => {
             if (item.section) {
               return (
                 <Typography key={`section-${idx}`} sx={{
-                  fontSize: 10, fontWeight: 800, color: "rgba(255,255,255,0.3)",
-                  letterSpacing: "1.4px", textTransform: "uppercase",
+                  fontSize: 10, fontWeight: 800, color: "#6F7774", letterSpacing: "1.4px", textTransform: "uppercase",
                   px: 1.5, mt: idx === 0 ? 0 : 2, mb: 0.5,
                 }}>
                   {item.section}
@@ -209,21 +207,22 @@ const Sidebar = ({ onClose }) => {
                 onClick={() => handleNav(item.path)}
                 sx={{
                   borderRadius: "10px", mb: 0.25, py: 0.85, px: 1.5,
-                  color: active ? "#FFFFFF" : "#879A91",
-                  bgcolor: active ? "rgba(255,255,255,0.05)" : "transparent",
-                  borderLeft: `3px solid ${active ? ACCENT : "transparent"}`,
+                  color: active ? "#FFFFFF" : "#D9E2DF",
+                  bgcolor: active ? "#101010" : "transparent",
+                  borderLeft: `3px solid ${active ? "#7777C7" : "transparent"}`,
+                  border: active ? "1px solid #1F2422" : "1px solid transparent",
                   transition: "all 0.15s ease",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.03)", color: "#FFFFFF" },
+                  "&:hover": { bgcolor: "#151515", color: "#FFFFFF" },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 34, color: active ? ACCENT : "#879A91", "& svg": { fontSize: 18 } }}>
+                <ListItemIcon sx={{ minWidth: 34, color: active ? "#7777C7" : "#7C8399", "& svg": { fontSize: 18 } }}>
                   {item.icon}
                 </ListItemIcon>
                 <ListItemText
                   primary={item.text}
                   slotProps={{ primary: { style: { fontSize: 13, fontWeight: active ? 800 : 600, color: "inherit" } } }}
                 />
-                {active && <ChevronRightRounded sx={{ fontSize: 16, color: ACCENT, opacity: 0.7 }} />}
+                {active && <ChevronRightRounded sx={{ fontSize: 16, color: ACCENT, opacity: 0.9 }} />}
               </ListItemButton>
             );
           })}
@@ -231,13 +230,13 @@ const Sidebar = ({ onClose }) => {
       </Box>
 
       {/* User Row */}
-      <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.06)", px: 2, py: 2 }}>
+      <Box sx={{ borderTop: "1px solid #1F2422", px: 2, py: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Avatar src={getFileUrl(currentUser?.avatar) || undefined} sx={{
             width: 34, height: 34,
-            background: "#072F1F",
+            background: "#7777C7",
             color: "#FFFFFF", fontWeight: 900, fontSize: 12,
-            boxShadow: "0 2px 8px rgba(5,28,18,0.25)",
+            boxShadow: "0 2px 8px rgba(119, 119, 199, 0.35)",
           }}>
             {userInitials}
           </Avatar>
@@ -245,12 +244,12 @@ const Sidebar = ({ onClose }) => {
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {userName}
             </Typography>
-            <Typography sx={{ fontSize: 11, color: "#879A91", textTransform: "capitalize" }}>
+            <Typography sx={{ fontSize: 11, color: "#7C8399", textTransform: "capitalize" }}>
               {currentUser?.role || "user"}
             </Typography>
           </Box>
         </Box>
-        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)", textAlign: "center", mt: 1.5, letterSpacing: "0.3px" }}>
+        <Typography sx={{ fontSize: 10, fontWeight: 600, color: "#7C8399", textAlign: "center", mt: 1.5, letterSpacing: "0.3px" }}>
           Powered by IAssetCare
         </Typography>
       </Box>
@@ -258,24 +257,55 @@ const Sidebar = ({ onClose }) => {
   );
 };
 
+export const PageTitle = ({ title }) => (
+  <Typography
+    component="h1"
+    className="page-title"
+    sx={{
+      fontWeight: 800,
+      fontSize: 17,
+      color: "#0A0A0A",
+      letterSpacing: "-0.4px",
+      lineHeight: 1.2,
+      fontFamily: "inherit",
+      m: 0,
+      p: 0,
+    }}
+  >
+    {title}
+  </Typography>
+);
+
 const PAGE_TITLES = {
-  "/super-admin/console": "Platform Console",
-  "/admin/dashboard":     "Dashboard",
-  "/admin/assets/add":    "Register Asset",
-  "/admin/assets":        "Asset Registry",
-  "/admin/assignments":   "Assigned Devices",
-  "/admin/enterprise":    "Enterprise Hub",
-  "/admin/analytics":     "Analytics",
-  "/admin/approvals":     "Approvals",
-  "/admin/departments":   "Departments",
-  "/admin/audit":         "Audit Logs",
-  "/admin/invoices":      "Invoice Management",
-  "/admin/apikeys":       "API Key Management",
-  "/admin/maintenance":   "Maintenance Logs",
-  "/tickets":             "Tickets",
-  "/notifications":       "Notifications",
-  "/settings":            "Settings",
-  "/employee/portal":     "My Portal",
+  "/super-admin/console":        "Platform Console",
+  "/admin/dashboard":            "Dashboard",
+  "/admin/assets/add":           "Register Asset",
+  "/admin/assets/edit":          "Edit Asset",
+  "/admin/assets":               "Asset Registry",
+  "/admin/assignments":          "Assigned Devices",
+  "/admin/maintenance":          "Maintenance",
+  "/admin/service-centers":      "Service Centers",
+  "/admin/tickets":              "Tickets",
+  "/tickets":                    "Tickets",
+  "/admin/approvals":            "Approvals",
+  "/admin/departments":          "Departments",
+  "/admin/users":                "Users",
+  "/admin/my-team":              "Department Team",
+  "/admin/enterprise":           "Enterprise Hub",
+  "/admin/analytics":            "Analytics",
+  "/admin/audit":                "Audit Logs",
+  "/admin/invoices":             "Invoice Management",
+  "/admin/apikeys":              "API Key Management",
+  "/admin/subscription-billing": "Subscription & Billing",
+  "/admin/billing/invoice":      "Invoice Details",
+  "/admin/billing":              "Subscription & Billing",
+  "/admin/checkout":             "Checkout",
+  "/employee/portal":            "My Portal",
+  "/technician/portal":          "Technician Portal",
+  "/notifications":              "Notifications",
+  "/settings":                   "Settings",
+  "/onboarding":                 "Onboarding",
+  "/scan":                       "Scan Asset",
 };
 
 const Layout = () => {
@@ -308,12 +338,18 @@ const Layout = () => {
 
   const userInitials = (currentUser?.name || "U").substring(0, 2).toUpperCase();
 
-  const pageTitle = Object.entries(PAGE_TITLES).find(([k]) =>
-    location.pathname === k || (k !== "/" && location.pathname.startsWith(k))
-  )?.[1] ?? "IAssetCare";
+  const getPageTitle = (pathname) => {
+    if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+    const match = Object.entries(PAGE_TITLES)
+      .filter(([route]) => route !== "/" && pathname.startsWith(route))
+      .sort((a, b) => b[0].length - a[0].length)[0];
+    return match ? match[1] : "Dashboard";
+  };
+
+  const pageTitle = getPageTitle(location.pathname);
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: "background.default" }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", bgcolor: "#F0F2F1" }}>
 
       {!isMobile && (
         <Drawer variant="permanent"
@@ -332,27 +368,24 @@ const Layout = () => {
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
 
         <AppBar position="sticky" elevation={0} sx={{
-          bgcolor: "background.paper",
-          borderBottom: "1px solid",
-          borderColor: "divider",
-          color: "text.primary",
+          bgcolor: "#FFFFFF",
+          borderBottom: "1px solid #E3E7E5",
+          color: "#0A0A0A",
         }}>
           <Toolbar sx={{ px: { xs: 2, md: 3 }, minHeight: "60px !important", display: "flex", justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               {isMobile && (
-                <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "text.secondary", mr: 0.5 }}>
+                <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#61706B", mr: 0.5, "&:hover": { bgcolor: "#F0F2F1", color: "#0C1C16" } }}>
                   <MenuRounded />
                 </IconButton>
               )}
-              <Typography sx={{ fontWeight: 800, fontSize: 17, color: "text.primary", letterSpacing: "-0.4px" }}>
-                {pageTitle}
-              </Typography>
+              <PageTitle title={pageTitle} />
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <GlobalSearch />
               <IconButton onClick={() => navigate("/notifications")}
-                sx={{ color: "text.secondary", "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}>
+                sx={{ color: "#61706B", "&:hover": { bgcolor: "#F0F2F1", color: "#0C1C16" } }}>
                 <Badge badgeContent={unreadCount || null} color="error"
                   sx={{ "& .MuiBadge-badge": { fontSize: 10, minWidth: 16, height: 16 } }}>
                   <NotificationsRounded />
@@ -363,37 +396,176 @@ const Layout = () => {
                 src={getFileUrl(currentUser?.avatar) || undefined}
                 sx={{
                   width: 34, height: 34, ml: 0.5, cursor: "pointer",
-                  background: "#051C12",
+                  background: "#7777C7",
                   color: "#FFFFFF", fontWeight: 900, fontSize: 12,
-                  boxShadow: "0 2px 8px rgba(5,28,18,0.15)",
+                  boxShadow: "0 2px 8px rgba(119, 119, 199, 0.35)",
                   "&:hover": { opacity: 0.85 }
                 }}>
                 {userInitials}
               </Avatar>
               <IconButton onClick={() => setLogoutOpen(true)}
-                sx={{ ml: 0.5, color: "text.secondary", "&:hover": { color: "#EF4444", bgcolor: "#FEE2E2" } }}>
+                sx={{ ml: 0.5, color: "#61706B", "&:hover": { color: "#EF4444", bgcolor: "rgba(239, 68, 68, 0.15)" } }}>
                 <LogoutRounded sx={{ fontSize: 19 }} />
               </IconButton>
             </Box>
           </Toolbar>
         </AppBar>
 
-        <Dialog open={logoutOpen} onClose={() => setLogoutOpen(false)} maxWidth="xs" fullWidth
-          slotProps={{ paper: { sx: { borderRadius: "16px", bgcolor: "background.paper" } } }}>
-          <DialogTitle sx={{ fontWeight: 900, fontSize: 18, color: "text.primary" }}>Sign Out</DialogTitle>
-          <DialogContent>
-            <Typography color="text.secondary" fontWeight={500}>Are you sure you want to sign out?</Typography>
-          </DialogContent>
-          <DialogActions sx={{ p: 2, pt: 0 }}>
-            <Button onClick={() => setLogoutOpen(false)} sx={{ fontWeight: 700, color: "text.secondary" }}>Cancel</Button>
-            <Button variant="contained" onClick={() => { logout(); navigate("/login"); }}
-              sx={{ bgcolor: "#EF4444", "&:hover": { bgcolor: "#DC2626" }, fontWeight: 900, borderRadius: "8px", px: 3 }}>
-              Sign Out
-            </Button>
-          </DialogActions>
+        {/* Logout Confirmation Modal */}
+        <Dialog
+          open={logoutOpen}
+          onClose={() => setLogoutOpen(false)}
+          maxWidth="xs"
+          fullWidth
+          slotProps={{
+            backdrop: {
+              sx: {
+                bgcolor: "rgba(0, 0, 0, 0.55)",
+                backdropFilter: "blur(2px)",
+              }
+            },
+            paper: {
+              sx: {
+                width: "100%",
+                maxWidth: "420px",
+                borderRadius: "24px",
+                bgcolor: "#FFFFFF",
+                p: { xs: 2.5, sm: 3.5 },
+                pt: { xs: 3, sm: 3.5 },
+                position: "relative",
+                boxShadow: "0 24px 60px rgba(0, 0, 0, 0.18)",
+                border: "1px solid #E3E7E5",
+                textAlign: "center",
+                overflow: "visible",
+              }
+            }
+          }}
+        >
+          {/* Close X Button */}
+          <IconButton
+            onClick={() => setLogoutOpen(false)}
+            aria-label="Close"
+            sx={{
+              position: "absolute",
+              top: 14,
+              right: 14,
+              color: "#61706B",
+              bgcolor: "transparent",
+              "&:hover": { color: "#0A0A0A", bgcolor: "#F0F2F1" }
+            }}
+          >
+            <CloseRounded sx={{ fontSize: 20 }} />
+          </IconButton>
+
+          {/* Centered Modal Content */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+            {/* Top Illustration */}
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 2,
+                mt: 0.5,
+              }}
+            >
+              <Box
+                component="img"
+                src="/logout-illustration.png"
+                alt="Logout Confirmation"
+                sx={{
+                  width: "160px",
+                  maxWidth: "100%",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+            </Box>
+
+            {/* Single Heading */}
+            <Typography
+              component="h2"
+              sx={{
+                fontSize: { xs: 19, sm: 21 },
+                fontWeight: 800,
+                color: "#0A0A0A",
+                letterSpacing: "-0.4px",
+                lineHeight: 1.3,
+                textAlign: "center",
+                mb: 3.5,
+              }}
+            >
+              Are you sure you want to logout?
+            </Typography>
+
+            {/* Action Buttons */}
+            <Box
+              sx={{
+                display: "flex",
+                gap: 1.5,
+                width: "100%",
+                justifyContent: "center",
+                flexDirection: { xs: "column-reverse", sm: "row" },
+              }}
+            >
+              <Button
+                onClick={() => setLogoutOpen(false)}
+                sx={{
+                  flex: 1,
+                  py: 1.25,
+                  borderRadius: "12px",
+                  bgcolor: "#FFFFFF",
+                  color: "#0A0A0A",
+                  border: "1px solid #D9E0DF",
+                  fontWeight: 700,
+                  fontSize: 14.5,
+                  textTransform: "none",
+                  boxShadow: "none",
+                  minHeight: "44px",
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    bgcolor: "#F6F6FD",
+                    borderColor: "#C9C9EA",
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  setLogoutOpen(false);
+                  logout();
+                  navigate("/login");
+                }}
+                sx={{
+                  flex: 1,
+                  py: 1.25,
+                  borderRadius: "12px",
+                  bgcolor: "#7777C7",
+                  color: "#FFFFFF",
+                  fontWeight: 800,
+                  fontSize: 14.5,
+                  textTransform: "none",
+                  boxShadow: "none",
+                  minHeight: "44px",
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    bgcolor: "#6969B8",
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                Log out
+              </Button>
+            </Box>
+          </Box>
         </Dialog>
 
-        <Box sx={{ flex: 1, p: { xs: 3, md: 4 }, color: "text.primary" }}>
+        <Box sx={{ flex: 1, p: { xs: 3, md: 4 }, color: "#0A0A0A" }}>
           <Outlet />
         </Box>
       </Box>

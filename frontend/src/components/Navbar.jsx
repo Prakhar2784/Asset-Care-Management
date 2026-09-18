@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { NavLink, Link, useLocation } from "react-router-dom";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 
 const Navbar = () => {
@@ -34,7 +33,7 @@ const Navbar = () => {
           top: 0; left: 0;
           width: 100%;
           z-index: 1000;
-          padding: ${scrolled ? "10px 20px" : "20px 20px"};
+          padding: ${scrolled ? "12px 20px" : "20px 20px"};
           pointer-events: none;
           display: flex;
           justify-content: center;
@@ -43,20 +42,21 @@ const Navbar = () => {
 
         .nav-pill {
           pointer-events: auto;
-          background: #051C12;
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 100px;
-          padding: 7px 7px 7px 22px;
+          background: rgba(14, 17, 30, 0.92);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 9999px;
+          padding: 6px 8px 6px 20px;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          max-width: 1100px;
+          max-width: 1200px;
           width: 100%;
-          box-shadow: ${scrolled
-            ? "0 8px 32px -8px rgba(5,28,18,0.5), 0 0 0 1px rgba(255,255,255,0.05)"
-            : "0 2px 16px -4px rgba(5,28,18,0.2)"};
+          box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(119, 119, 199, 0.1);
           transition: all 0.35s ease;
           position: relative;
+          font-family: 'Poppins', 'Inter', -apple-system, sans-serif;
         }
 
         .brand-link {
@@ -65,65 +65,78 @@ const Navbar = () => {
         }
 
         .brand-logo-img {
-          height: 36px;
-          width: 36px;
+          height: 32px;
+          width: 32px;
           display: block;
           object-fit: contain;
-          border-radius: 8px;
-          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          border-radius: 6px;
+          transition: transform 0.3s ease;
         }
 
         .brand-title {
-          font-size: 19px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 18px;
           font-weight: 900;
           color: #FFFFFF;
           letter-spacing: -0.4px;
         }
 
         .brand-link:hover .brand-logo-img {
-          transform: scale(1.08);
+          transform: scale(1.06);
         }
 
         .nav-link-track {
-          display: flex; align-items: center; gap: 2px;
+          display: flex; align-items: center; gap: 4px;
         }
 
         .nav-link-item {
-          padding: 9px 18px;
-          color: #879A91;
+          padding: 8px 18px;
+          color: #94A3B8;
           text-decoration: none;
-          font-weight: 700; font-size: 14px;
-          border-radius: 100px;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 700;
+          font-size: 13.5px;
+          border-radius: 9999px;
           transition: all 0.2s ease;
           background: transparent;
         }
 
         .nav-link-item:hover {
-          background: rgba(255,255,255,0.03);
           color: #FFFFFF;
+          background: rgba(255, 255, 255, 0.08);
         }
 
         .nav-link-item.active {
-          background: #B4F105;
-          color: #051C12;
+          background: #7777C7;
+          color: #0B0C1A;
           font-weight: 800;
+          box-shadow: 0 2px 10px rgba(119, 119, 199, 0.4);
         }
 
         .nav-cta {
-          background: #B4F105;
-          color: #051C12;
-          padding: 11px 22px;
-          border-radius: 100px;
-          font-weight: 800; font-size: 14px;
+          background: #7777C7;
+          color: #0B0C1A;
+          padding: 9px 22px;
+          border-radius: 9999px;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 800;
+          font-size: 14px;
           text-decoration: none;
-          display: flex; align-items: center; gap: 7px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
           transition: all 0.2s ease;
           letter-spacing: -0.2px;
+          border: 1px solid #7777C7;
+          box-shadow: 0 4px 14px rgba(119, 119, 199, 0.35);
         }
 
         .nav-cta:hover {
-          background: #c1f824;
+          background: #6464B8;
+          border-color: #6464B8;
+          color: #FFFFFF;
           transform: translateY(-1px);
+          box-shadow: 0 6px 20px rgba(119, 119, 199, 0.5);
         }
 
         .mobile-toggle {
@@ -131,24 +144,24 @@ const Navbar = () => {
           background: transparent;
           color: #FFFFFF;
           border: none;
-          width: 42px; height: 42px;
+          width: 40px; height: 40px;
           border-radius: 50%;
           cursor: pointer;
           transition: all 0.2s ease;
           place-items: center;
         }
 
-        .mobile-toggle:hover { background: rgba(255,255,255,0.1); }
+        .mobile-toggle:hover { background: rgba(255, 255, 255, 0.1); }
 
         .mobile-menu-card {
           position: absolute;
           top: calc(100% + 12px);
           left: 0; right: 0;
-          background: #051C12;
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 24px;
+          background: #1E233D;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 20px;
           padding: 14px;
-          box-shadow: 0 20px 40px -8px rgba(5,28,18,0.5);
+          box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.8);
           opacity: 0;
           visibility: hidden;
           transform: translateY(-8px) scale(0.98);
@@ -165,24 +178,26 @@ const Navbar = () => {
 
         .mob-link-item {
           display: block;
-          padding: 14px 20px;
-          border-radius: 14px;
-          color: #879A91;
+          padding: 12px 18px;
+          border-radius: 12px;
+          color: #94A3B8;
           text-decoration: none;
-          font-weight: 700; font-size: 15px;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 700;
+          font-size: 14.5px;
           transition: all 0.18s ease;
-          margin-bottom: 3px;
+          margin-bottom: 2px;
         }
 
-        .mob-link-item:hover { background: rgba(255,255,255,0.03); color: #FFFFFF; }
-        .mob-link-item.active { background: #B4F105; color: #051C12; }
+        .mob-link-item:hover { background: rgba(255, 255, 255, 0.08); color: #FFFFFF; }
+        .mob-link-item.active { background: #7777C7; color: #0B0C1A; font-weight: 800; }
 
-        .mob-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0; }
+        .mob-divider { height: 1px; background: rgba(119, 119, 199, 0.18); margin: 8px 0; }
 
         @media (max-width: 900px) {
           .nav-link-track, .nav-cta { display: none; }
           .mobile-toggle { display: grid; }
-          .nav-pill { padding: 7px 14px 7px 22px; }
+          .nav-pill { padding: 6px 12px 6px 16px; }
         }
       `}</style>
 
@@ -207,10 +222,10 @@ const Navbar = () => {
           </div>
 
           <Link to="/login" className="nav-cta">
-            <LoginRoundedIcon fontSize="small" /> Access Portal
+            <ArrowForwardRoundedIcon sx={{ fontSize: 16 }} /> Access Portal
           </Link>
 
-          <button className="mobile-toggle" onClick={() => setOpen(!open)}>
+          <button className="mobile-toggle" onClick={() => setOpen(!open)} aria-label="Toggle navigation menu">
             {open ? <CloseRoundedIcon /> : <MenuRoundedIcon />}
           </button>
 
@@ -230,10 +245,10 @@ const Navbar = () => {
             <Link
               to="/login"
               className="mob-link-item"
-              style={{ background: "#B4F105", color: "#051C12", display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}
+              style={{ background: "#7777C7", color: "#0B0C1A", display: "flex", alignItems: "center", gap: 8, justifyContent: "center", fontWeight: 800 }}
               onClick={() => setOpen(false)}
             >
-              <ArrowForwardRoundedIcon fontSize="small" /> Access Portal
+              <ArrowForwardRoundedIcon sx={{ fontSize: 16 }} /> Access Portal
             </Link>
           </div>
         </nav>
@@ -243,3 +258,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+

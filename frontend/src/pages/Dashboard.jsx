@@ -21,12 +21,13 @@ const Dashboard = () => {
         
         .dashboard-page {
           font-family: 'Plus Jakarta Sans', sans-serif !important;
-          background-color: #F4F6F5 !important;
+          background-color: #0B0D17 !important;
+          color: #FFFFFF !important;
         }
         
         .dash-sidebar {
-          background-color: #051C12 !important;
-          border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+          background-color: #0B0D17 !important;
+          border-right: 1px solid rgba(119, 119, 199, 0.18) !important;
         }
         
         .dash-sidebar h2 {
@@ -34,71 +35,71 @@ const Dashboard = () => {
         }
         
         .nav-item {
-          color: #879A91 !important;
+          color: #94A3B8 !important;
         }
         
         .nav-item:hover {
-          background-color: rgba(255,255,255,0.03) !important;
+          background-color: rgba(119, 119, 199, 0.10) !important;
           color: #FFFFFF !important;
         }
         
         .nav-item.active {
-          background-color: rgba(255, 255, 255, 0.05) !important;
+          background-color: rgba(119, 119, 199, 0.18) !important;
           color: #FFFFFF !important;
-          border-left: 3px solid #B4F105 !important;
+          border-left: 3px solid #7777C7 !important;
         }
         
         .btn-primary {
-          background-color: #051C12 !important;
-          color: #B4F105 !important;
-          border: 1px solid #051C12 !important;
+          background-color: #7777C7 !important;
+          color: #FFFFFF !important;
+          border: 1px solid #7777C7 !important;
           border-radius: 12px !important;
           font-weight: 800 !important;
         }
         
         .btn-primary:hover {
-          background-color: #072F1F !important;
+          background-color: #6464B8 !important;
         }
         
         .dash-card {
-          background: #FFFFFF !important;
-          border: 1.5px solid #E9EFEF !important;
-          box-shadow: 0 10px 30px rgba(11, 19, 15, 0.04) !important;
+          background: #1E233D !important;
+          border: 1px solid rgba(119, 119, 199, 0.18) !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
           border-radius: 18px !important;
           padding: 24px !important;
         }
         
         .dash-card p {
-          color: #6C7E75 !important;
+          color: #94A3B8 !important;
           font-weight: 700 !important;
         }
         
         .dash-card h2 {
-          color: #0B130F !important;
+          color: #FFFFFF !important;
           font-weight: 800 !important;
         }
         
         .trend-badge {
-          background-color: rgba(180, 241, 5, 0.15) !important;
-          color: #051C12 !important;
+          background-color: rgba(119, 119, 199, 0.18) !important;
+          color: #7777C7 !important;
           border-radius: 50rem !important;
           font-weight: 800 !important;
         }
         
         .dash-panel {
-          background: #FFFFFF !important;
-          border: 1.5px solid #E9EFEF !important;
-          box-shadow: 0 10px 30px rgba(11, 19, 15, 0.04) !important;
+          background: #1E233D !important;
+          border: 1px solid rgba(119, 119, 199, 0.18) !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
           border-radius: 18px !important;
         }
         
         .dash-ticket {
-          border-bottom: 1px solid #E9EFEF !important;
+          border-bottom: 1px solid rgba(119, 119, 199, 0.12) !important;
         }
         
         .ticket-id {
-          color: #051C12 !important;
-          background-color: rgba(180, 241, 5, 0.15) !important;
+          color: #7777C7 !important;
+          background-color: rgba(119, 119, 199, 0.15) !important;
           font-weight: 800 !important;
           border-radius: 6px !important;
           padding: 2px 6px !important;

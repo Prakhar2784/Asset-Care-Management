@@ -17,6 +17,9 @@ const {
   updateCoupon,
   toggleCouponStatus,
   deleteCoupon,
+  getPlans,
+  updatePlan,
+  resetPlans,
 } = require('../controllers/superAdminController');
 const { generateLicenseKey } = require('../services/licenseService');
 const ContactLead = require('../models/ContactLead');
@@ -55,6 +58,11 @@ router.patch('/tenants/:id/toggle', toggleTenantStatus);
 router.patch('/tenants/:id/plan', updateTenantPlan);
 router.delete('/tenants/:id', deleteTenant);
 router.get('/tenants/:id/users', getTenantUsers);
+
+// ─── Plan & Pricing Management ─────────────────────────────────────────────
+router.get('/plans', getPlans);
+router.put('/plans/:planKey', updatePlan);
+router.post('/plans/reset', resetPlans);
 
 // ─── Coupon Management ─────────────────────────────────────────────────────
 router.get('/coupons', getCoupons);

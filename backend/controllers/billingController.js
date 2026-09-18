@@ -3,6 +3,7 @@ const Invoice = require('../models/Invoice');
 const SubscriptionHistory = require('../models/SubscriptionHistory');
 const Coupon = require('../models/Coupon');
 const billingConfig = require('../config/billingConfig');
+const planService = require('../services/planService');
 const crypto = require('crypto');
 const { generateLicenseKey } = require('../services/licenseService');
 const razorpayService = require('../services/razorpayService');
@@ -34,16 +35,46 @@ const assertNoDowngrade = (tenant, selectedPlanName) => {
   }
 };
 
-// Utility to calculate billing math using dynamic DB coupons (with config fallback)
-const computeBilling = async (planKey, couponCode, customerState) => {
-  const cleanKey = (planKey || 'HOME_USER').toString().trim().toUpperCase().replace(/\s+/g, '_');
-  const plan = billingConfig.PLANS[cleanKey] || 
-               billingConfig.PLANS[planKey] || 
-               Object.values(billingConfig.PLANS).find(p => p.name.toLowerCase() === (planKey || '').toString().toLowerCase()) ||
-               billingConfig.PLANS.HOME_USER;
+// Utility to calculate billing math using dynamic DB plans, DB coupons (with config fallback) and prorated upgrade adjustments
+const computeBilling = async (planKey, couponCode, customerState, tenant = null) => {
+  const plan = await planService.getPlanByKey(planKey);
   if (!plan) throw new Error('Invalid plan selected');
 
+  const r2 = (n) => Math.round(n * 100) / 100;
   const baseAmount = plan.price;
+  let prorationCredit = 0;
+  let isUpgrade = false;
+  let daysRemaining = 0;
+  let currentPlanName = tenant?.plan || null;
+
+  // Proration calculation: When tenant is Active and upgrading to a higher tier plan
+  if (tenant && tenant.subscriptionStatus === 'Active' && tenant.plan && tenant.planExpiry) {
+    const currentRank = getPlanRank(tenant.plan);
+    const targetRank = getPlanRank(plan.name);
+
+    if (currentRank > 0 && targetRank > currentRank) {
+      isUpgrade = true;
+      const now = new Date();
+      const expiry = new Date(tenant.planExpiry);
+      const msRemaining = expiry.getTime() - now.getTime();
+      daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+
+      if (daysRemaining > 0) {
+        // Find current plan price dynamically
+        const currentPlanConfig = await planService.getPlanByKey(tenant.plan);
+        const currentPrice = currentPlanConfig ? currentPlanConfig.price : 0;
+
+        if (currentPrice > 0) {
+          const dailyRate = currentPrice / 365;
+          prorationCredit = r2(dailyRate * daysRemaining);
+          // Credit cannot exceed target plan base price
+          prorationCredit = Math.min(prorationCredit, baseAmount);
+        }
+      }
+    }
+  }
+
+  const adjustedBase = Math.max(0, r2(baseAmount - prorationCredit));
   let discountAmount = 0;
   let appliedCoupon = null;
 
@@ -81,7 +112,7 @@ const computeBilling = async (planKey, couponCode, customerState) => {
       throw new Error('Coupon has expired');
     }
 
-    if (coupon.minOrderValue && baseAmount < coupon.minOrderValue) {
+    if (coupon.minOrderValue && adjustedBase < coupon.minOrderValue) {
       throw new Error(`Minimum order value of ₹${coupon.minOrderValue} required for this coupon`);
     }
 
@@ -98,33 +129,45 @@ const computeBilling = async (planKey, couponCode, customerState) => {
     if (coupon.discountType === 'fixed') {
       discountAmount = coupon.discountValue;
     } else if (coupon.discountType === 'percentage') {
-      discountAmount = baseAmount * (coupon.discountValue / 100);
+      discountAmount = adjustedBase * (coupon.discountValue / 100);
       if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
         discountAmount = coupon.maxDiscount;
       }
     }
 
-    discountAmount = Math.min(baseAmount, Math.max(0, discountAmount));
-  appliedCoupon = coupon;
-}
+    discountAmount = Math.min(adjustedBase, Math.max(0, discountAmount));
+    appliedCoupon = coupon;
+  }
 
-// Round monetary values to 2 decimal places to eliminate floating-point artefacts
-const r2 = (n) => Math.round(n * 100) / 100;
+  const taxableAmount = r2(Math.max(0, adjustedBase - discountAmount));
+  discountAmount = r2(discountAmount);
 
-const taxableAmount = r2(Math.max(0, baseAmount - discountAmount));
-discountAmount = r2(discountAmount);
+  let cgst = 0, sgst = 0, igst = 0;
+  if (customerState && customerState.toLowerCase() === billingConfig.COMPANY_STATE.toLowerCase()) {
+    cgst = r2(taxableAmount * (billingConfig.GST_RATE / 2));
+    sgst = r2(taxableAmount * (billingConfig.GST_RATE / 2));
+  } else {
+    igst = r2(taxableAmount * billingConfig.GST_RATE);
+  }
 
-let cgst = 0, sgst = 0, igst = 0;
-if (customerState && customerState.toLowerCase() === billingConfig.COMPANY_STATE.toLowerCase()) {
-  cgst = r2(taxableAmount * (billingConfig.GST_RATE / 2));
-  sgst = r2(taxableAmount * (billingConfig.GST_RATE / 2));
-} else {
-  igst = r2(taxableAmount * billingConfig.GST_RATE);
-}
+  const totalAmount = r2(taxableAmount + cgst + sgst + igst);
 
-const totalAmount = r2(taxableAmount + cgst + sgst + igst);
-
-return { plan, baseAmount, discountAmount, taxableAmount, cgst, sgst, igst, totalAmount, appliedCoupon };
+  return {
+    plan,
+    baseAmount,
+    isUpgrade,
+    currentPlanName,
+    daysRemaining,
+    prorationCredit,
+    adjustedBase,
+    discountAmount,
+    taxableAmount,
+    cgst,
+    sgst,
+    igst,
+    totalAmount,
+    appliedCoupon
+  };
 };
 
 /**
@@ -190,11 +233,21 @@ const activateVerifiedPayment = async ({ invoice, paymentId, signature, gateway 
   tenant.plan = invoice.planName;
   const { getPlanDefaults } = require('../config/planDefaults');
   const planDefaults = getPlanDefaults(invoice.planName);
+  const dbPlan = await planService.getPlanByKey(invoice.planName);
   tenant.limits = tenant.limits || {};
-  tenant.limits.maxAssets = planDefaults.maxAssets;
-  tenant.limits.maxUsers = planDefaults.maxUsers;
+  tenant.limits.maxAssets = dbPlan?.maxAssets !== undefined ? (dbPlan.maxAssets === -1 ? 999999999 : dbPlan.maxAssets) : planDefaults.maxAssets;
+  tenant.limits.maxUsers = dbPlan?.maxUsers !== undefined ? dbPlan.maxUsers : planDefaults.maxUsers;
   tenant.features = planDefaults.features;
-  tenant.planExpiry = invoice.periodEnd;
+
+  // Extend validity: if renewal on active subscription, extend from current planExpiry
+  if (action === 'Renewed' && tenant.planExpiry && new Date(tenant.planExpiry) > new Date()) {
+    const currentExp = new Date(tenant.planExpiry);
+    currentExp.setFullYear(currentExp.getFullYear() + 1);
+    tenant.planExpiry = invoice.periodEnd || currentExp;
+  } else {
+    tenant.planExpiry = invoice.periodEnd || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  }
+
   if (!tenant.licenseKey) {
     tenant.licenseKey = generateLicenseKey(tenant.slug);
   }
@@ -203,19 +256,60 @@ const activateVerifiedPayment = async ({ invoice, paymentId, signature, gateway 
   return { alreadyPaid: false, invoice, tenant };
 };
 
+const resolveCheckoutTenant = async (req) => {
+  const possibleSlugs = [
+    req.tenantId,
+    req.user?.tenantId,
+    req.headers['x-tenant-id'],
+    req.headers['X-Tenant-Id']
+  ].filter(s => s && s !== 'default');
+
+  for (const slug of possibleSlugs) {
+    try {
+      const tenant = await Tenant.findOne({ slug: slug.toString().toLowerCase() }).setOptions({ bypassTenantFilter: true });
+      if (tenant) return tenant;
+    } catch (e) {}
+  }
+
+  // If superadmin, fall back to first active tenant or a virtual tenant for calculations
+  if (req.user?.role === 'super_admin') {
+    try {
+      const firstTenant = await Tenant.findOne({ isActive: true }).setOptions({ bypassTenantFilter: true });
+      if (firstTenant) return firstTenant;
+    } catch (e) {}
+  }
+
+  return null;
+};
+
 exports.calculateCheckout = async (req, res) => {
   try {
-    console.log('[CALCULATE CHECKOUT REQ]', { body: req.body, tenantId: req.tenantId });
+    console.log('[CALCULATE CHECKOUT REQ]', { body: req.body, tenantId: req.tenantId, userTenant: req.user?.tenantId });
     const { planKey, couponCode } = req.body;
-    const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
-    if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
+    let tenant = await resolveCheckoutTenant(req);
+    
+    // If still no tenant found, use default virtual tenant context for rate preview
+    if (!tenant) {
+      tenant = {
+        name: 'Platform Organization',
+        slug: 'default',
+        plan: 'Home User',
+        subscriptionStatus: 'Pending Checkout',
+        address: { state: 'Maharashtra' }
+      };
+    }
 
-    const breakdown = await computeBilling(planKey, couponCode, tenant.address?.state);
+    const breakdown = await computeBilling(planKey, couponCode, tenant.address?.state, tenant);
     assertNoDowngrade(tenant, breakdown.plan.name);
 
     res.json({
       plan: breakdown.plan,
       baseAmount: breakdown.baseAmount,
+      isUpgrade: breakdown.isUpgrade,
+      currentPlanName: breakdown.currentPlanName,
+      daysRemaining: breakdown.daysRemaining,
+      prorationCredit: breakdown.prorationCredit,
+      adjustedBase: breakdown.adjustedBase,
       discountAmount: breakdown.discountAmount,
       taxableAmount: breakdown.taxableAmount,
       cgst: breakdown.cgst,
@@ -235,20 +329,30 @@ exports.calculateCheckout = async (req, res) => {
  */
 exports.createRazorpayOrder = async (req, res) => {
   try {
-    console.log('[CREATE RAZORPAY ORDER REQ]', { body: req.body, tenantId: req.tenantId });
+    console.log('[CREATE RAZORPAY ORDER REQ]', { body: req.body, tenantId: req.tenantId, userTenant: req.user?.tenantId });
     const { planKey, planName, plan, couponCode } = req.body;
     const selectedPlan = planKey || planName || plan;
-    const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
-    if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
+    const tenant = await resolveCheckoutTenant(req);
+    if (!tenant) return res.status(404).json({ message: 'Tenant organization record not found.' });
 
-    const breakdown = await computeBilling(selectedPlan, couponCode, tenant.address?.state);
+    const breakdown = await computeBilling(selectedPlan, couponCode, tenant.address?.state, tenant);
     assertNoDowngrade(tenant, breakdown.plan.name);
     const amountInPaise = Math.round(breakdown.totalAmount * 100);
     const invoiceNumber = 'INV-' + Date.now() + '-' + crypto.randomBytes(2).toString('hex').toUpperCase();
 
-    const periodStart = new Date();
-    const periodEnd = new Date();
-    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    let periodStart = new Date();
+    let periodEnd = new Date();
+
+    // If active and renewing same plan, add 1 full year (365 days) on top of current planExpiry
+    if (tenant.subscriptionStatus === 'Active' && tenant.planExpiry && new Date(tenant.planExpiry) > new Date() && !breakdown.isUpgrade) {
+      periodStart = new Date(tenant.planExpiry);
+      periodEnd = new Date(tenant.planExpiry);
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    } else {
+      periodStart = new Date();
+      periodEnd = new Date();
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    }
 
     // Create Razorpay Order with authoritative server amount
     const rzpOrder = await razorpayService.createRazorpayOrder({
@@ -259,7 +363,8 @@ exports.createRazorpayOrder = async (req, res) => {
         tenantId: tenant._id.toString(),
         tenantSlug: tenant.slug,
         planName: breakdown.plan.name,
-        couponCode: couponCode || ''
+        couponCode: couponCode || '',
+        prorationCredit: breakdown.prorationCredit ? breakdown.prorationCredit.toString() : '0'
       }
     });
 
@@ -269,6 +374,7 @@ exports.createRazorpayOrder = async (req, res) => {
       tenantId: tenant._id,
       planName: breakdown.plan.name,
       baseAmount: breakdown.baseAmount,
+      prorationCredit: breakdown.prorationCredit || 0,
       discountAmount: breakdown.discountAmount,
       couponCode: couponCode || null,
       taxableAmount: breakdown.taxableAmount,
@@ -299,6 +405,11 @@ exports.createRazorpayOrder = async (req, res) => {
       breakdown: {
         plan: breakdown.plan,
         baseAmount: breakdown.baseAmount,
+        isUpgrade: breakdown.isUpgrade,
+        currentPlanName: breakdown.currentPlanName,
+        daysRemaining: breakdown.daysRemaining,
+        prorationCredit: breakdown.prorationCredit,
+        adjustedBase: breakdown.adjustedBase,
         discountAmount: breakdown.discountAmount,
         taxableAmount: breakdown.taxableAmount,
         cgst: breakdown.cgst,
@@ -431,7 +542,7 @@ exports.processCheckout = async (req, res) => {
     const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
 
-    const breakdown = await computeBilling(planKey, couponCode, tenant.address?.state);
+    const breakdown = await computeBilling(planKey, couponCode, tenant.address?.state, tenant);
     assertNoDowngrade(tenant, breakdown.plan.name);
 
     if (breakdown.appliedCoupon && breakdown.appliedCoupon._id) {
@@ -443,15 +554,25 @@ exports.processCheckout = async (req, res) => {
     }
 
     const invoiceNumber = 'INV-' + Date.now() + '-' + crypto.randomBytes(2).toString('hex').toUpperCase();
-    const periodStart = new Date();
-    const periodEnd = new Date();
-    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    let periodStart = new Date();
+    let periodEnd = new Date();
+
+    if (tenant.subscriptionStatus === 'Active' && tenant.planExpiry && new Date(tenant.planExpiry) > new Date() && !breakdown.isUpgrade) {
+      periodStart = new Date(tenant.planExpiry);
+      periodEnd = new Date(tenant.planExpiry);
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    } else {
+      periodStart = new Date();
+      periodEnd = new Date();
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+    }
 
     const invoice = await Invoice.create({
       invoiceNumber,
       tenantId: tenant._id,
       planName: breakdown.plan.name,
       baseAmount: breakdown.baseAmount,
+      prorationCredit: breakdown.prorationCredit || 0,
       discountAmount: breakdown.discountAmount,
       couponCode: couponCode || null,
       taxableAmount: breakdown.taxableAmount,
@@ -566,4 +687,14 @@ exports.getInvoiceById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getPublicPlans = async (req, res) => {
+  try {
+    const plans = await planService.getAllPlans();
+    res.json(plans);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 

@@ -12,8 +12,8 @@ import {
 } from '@mui/icons-material';
 import api from '../api/axios';
 
-const ACCENT = '#B4F105';
-const DARK = '#051C12';
+const ACCENT = '#7777C7';
+const DARK = '#161B2E';
 
 const ICON_MAP = {
   ticket: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />,
@@ -77,7 +77,7 @@ function TimeEvent({ event, last }) {
 
         <Paper sx={{
           p: 1.8, borderRadius: 2.5, border: '1px solid', borderColor: 'divider',
-          '&:hover': { borderColor: event.color || '#051C12', bgcolor: `${event.color || '#051C12'}05` },
+          '&:hover': { borderColor: event.color || '#7777C7', bgcolor: 'rgba(119, 119, 199, 0.05)' },
           transition: 'all 0.2s',
           bgcolor: 'background.paper'
         }}>
@@ -86,14 +86,15 @@ function TimeEvent({ event, last }) {
           </Typography>
           {event.meta?.cost > 0 && (
             <Chip label={`₹${Number(event.meta.cost).toLocaleString('en-IN')}`} size="small"
-              sx={{ mt: 0.8, height: 18, fontSize: 10, fontWeight: 700, bgcolor: '#422006', color: '#fb923c' }} />
+              sx={{ mt: 0.8, height: 18, fontSize: 10, fontWeight: 700, bgcolor: 'rgba(245, 158, 11, 0.15)', color: '#FBBF24', border: '1px solid rgba(245, 158, 11, 0.3)' }} />
           )}
           {event.meta?.priority && (
             <Chip label={event.meta.priority} size="small"
               sx={{
                 mt: 0.8, ml: event.meta?.cost > 0 ? 0.5 : 0, height: 18, fontSize: 10, fontWeight: 700,
-                bgcolor: event.meta.priority === 'Critical' ? '#450a0a' : event.meta.priority === 'High' ? '#450a0a' : '#422006',
-                color: event.meta.priority === 'Critical' ? '#f87171' : event.meta.priority === 'High' ? '#f87171' : '#fb923c'
+                bgcolor: event.meta.priority === 'Critical' ? 'rgba(239, 68, 68, 0.15)' : event.meta.priority === 'High' ? 'rgba(249, 115, 22, 0.15)' : 'rgba(119, 119, 199, 0.15)',
+                color: event.meta.priority === 'Critical' ? '#F87171' : event.meta.priority === 'High' ? '#FB923C' : '#9898E0',
+                border: `1px solid ${event.meta.priority === 'Critical' ? 'rgba(239, 68, 68, 0.3)' : event.meta.priority === 'High' ? 'rgba(249, 115, 22, 0.3)' : 'rgba(119, 119, 199, 0.3)'}`
               }} />
           )}
         </Paper>
@@ -130,16 +131,16 @@ export default function AssetTimelineDrawer({ open, assetId, assetName, onClose 
       slotProps={{ paper: {
         sx: {
           width: { xs: '100vw', sm: 520 },
-          bgcolor: 'background.default',
+          bgcolor: '#0B0D17',
           display: 'flex',
           flexDirection: 'column',
         }
       } }}
     >
       {/* Header */}
-      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', bgcolor: DARK }}>
+      <Box sx={{ p: 2.5, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', bgcolor: DARK, borderBottom: '1px solid rgba(119, 119, 199, 0.18)' }}>
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
-          <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'rgba(180, 241, 5, 0.15)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+          <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'rgba(119, 119, 199, 0.15)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
             <ManageHistoryRounded sx={{ color: ACCENT, fontSize: 22 }} />
           </Box>
           <Box>
@@ -156,11 +157,11 @@ export default function AssetTimelineDrawer({ open, assetId, assetName, onClose 
 
       {/* Asset Quick Info */}
       {asset && (
-        <Box sx={{ px: 2.5, py: 1.8, bgcolor: DARK, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <Box sx={{ px: 2.5, py: 1.8, bgcolor: DARK, borderBottom: '1px solid rgba(119, 119, 199, 0.18)' }}>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            <Chip label={asset.category} size="small" sx={{ bgcolor: 'rgba(180, 241, 5, 0.15)', color: ACCENT, fontWeight: 700, fontSize: 11 }} />
-            <Chip label={asset.department} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.1)', color: '#E2E8F0', fontWeight: 600, fontSize: 11 }} />
-            <Chip label={asset.status} size="small" sx={{ bgcolor: asset.status === 'Active' ? '#064E3B' : '#7F1D1D', color: asset.status === 'Active' ? '#34D399' : '#F87171', fontWeight: 700, fontSize: 11 }} />
+            <Chip label={asset.category} size="small" sx={{ bgcolor: 'rgba(119, 119, 199, 0.18)', color: ACCENT, fontWeight: 700, fontSize: 11, border: '1px solid rgba(119, 119, 199, 0.25)' }} />
+            <Chip label={asset.department} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#E2E8F0', fontWeight: 600, fontSize: 11 }} />
+            <Chip label={asset.status} size="small" sx={{ bgcolor: asset.status === 'Active' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', color: asset.status === 'Active' ? '#34D399' : '#F87171', fontWeight: 700, fontSize: 11, border: `1px solid ${asset.status === 'Active' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}` }} />
             {asset.serialNumber && (
               <Chip label={`SN: ${asset.serialNumber}`} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.08)', color: '#CBD5E1', fontWeight: 600, fontSize: 11 }} />
             )}
@@ -170,12 +171,12 @@ export default function AssetTimelineDrawer({ open, assetId, assetName, onClose 
 
       {/* Event counts */}
       {data && (
-        <Box sx={{ px: 2.5, py: 1.5, display: 'flex', gap: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.paper', flexWrap: 'wrap' }}>
+        <Box sx={{ px: 2.5, py: 1.5, display: 'flex', gap: 2.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: '#1E233D', flexWrap: 'wrap' }}>
           {[
-            { label: 'Total Events', value: events.length, color: '#051C12' },
-            { label: 'Tickets', value: counts.tickets, color: '#DC2626' },
-            { label: 'Assignments', value: counts.assignments, color: '#2563EB' },
-            { label: 'Maintenance', value: counts.maintenance, color: '#D97706' },
+            { label: 'Total Events', value: events.length, color: '#FFFFFF' },
+            { label: 'Tickets', value: counts.tickets, color: '#F87171' },
+            { label: 'Assignments', value: counts.assignments, color: '#7777C7' },
+            { label: 'Maintenance', value: counts.maintenance, color: '#FBBF24' },
           ].map(s => (
             <Box key={s.label} textAlign="left">
               <Typography fontWeight={900} fontSize={16} color={s.color} sx={{ lineHeight: 1.2 }}>{s.value ?? 0}</Typography>

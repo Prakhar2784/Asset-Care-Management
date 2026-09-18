@@ -157,7 +157,7 @@ const Departments = () => {
 
   const kpis = [
     { label: "Total Departments", value: summary.total,    color: "text.primary", icon: <ApartmentRounded fontSize="small" /> },
-    { label: "Active",            value: summary.active,   color: "#B4F105", icon: <CheckCircleRounded fontSize="small" /> },
+    { label: "Active",            value: summary.active,   color: "#7777C7", icon: <CheckCircleRounded fontSize="small" /> },
   ];
 
   return (
@@ -176,7 +176,7 @@ const Departments = () => {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm}
-          sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
+          sx={{ background: "#7777C7", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", px: 2.5, boxShadow: "none" }}>
           Add Department
         </Button>
       </Box>
@@ -212,7 +212,7 @@ const Departments = () => {
           <Typography color="text.secondary" sx={{ mt: 1 }}>
             Add departments to manage approvals and asset ownership.
           </Typography>
-          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
+          <Button variant="contained" startIcon={<AddRounded />} onClick={openAddForm} sx={{ mt: 3, background: "#7777C7", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none" }}>
             Add First Department
           </Button>
         </Paper>
@@ -226,7 +226,7 @@ const Departments = () => {
                 transition: "box-shadow 0.2s", "&:hover": { boxShadow: "0 8px 32px rgba(17,24,39,0.12)" }
               }}>
                 {/* Top accent bar */}
-                <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#111827" }} />
+                <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "#7777C7" }} />
 
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mt: 0.5 }}>
                   <Box sx={{ width: 52, height: 52, borderRadius: "14px", bgcolor: "rgba(17,24,39,0.10)", color: "text.primary", display: "grid", placeItems: "center" }}>
@@ -428,7 +428,7 @@ const Departments = () => {
           </Button>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSaveDepartment} disabled={saving}
-            sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
+            sx={{ background: "#7777C7", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", px: 3, boxShadow: "none", textTransform: "none" }}>
             {saving ? "Saving..." : mode === "add" ? "Save Department" : "Update Department"}
           </Button>
         </DialogActions>

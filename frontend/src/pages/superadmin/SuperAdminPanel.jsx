@@ -26,8 +26,8 @@ import {
 } from '@mui/icons-material';
 import api from '../../api/axios';
 
-const ACCENT = '#B4F105';
-const DARK = '#051C12';
+const ACCENT = '#7777C7';
+const DARK = '#7777C7';
 const TEXT_MUTED = '#64748B';
 
 // Currency formatter for Indian numbering system
@@ -285,6 +285,22 @@ export default function SuperAdminPanel() {
   const [leads, setLeads] = useState([]);
   const [leadsLoading, setLeadsLoading] = useState(false);
 
+  // Plans & Pricing tab
+  const [plans, setPlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [planEditModal, setPlanEditModal] = useState({ open: false, data: null });
+  const [planEditForm, setPlanEditForm] = useState({
+    planKey: '',
+    name: '',
+    price: '',
+    maxAssets: '',
+    maxUsers: '',
+    description: '',
+    badge: '',
+    featuresText: '',
+    isActive: true
+  });
+
   // Dialogs
   const [createOpen, setCreateOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
@@ -329,6 +345,79 @@ export default function SuperAdminPanel() {
   const [instructionsCopied, setInstructionsCopied] = useState(false);
 
   const showSnack = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
+
+  const fetchPlans = useCallback(async () => {
+    setPlansLoading(true);
+    try {
+      const { data: res } = await api.get('/super-admin/plans');
+      setPlans(res || []);
+    } catch {
+      showSnack('Failed to load subscription plans.', 'error');
+    } finally {
+      setPlansLoading(false);
+    }
+  }, []);
+
+  const openEditPlanModal = (p) => {
+    setPlanEditForm({
+      planKey: p.planKey,
+      name: p.name,
+      price: p.price,
+      maxAssets: p.maxAssets === -1 || p.maxAssets === 999999999 ? 'unlimited' : p.maxAssets,
+      maxUsers: p.maxUsers === -1 || p.maxUsers === 999999999 ? 'unlimited' : p.maxUsers,
+      description: p.description || '',
+      badge: p.badge || '',
+      featuresText: (p.features || []).join('\n'),
+      isActive: p.isActive !== false
+    });
+    setPlanEditModal({ open: true, data: p });
+  };
+
+  const handleSavePlan = async (e) => {
+    if (e) e.preventDefault();
+    setSaving(true);
+    try {
+      const features = planEditForm.featuresText
+        ? planEditForm.featuresText.split('\n').map(s => s.trim()).filter(Boolean)
+        : [];
+
+      const payload = {
+        price: Number(planEditForm.price),
+        name: planEditForm.name,
+        description: planEditForm.description,
+        badge: planEditForm.badge,
+        maxAssets: planEditForm.maxAssets === 'unlimited' || planEditForm.maxAssets === -1 || planEditForm.maxAssets === '-1' ? -1 : Number(planEditForm.maxAssets),
+        maxUsers: planEditForm.maxUsers === 'unlimited' || planEditForm.maxUsers === -1 || planEditForm.maxUsers === '-1' ? -1 : Number(planEditForm.maxUsers),
+        features,
+        isActive: planEditForm.isActive
+      };
+
+      const { data: res } = await api.put(`/super-admin/plans/${planEditForm.planKey}`, payload);
+      showSnack(res.message || 'Plan updated successfully!');
+      setPlanEditModal({ open: false, data: null });
+      fetchPlans();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Failed to update plan.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleResetPlans = async () => {
+    if (!window.confirm('Reset all plans to standard default factory pricing and limits?')) return;
+    setSaving(true);
+    try {
+      const { data: res } = await api.post('/super-admin/plans/reset');
+      showSnack(res.message || 'Plans reset to defaults.');
+      fetchPlans();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Reset failed.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -406,13 +495,16 @@ export default function SuperAdminPanel() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchPlans();
+  }, [fetchData, fetchPlans]);
 
   useEffect(() => {
+    if (mainTab === 0) fetchPlans();
     if (mainTab === 2) fetchExpiryMonitoring();
     if (mainTab === 4) fetchCoupons();
     if (mainTab === 5) fetchLeads();
-  }, [mainTab, fetchExpiryMonitoring, fetchCoupons, fetchLeads]);
+    if (mainTab === 6) fetchPlans();
+  }, [mainTab, fetchExpiryMonitoring, fetchCoupons, fetchLeads, fetchPlans]);
 
   const handleOpenDetails = async (tenantId) => {
     setSelectedTenantId(tenantId);
@@ -746,7 +838,7 @@ export default function SuperAdminPanel() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(5, 28, 18, 0.2)'
+                boxShadow: '0 4px 10px rgba(119, 119, 199, 0.2)'
               }}
             >
               <ShieldRounded sx={{ fontSize: 22 }} />
@@ -827,8 +919,8 @@ export default function SuperAdminPanel() {
               fontWeight: 800,
               textTransform: 'none',
               px: 2.5,
-              boxShadow: '0 4px 12px rgba(5, 28, 18, 0.15)',
-              '&:hover': { bgcolor: '#0B291C' }
+              boxShadow: '0 4px 12px rgba(119, 119, 199, 0.15)',
+              '&:hover': { bgcolor: '#6464B8' }
             }}
           >
             Provision Company
@@ -902,6 +994,11 @@ export default function SuperAdminPanel() {
             icon={<InboxRounded sx={{ fontSize: 18 }} />}
             iconPosition="start"
             label={`Contact Inquiries (${leads.length})`}
+          />
+          <Tab
+            icon={<MonetizationOnRounded sx={{ fontSize: 18 }} />}
+            iconPosition="start"
+            label="Plan Pricing & Limits"
           />
         </Tabs>
       </Paper>
@@ -1844,7 +1941,7 @@ export default function SuperAdminPanel() {
                 fontWeight: 800,
                 textTransform: 'none',
                 px: 2.5,
-                '&:hover': { bgcolor: '#0B291C' }
+                '&:hover': { bgcolor: '#6464B8' }
               }}
             >
               Create Coupon
@@ -2110,6 +2207,262 @@ export default function SuperAdminPanel() {
         </Paper>
       )}
 
+      {/* ─── TAB 6: SUBSCRIPTION PLANS & PRICING CONTROL ───────────────────────────── */}
+      {mainTab === 6 && (
+        <Box>
+          {/* Header Banner */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: '16px',
+              border: '1px solid #E2E8F0',
+              bgcolor: '#FFFFFF',
+              mb: 3.5,
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 2
+            }}
+          >
+            <Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A' }}>
+                  Subscription Plans, Pricing & Quotas
+                </Typography>
+                <Chip
+                  label="Authoritative Rates"
+                  size="small"
+                  sx={{
+                    bgcolor: '#ECFDF5',
+                    color: '#059669',
+                    fontWeight: 800,
+                    fontSize: '11px',
+                    border: '1px solid #A7F3D0'
+                  }}
+                />
+              </Box>
+              <Typography variant="body2" sx={{ color: TEXT_MUTED, maxWidth: 750 }}>
+                Configure live subscription rates, asset capacities, and quotas across the platform. All price changes reflect immediately in checkouts, renewals, public registration, and automated invoice calculations.
+              </Typography>
+            </Box>
+
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleResetPlans}
+              disabled={saving || plansLoading}
+              sx={{
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '12.5px',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Reset to Factory Defaults
+            </Button>
+          </Paper>
+
+          {plansLoading && plans.length === 0 ? (
+            <Box sx={{ p: 8, textAlign: 'center' }}>
+              <CircularProgress size={36} sx={{ color: DARK, mb: 1.5 }} />
+              <Typography variant="body2" color="text.secondary">
+                Loading live subscription tiers & pricing configurations...
+              </Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={3}>
+              {(plans.length > 0 ? plans : [
+                { planKey: 'HOME_USER', name: 'Home User', price: 999, maxAssets: 20, maxUsers: 1, badge: 'Popular for Personal', description: 'Up to 20 assets for personal or small office equipment tracking' },
+                { planKey: 'MSME', name: 'MSME', price: 2999, maxAssets: 50, maxUsers: 10, badge: 'Most Popular', description: 'Up to 50 assets with multi-department support and warranty radar' },
+                { planKey: 'LARGE_SCALE', name: 'Large Scale', price: 8999, maxAssets: -1, maxUsers: -1, badge: 'Enterprise', description: 'Unlimited assets with developer REST API and priority 24/7 SLA support' }
+              ]).map((p) => {
+                const isMsme = p.planKey === 'MSME' || p.name === 'MSME';
+                const isLarge = p.planKey === 'LARGE_SCALE' || p.name === 'Large Scale';
+
+                const themeColor = isMsme ? '#7C3AED' : isLarge ? '#059669' : '#2563EB';
+                const themeBg = isMsme ? '#F5F3FF' : isLarge ? '#ECFDF5' : '#EFF6FF';
+                const themeBorder = isMsme ? '#DDD6FE' : isLarge ? '#A7F3D0' : '#BFDBFE';
+
+                return (
+                  <Grid item xs={12} md={4} key={p.planKey || p.name}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 3,
+                        borderRadius: '20px',
+                        bgcolor: '#FFFFFF',
+                        border: `1.5px solid ${themeBorder}`,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        height: '100%',
+                        position: 'relative',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+                        '&:hover': {
+                          transform: 'translateY(-3px)',
+                          boxShadow: '0 12px 24px -4px rgba(0, 0, 0, 0.08)'
+                        }
+                      }}
+                    >
+                      {/* Top Plan Tag */}
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <PlanBadge plan={p.name} />
+                          {p.badge && (
+                            <Chip
+                              label={p.badge}
+                              size="small"
+                              sx={{
+                                height: 22,
+                                fontSize: '10.5px',
+                                fontWeight: 800,
+                                bgcolor: themeBg,
+                                color: themeColor,
+                                border: `1px solid ${themeBorder}`
+                              }}
+                            />
+                          )}
+                        </Box>
+
+                        <Chip
+                          label={p.isActive !== false ? 'Active' : 'Disabled'}
+                          size="small"
+                          sx={{
+                            height: 22,
+                            fontSize: '10.5px',
+                            fontWeight: 800,
+                            bgcolor: p.isActive !== false ? '#ECFDF5' : '#FEF2F2',
+                            color: p.isActive !== false ? '#059669' : '#DC2626'
+                          }}
+                        />
+                      </Box>
+
+                      {/* Plan Heading */}
+                      <Typography variant="h5" sx={{ fontWeight: 900, color: '#0F172A', mb: 0.5 }}>
+                        {p.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '13px', minHeight: 38, mb: 2 }}>
+                        {p.description || 'Configured subscription plan'}
+                      </Typography>
+
+                      {/* Current Authoritative Price */}
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 2,
+                          borderRadius: '14px',
+                          bgcolor: '#F8FAFC',
+                          border: '1px solid #E2E8F0',
+                          mb: 2.5,
+                          display: 'flex',
+                          alignItems: 'baseline',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="caption" sx={{ fontWeight: 800, color: TEXT_MUTED, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            Annual Base Price
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, mt: 0.2 }}>
+                            <Typography variant="h4" sx={{ fontWeight: 950, color: '#0F172A', letterSpacing: '-0.5px' }}>
+                              {formatINR(p.price)}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
+                              / year
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => openEditPlanModal(p)}
+                          sx={{
+                            bgcolor: '#FFFFFF',
+                            border: '1px solid #CBD5E1',
+                            color: '#0F172A',
+                            '&:hover': { bgcolor: themeBg, color: themeColor }
+                          }}
+                          title="Edit Price & Limits"
+                        >
+                          <EditRounded sx={{ fontSize: 16 }} />
+                        </IconButton>
+                      </Paper>
+
+                      {/* Quotas & Specs */}
+                      <Box sx={{ mb: 2.5 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', mb: 1 }}>
+                          Capacity Quotas
+                        </Typography>
+                        <Stack spacing={1}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5, borderBottom: '1px solid #F1F5F9' }}>
+                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>Asset Registry Limit</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                              {p.maxAssets === -1 || p.maxAssets === 999999999 ? 'Unlimited Assets' : `Up to ${p.maxAssets} Assets`}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5, borderBottom: '1px solid #F1F5F9' }}>
+                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>User Accounts</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                              {p.maxUsers === -1 || p.maxUsers === 999999999 ? 'Unlimited Users' : `Up to ${p.maxUsers} Users`}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Box>
+
+                      {/* Feature Bullet Points */}
+                      {p.features && p.features.length > 0 && (
+                        <Box sx={{ mb: 3 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', mb: 1 }}>
+                            Features Included ({p.features.length})
+                          </Typography>
+                          <Stack spacing={0.75}>
+                            {p.features.slice(0, 5).map((feat, idx) => (
+                              <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <CheckRounded sx={{ fontSize: 15, color: '#16A34A' }} />
+                                <Typography variant="body2" sx={{ fontSize: '12.5px', color: '#475569', fontWeight: 600 }}>
+                                  {feat}
+                                </Typography>
+                              </Box>
+                            ))}
+                            {p.features.length > 5 && (
+                              <Typography variant="caption" sx={{ color: TEXT_MUTED, pl: 3, fontWeight: 700 }}>
+                                + {p.features.length - 5} more features
+                              </Typography>
+                            )}
+                          </Stack>
+                        </Box>
+                      )}
+
+                      {/* Action Button */}
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        startIcon={<EditRounded />}
+                        onClick={() => openEditPlanModal(p)}
+                        sx={{
+                          mt: 'auto',
+                          borderRadius: '12px',
+                          bgcolor: DARK,
+                          color: '#FFFFFF',
+                          fontWeight: 800,
+                          textTransform: 'none',
+                          py: 1.2,
+                          '&:hover': { bgcolor: '#6464B8' }
+                        }}
+                      >
+                        Edit Price & Specifications
+                      </Button>
+                    </Paper>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
+        </Box>
+      )}
+
       {/* ─── MODAL: 360° COMPANY INSPECTION & DETAILS ─────────────────────────────── */}
       <Dialog
         open={detailOpen}
@@ -2149,7 +2502,7 @@ export default function SuperAdminPanel() {
               color: '#FFFFFF',
               fontWeight: 800,
               textTransform: 'none',
-              '&:hover': { bgcolor: '#0B291C' }
+              '&:hover': { bgcolor: '#6464B8' }
             }}
           >
             Manage Subscription
@@ -2476,7 +2829,7 @@ export default function SuperAdminPanel() {
               color: '#FFFFFF',
               fontWeight: 800,
               textTransform: 'none',
-              '&:hover': { bgcolor: '#0B291C' }
+              '&:hover': { bgcolor: '#6464B8' }
             }}
           >
             {saving ? 'Updating...' : 'Save Changes'}
@@ -2581,7 +2934,7 @@ export default function SuperAdminPanel() {
                 color: '#FFFFFF',
                 fontWeight: 800,
                 textTransform: 'none',
-                '&:hover': { bgcolor: '#0B291C' }
+                '&:hover': { bgcolor: '#6464B8' }
               }}
             >
               {saving ? 'Provisioning...' : 'Provision Company'}
@@ -2766,7 +3119,7 @@ export default function SuperAdminPanel() {
                 color: '#FFFFFF',
                 fontWeight: 800,
                 textTransform: 'none',
-                '&:hover': { bgcolor: '#0B291C' }
+                '&:hover': { bgcolor: '#6464B8' }
               }}
             >
               {saving ? 'Saving...' : couponModal.isEdit ? 'Update Coupon' : 'Create Coupon'}
@@ -2784,7 +3137,7 @@ export default function SuperAdminPanel() {
         PaperProps={{
           sx: {
             borderRadius: '18px',
-            boxShadow: '0 25px 60px rgba(5, 28, 18, 0.25)',
+            boxShadow: '0 25px 60px rgba(119, 119, 199, 0.25)',
             overflow: 'hidden'
           }
         }}
@@ -2805,7 +3158,7 @@ export default function SuperAdminPanel() {
               width: 38,
               height: 38,
               borderRadius: '10px',
-              bgcolor: 'rgba(180, 241, 5, 0.15)',
+              bgcolor: 'rgba(119, 119, 199, 0.15)',
               color: ACCENT,
               display: 'flex',
               alignItems: 'center',
@@ -2866,7 +3219,7 @@ export default function SuperAdminPanel() {
                     px: 3,
                     height: 40,
                     whiteSpace: 'nowrap',
-                    '&:hover': { bgcolor: '#0B291C' }
+                    '&:hover': { bgcolor: '#6464B8' }
                   }}
                 >
                   {keyGenLoading ? <CircularProgress size={18} sx={{ color: '#FFFFFF' }} /> : 'Generate'}
@@ -2965,7 +3318,7 @@ License Key     : ${generatedKey}`}
                       fontWeight: 800,
                       bgcolor: DARK,
                       color: '#FFFFFF',
-                      '&:hover': { bgcolor: '#0B291C' }
+                      '&:hover': { bgcolor: '#6464B8' }
                     }}
                   >
                     {instructionsCopied ? "Instructions Copied" : "Copy Client Instructions"}
@@ -2984,6 +3337,156 @@ License Key     : ${generatedKey}`}
             Close
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* ─── MODAL: EDIT PLAN PRICING & SPECIFICATIONS ───────────────────────── */}
+      <Dialog
+        open={planEditModal.open}
+        onClose={() => setPlanEditModal({ open: false, data: null })}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
+      >
+        <form onSubmit={handleSavePlan}>
+          <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A' }}>
+                Edit Plan: {planEditForm.name || planEditForm.planKey}
+              </Typography>
+              <Typography variant="caption" sx={{ color: TEXT_MUTED, fontFamily: 'monospace' }}>
+                Key: {planEditForm.planKey}
+              </Typography>
+            </Box>
+            <PlanBadge plan={planEditForm.name} />
+          </DialogTitle>
+
+          <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, py: 3 }}>
+            <Alert severity="info" sx={{ borderRadius: '12px', fontSize: '12.5px' }}>
+              Updating this price updates all public registration cards, checkout pricing, renewal amounts, and prorated upgrades across the entire platform in real time.
+            </Alert>
+
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Annual Price (₹)"
+                  type="number"
+                  value={planEditForm.price}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, price: e.target.value })}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">₹</InputAdornment>
+                  }}
+                  helperText="Authoritative yearly price before GST"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Display Plan Name"
+                  value={planEditForm.name}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, name: e.target.value })}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Max Assets Limit"
+                  value={planEditForm.maxAssets}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, maxAssets: e.target.value })}
+                  placeholder="e.g. 20, 50, or unlimited"
+                  helperText="Enter a number or 'unlimited' (-1)"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Max Users Limit"
+                  value={planEditForm.maxUsers}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, maxUsers: e.target.value })}
+                  placeholder="e.g. 1, 10, or unlimited"
+                  helperText="Enter a number or 'unlimited' (-1)"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Badge / Tag (Optional)"
+                  value={planEditForm.badge}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, badge: e.target.value })}
+                  placeholder="e.g. Most Popular, Enterprise, Recommended"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  label="Plan Subtitle / Description"
+                  value={planEditForm.description}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, description: e.target.value })}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={5}
+                  label="Features List (One feature per line)"
+                  value={planEditForm.featuresText}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, featuresText: e.target.value })}
+                  helperText="Enter each feature description on a new line"
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={planEditForm.isActive}
+                      onChange={(e) => setPlanEditForm({ ...planEditForm, isActive: e.target.checked })}
+                      color="primary"
+                    />
+                  }
+                  label="Plan Active & Selectable in Checkout"
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+
+          <DialogActions sx={{ p: 2.5, gap: 1 }}>
+            <Button
+              onClick={() => setPlanEditModal({ open: false, data: null })}
+              disabled={saving}
+              sx={{ textTransform: 'none', fontWeight: 700, color: TEXT_MUTED }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={saving}
+              sx={{
+                borderRadius: '10px',
+                bgcolor: DARK,
+                color: '#FFFFFF',
+                fontWeight: 800,
+                textTransform: 'none',
+                px: 3,
+                '&:hover': { bgcolor: '#6464B8' }
+              }}
+            >
+              {saving ? 'Saving...' : 'Save Plan Changes'}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
       {/* Global Snackbar */}

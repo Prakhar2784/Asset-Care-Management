@@ -111,7 +111,7 @@ function ProfileTab() {
                 sx={{
                   width: 90, height: 90,
                   fontSize: 32, fontWeight: 900,
-                  bgcolor: '#FBBF24', color: '#111827',
+                  bgcolor: '#7777C7', color: '#FFFFFF',
                   border: '3px solid', borderColor: 'background.paper',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
                 }}
@@ -123,10 +123,10 @@ function ProfileTab() {
                 disabled={avatarUploading}
                 sx={{
                   position: 'absolute', bottom: 0, right: 0,
-                  bgcolor: '#FBBF24', color: '#111827',
+                  bgcolor: '#7777C7', color: '#FFFFFF',
                   width: 32, height: 32,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  '&:hover': { bgcolor: '#FBBF24', opacity: 0.9 },
+                  '&:hover': { bgcolor: '#6464B8' },
                   '&.Mui-disabled': { bgcolor: 'action.disabledBackground' }
                 }}
               >
@@ -155,7 +155,7 @@ function ProfileTab() {
           {msg && <Alert severity={msg.includes('success') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{msg}</Alert>}
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSave} disabled={saving}
-            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
+            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#7777C7', color: '#FFFFFF', boxShadow: 'none', '&:hover': { background: '#6464B8' } }}>
             Save Changes
           </Button>
         </Paper>
@@ -190,7 +190,7 @@ function ProfileTab() {
           {passMsg && <Alert severity={passMsg.startsWith('✓') ? 'success' : 'error'} sx={{ mt: 2, borderRadius: '10px' }}>{passMsg}</Alert>}
           <Button variant="contained" startIcon={passLoading ? <CircularProgress size={16} color="inherit" /> : <LockRounded />}
             onClick={handleChangePass} disabled={passLoading || !current || !newPass || !confirm}
-            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
+            sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', px: 3, py: 1.2, background: '#7777C7', color: '#FFFFFF', boxShadow: 'none', '&:hover': { background: '#6464B8' } }}>
             Change Password
           </Button>
         </Paper>
@@ -210,7 +210,7 @@ function CompanySettingsTab({ isAdmin = true }) {
     name: '', industry: '', employeeCount: '', phone: '', website: '', contactEmail: '',
     gstNumber: '', panNumber: '',
     addressLine: '', city: '', state: '', pin: '', country: 'India',
-    logoUrl: '', primaryColor: '#141414', secondaryColor: '#111827',
+    logoUrl: '', primaryColor: '#7777C7', secondaryColor: '#6464B8',
     smtpHost: '', smtpPort: '', smtpUser: '', smtpPass: '', smtpFromEmail: ''
   });
   const [tenant, setTenant] = useState(null);
@@ -239,8 +239,8 @@ function CompanySettingsTab({ isAdmin = true }) {
       pin: data.address?.pin || '',
       country: data.address?.country || 'India',
       logoUrl: data.branding?.logoUrl || '',
-      primaryColor: data.branding?.primaryColor || '#141414',
-      secondaryColor: data.branding?.secondaryColor || '#111827',
+      primaryColor: data.branding?.primaryColor || '#7777C7',
+      secondaryColor: data.branding?.secondaryColor || '#6464B8',
       smtpHost: data.smtp?.host || '',
       smtpPort: data.smtp?.port || '',
       smtpUser: data.smtp?.user || '',
@@ -457,7 +457,7 @@ function CompanySettingsTab({ isAdmin = true }) {
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Button variant="contained" startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
             onClick={handleSave} disabled={saving}
-            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
+            sx={{ fontWeight: 800, borderRadius: '12px', px: 4, py: 1.3, background: '#7777C7', color: '#FFFFFF', '&:hover': { background: '#6464B8' }, boxShadow: 'none' }}>
             {saving ? 'Saving…' : 'Save Changes'}
           </Button>
         </Box>
@@ -588,7 +588,7 @@ function CustomFieldsTab() {
 
             <Button type="submit" variant="contained" fullWidth disabled={saving || !name.trim()}
               startIcon={saving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
-              sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', py: 1.2, background: '#FBBF24', color: '#111827', boxShadow: 'none' }}>
+              sx={{ mt: 3, fontWeight: 800, borderRadius: '12px', py: 1.2, background: '#7777C7', color: '#FFFFFF', '&:hover': { background: '#6464B8' }, boxShadow: 'none' }}>
               {saving ? 'Adding…' : 'Add Custom Field'}
             </Button>
           </Box>
@@ -901,7 +901,7 @@ function BillingTab() {
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-      <CircularProgress sx={{ color: '#051C12' }} />
+      <CircularProgress sx={{ color: '#7777C7' }} />
     </Box>
   );
   if (!tenant) return <Typography>Error loading billing info.</Typography>;
@@ -938,7 +938,7 @@ function BillingTab() {
           <Paper variant="outlined" sx={{ p: 3.5, borderRadius: '16px', height: '100%', border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="overline" color="text.secondary" fontWeight="800" letterSpacing="0.5px">CURRENT SUBSCRIPTION</Typography>
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1.5, my: 1 }}>
-              <Typography variant="h4" fontWeight="900" sx={{ color: '#051C12' }}>{tenant.plan || 'No Plan Active'}</Typography>
+              <Typography variant="h4" fontWeight="900" sx={{ color: '#7777C7' }}>{tenant.plan || 'No Plan Active'}</Typography>
               <Typography variant="h6" fontWeight="700" color="text.secondary">({planPrices[tenant.plan] || '—'})</Typography>
             </Box>
             <Typography variant="body2" color="text.secondary" mb={2.5}>
@@ -974,7 +974,7 @@ function BillingTab() {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="caption" color="text.secondary" fontWeight="700" display="block">COMMERCIAL LICENSE KEY</Typography>
-                <Typography variant="body2" fontWeight="700" sx={{ fontFamily: 'monospace', bgcolor: 'rgba(5,28,18,0.04)', px: 1, py: 0.5, borderRadius: '6px', display: 'inline-block', mt: 0.5 }}>
+                <Typography variant="body2" fontWeight="700" sx={{ fontFamily: 'monospace', bgcolor: 'rgba(119, 119, 199, 0.04)', px: 1, py: 0.5, borderRadius: '6px', display: 'inline-block', mt: 0.5 }}>
                   {tenant.licenseKey || '—'}
                 </Typography>
               </Grid>
@@ -988,7 +988,7 @@ function BillingTab() {
               variant="contained" 
               fullWidth 
               onClick={() => navigate('/admin/checkout')}
-              sx={{ py: 1.2, fontWeight: 800, bgcolor: '#051C12', color: '#B4F105', '&:hover': { bgcolor: '#0B3B24' }, borderRadius: '10px' }}
+              sx={{ py: 1.2, fontWeight: 800, bgcolor: '#7777C7', color: '#FFFFFF', '&:hover': { bgcolor: '#6464B8' }, borderRadius: '10px' }}
             >
               Change / Upgrade Plan
             </Button>
@@ -996,7 +996,7 @@ function BillingTab() {
               variant="outlined" 
               fullWidth 
               onClick={() => navigate('/admin/checkout')}
-              sx={{ py: 1.2, fontWeight: 700, borderColor: '#051C12', color: '#051C12', borderRadius: '10px' }}
+              sx={{ py: 1.2, fontWeight: 700, borderColor: '#7777C7', color: '#7777C7', borderRadius: '10px', '&:hover': { borderColor: '#7777C7', bgcolor: 'rgba(119, 119, 199, 0.10)' } }}
             >
               Renew Subscription
             </Button>
@@ -1030,7 +1030,7 @@ function BillingTab() {
           </thead>
           <tbody>
             {invoices.length === 0 ? (
-              <tr><td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#6C7E75' }}>No invoices found.</td></tr>
+              <tr><td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#94A3B8' }}>No invoices found.</td></tr>
             ) : (
               invoices.map(inv => (
                 <tr key={inv._id} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>

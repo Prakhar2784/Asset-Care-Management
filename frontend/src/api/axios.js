@@ -73,13 +73,17 @@ api.interceptors.response.use(
   }
 );
 
-// Converts a relative avatar/logo path like "/uploads/avatars/photo.jpg"
-// into the full backend URL using the configured base URL.
+// Converts a relative avatar/logo/attachment path like "/uploads/avatars/photo.jpg"
+// into the full URL using the origin or configured base URL.
 export const getFileUrl = (path) => {
   if (!path) return null;
-  if (path.startsWith('http')) return path;
-  const base = api.defaults.baseURL?.replace(/\/api\/?$/, '') || 'http://localhost:5000';
-  return `${base}${path}`;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  let base = api.defaults.baseURL?.replace(/\/api\/?$/, '') || '';
+  if (!base || base === '') {
+    base = typeof window !== 'undefined' ? window.location.origin : '';
+  }
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath}`;
 };
 
 export default api;

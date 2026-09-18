@@ -128,14 +128,21 @@ export default function ServiceCenters() {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3, flexWrap: "wrap", gap: 2 }}>
-        <Box>
-          <Typography fontWeight={900} fontSize={26} color="text.primary">Service Centers</Typography>
-          <Typography fontSize={14} color="text.secondary">Manage service partners and track warranty assets</Typography>
+      {/* Page Header */}
+      <Box sx={{ mb: 4, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(17,24,39,0.12)" }}>
+            <StorefrontRounded sx={{ color: "text.primary" }} />
+          </Box>
+          <Box>
+            <Typography variant="h5" fontWeight={800} letterSpacing="-0.5px">Service Centers</Typography>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              Manage service partners and track warranty assets
+            </Typography>
+          </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ fontWeight: 800, borderRadius: "12px", px: 3, background: "#051C12", color: "#FFFFFF", boxShadow: "none" }}>
+          sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, py: 1, background: "#7777C7", color: "#FFFFFF", boxShadow: "none", "&:hover": { background: "#6464B8" } }}>
           Add Service Center
         </Button>
       </Box>
@@ -144,9 +151,9 @@ export default function ServiceCenters() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
           { label: "Service Centers", value: centers.length, color: "text.primary", icon: <StorefrontRounded /> },
-          { label: "Assets Under Warranty", value: warrantyAssets.length, color: "#B4F105", icon: <VerifiedRounded /> },
-          { label: "Expiring in 30 Days", value: expiringSoon, color: "#B4F105", icon: <WarningAmberRounded /> },
-          { label: "Categories Covered", value: new Set(centers.flatMap(c => c.categories)).size, color: "#B4F105", icon: <CategoryRounded /> },
+          { label: "Assets Under Warranty", value: warrantyAssets.length, color: "#7777C7", icon: <VerifiedRounded /> },
+          { label: "Expiring in 30 Days", value: expiringSoon, color: "#7777C7", icon: <WarningAmberRounded /> },
+          { label: "Categories Covered", value: new Set(centers.flatMap(c => c.categories)).size, color: "#7777C7", icon: <CategoryRounded /> },
         ].map((k) => (
           <Grid size={{ xs: 6, md: 3 }} key={k.label}>
             <Paper sx={{ p: 2.5, borderRadius: "18px", border: 1, borderColor: "divider", display: "flex", alignItems: "center", gap: 2 }}>
@@ -391,7 +398,7 @@ export default function ServiceCenters() {
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={() => setOpen(false)} sx={{ fontWeight: 700, borderRadius: "10px", color: "text.secondary" }}>Cancel</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving || !form.name.trim()}
-            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#051C12", color: "#FFFFFF", boxShadow: "none" }}>
+            sx={{ fontWeight: 800, borderRadius: "10px", px: 3, background: "#7777C7", color: "#FFFFFF", boxShadow: "none" }}>
             {saving ? <CircularProgress size={18} color="inherit" /> : editTarget ? "Save Changes" : "Add Center"}
           </Button>
         </DialogActions>

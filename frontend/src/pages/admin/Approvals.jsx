@@ -118,9 +118,9 @@ const Approvals = () => {
         ].map(k => (
           <Grid size={{ xs: 12, sm: 4 }} key={k.label}>
             <Paper sx={{ p: 2.5, borderRadius: "16px", border: 1, borderColor: "divider", position: "relative", overflow: "hidden" }}>
-              <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: "#B4F105" }} />
-              <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "rgba(180,241,5,0.12)", display: "grid", placeItems: "center", mb: 1.5 }}>
-                <Box sx={{ color: "#051C12" }}>{k.icon}</Box>
+              <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: "#7777C7" }} />
+              <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "rgba(119, 119, 199, 0.12)", display: "grid", placeItems: "center", mb: 1.5 }}>
+                <Box sx={{ color: "#7777C7" }}>{k.icon}</Box>
               </Box>
               <Typography fontSize={28} fontWeight={950} sx={{ lineHeight: 1, letterSpacing: "-1px" }}>{k.value}</Typography>
               <Typography fontSize={13} fontWeight={700} mt={0.3}>{k.label}</Typography>
@@ -145,7 +145,7 @@ const Approvals = () => {
               <Paper key={item._id} sx={{ ...cardSx, pl: { xs: 2.5, md: 3.5 } }}>
                 <Box sx={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, bgcolor: priorityBorderColor(item.priority) }} />
                 <Box sx={{ display: "flex", gap: 2.5, alignItems: "flex-start", width: "100%", flex: 1 }}>
-                  <Avatar sx={{ background: "#051C12", color: "#FFFFFF", width: 48, height: 48, fontWeight: 900, fontSize: "18px", flexShrink: 0 }}>
+                  <Avatar sx={{ background: "#7777C7", color: "#FFFFFF", width: 48, height: 48, fontWeight: 900, fontSize: "18px", flexShrink: 0 }}>
                     {item.raisedBy?.name?.charAt(0) || "S"}
                   </Avatar>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -170,7 +170,7 @@ const Approvals = () => {
                   <Button variant="outlined" startIcon={<CloseRounded />} disabled={isCompleted} onClick={() => handleTicketActionClick(item, "reject")}
                     sx={{ borderRadius: "10px", fontWeight: 800, textTransform: "none", px: 2, color: "#EF4444", borderColor: "#FCA5A5", fontSize: 13 }}>Reject</Button>
                   <Button variant="contained" startIcon={<CheckRounded />} disabled={isCompleted} onClick={() => handleTicketActionClick(item, "authorize")}
-                    sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, fontSize: 13, background: "#051C12", color: "#FFFFFF", boxShadow: "none" }}>Authorize</Button>
+                    sx={{ fontWeight: 800, borderRadius: "10px", px: 2.5, fontSize: 13, background: "#7777C7", color: "#FFFFFF", boxShadow: "none" }}>Authorize</Button>
                 </Box>
               </Paper>
             );

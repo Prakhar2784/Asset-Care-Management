@@ -40,8 +40,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 // ─── STYLING CONSTANTS ────────────────────────────────────────────────────────
-const DARK = '#051C12';
-const ACCENT = '#B4F105';
+const DARK = '#7777C7';
+const ACCENT = '#7777C7';
 const BORDER_COLOR = '#E2E8F0';
 const BG_MUTED = '#F8FAFC';
 const TEXT_MUTED = '#64748B';
@@ -165,6 +165,7 @@ export default function Checkout() {
   const [couponSuccess, setCouponSuccess] = useState('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
+  const [plansList, setPlansList] = useState(PLANS);
 
   // Authoritative Calculation from backend
   const fetchBreakdown = useCallback(async (planKey, coupon) => {
@@ -205,14 +206,36 @@ export default function Checkout() {
     }
   }, []);
 
-  // 1. AUTO-DETECT CURRENT PLAN ON MOUNT
+  // 1. AUTO-DETECT CURRENT PLAN & LOAD LIVE DYNAMIC PLAN PRICES
   useEffect(() => {
     const detectCurrentPlan = async () => {
+      let activePlans = PLANS;
+      try {
+        const { data: livePlans } = await api.get('/billing/plans');
+        if (livePlans && livePlans.length > 0) {
+          activePlans = PLANS.map(staticPlan => {
+            const dynamic = livePlans.find(dp => dp.planKey === staticPlan.key || dp.name?.toLowerCase() === staticPlan.name?.toLowerCase());
+            if (dynamic) {
+              return {
+                ...staticPlan,
+                price: dynamic.price,
+                assets: dynamic.maxAssets === -1 || dynamic.maxAssets === 999999999 ? 'Unlimited Assets' : `${dynamic.maxAssets} Assets`,
+                assetCount: dynamic.maxAssets === -1 || dynamic.maxAssets === 999999999 ? 'Unlimited' : dynamic.maxAssets,
+                tagline: dynamic.description || staticPlan.tagline,
+                features: dynamic.features && dynamic.features.length > 0 ? dynamic.features : staticPlan.features
+              };
+            }
+            return staticPlan;
+          });
+          setPlansList(activePlans);
+        }
+      } catch {}
+
       try {
         const { data } = await api.get('/auth/me');
         const rawPlan = data.plan || currentUser?.plan || 'Home User';
         const detectedKey = normalizePlanKey(rawPlan);
-        const matchedPlanObj = PLANS.find((p) => p.key === detectedKey) || PLANS[0];
+        const matchedPlanObj = activePlans.find((p) => p.key === detectedKey) || activePlans[0];
 
         setCurrentPlanKey(detectedKey);
         setCurrentPlanName(matchedPlanObj.name);
@@ -227,7 +250,7 @@ export default function Checkout() {
         // Fallback to currentUser from AuthContext or default
         const rawPlan = currentUser?.plan || 'Home User';
         const detectedKey = normalizePlanKey(rawPlan);
-        const matchedPlanObj = PLANS.find((p) => p.key === detectedKey) || PLANS[0];
+        const matchedPlanObj = activePlans.find((p) => p.key === detectedKey) || activePlans[0];
 
         setCurrentPlanKey(detectedKey);
         setCurrentPlanName(matchedPlanObj.name);
@@ -374,7 +397,7 @@ export default function Checkout() {
   const selectedRank = PLAN_TIER_RANK[selectedPlan] || 1;
   const isSamePlan = selectedPlan === currentPlanKey;
   const isUpgrade = selectedRank > currentRank;
-  const selectedPlanObj = PLANS.find((p) => p.key === selectedPlan) || PLANS[0];
+  const selectedPlanObj = plansList.find((p) => p.key === selectedPlan) || plansList[0];
 
   return (
     <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
@@ -404,6 +427,25 @@ export default function Checkout() {
           }}
         >
           Payment verified successfully! Activating your commercial subscription and redirecting to your billing dashboard...
+        </Alert>
+      )}
+
+      {/* ─── PRORATED UPGRADE BENEFIT BANNER ──────────────────────────────────── */}
+      {breakdown?.prorationCredit > 0 && (
+        <Alert
+          severity="info"
+          icon={<TrendingUpRounded sx={{ fontSize: 24, color: '#059669' }} />}
+          sx={{
+            mb: 3,
+            borderRadius: '12px',
+            fontWeight: 600,
+            fontSize: '13.5px',
+            bgcolor: '#ECFDF5',
+            color: '#065F46',
+            border: '1.5px solid #A7F3D0',
+          }}
+        >
+          <strong>Prorated Upgrade Benefit:</strong> You have <strong>{breakdown.daysRemaining} days</strong> remaining on your active <strong>{breakdown.currentPlanName || currentPlanName}</strong> plan. We have automatically adjusted and deducted <strong>{formatINR(breakdown.prorationCredit)}</strong> from your upgrade price!
         </Alert>
       )}
 
@@ -537,7 +579,7 @@ export default function Checkout() {
                 gap: 2,
               }}
             >
-              {PLANS.map((plan) => {
+              {plansList.map((plan) => {
                 const isSelected = selectedPlan === plan.key;
                 const isCurrent = currentPlanKey === plan.key;
                 const isDisabled = isPlanDisabled(plan.key);
@@ -564,7 +606,7 @@ export default function Checkout() {
                         : '1px solid #E2E8F0',
                       bgcolor: isSelected ? '#FBFDFB' : isDisabled ? '#F8FAFC' : '#FFFFFF',
                       boxShadow: isSelected
-                        ? '0 12px 28px -6px rgba(5, 28, 18, 0.15)'
+                        ? '0 12px 28px -6px rgba(119, 119, 199, 0.15)'
                         : '0 2px 6px rgba(0, 0, 0, 0.02)',
                       transform: isSelected ? 'translateY(-2px)' : 'none',
                       '&:hover': {
@@ -664,9 +706,9 @@ export default function Checkout() {
                           py: 0.5,
                           px: 1,
                           borderRadius: '6px',
-                          bgcolor: isSelected ? 'rgba(5, 28, 18, 0.05)' : '#F8FAFC',
+                          bgcolor: isSelected ? 'rgba(119, 119, 199, 0.05)' : '#F8FAFC',
                           border: '1px solid',
-                          borderColor: isSelected ? 'rgba(5, 28, 18, 0.12)' : '#E2E8F0',
+                          borderColor: isSelected ? 'rgba(119, 119, 199, 0.12)' : '#E2E8F0',
                           display: 'flex',
                           alignItems: 'center',
                           gap: 0.75,
@@ -747,7 +789,7 @@ export default function Checkout() {
                             color: isSelected ? '#FFFFFF' : '#334155',
                             borderColor: isSelected ? DARK : '#CBD5E1',
                             '&:hover': {
-                              bgcolor: isSelected ? '#0B291C' : '#F1F5F9',
+                              bgcolor: isSelected ? '#6464B8' : '#F1F5F9',
                               borderColor: DARK,
                             },
                           }}
@@ -882,7 +924,7 @@ export default function Checkout() {
                     textTransform: 'none',
                     bgcolor: DARK,
                     color: '#FFFFFF',
-                    '&:hover': { bgcolor: '#0B291C' },
+                    '&:hover': { bgcolor: '#6464B8' },
                   }}
                 >
                   {calculatingCoupon ? 'Applying...' : 'Apply Coupon'}
@@ -916,7 +958,7 @@ export default function Checkout() {
               border: `1.5px solid ${DARK}`,
               position: 'sticky',
               top: 24,
-              boxShadow: '0 12px 32px -8px rgba(5, 28, 18, 0.1)',
+              boxShadow: '0 12px 32px -8px rgba(119, 119, 199, 0.1)',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -950,6 +992,34 @@ export default function Checkout() {
                     {formatINR(breakdown.baseAmount)}
                   </Typography>
                 </Box>
+
+                {/* Proration Credit Line */}
+                {breakdown.prorationCredit > 0 && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      mb: 1.5,
+                      alignItems: 'center',
+                      p: 1.25,
+                      borderRadius: '8px',
+                      bgcolor: '#ECFDF5',
+                      border: '1px solid #A7F3D0',
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="body2" sx={{ color: '#059669', fontWeight: 800, fontSize: '12px' }}>
+                        Unused Plan Credit
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#047857', fontWeight: 600, fontSize: '11px', display: 'block' }}>
+                        {breakdown.currentPlanName || currentPlanName} ({breakdown.daysRemaining} days unused)
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ color: '#059669', fontWeight: 900, fontSize: '13px' }}>
+                      - {formatINR(breakdown.prorationCredit)}
+                    </Typography>
+                  </Box>
+                )}
 
                 {/* Discount Line */}
                 {breakdown.discountAmount > 0 && (
@@ -1056,9 +1126,9 @@ export default function Checkout() {
                     textTransform: 'none',
                     bgcolor: DARK,
                     color: '#FFFFFF',
-                    boxShadow: '0 8px 20px -4px rgba(5, 28, 18, 0.35)',
+                    boxShadow: '0 8px 20px -4px rgba(119, 119, 199, 0.35)',
                     '&:hover': {
-                      bgcolor: '#0B291C',
+                      bgcolor: '#6464B8',
                     },
                   }}
                 >

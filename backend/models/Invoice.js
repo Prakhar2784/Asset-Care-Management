@@ -8,6 +8,7 @@ const invoiceSchema = new mongoose.Schema({
   
   // Amounts
   baseAmount: { type: Number, required: true },
+  prorationCredit: { type: Number, default: 0 },
   discountAmount: { type: Number, default: 0 },
   couponCode: { type: String, default: null },
   taxableAmount: { type: Number, required: true },

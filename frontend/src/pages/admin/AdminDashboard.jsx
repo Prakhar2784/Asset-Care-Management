@@ -23,7 +23,7 @@ import api from "../../api/axios";
 const ADMIN_TIER = ['admin', 'super_admin', 'hod', 'manager'];
 
 // Custom status styling matching Spark theme colors
-const PRIORITY_COLOR = { Critical: "#EF4444", High: "#F97316", Medium: "#22C55E", Low: "#6C7E75" };
+const PRIORITY_COLOR = { Critical: "#EF4444", High: "#F97316", Medium: "#22C55E", Low: "#94A3B8" };
 const STATUS_DOT = {
   "Pending Approval": "#F97316",
   "Under Repair":     "#FFC107",
@@ -43,35 +43,35 @@ const fmtDate = () =>
 /* ─────────────────────── sub-components ─────────────────────── */
 const KpiCard = ({ label, value, sub, icon, onClick }) => (
   <Paper onClick={onClick} sx={{
-    p: 3, borderRadius: "18px", border: "1.5px solid #E9EFEF",
+    p: 3, borderRadius: "20px", border: "1px solid #D9E0DF",
     bgcolor: "#FFFFFF", cursor: "pointer", position: "relative", overflow: "hidden",
-    boxShadow: "0 10px 30px rgba(11, 19, 15, 0.04)",
-    transition: "all 0.25s ease-in-out",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)",
+    transition: "all 0.2s ease-in-out",
     "&:hover": { 
       transform: "translateY(-4px)", 
-      boxShadow: "0 20px 50px rgba(11, 19, 15, 0.08)", 
-      borderColor: "#051C12" 
+      boxShadow: "0 12px 30px rgba(0, 0, 0, 0.08)", 
+      borderColor: "#7777C7" 
     },
   }}>
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-      <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "rgba(5, 28, 18, 0.05)" }}>
-        <Box sx={{ color: "#051C12", "& svg": { fontSize: 22 } }}>{icon}</Box>
+      <Box sx={{ width: 44, height: 44, borderRadius: "12px", display: "grid", placeItems: "center", bgcolor: "#F3F6F5", border: "1px solid #DDE4E1" }}>
+        <Box sx={{ color: "#0C1C16", "& svg": { fontSize: 22 } }}>{icon}</Box>
       </Box>
-      <Box sx={{ px: 1.2, py: 0.5, borderRadius: "50rem", bgcolor: "rgba(180, 241, 5, 0.15)", border: "1px solid rgba(5, 28, 18, 0.08)" }}>
-        <Typography sx={{ fontSize: 11, fontWeight: 800, color: "#051C12" }}>+12.5%</Typography>
+      <Box sx={{ px: 1.2, py: 0.5, borderRadius: "50rem", bgcolor: "#EEEEFA", border: "1px solid #C9C9EA" }}>
+        <Typography sx={{ fontSize: 11, fontWeight: 800, color: "#5D5DA8" }}>+12.5%</Typography>
       </Box>
     </Box>
-    <Typography sx={{ fontSize: 32, fontWeight: 800, color: "#0B130F", lineHeight: 1.1, letterSpacing: "-1px" }}>
+    <Typography sx={{ fontSize: 32, fontWeight: 800, color: "#0A0A0A", lineHeight: 1.1, letterSpacing: "-1px" }}>
       {value ?? "—"}
     </Typography>
-    <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#0B130F", mt: 0.8, mb: 0.3 }}>{label}</Typography>
-    <Typography sx={{ fontSize: 12, color: "#6C7E75" }}>{sub}</Typography>
+    <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#0A0A0A", mt: 0.8, mb: 0.3 }}>{label}</Typography>
+    <Typography sx={{ fontSize: 12, color: "#5F6865" }}>{sub}</Typography>
   </Paper>
 );
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
-// Calendar sized for the dark-green hero banner (light text/cells on translucent glass)
+// Calendar sized for the hero banner
 const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) => {
   const { currentUser } = useAuth();
   const today = new Date();
@@ -116,18 +116,17 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
   return (
     <Box sx={{
       width: 260, borderRadius: "18px", p: 2,
-      bgcolor: "rgba(26, 62, 48, 0.45)", border: "1px solid rgba(255,255,255,0.08)",
-      backdropFilter: "blur(10px)",
+      bgcolor: "#0C1C16", border: "1px solid #1F302A",
     }}>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.2 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <EventNoteRounded sx={{ fontSize: 14, color: "#fff", mr: 0.2 }} />
+          <EventNoteRounded sx={{ fontSize: 14, color: "#FFFFFF", mr: 0.2 }} />
           <select
             value={currentMonth}
             onChange={handleMonthChange}
             style={{
               background: "transparent",
-              color: "#ffffff",
+              color: "#FFFFFF",
               border: "none",
               fontSize: "13px",
               fontWeight: 700,
@@ -137,7 +136,7 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
             }}
           >
             {MONTHS.map((m, idx) => (
-              <option key={m} value={idx} style={{ background: "#051C12", color: "#fff" }}>
+              <option key={m} value={idx} style={{ background: "#0C1C16", color: "#FFFFFF" }}>
                 {m}
               </option>
             ))}
@@ -147,7 +146,7 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
             onChange={handleYearChange}
             style={{
               background: "transparent",
-              color: "rgba(255,255,255,0.8)",
+              color: "rgba(255,255,255,0.85)",
               border: "none",
               fontSize: "13px",
               fontWeight: 700,
@@ -156,7 +155,7 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
             }}
           >
             {years.map((y) => (
-              <option key={y} value={y} style={{ background: "#051C12", color: "#fff" }}>
+              <option key={y} value={y} style={{ background: "#0C1C16", color: "#FFFFFF" }}>
                 {y}
               </option>
             ))}
@@ -164,18 +163,18 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
         </Box>
         <Box sx={{ display: "flex", gap: 0.5 }}>
           <IconButton size="small" onClick={() => changeMonth(-1)}
-            sx={{ width: 22, height: 22, color: "#fff", bgcolor: "rgba(255,255,255,0.12)", "&:hover": { bgcolor: "rgba(255,255,255,0.22)" } }}>
+            sx={{ width: 22, height: 22, color: "#FFFFFF", bgcolor: "rgba(255,255,255,0.08)", "&:hover": { bgcolor: "rgba(255,255,255,0.16)" } }}>
             <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1 }}>‹</Typography>
           </IconButton>
           <IconButton size="small" onClick={() => changeMonth(1)}
-            sx={{ width: 22, height: 22, color: "#fff", bgcolor: "rgba(255,255,255,0.12)", "&:hover": { bgcolor: "rgba(255,255,255,0.22)" } }}>
+            sx={{ width: 22, height: 22, color: "#FFFFFF", bgcolor: "rgba(255,255,255,0.08)", "&:hover": { bgcolor: "rgba(255,255,255,0.16)" } }}>
             <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1 }}>›</Typography>
           </IconButton>
         </Box>
       </Box>
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px", mb: 0.5 }}>
         {WEEKDAYS.map((d, i) => (
-          <Typography key={i} align="center" sx={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)" }}>{d}</Typography>
+          <Typography key={i} align="center" sx={{ fontSize: 10, fontWeight: 600, color: "#9BA7A2" }}>{d}</Typography>
         ))}
       </Box>
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px" }}>
@@ -195,13 +194,13 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
             <Box key={i} onClick={() => day && onDayClick && onDayClick(new Date(viewDate.getFullYear(), viewDate.getMonth(), day))} sx={{
               aspectRatio: "1", display: "grid", placeItems: "center", borderRadius: "8px",
               fontSize: 12, fontWeight: isToday ? 700 : 500,
-              color: isToday ? "#051C12" : day ? "rgba(255,255,255,0.88)" : "transparent",
-              bgcolor: isToday ? "#B4F105" : "transparent",
+              color: isToday ? "#FFFFFF" : day ? "#D9E2DF" : "transparent",
+              bgcolor: isToday ? "#7777C7" : "transparent",
               cursor: day ? "pointer" : "default",
               position: "relative",
               transition: "all 0.15s",
               "&:hover": day ? {
-                bgcolor: isToday ? "#B4F105" : "rgba(255,255,255,0.12)",
+                bgcolor: isToday ? "#7777C7" : "rgba(119, 119, 199, 0.2)",
                 transform: "scale(1.08)"
               } : {},
             }}>
@@ -210,10 +209,10 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
                 {day && (hasReminder || hasMaintenance) && (
                   <Box sx={{ position: "absolute", bottom: -4, display: "flex", gap: "2px" }}>
                     {hasReminder && (
-                      <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: isToday ? "#051C12" : "#B4F105" }} />
+                      <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: isToday ? "#FFFFFF" : "#7777C7" }} />
                     )}
                     {hasMaintenance && (
-                      <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: isToday ? "#051C12" : "#EF4444" }} />
+                      <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: "#EF4444" }} />
                     )}
                   </Box>
                 )}
@@ -228,37 +227,37 @@ const HeroMiniCalendar = ({ onDayClick, remindersUpdated, maintenanceDates }) =>
 
 const QuickAction = ({ label, icon, onClick }) => (
   <Paper onClick={onClick} sx={{
-    p: 2.2, borderRadius: "16px", border: "1.5px solid #E9EFEF",
+    p: 2.2, borderRadius: "16px", border: "1px solid #D9E0DF",
     bgcolor: "#FFFFFF", cursor: "pointer", textAlign: "center",
-    boxShadow: "0 10px 30px rgba(11, 19, 15, 0.03)",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
     transition: "all 0.2s", 
     "&:hover": { 
-      borderColor: "#051C12", 
-      bgcolor: "rgba(5, 28, 18, 0.02)", 
+      borderColor: "#7777C7", 
+      bgcolor: "#F6F6FD", 
       transform: "translateY(-3px)",
-      boxShadow: "0 15px 40px rgba(11, 19, 15, 0.06)"
+      boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)"
     },
   }}>
-    <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "rgba(5, 28, 18, 0.05)", display: "grid", placeItems: "center", mx: "auto", mb: 1.2 }}>
-      <Box sx={{ color: "#051C12", "& svg": { fontSize: 22 } }}>{icon}</Box>
+    <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "#F3F6F5", border: "1px solid #DDE4E1", display: "grid", placeItems: "center", mx: "auto", mb: 1.2 }}>
+      <Box sx={{ color: "#0C1C16", "& svg": { fontSize: 22 } }}>{icon}</Box>
     </Box>
-    <Typography fontSize={13} fontWeight={700} color="#0B130F" sx={{ lineHeight: 1.3 }}>{label}</Typography>
+    <Typography fontSize={13} fontWeight={700} color="#0A0A0A" sx={{ lineHeight: 1.3 }}>{label}</Typography>
   </Paper>
 );
 
 const TicketRow = ({ ticket, onClick }) => {
   const dot = STATUS_DOT[ticket.status] || "#94A3B8";
-  const pri = PRIORITY_COLOR[ticket.priority] || "#6C7E75";
+  const pri = PRIORITY_COLOR[ticket.priority] || "#94A3B8";
   return (
     <Box onClick={onClick} sx={{
       display: "flex", alignItems: "center", gap: 2, px: 2, py: 1.6,
       borderRadius: "14px", cursor: "pointer", transition: "all 0.18s",
-      "&:hover": { bgcolor: "rgba(5, 28, 18, 0.03)" },
+      "&:hover": { bgcolor: "#F6F6FD" },
     }}>
       <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: dot, flexShrink: 0 }} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography fontSize={13} fontWeight={700} color="#0B130F" noWrap>{ticket.issue}</Typography>
-        <Typography fontSize={11} color="#6C7E75" noWrap>{ticket.asset} · {ticket.date}</Typography>
+        <Typography fontSize={13} fontWeight={700} color="#0A0A0A" noWrap>{ticket.issue}</Typography>
+        <Typography fontSize={11} color="#5F6865" noWrap>{ticket.asset} · {ticket.date}</Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
         <Box sx={{ px: 1, py: 0.25, borderRadius: "6px", fontSize: 10, fontWeight: 800, bgcolor: `${pri}18`, color: pri }}>
@@ -365,30 +364,31 @@ const AdminDashboard = () => {
 
   /* ── filtered KPIs ── */
   const allKpis = [
-    { label: "Total Assets",      value: dashboardData?.totalAssets,         sub: "Registered in system",      icon: <Inventory2Rounded />,          accent: "#B4F105", route: "/admin/assets",    show: canViewAssets },
-    { label: "Active Repairs",    value: dashboardData?.activeRepairs,        sub: "Currently under service",    icon: <BuildRounded />,               accent: "#B4F105", route: "/tickets",         show: canViewAssets },
-    { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#B4F105", route: "/admin/approvals", show: canApprove },
-    { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#B4F105", route: "/tickets",         show: canViewTickets || isAdminTier },
-    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within 30 days or overdue",       icon: <ShieldRounded />,               accent: "#B4F105", route: "/admin/assets",    show: canViewAssets },
+    { label: "Total Assets",      value: dashboardData?.totalAssets,         sub: "Registered in system",      icon: <Inventory2Rounded />,          accent: "#7777C7", route: "/admin/assets",    show: canViewAssets },
+    { label: "Active Repairs",    value: dashboardData?.activeRepairs,        sub: "Currently under service",    icon: <BuildRounded />,               accent: "#7777C7", route: "/tickets",         show: canViewAssets },
+    { label: "Pending Approvals", value: dashboardData?.pendingTickets,       sub: "Awaiting authorization",     icon: <ApprovalRounded />,            accent: "#7777C7", route: "/admin/approvals", show: canApprove },
+    { label: "Total Tickets",     value: dashboardData?.totalTickets,         sub: "All-time service requests",  icon: <ConfirmationNumberRounded />,   accent: "#7777C7", route: "/tickets",         show: canViewTickets || isAdminTier },
+    { label: "Warranty Expiring", value: dashboardData?.warrantyExpiringSoon, sub: "Within 30 days or overdue",       icon: <ShieldRounded />,               accent: "#7777C7", route: "/admin/assets",    show: canViewAssets },
   ].filter(k => k.show);
 
   /* ── filtered quick actions ── */
   const allQuickActions = [
-    { label: "Add Asset",    icon: <AddRounded />,                accent: "#B4F105", route: "/admin/assets/add",  show: canRegister },
-    { label: "Approvals",    icon: <ApprovalRounded />,           accent: "#B4F105", route: "/admin/approvals",   show: canApprove },
-    { label: "Tickets",      icon: <ConfirmationNumberRounded />, accent: "#B4F105", route: "/tickets",            show: (canViewTickets || isAdminTier) && !canRegister },
-    { label: "Users",        icon: <PeopleRounded />,             accent: "#B4F105", route: "/admin/users",       show: canManageUsers },
-    { label: "Departments",  icon: <BusinessRounded />,           accent: "#B4F105", route: "/admin/departments", show: canManageUsers },
-    { label: "Invoices",     icon: <ReceiptLongRounded />,        accent: "#B4F105", route: "/admin/invoices",    show: isAdminTier },
-    { label: "Assets",       icon: <Inventory2Rounded />,         accent: "#B4F105", route: "/admin/assets",      show: canViewAssets && !canRegister },
+    { label: "Add Asset",    icon: <AddRounded />,                accent: "#7777C7", route: "/admin/assets/add",  show: canRegister },
+    { label: "Approvals",    icon: <ApprovalRounded />,           accent: "#7777C7", route: "/admin/approvals",   show: canApprove },
+    { label: "Tickets",      icon: <ConfirmationNumberRounded />, accent: "#7777C7", route: "/tickets",            show: (canViewTickets || isAdminTier) && !canRegister },
+    { label: "Users",        icon: <PeopleRounded />,             accent: "#7777C7", route: "/admin/users",       show: canManageUsers },
+    { label: "Departments",  icon: <BusinessRounded />,           accent: "#7777C7", route: "/admin/departments", show: canManageUsers },
+    { label: "Invoices",     icon: <ReceiptLongRounded />,        accent: "#7777C7", route: "/admin/invoices",    show: isAdminTier },
+    { label: "Assets",       icon: <Inventory2Rounded />,         accent: "#7777C7", route: "/admin/assets",      show: canViewAssets && !canRegister },
   ].filter(a => a.show);
+
 
   /* ── banner stat strip ── */
   const bannerStats = [
-    canViewAssets              && { label: "Total Assets",   value: dashboardData?.totalAssets ?? 0,          icon: <Inventory2Rounded sx={{ fontSize: 16 }} />,       color: "#C4B5FD", route: "/admin/assets" },
+    canViewAssets              && { label: "Total Assets",   value: dashboardData?.totalAssets ?? 0,          icon: <Inventory2Rounded sx={{ fontSize: 16 }} />,       color: "#7777C7", route: "/admin/assets" },
     canViewAssets              && { label: "Active Repairs", value: dashboardData?.activeRepairs ?? 0,         icon: <BuildRounded sx={{ fontSize: 16 }} />,            color: "#FCA5A5", route: "/tickets" },
     canViewAssets              && { label: "Warranty Alert", value: dashboardData?.warrantyExpiringSoon ?? 0,  icon: <ShieldRounded sx={{ fontSize: 16 }} />,           color: "#FCD34D", route: "/admin/assets?filter=warranty" },
-    (canViewTickets || isAdminTier) && { label: "Open Tickets", value: dashboardData?.totalTickets ?? 0,      icon: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />, color: "#6EE7B7", route: "/tickets" },
+    (canViewTickets || isAdminTier) && { label: "Open Tickets", value: dashboardData?.totalTickets ?? 0,      icon: <ConfirmationNumberRounded sx={{ fontSize: 16 }} />, color: "#34D399", route: "/tickets" },
   ].filter(Boolean);
 
   return (
@@ -444,27 +444,27 @@ const AdminDashboard = () => {
       {/* ── Welcome Banner ────────────────────────────────────────────────── */}
       <Box sx={{
         mb: 4, borderRadius: "24px",
-        background: "linear-gradient(135deg, #051C12 0%, #072F1F 100%)",
+        background: "#000000",
         position: "relative", overflow: "hidden",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow: "0 15px 40px rgba(5,28,18,0.15)"
+        border: "1px solid #1F2422",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)"
       }}>
-        <Box sx={{ position: "absolute", right: -80, top: -80, width: 280, height: 280, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.03)", pointerEvents: "none" }} />
-        <Box sx={{ position: "absolute", right: 80, bottom: -100, width: 200, height: 200, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.02)", pointerEvents: "none" }} />
-        <Box sx={{ position: "absolute", left: "40%", top: -40, width: 160, height: 160, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.01)", pointerEvents: "none" }} />
+        <Box sx={{ position: "absolute", right: -80, top: -80, width: 280, height: 280, borderRadius: "50%", bgcolor: "rgba(255, 255, 255, 0.02)", pointerEvents: "none" }} />
+        <Box sx={{ position: "absolute", right: 80, bottom: -100, width: 200, height: 200, borderRadius: "50%", bgcolor: "rgba(255, 255, 255, 0.02)", pointerEvents: "none" }} />
+        <Box sx={{ position: "absolute", left: "40%", top: -40, width: 160, height: 160, borderRadius: "50%", bgcolor: "rgba(255, 255, 255, 0.02)", pointerEvents: "none" }} />
 
         <Box sx={{ p: { xs: 3, md: "32px 36px 20px" }, position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.8, mb: 1.2 }}>
-              <CalendarTodayRounded sx={{ fontSize: 13, color: "rgba(255,255,255,0.55)" }} />
-              <Typography sx={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.55)", letterSpacing: "0.3px" }}>
+              <CalendarTodayRounded sx={{ fontSize: 13, color: "#AEB7B4" }} />
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#AEB7B4", letterSpacing: "0.3px" }}>
                 {fmtDate()}
               </Typography>
             </Box>
-            <Typography sx={{ fontSize: { xs: 24, md: 32 }, fontWeight: 800, color: "#fff", letterSpacing: "-1px", lineHeight: 1.15, mb: 1 }}>
+            <Typography sx={{ fontSize: { xs: 24, md: 32 }, fontWeight: 800, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1.15, mb: 1 }}>
               {greet()}, {user?.name?.split(" ")[0] || "there"}
             </Typography>
-            <Typography sx={{ fontSize: 14, color: "rgba(255,255,255,0.65)", fontWeight: 500, maxWidth: 480, mb: 3.5, lineHeight: 1.6 }}>
+            <Typography sx={{ fontSize: 14, color: "#C3CBC8", fontWeight: 500, maxWidth: 480, mb: 3.5, lineHeight: 1.6 }}>
               {isAdminTier
                 ? "Here is your asset operations summary for today. Review pending items and stay ahead."
                 : "Here's a quick overview of your activity. Raise a ticket or check your requests below."}
@@ -474,19 +474,36 @@ const AdminDashboard = () => {
             <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
               {canRegister && (
                 <Button variant="contained" startIcon={<AddRounded />} onClick={() => navigate("/admin/assets/add")}
-                  sx={{ bgcolor: "#B4F105", color: "#051C12", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 3, py: 1.2, "&:hover": { bgcolor: "#c1f824" }, boxShadow: "none", textTransform: "none" }}>
+                sx={{
+                  bgcolor: "#7777C7", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px",
+                  px: 2.5, py: 1.1, fontSize: 13, textTransform: "none", boxShadow: "none",
+                  "&:hover": { bgcolor: "#6969B8", boxShadow: "none" },
+                  "&:active": { bgcolor: "#5D5DA8" },
+                }}>
                   Register Asset
                 </Button>
               )}
               {canApprove && (
                 <Button variant="contained" startIcon={<NotificationsActiveRounded />} onClick={() => navigate("/admin/approvals")}
-                  sx={{ bgcolor: "rgba(255,255,255,0.12)", color: "#fff", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 3, py: 1.2, border: "1px solid rgba(255,255,255,0.2)", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" }, boxShadow: "none", textTransform: "none" }}>
+                  sx={{
+                    bgcolor: "#1A1A1A",
+                    color: "#FFFFFF",
+                    fontWeight: 800,
+                    fontSize: 13,
+                    borderRadius: "12px",
+                    px: 3,
+                    py: 1.2,
+                    border: "1px solid #3A3A3A",
+                    boxShadow: "none",
+                    textTransform: "none",
+                    "&:hover": { bgcolor: "#252525", borderColor: "#4A4A4A" }
+                  }}>
                   Approvals {dashboardData?.pendingTickets > 0 && `(${dashboardData.pendingTickets})`}
                 </Button>
               )}
               {!isAdminTier && !canRegister && !canApprove && canViewTickets && (
                 <Button variant="contained" startIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
-                  sx={{ bgcolor: "#B4F105", color: "#051C12", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 3, py: 1.2, "&:hover": { bgcolor: "#c1f824" }, boxShadow: "none", textTransform: "none" }}>
+                  sx={{ bgcolor: "#7777C7", color: "#FFFFFF", fontWeight: 800, fontSize: 13, borderRadius: "12px", px: 3, py: 1.2, "&:hover": { bgcolor: "#6464B8" }, boxShadow: "0 4px 14px rgba(119, 119, 199, 0.35)", textTransform: "none" }}>
                   My Tickets
                 </Button>
               )}
@@ -495,77 +512,76 @@ const AdminDashboard = () => {
 
           {/* SVG illustration + mini calendar — only on medium screens and up */}
           <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+            <Box sx={{ display: { xs: "none", lg: "block" }, width: 160, height: 140, flexShrink: 0 }}>
+              <svg viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
+                {/* Ground shadow */}
+                <ellipse cx="110" cy="148" rx="85" ry="7" fill="rgba(0,0,0,0.2)"/>
 
-          <Box sx={{ display: { xs: "none", lg: "block" }, width: 160, height: 140, flexShrink: 0 }}>
-            <svg viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: "100%", height: "100%" }}>
-              {/* Ground shadow */}
-              <ellipse cx="110" cy="148" rx="85" ry="7" fill="rgba(0,0,0,0.12)"/>
+                {/* Soft glow behind monitor */}
+                <circle cx="118" cy="70" r="52" fill="rgba(119, 119, 199, 0.15)"/>
 
-              {/* Soft glow behind monitor */}
-              <circle cx="118" cy="70" r="52" fill="rgba(255,255,255,0.06)"/>
+                {/* Monitor stand */}
+                <rect x="108" y="112" width="10" height="16" rx="2" fill="rgba(255,255,255,0.35)"/>
+                <rect x="90" y="126" width="46" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>
 
-              {/* Monitor stand */}
-              <rect x="108" y="112" width="10" height="16" rx="2" fill="rgba(255,255,255,0.35)"/>
-              <rect x="90" y="126" width="46" height="6" rx="3" fill="rgba(255,255,255,0.35)"/>
+                {/* Monitor frame */}
+                <rect x="48" y="38" width="140" height="78" rx="10" fill="#0C1C16" stroke="rgba(119,119,199,0.3)" strokeWidth="1.5"/>
+                <rect x="58" y="48" width="120" height="58" rx="4" fill="#182622"/>
 
-              {/* Monitor frame */}
-              <rect x="48" y="38" width="140" height="78" rx="10" fill="#1E1B3A" stroke="rgba(255,255,255,0.18)" strokeWidth="1.5"/>
-              <rect x="58" y="48" width="120" height="58" rx="4" fill="#FFFFFF"/>
+                {/* Bar chart on screen */}
+                <rect x="68" y="80" width="10" height="18" rx="2" fill="#7777C7"/>
+                <rect x="84" y="68" width="10" height="30" rx="2" fill="#38BDF8"/>
+                <rect x="100" y="74" width="10" height="24" rx="2" fill="#7777C7"/>
+                <rect x="116" y="60" width="10" height="38" rx="2" fill="#38BDF8"/>
+                <rect x="132" y="70" width="10" height="28" rx="2" fill="#7777C7"/>
+                {/* Trend line */}
+                <path d="M68 76 L84 62 L100 70 L116 52 L132 64 L148 56" stroke="#94A3B8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <circle cx="148" cy="56" r="3" fill="#94A3B8"/>
 
-              {/* Bar chart on screen */}
-              <rect x="68" y="80" width="10" height="18" rx="2" fill="#C4B5FD"/>
-              <rect x="84" y="68" width="10" height="30" rx="2" fill="#111827"/>
-              <rect x="100" y="74" width="10" height="24" rx="2" fill="#111827"/>
-              <rect x="116" y="60" width="10" height="38" rx="2" fill="#111827"/>
-              <rect x="132" y="70" width="10" height="28" rx="2" fill="#C4B5FD"/>
-              {/* Trend line */}
-              <path d="M68 76 L84 62 L100 70 L116 52 L132 64 L148 56" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              <circle cx="148" cy="56" r="3" fill="#9CA3AF"/>
+                {/* Notification badge on monitor */}
+                <circle cx="176" cy="46" r="7" fill="#7777C7"/>
+                <path d="M173 46l2 2 4-4" stroke="#FFFFFF" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
 
-              {/* Notification badge on monitor */}
-              <circle cx="176" cy="46" r="7" fill="#B4F105"/>
-              <path d="M173 46l2 2 4-4" stroke="#111827" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                {/* Person — sitting, looking at screen */}
+                <path d="M18 148L18 132C18 118 30 108 46 108C62 108 74 118 74 132L74 148Z" fill="#0C1C16"/>
+                <path d="M18 148L18 132C18 118 30 108 46 108C62 108 74 118 74 132L74 148Z" fill="url(#bodyGrad)" opacity="0.5"/>
+                <circle cx="46" cy="90" r="14" fill="#FDBA74"/>
+                {/* Hair */}
+                <path d="M32 88C32 74 38 66 46 66C54 66 60 72 60 82C60 84 59 86 58 88C56 82 50 84 46 78C42 84 34 84 32 88Z" fill="#182622"/>
+                {/* Arm resting toward keyboard */}
+                <path d="M60 118C68 116 76 118 80 124" stroke="#FDBA74" strokeWidth="7" strokeLinecap="round"/>
 
-              {/* Person — sitting, looking at screen */}
-              <path d="M18 148L18 132C18 118 30 108 46 108C62 108 74 118 74 132L74 148Z" fill="#111827"/>
-              <path d="M18 148L18 132C18 118 30 108 46 108C62 108 74 118 74 132L74 148Z" fill="url(#bodyGrad)" opacity="0.5"/>
-              <circle cx="46" cy="90" r="14" fill="#FDBA74"/>
-              {/* Hair */}
-              <path d="M32 88C32 74 38 66 46 66C54 66 60 72 60 82C60 84 59 86 58 88C56 82 50 84 46 78C42 84 34 84 32 88Z" fill="#292524"/>
-              {/* Arm resting toward keyboard */}
-              <path d="M60 118C68 116 76 118 80 124" stroke="#FDBA74" strokeWidth="7" strokeLinecap="round"/>
+                {/* Keyboard */}
+                <rect x="64" y="122" width="34" height="10" rx="3" fill="rgba(255,255,255,0.7)"/>
 
-              {/* Keyboard */}
-              <rect x="64" y="122" width="34" height="10" rx="3" fill="rgba(255,255,255,0.85)"/>
+                {/* Floating dashed accent */}
+                <circle cx="30" cy="46" r="10" fill="none" stroke="#7777C7" strokeWidth="2" strokeDasharray="3 3"/>
+                <circle cx="30" cy="46" r="3.5" fill="#7777C7"/>
 
-              {/* Floating dashed accent */}
-              <circle cx="30" cy="46" r="10" fill="none" stroke="#B4F105" strokeWidth="2" strokeDasharray="3 3"/>
-              <circle cx="30" cy="46" r="3.5" fill="#B4F105"/>
+                {/* Speech/insight bubble */}
+                <path d="M186 78C186 72 190.5 68 196 68H208C213.5 68 218 72 218 78V82C218 87.5 213.5 92 208 92H198L189 99V92C187 90 186 85 186 78Z" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.25)"/>
+                <rect x="194" y="75" width="18" height="3" rx="1.5" fill="#6EE7B7"/>
+                <rect x="194" y="82" width="12" height="3" rx="1.5" fill="#6EE7B7"/>
 
-              {/* Speech/insight bubble */}
-              <path d="M186 78C186 72 190.5 68 196 68H208C213.5 68 218 72 218 78V82C218 87.5 213.5 92 208 92H198L189 99V92C187 90 186 85 186 78Z" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.25)"/>
-              <rect x="194" y="75" width="18" height="3" rx="1.5" fill="#6EE7B7"/>
-              <rect x="194" y="82" width="12" height="3" rx="1.5" fill="#6EE7B7"/>
-
-              <defs>
-                <linearGradient id="bodyGrad" x1="18" y1="108" x2="74" y2="148" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#111827"/>
-                  <stop offset="1" stopColor="#111827" stopOpacity="0"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </Box>
+                <defs>
+                  <linearGradient id="bodyGrad" x1="18" y1="108" x2="74" y2="148" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#182622"/>
+                    <stop offset="1" stopColor="#182622" stopOpacity="0"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </Box>
 
             <Box>
               <HeroMiniCalendar onDayClick={handleDayClick} remindersUpdated={remindersUpdated} maintenanceDates={maintenanceDates} />
               <Box sx={{ display: "flex", gap: 1.5, mt: 1, px: 0.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#B4F105" }} />
-                  <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Reminder</Typography>
+                  <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#7777C7" }} />
+                  <Typography sx={{ fontSize: 10, color: "#9BA7A2", fontWeight: 600 }}>Reminder</Typography>
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                   <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#EF4444" }} />
-                  <Typography sx={{ fontSize: 10, color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>Maintenance</Typography>
+                  <Typography sx={{ fontSize: 10, color: "#9BA7A2", fontWeight: 600 }}>Maintenance</Typography>
                 </Box>
               </Box>
             </Box>
@@ -577,23 +593,23 @@ const AdminDashboard = () => {
           <Box sx={{
             position: "relative",
             display: "grid", gridTemplateColumns: `repeat(${bannerStats.length}, 1fr)`,
-            borderTop: "1px solid rgba(255,255,255,0.12)",
+            borderTop: "1px solid #1F1F1F", bgcolor: "#000000",
           }}>
             {bannerStats.map((s, i) => (
               <Box key={s.label} onClick={() => s.route && navigate(s.route)} sx={{
                 px: { xs: 2, md: 3 }, py: 2,
-                borderRight: i < bannerStats.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                borderRight: i < bannerStats.length - 1 ? "1px solid #1F1F1F" : "none",
                 display: "flex", alignItems: "center", gap: 1.5,
                 cursor: s.route ? "pointer" : "default",
                 transition: "background-color 0.15s",
-                "&:hover": s.route ? { bgcolor: "rgba(255,255,255,0.06)" } : {},
+                "&:hover": s.route ? { bgcolor: "rgba(255, 255, 255, 0.04)" } : {},
               }}>
-                <Box sx={{ width: 34, height: 34, borderRadius: "9px", flexShrink: 0, bgcolor: "rgba(255,255,255,0.1)", display: "grid", placeItems: "center", color: s.color }}>
+                <Box sx={{ width: 34, height: 34, borderRadius: "9px", flexShrink: 0, bgcolor: "rgba(255, 255, 255, 0.06)", display: "grid", placeItems: "center", color: s.color }}>
                   {s.icon}
                 </Box>
                 <Box>
-                  <Typography sx={{ fontSize: 20, fontWeight: 900, color: "#fff", lineHeight: 1 }}>{s.value}</Typography>
-                  <Typography sx={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontWeight: 600, mt: 0.3, whiteSpace: "nowrap" }}>{s.label}</Typography>
+                  <Typography sx={{ fontSize: 20, fontWeight: 900, color: "#FFFFFF", lineHeight: 1 }}>{s.value}</Typography>
+                  <Typography sx={{ fontSize: 11, color: "#AAB4B0", fontWeight: 600, mt: 0.3, whiteSpace: "nowrap" }}>{s.label}</Typography>
                 </Box>
               </Box>
             ))}
@@ -603,7 +619,7 @@ const AdminDashboard = () => {
 
       {loading ? (
         <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "40vh", gap: 2 }}>
-          <CircularProgress size={44} sx={{ color: "text.primary" }} />
+          <CircularProgress size={44} sx={{ color: "#7777C7" }} />
           <Typography color="text.secondary" fontWeight={600}>Loading dashboard…</Typography>
         </Box>
       ) : (
@@ -624,23 +640,23 @@ const AdminDashboard = () => {
 
             {/* Recent Tickets */}
             <Grid size={{ xs: 12 }}>
-              <Paper sx={{ borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper", overflow: "hidden" }}>
-                <Box sx={{ px: 3, py: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid", borderColor: "divider" }}>
+              <Paper sx={{ borderRadius: "24px", border: "1px solid #D9E0DF", bgcolor: "#FFFFFF", overflow: "hidden", boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)" }}>
+                <Box sx={{ px: 3, py: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #D9E0DF" }}>
                   <Box>
-                    <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px">Recent Tickets</Typography>
-                    <Typography fontSize={12} color="text.secondary" fontWeight={500} mt={0.2}>Click a row to view full details</Typography>
+                    <Typography fontWeight={900} fontSize={18} color="#0A0A0A" letterSpacing="-0.4px">Recent Tickets</Typography>
+                    <Typography fontSize={12} color="#5F6865" fontWeight={500} mt={0.2}>Click a row to view full details</Typography>
                   </Box>
                   <Button size="small" endIcon={<ConfirmationNumberRounded />} onClick={() => navigate("/tickets")}
-                    sx={{ fontWeight: 700, color: "text.primary", fontSize: 13, "&:hover": { bgcolor: "rgba(17,24,39,0.08)" } }}>
+                    sx={{ fontWeight: 700, color: "#7777C7", fontSize: 13, "&:hover": { bgcolor: "rgba(119, 119, 199, 0.12)" } }}>
                     View All
                   </Button>
                 </Box>
 
-                <Box sx={{ px: 3, py: 1.5, display: "flex", gap: 2.5, flexWrap: "wrap", borderBottom: "1px solid", borderColor: "divider", bgcolor: "background.default" }}>
+                <Box sx={{ px: 3, py: 1.5, display: "flex", gap: 2.5, flexWrap: "wrap", borderBottom: "1px solid #D9E0DF", bgcolor: "#F7F9F8" }}>
                   {Object.entries(STATUS_DOT).map(([s, c]) => (
                     <Box key={s} sx={{ display: "flex", alignItems: "center", gap: 0.7 }}>
                       <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: c }} />
-                      <Typography fontSize={11} fontWeight={600} color="text.secondary">{s}</Typography>
+                      <Typography fontSize={11} fontWeight={600} color="#5F6865">{s}</Typography>
                     </Box>
                   ))}
                 </Box>
@@ -648,8 +664,8 @@ const AdminDashboard = () => {
                 <Box sx={{ p: 1.5 }}>
                   {recentTickets.length === 0 ? (
                     <Box sx={{ py: 3, textAlign: "center" }}>
-                      <TaskAltRounded sx={{ fontSize: 32, color: "text.disabled", mb: 0.5 }} />
-                      <Typography color="text.disabled" fontWeight={600} fontSize={13}>No recent tickets</Typography>
+                      <TaskAltRounded sx={{ fontSize: 32, color: "#64748B", mb: 0.5 }} />
+                      <Typography color="#64748B" fontWeight={600} fontSize={13}>No recent tickets</Typography>
                     </Box>
                   ) : recentTickets.map(t => (
                     <TicketRow key={t.id} ticket={t} onClick={() => setSelectedTicket(t)} />
@@ -664,9 +680,9 @@ const AdminDashboard = () => {
           {allQuickActions.length > 0 && (
             <Grid container spacing={3}>
               <Grid size={{ xs: 12 }}>
-                <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" }}>
-                  <Typography fontWeight={900} fontSize={18} letterSpacing="-0.4px" mb={0.3}>Quick Actions</Typography>
-                  <Typography fontSize={12} color="text.secondary" mb={2.5}>Jump to any section instantly</Typography>
+                <Paper sx={{ p: 3, borderRadius: "24px", border: "1px solid #D9E0DF", bgcolor: "#FFFFFF", boxShadow: "0 4px 20px rgba(0, 0, 0, 0.04)" }}>
+                  <Typography fontWeight={900} fontSize={18} color="#0A0A0A" letterSpacing="-0.4px" mb={0.3}>Quick Actions</Typography>
+                  <Typography fontSize={12} color="#5F6865" mb={2.5}>Jump to any section instantly</Typography>
                   <Box sx={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 1.5 }}>
                     {allQuickActions.map(a => <QuickAction key={a.label} {...a} onClick={() => navigate(a.route)} />)}
                   </Box>
@@ -679,20 +695,20 @@ const AdminDashboard = () => {
 
       {/* ── Ticket Detail Dialog ─────────────────────────────── */}
       <Dialog open={!!selectedTicket} onClose={() => setSelectedTicket(null)} fullWidth maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider" } } }}>
+        slotProps={{ paper: { sx: { borderRadius: "24px", border: "1px solid #D9E0DF", bgcolor: "#FFFFFF" } } }}>
         {selectedTicket && (
           <>
-            <Box sx={{ p: 3, background: "linear-gradient(135deg,rgba(17,24,39,0.1),rgba(17,24,39,0.05))", borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ p: 3, background: "#F7F9F8", borderBottom: "1px solid #E3E7E5", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#111827", display: "grid", placeItems: "center" }}>
-                  <ConfirmationNumberRounded sx={{ color: "#fff", fontSize: 22 }} />
+                <Box sx={{ width: 44, height: 44, borderRadius: "12px", background: "#EEEEFA", border: "1px solid #C9C9EA", display: "grid", placeItems: "center" }}>
+                  <ConfirmationNumberRounded sx={{ color: "#7777C7", fontSize: 22 }} />
                 </Box>
                 <Box>
-                  <Typography fontWeight={900} fontSize={18}>{selectedTicket.issue}</Typography>
-                  <Typography fontSize={12} color="text.secondary">{selectedTicket.id} · {selectedTicket.asset}</Typography>
+                  <Typography fontWeight={900} fontSize={18} color="#0A0A0A">{selectedTicket.issue}</Typography>
+                  <Typography fontSize={12} color="#5F6865">{selectedTicket.id} · {selectedTicket.asset}</Typography>
                 </Box>
               </Box>
-              <IconButton onClick={() => setSelectedTicket(null)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
+              <IconButton onClick={() => setSelectedTicket(null)} sx={{ bgcolor: "rgba(0, 0, 0, 0.05)", color: "#0A0A0A", borderRadius: "10px", "&:hover": { bgcolor: "rgba(0,0,0,0.1)" } }}><CloseRounded /></IconButton>
             </Box>
             <DialogContent sx={{ p: 3 }}>
               <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1.5, mb: 3 }}>
@@ -703,14 +719,14 @@ const AdminDashboard = () => {
                   { label: "Raised By",  value: selectedTicket.raisedBy },
                   { label: "Date",       value: selectedTicket.date },
                 ].map(({ label, value }) => (
-                  <Box key={label} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "background.default", border: "1px solid", borderColor: "divider" }}>
-                    <Typography fontSize={10} fontWeight={800} color="text.secondary" mb={0.3} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>{label}</Typography>
-                    <Typography fontSize={13} fontWeight={800} color="text.primary">{value}</Typography>
+                  <Box key={label} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "#F7F9F8", border: "1px solid #E3E7E5" }}>
+                    <Typography fontSize={10} fontWeight={800} color="#5F6865" mb={0.3} sx={{ textTransform: 'uppercase', letterSpacing: '0.6px' }}>{label}</Typography>
+                    <Typography fontSize={13} fontWeight={800} color="#0A0A0A">{value}</Typography>
                   </Box>
                 ))}
               </Box>
               <Button fullWidth variant="contained" onClick={() => { setSelectedTicket(null); navigate("/tickets"); }}
-                sx={{ background: "#051C12", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none" }}>
+                sx={{ background: "#7777C7", color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", py: 1.3, boxShadow: "none", "&:hover": { background: "#6969B8" } }}>
                 Open Full Ticket →
               </Button>
             </DialogContent>
@@ -720,28 +736,28 @@ const AdminDashboard = () => {
 
       {/* ── Calendar Event Planner Dialog ──────────────────────── */}
       <Dialog open={!!selectedDate} onClose={() => setSelectedDate(null)} fullWidth maxWidth="sm"
-        slotProps={{ paper: { sx: { borderRadius: "24px", border: "1px solid", borderColor: "divider", bgcolor: "background.paper" } } }}>
+        slotProps={{ paper: { sx: { borderRadius: "24px", border: "1px solid #D9E0DF", bgcolor: "#FFFFFF" } } }}>
         {selectedDate && (
           <>
-            <Box sx={{ p: 3, borderBottom: "1px solid", borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ p: 3, borderBottom: "1px solid #E3E7E5", bgcolor: "#F7F9F8", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "primary.main", display: "grid", placeItems: "center", color: "primary.contrastText" }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: "10px", bgcolor: "#EEEEFA", border: "1px solid #C9C9EA", display: "grid", placeItems: "center", color: "#7777C7" }}>
                   <EventNoteRounded />
                 </Box>
                 <Box>
-                  <Typography fontWeight={900} fontSize={17} color="text.primary">Date Planner</Typography>
-                  <Typography fontSize={12} color="text.secondary">
+                  <Typography fontWeight={900} fontSize={17} color="#0A0A0A">Date Planner</Typography>
+                  <Typography fontSize={12} color="#5F6865">
                     {selectedDate.toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                   </Typography>
                 </Box>
               </Box>
-              <IconButton onClick={() => setSelectedDate(null)} sx={{ bgcolor: "action.hover", borderRadius: "10px" }}><CloseRounded /></IconButton>
+              <IconButton onClick={() => setSelectedDate(null)} sx={{ bgcolor: "rgba(0, 0, 0, 0.05)", color: "#0A0A0A", borderRadius: "10px", "&:hover": { bgcolor: "rgba(0,0,0,0.1)" } }}><CloseRounded /></IconButton>
             </Box>
 
             <DialogContent sx={{ p: 3, display: "flex", flexDirection: "column", gap: 3.5 }}>
               {/* Reminders/Notes input */}
               <Box>
-                <Typography fontSize={13} fontWeight={800} color="text.primary" mb={1.2} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <Typography fontSize={13} fontWeight={800} color="#0A0A0A" mb={1.2} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   Reminders & Notes
                 </Typography>
                 <TextField
@@ -757,16 +773,18 @@ const AdminDashboard = () => {
                       sx: {
                         fontSize: 13.5,
                         fontWeight: 600,
+                        color: "#0A0A0A",
+                        bgcolor: "#FFFFFF",
                       }
                     }
                   }}
                   sx={{ mb: 1.5 }}
                 />
                 <Box sx={{ display: "flex", gap: 1.5, justifyContent: "flex-end" }}>
-                  <Button size="small" variant="outlined" onClick={() => setReminderText("")} sx={{ borderRadius: "10px", fontWeight: 700, textTransform: "none" }}>
+                  <Button size="small" variant="outlined" onClick={() => setReminderText("")} sx={{ borderRadius: "10px", fontWeight: 700, textTransform: "none", color: "#5F6865", borderColor: "#D9E0DF" }}>
                     Clear
                   </Button>
-                  <Button size="small" variant="contained" onClick={handleSaveReminder} sx={{ bgcolor: "primary.main", color: "primary.contrastText", borderRadius: "10px", fontWeight: 800, textTransform: "none", boxShadow: "none", "&:hover": { bgcolor: "primary.main", opacity: 0.9 } }}>
+                  <Button size="small" variant="contained" onClick={handleSaveReminder} sx={{ bgcolor: "#7777C7", color: "#FFFFFF", borderRadius: "10px", fontWeight: 800, textTransform: "none", boxShadow: "none", "&:hover": { bgcolor: "#6969B8" } }}>
                     Save Note
                   </Button>
                 </Box>
@@ -774,58 +792,58 @@ const AdminDashboard = () => {
 
               {/* Past History / System Logs */}
               <Box>
-                <Typography fontSize={13} fontWeight={800} color="text.primary" mb={1.5} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                <Typography fontSize={13} fontWeight={800} color="#0A0A0A" mb={1.5} sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>
                   System Events & History
                 </Typography>
 
                 {historyLoading ? (
                   <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
-                    <CircularProgress size={24} />
+                    <CircularProgress size={24} sx={{ color: "#7777C7" }} />
                   </Box>
                 ) : dateHistory && (
                   <Stack spacing={1.2}>
                     {/* Assets Procured */}
                     {dateHistory.assets?.map((a) => (
-                      <Box key={a._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
-                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(180,241,5,0.12)", color: "#051C12", display: "grid", placeItems: "center" }}>
+                      <Box key={a._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "#F7F9F8", border: "1px solid #E3E7E5", display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#EEEEFA", color: "#7777C7", display: "grid", placeItems: "center" }}>
                           <Inventory2Rounded sx={{ fontSize: 16 }} />
                         </Box>
                         <Box sx={{ minWidth: 0, flex: 1 }}>
-                          <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{a.name}</Typography>
-                          <Typography fontSize={11} color="text.secondary" noWrap>Asset Registered · SN: {a.serialNumber || "N/A"} · {a.department}</Typography>
+                          <Typography fontSize={13} fontWeight={800} color="#0A0A0A" noWrap>{a.name}</Typography>
+                          <Typography fontSize={11} color="#5F6865" noWrap>Asset Registered · SN: {a.serialNumber || "N/A"} · {a.department}</Typography>
                         </Box>
                       </Box>
                     ))}
 
                     {/* Tickets Raised */}
                     {dateHistory.tickets?.map((t) => (
-                      <Box key={t._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
-                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(156,163,175,0.12)", color: "#9CA3AF", display: "grid", placeItems: "center" }}>
+                      <Box key={t._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: "#F7F9F8", border: "1px solid #E3E7E5", display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "#EEEEFA", color: "#7777C7", display: "grid", placeItems: "center" }}>
                           <ConfirmationNumberRounded sx={{ fontSize: 16 }} />
                         </Box>
                         <Box sx={{ minWidth: 0, flex: 1 }}>
-                          <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{t.issue}</Typography>
-                          <Typography fontSize={11} color="text.secondary" noWrap>Ticket #{t.ticketId} · Status: {t.status} · Priority: {t.priority}</Typography>
+                          <Typography fontSize={13} fontWeight={800} color="#0A0A0A" noWrap>{t.issue}</Typography>
+                          <Typography fontSize={11} color="#5F6865" noWrap>Ticket #{t.ticketId} · Status: {t.status} · Priority: {t.priority}</Typography>
                         </Box>
                       </Box>
                     ))}
 
                     {/* Maintenance logs */}
                     {dateHistory.maintenance?.map((m) => (
-                      <Box key={m._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: m.status === 'Scheduled' ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.02)", border: "1px solid", borderColor: m.status === 'Scheduled' ? "rgba(239,68,68,0.25)" : "rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box key={m._id} sx={{ p: 1.5, borderRadius: "12px", bgcolor: m.status === 'Scheduled' ? "rgba(239,68,68,0.06)" : "#F7F9F8", border: "1px solid", borderColor: m.status === 'Scheduled' ? "rgba(239,68,68,0.2)" : "#E3E7E5", display: "flex", alignItems: "center", gap: 2 }}>
                         <Box sx={{ width: 32, height: 32, borderRadius: "8px", bgcolor: "rgba(239,68,68,0.12)", color: "#EF4444", display: "grid", placeItems: "center" }}>
                           <BuildRounded sx={{ fontSize: 16 }} />
                         </Box>
                         <Box sx={{ minWidth: 0, flex: 1 }}>
                           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.2 }}>
-                            <Typography fontSize={13} fontWeight={800} color="text.primary" noWrap>{m.description}</Typography>
+                            <Typography fontSize={13} fontWeight={800} color="#0A0A0A" noWrap>{m.description}</Typography>
                             {m.status === 'Scheduled' && (
-                              <Box sx={{ px: 0.8, py: 0.1, borderRadius: "6px", bgcolor: "rgba(239,68,68,0.15)", color: "#EF4444", fontSize: 10, fontWeight: 800, flexShrink: 0 }}>
+                              <Box sx={{ px: 0.8, py: 0.1, borderRadius: "6px", bgcolor: "rgba(239,68,68,0.12)", color: "#EF4444", fontSize: 10, fontWeight: 800, flexShrink: 0 }}>
                                 Scheduled
                               </Box>
                             )}
                           </Box>
-                          <Typography fontSize={11} color="text.secondary" noWrap>{m.type} Maintenance · {m.asset?.name || "Unknown Asset"} · Cost: ₹{m.cost || 0}</Typography>
+                          <Typography fontSize={11} color="#5F6865" noWrap>{m.type} Maintenance · {m.asset?.name || "Unknown Asset"} · Cost: ₹{m.cost || 0}</Typography>
                         </Box>
                       </Box>
                     ))}

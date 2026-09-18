@@ -16,7 +16,6 @@ import PinDropRoundedIcon from "@mui/icons-material/PinDropRounded";
 import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import KeyRoundedIcon from "@mui/icons-material/KeyRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import ShieldRoundedIcon from "@mui/icons-material/ShieldRounded";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 
 const RegisterCompany = () => {
@@ -46,8 +45,13 @@ const RegisterCompany = () => {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(false);
+  const [plans, setPlans] = useState([
+    { name: 'Home User', price: 999, maxAssets: 20 },
+    { name: 'MSME', price: 2999, maxAssets: 50 },
+    { name: 'Large Scale', price: 8999, maxAssets: -1 }
+  ]);
 
-  // Check if first-run setup is required
+  // Check if first-run setup is required & load live plans
   useEffect(() => {
     const checkSetupStatus = async () => {
       try {
@@ -59,7 +63,16 @@ const RegisterCompany = () => {
         console.error("Failed to check setup status:", err);
       }
     };
+    const fetchPlans = async () => {
+      try {
+        const { data } = await api.get("/billing/plans");
+        if (data && data.length > 0) {
+          setPlans(data);
+        }
+      } catch {}
+    };
     checkSetupStatus();
+    fetchPlans();
   }, []);
 
   const pwRules = [
@@ -127,27 +140,27 @@ const RegisterCompany = () => {
     <div className="auth-wrapper">
       <div className="auth-container">
         <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
           .auth-wrapper {
             min-height: 100vh;
-            padding: 100px 20px 60px;
+            padding: 130px 24px 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #0B0D12;
-            background-attachment: fixed;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #0B0D17;
+            font-family: 'Poppins', 'Inter', -apple-system, sans-serif;
             width: 100%;
+            color: #FFFFFF;
           }
 
           .auth-container {
             width: 100%;
-            max-width: 1240px;
-            background: rgba(18, 20, 29, 0.85);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 32px;
-            box-shadow: 0 35px 80px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+            max-width: 1200px;
+            background-color: #1E233D;
+            border: 1px solid rgba(119, 119, 199, 0.22);
+            border-radius: 28px;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
             display: flex;
             overflow: hidden;
             color: #ffffff;
@@ -155,23 +168,24 @@ const RegisterCompany = () => {
 
           .auth-info {
             flex: 1;
-            background: linear-gradient(160deg, #131722 0%, #090B10 100%);
+            background-color: #161B2E;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 56px 48px;
+            padding: 60px 48px;
             position: relative;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
+            border-right: 1px solid rgba(119, 119, 199, 0.18);
+            overflow: hidden;
           }
 
           .auth-info::before {
             content: '';
             position: absolute;
-            top: -15%;
-            left: -15%;
-            width: 450px;
-            height: 450px;
-            background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, rgba(0,0,0,0) 70%);
+            top: -80px;
+            right: -80px;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(119, 119, 199, 0.14) 0%, rgba(0,0,0,0) 70%);
             border-radius: 50%;
             pointer-events: none;
           }
@@ -179,68 +193,63 @@ const RegisterCompany = () => {
           .brand-header {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             z-index: 2;
           }
 
           .brand-logo {
-            width: 46px;
-            height: 46px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #1E2433 0%, #111520 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: grid;
-            place-items: center;
-            color: #FBBF24;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
 
           .brand-name {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: -0.4px;
             color: #FFFFFF;
           }
 
           .info-content {
             max-width: 480px;
             z-index: 2;
-            margin: 40px 0;
-            position: sticky;
-            top: 130px;
+            margin: 36px 0;
           }
 
           .badge-tag {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(251, 191, 36, 0.12);
-            border: 1px solid rgba(251, 191, 36, 0.25);
-            color: #FBBF24;
+            background-color: #171B2E;
+            border: 1px solid rgba(119, 119, 199, 0.35);
+            color: #7777C7;
             padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+            border-radius: 9999px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 11.5px;
+            font-weight: 800;
             margin-bottom: 20px;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
           }
 
           .info-title {
-            font-size: 36px;
-            font-weight: 800;
-            line-height: 1.25;
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(28px, 3vw, 38px);
+            font-weight: 900;
+            line-height: 1.2;
             margin-bottom: 16px;
-            background: linear-gradient(135deg, #FFFFFF 30%, #A1A1AA 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.8px;
+            letter-spacing: -1px;
+            color: #FFFFFF;
           }
 
           .info-desc {
-            color: #9CA3AF;
+            color: #94A3B8;
             line-height: 1.65;
-            font-size: 14.5px;
+            font-size: 15px;
             margin-bottom: 32px;
+            font-weight: 400;
           }
 
           .feature-card {
@@ -248,43 +257,43 @@ const RegisterCompany = () => {
             align-items: flex-start;
             gap: 16px;
             padding: 18px 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 18px;
-            backdrop-filter: blur(12px);
+            background-color: #171B2E;
+            border: 1px solid rgba(119, 119, 199, 0.15);
+            border-radius: 16px;
             margin-bottom: 14px;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
           }
 
           .feature-card:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(251, 191, 36, 0.25);
+            border-color: rgba(119, 119, 199, 0.35);
             transform: translateY(-2px);
           }
 
           .feature-icon-wrapper {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: rgba(251, 191, 36, 0.1);
-            color: #FBBF24;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background-color: #1E233D;
+            color: #7777C7;
             display: grid;
             place-items: center;
             flex-shrink: 0;
           }
 
           .feature-details h4 {
-            font-size: 15px;
-            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14.5px;
+            font-weight: 800;
             color: #FFFFFF;
-            margin: 0 0 4px 0;
+            margin: 0 0 3px 0;
           }
 
           .feature-details p {
             font-size: 13px;
-            color: #88909E;
+            color: #94A3B8;
             margin: 0;
-            line-height: 1.45;
+            line-height: 1.5;
+            font-weight: 400;
           }
 
           .auth-form-side {
@@ -293,8 +302,8 @@ const RegisterCompany = () => {
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 48px 40px;
-            background: #0D1017;
+            padding: 60px 48px;
+            background-color: #1E233D;
             z-index: 2;
           }
 
@@ -304,29 +313,52 @@ const RegisterCompany = () => {
           }
 
           .form-header-area {
-            margin-bottom: 28px;
+            margin-bottom: 24px;
           }
 
           .form-title {
+            font-family: 'Poppins', sans-serif;
             font-size: 28px;
-            font-weight: 800;
+            font-weight: 900;
             margin-bottom: 6px;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.8px;
             color: #FFFFFF;
           }
 
           .form-sub {
-            color: #88909E;
-            font-size: 14px;
-            margin: 0;
+            color: #94A3B8;
+            font-size: 14.5px;
+            margin-bottom: 0;
+            line-height: 1.6;
+            font-weight: 400;
+          }
+
+          .form-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .field-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+          }
+
+          .field-label .required {
+            color: #F87171;
+            margin-left: 2px;
           }
 
           .form-section-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 20px;
+            background-color: #0B0D17;
+            border: 1px solid rgba(119, 119, 199, 0.16);
+            border-radius: 18px;
             padding: 22px 20px 14px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
           }
 
           .section-header {
@@ -337,20 +369,23 @@ const RegisterCompany = () => {
           }
 
           .section-num {
-            width: 30px;
-            height: 30px;
-            border-radius: 9px;
-            background: #FBBF24;
-            color: #111827;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background-color: #1E233D;
+            color: #7777C7;
+            border: 1px solid rgba(119, 119, 199, 0.3);
             display: grid;
             place-items: center;
+            font-family: 'Poppins', sans-serif;
             font-weight: 900;
-            font-size: 13px;
+            font-size: 12px;
             flex-shrink: 0;
           }
 
           .section-title {
-            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14.5px;
             font-weight: 800;
             color: #ffffff;
             letter-spacing: -0.2px;
@@ -358,8 +393,8 @@ const RegisterCompany = () => {
 
           .section-sub {
             font-size: 12px;
-            font-weight: 500;
-            color: #717684;
+            font-weight: 400;
+            color: #94A3B8;
             margin-top: 1px;
           }
 
@@ -373,7 +408,7 @@ const RegisterCompany = () => {
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: #6B7280;
+            color: #7777C7;
             display: flex;
             align-items: center;
             pointer-events: none;
@@ -381,25 +416,26 @@ const RegisterCompany = () => {
 
           .auth-input {
             width: 100%;
-            background: #141721;
-            border: 1px solid #232734;
+            background-color: #161B2E;
+            border: 1px solid rgba(119, 119, 199, 0.22);
             padding: 13px 14px 13px 44px;
             border-radius: 12px;
             color: #ffffff;
-            font-size: 13.5px;
+            font-size: 14px;
             transition: all 0.2s ease;
             outline: none;
             box-sizing: border-box;
+            font-family: 'Poppins', 'Inter', sans-serif;
           }
 
           .auth-input:focus {
-            border-color: #FBBF24;
-            background: #171B27;
-            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+            border-color: #7777C7;
+            background-color: #1E233D;
+            box-shadow: 0 0 0 3px rgba(119, 119, 199, 0.15);
           }
 
           .auth-input::placeholder {
-            color: #525866;
+            color: #64748B;
           }
 
           .input-grid-2 {
@@ -413,44 +449,44 @@ const RegisterCompany = () => {
             right: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: #6B7280;
+            color: #94A3B8;
             cursor: pointer;
             display: flex;
             align-items: center;
           }
 
           .input-suffix:hover {
-            color: #FBBF24;
+            color: #FFFFFF;
           }
 
           .slug-hint {
-            font-size: 11.5px;
-            color: #717684;
-            margin-top: -8px;
+            font-size: 12px;
+            color: #94A3B8;
+            margin-top: -6px;
             margin-bottom: 12px;
             padding-left: 4px;
           }
 
           .slug-highlight {
-            color: #FBBF24;
-            font-weight: 600;
+            color: #7777C7;
+            font-weight: 700;
           }
 
           .error-banner {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.25);
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
             color: #F87171;
             padding: 12px 16px;
             border-radius: 12px;
-            font-size: 13px;
+            font-size: 13.5px;
             margin-bottom: 20px;
             font-weight: 600;
           }
 
           .success-banner {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.25);
-            color: #4ADE80;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10B981;
             padding: 20px;
             border-radius: 16px;
             font-size: 14px;
@@ -463,8 +499,8 @@ const RegisterCompany = () => {
           }
 
           .terms-wrapper {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background-color: #0B0D17;
+            border: 1px solid rgba(119, 119, 199, 0.15);
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 20px;
@@ -475,48 +511,51 @@ const RegisterCompany = () => {
 
           .terms-label {
             font-size: 12.5px;
-            color: #9CA3AF;
+            color: #94A3B8;
             cursor: pointer;
             user-select: none;
           }
 
           .terms-link {
-            color: #FBBF24;
+            color: #7777C7;
             text-decoration: none;
             font-weight: 600;
           }
 
           .terms-link:hover {
+            color: #8C8CE0;
             text-decoration: underline;
           }
 
           .submit-btn {
             width: 100%;
-            background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
-            color: #0F172A;
+            background-color: #7777C7;
+            color: #0B0C1A;
+            font-family: 'Poppins', sans-serif;
             font-weight: 800;
-            border: none;
-            padding: 15px;
-            border-radius: 14px;
+            border: 1px solid #7777C7;
+            padding: 16px;
+            border-radius: 9999px;
             cursor: pointer;
             font-size: 15px;
-            transition: all 0.25s ease;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+            box-shadow: 0 6px 20px rgba(119, 119, 199, 0.35);
           }
 
           .submit-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 14px 30px rgba(245, 158, 11, 0.35);
+            box-shadow: 0 10px 28px rgba(119, 119, 199, 0.5);
+            background-color: #6464B8;
+            border-color: #6464B8;
+            color: #FFFFFF;
           }
 
           .submit-btn:disabled {
-            background: #27272a;
-            color: #71717a;
-            box-shadow: none;
+            opacity: 0.6;
             cursor: not-allowed;
           }
 
@@ -524,17 +563,18 @@ const RegisterCompany = () => {
             margin-top: 24px;
             text-align: center;
             font-size: 13.5px;
-            color: #88909E;
+            color: #94A3B8;
           }
 
           .auth-link {
-            color: #FBBF24;
+            color: #7777C7;
             text-decoration: none;
             font-weight: 700;
             margin-left: 4px;
           }
 
           .auth-link:hover {
+            color: #8C8CE0;
             text-decoration: underline;
           }
 
@@ -542,8 +582,8 @@ const RegisterCompany = () => {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 6px 12px;
-            background: #10131B;
-            border: 1px solid #232734;
+            background-color: #161B2E;
+            border: 1px solid rgba(119, 119, 199, 0.2);
             border-radius: 12px;
             padding: 10px 14px;
             margin-top: -4px;
@@ -558,15 +598,15 @@ const RegisterCompany = () => {
             font-weight: 600;
           }
 
-          .pw-rule.pass { color: #22C55E; }
-          .pw-rule.fail { color: #EF4444; }
+          .pw-rule.pass { color: #10B981; }
+          .pw-rule.fail { color: #F87171; }
 
           .pw-dot {
             width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
           }
 
-          .pw-rule.pass .pw-dot { background: #22C55E; }
-          .pw-rule.fail .pw-dot { background: #EF4444; }
+          .pw-rule.pass .pw-dot { background: #10B981; }
+          .pw-rule.fail .pw-dot { background: #F87171; }
 
           @media (max-width: 1024px) {
             .auth-container {
@@ -576,11 +616,10 @@ const RegisterCompany = () => {
             .auth-info {
               padding: 40px 30px;
               border-right: none;
-              border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+              border-bottom: 1px solid rgba(119, 119, 199, 0.12);
             }
             .auth-form-side {
               padding: 40px 24px;
-              max-height: none;
             }
           }
         `}</style>
@@ -588,16 +627,16 @@ const RegisterCompany = () => {
         {/* LEFT DESIGN SIDE */}
         <div className="auth-info">
           <div>
-            <div className="brand-header">
-              <div className="brand-logo" style={{ background: "transparent", border: "none", boxShadow: "none" }}>
-                <img src="/logo.png" alt="IAssetCare" style={{ width: 44, height: 44, objectFit: "contain", display: "block" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "28px" }}>
+              <div className="auth-brand-box">
+                <img src="/logo_home.png" alt="IAssetCare" style={{ width: 28, height: 28, display: 'block', objectFit: 'contain' }} />
               </div>
-              <span className="brand-name">IAssetCare</span>
+              <span style={{ fontFamily: 'Poppins', fontSize: "20px", fontWeight: "900", letterSpacing: "-0.4px", color: "#FFFFFF" }}>IAssetCare</span>
             </div>
 
             <div className="info-content">
               <div className="badge-tag">
-                <AutoAwesomeRoundedIcon style={{ fontSize: 14 }} /> Enterprise Multi-Tenant PaaS
+                <AutoAwesomeRoundedIcon sx={{ fontSize: 13 }} /> Enterprise Multi-Tenant PaaS
               </div>
               <h1 className="info-title">Launch Your Own Asset Workspace.</h1>
               <p className="info-desc">
@@ -607,7 +646,7 @@ const RegisterCompany = () => {
 
               <div className="feature-card">
                 <div className="feature-icon-wrapper">
-                  <ApartmentRoundedIcon fontSize="small" />
+                  <ApartmentRoundedIcon sx={{ fontSize: 20 }} />
                 </div>
                 <div className="feature-details">
                   <h4>Isolated Database Partition</h4>
@@ -617,20 +656,20 @@ const RegisterCompany = () => {
 
               <div className="feature-card">
                 <div className="feature-icon-wrapper">
-                  <LanguageRoundedIcon fontSize="small" />
+                  <LanguageRoundedIcon sx={{ fontSize: 20 }} />
                 </div>
                 <div className="feature-details">
-                  <h4>Corporate Identity & Slug</h4>
+                  <h4>Corporate Identity &amp; Slug</h4>
                   <p>Provision dedicated URL workspaces and personalize your dashboard branding context.</p>
                 </div>
               </div>
 
               <div className="feature-card">
                 <div className="feature-icon-wrapper">
-                  <ReceiptLongRoundedIcon fontSize="small" />
+                  <ReceiptLongRoundedIcon sx={{ fontSize: 20 }} />
                 </div>
                 <div className="feature-details">
-                  <h4>Automated Compliance & GST</h4>
+                  <h4>Automated Compliance &amp; GST</h4>
                   <p>Integrated tax invoicing, commercial licensing, and transparent subscription management.</p>
                 </div>
               </div>
@@ -638,7 +677,7 @@ const RegisterCompany = () => {
           </div>
 
           <div style={{ color: "#64748B", fontSize: "12.5px", zIndex: 2 }}>
-            &copy; 2026 AssetCare PaaS. All rights reserved.
+            &copy; 2026 IAssetCare. All rights reserved.
           </div>
         </div>
 
@@ -654,28 +693,28 @@ const RegisterCompany = () => {
 
             {isFirstTime && (
               <div style={{
-                background: 'rgba(251, 191, 36, 0.1)',
-                border: '1px solid rgba(251, 191, 36, 0.25)',
-                color: '#FBBF24',
+                background: 'rgba(119, 119, 199, 0.12)',
+                border: '1px solid rgba(119, 119, 199, 0.3)',
+                color: '#7777C7',
                 padding: '14px 16px',
                 borderRadius: '14px',
                 fontSize: '13px',
                 marginBottom: '20px',
                 lineHeight: '1.5'
               }}>
-                <strong>✨ First-Time Setup Detected</strong>
-                <div style={{ marginTop: '2px', opacity: 0.85 }}>
-                  Register your master organization to initialize the AssetCare workspace.
+                <strong style={{ color: '#FFFFFF' }}>✨ First-Time Setup Detected</strong>
+                <div style={{ marginTop: '2px', color: '#CBD5E1' }}>
+                  Register your master organization to initialize the IAssetCare workspace.
                 </div>
               </div>
             )}
             
             {success && (
               <div className="success-banner">
-                <CheckCircleOutlineRoundedIcon sx={{ fontSize: 44 }} />
+                <CheckCircleOutlineRoundedIcon sx={{ fontSize: 44, color: '#10B981' }} />
                 <div>
-                  <strong style={{ fontSize: '16px' }}>Workspace Initialized!</strong>
-                  <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#88909E" }}>
+                  <strong style={{ fontSize: '16px', color: '#FFFFFF' }}>Workspace Initialized!</strong>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "#94A3B8" }}>
                     Provisioning your dashboard partition... Redirecting to onboarding.
                   </p>
                 </div>
@@ -696,7 +735,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><ApartmentRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><ApartmentRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="text"
                       name="companyName"
@@ -709,7 +748,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><LanguageRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><LanguageRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="text"
                       name="slug"
@@ -722,12 +761,12 @@ const RegisterCompany = () => {
                   </div>
                   {formData.slug && (
                     <div className="slug-hint">
-                      Workspace URL: <span className="slug-highlight">assetcare.app/{formData.slug}</span>
+                      Workspace URL: <span className="slug-highlight">iassetcare.com/{formData.slug}</span>
                     </div>
                   )}
 
                   <div className="input-group">
-                    <span className="input-icon"><KeyRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><KeyRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="text"
                       name="licenseKey"
@@ -738,7 +777,7 @@ const RegisterCompany = () => {
                     />
                   </div>
                   {formData.licenseKey && (
-                    <div style={{ fontSize: '11.5px', color: '#B4F105', marginTop: '-8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ fontSize: '12px', color: '#7777C7', marginTop: '-8px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <AutoAwesomeRoundedIcon sx={{ fontSize: 14 }} /> Valid license key pre-activates your workspace immediately (no checkout required).
                     </div>
                   )}
@@ -752,15 +791,17 @@ const RegisterCompany = () => {
                       onChange={handleInputChange}
                       required
                     >
-                      <option value="Home User">Home User Plan (₹999/yr — Up to 20 assets)</option>
-                      <option value="MSME">MSME Plan (₹2,999/yr — Up to 50 assets)</option>
-                      <option value="Large Scale">Large Scale Plan (₹8,999/yr — Unlimited assets)</option>
+                      {plans.map((p) => (
+                        <option key={p.name} value={p.name}>
+                          {p.name} Plan (₹{p.price.toLocaleString('en-IN')}/yr — {p.maxAssets === -1 || p.maxAssets === 999999999 ? 'Unlimited' : `Up to ${p.maxAssets}`} assets)
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {(formData.plan === "MSME" || formData.plan === "Large Scale") && (
                     <div className="input-group">
-                      <span className="input-icon"><ReceiptLongRoundedIcon fontSize="small" /></span>
+                      <span className="input-icon"><ReceiptLongRoundedIcon sx={{ fontSize: 20 }} /></span>
                       <input
                         type="text"
                         name="gstNumber"
@@ -779,13 +820,13 @@ const RegisterCompany = () => {
                   <div className="section-header">
                     <div className="section-num">2</div>
                     <div>
-                      <div className="section-title">Billing & Company Address</div>
+                      <div className="section-title">Billing &amp; Company Address</div>
                       <div className="section-sub">Tax invoice address and registered location.</div>
                     </div>
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><LocationOnRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><LocationOnRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="text"
                       name="address"
@@ -799,7 +840,7 @@ const RegisterCompany = () => {
 
                   <div className="input-grid-2">
                     <div className="input-group">
-                      <span className="input-icon"><LocationCityRoundedIcon fontSize="small" /></span>
+                      <span className="input-icon"><LocationCityRoundedIcon sx={{ fontSize: 20 }} /></span>
                       <input
                         type="text"
                         name="city"
@@ -812,11 +853,11 @@ const RegisterCompany = () => {
                     </div>
 
                     <div className="input-group">
-                      <span className="input-icon"><PinDropRoundedIcon fontSize="small" /></span>
+                      <span className="input-icon"><PinDropRoundedIcon sx={{ fontSize: 20 }} /></span>
                       <input
                         type="text"
                         name="state"
-                        placeholder="State (e.g., Maharashtra)"
+                        placeholder="State (e.g., Rajasthan)"
                         className="auth-input"
                         value={formData.state}
                         onChange={handleInputChange}
@@ -826,7 +867,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><PinDropRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><PinDropRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="text"
                       name="pinCode"
@@ -851,7 +892,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><PersonRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><PersonRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="text"
                       name="adminName"
@@ -864,7 +905,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><EmailRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><EmailRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="email"
                       name="adminEmail"
@@ -877,7 +918,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group">
-                    <span className="input-icon"><PhoneRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><PhoneRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="tel"
                       name="adminPhone"
@@ -892,7 +933,7 @@ const RegisterCompany = () => {
                   </div>
 
                   <div className="input-group" style={{ marginBottom: formData.adminPassword.length > 0 ? "10px" : "14px" }}>
-                    <span className="input-icon"><LockRoundedIcon fontSize="small" /></span>
+                    <span className="input-icon"><LockRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type={showPassword ? "text" : "password"}
                       name="adminPassword"
@@ -906,7 +947,7 @@ const RegisterCompany = () => {
                       className="input-suffix"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
+                      {showPassword ? <VisibilityOffRoundedIcon sx={{ fontSize: 18 }} /> : <VisibilityRoundedIcon sx={{ fontSize: 18 }} />}
                     </span>
                   </div>
 
@@ -930,7 +971,7 @@ const RegisterCompany = () => {
                     name="acceptedTerms"
                     checked={formData.acceptedTerms}
                     onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
-                    style={{ accentColor: '#FBBF24', width: 16, height: 16, cursor: 'pointer' }}
+                    style={{ accentColor: '#7777C7', width: 16, height: 16, cursor: 'pointer' }}
                   />
                   <label htmlFor="acceptedTerms" className="terms-label">
                     I agree to the <Link to="/terms" className="terms-link" target="_blank">Terms of Service</Link> and <Link to="/privacy-policy" className="terms-link" target="_blank">Privacy Policy</Link>
@@ -944,7 +985,7 @@ const RegisterCompany = () => {
                   disabled={loading}
                 >
                   {loading ? "Provisioning Workspace..." : "Launch Workspace"}
-                  {!loading && <ArrowForwardRoundedIcon fontSize="small" />}
+                  {!loading && <ArrowForwardRoundedIcon sx={{ fontSize: 16 }} />}
                 </button>
 
               </form>

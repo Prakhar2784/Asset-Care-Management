@@ -1,30 +1,47 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 
 
-/* === IASSETCARE — DARK + LIME DESIGN SYSTEM === */
+/* === IASSETCARE — PERIWINKLE INDIGO & DARK DESIGN SYSTEM === */
 :root {
-  --bg-root: #F4F6F5;
-  --bg-panel: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-hover: rgba(5,28,18,0.05);
+  --primary: #7777C7;
+  --primary-hover: #6969B8;
+  --primary-active: #5D5DA8;
+  --primary-light: #EEEEFA;
+  --primary-very-light: #F6F6FD;
+  --primary-border: #C9C9EA;
 
-  --primary: #051C12;
-  --secondary: #B4F105;
+  --background: #F0F2F1;
+  --background-secondary: #E9ECEB;
+  --surface: #FFFFFF;
+  --surface-soft: #F7F9F8;
 
-  --text-main: #0B130F;
-  --text-muted: #6C7E75;
+  --dark: #000000;
+  --dark-surface: #050404;
+  --dark-surface-card: #0E0E10;
+  --dark-green: #0C1C16;
+  --dark-secondary: #182622;
 
-  --border: #E9EFEF;
-  --border-light: rgba(5,28,18,0.15);
+  --text-primary: #0A0A0A;
+  --text-secondary: #5F6865;
+  --text-muted: #7C8399;
+  --text-on-dark: #FFFFFF;
+  --text-on-dark-secondary: #D9E2DF;
+
+  --border: #D9E0DF;
+  --border-light: #E2E7E5;
+  --border-dark: #1F2422;
+
+  --success: #1F8A70;
+  --success-light: #E5F5EF;
+  --warning: #F5C542;
+  --warning-light: #FFF7D6;
+  --warning-text: #8A6A00;
+  --danger: #E55353;
+  --danger-light: #FDEAEA;
+  --danger-text: #C63F3F;
+  --info: #4D7CFE;
   
-  --success-bg: #dcfce7;
-  --success-text: #166534;
-  --warning-bg: #fef3c7;
-  --warning-text: #92400e;
-  --danger-bg: #fee2e2;
-  --danger-text: #991b1b;
-  
-  --shadow-subtle: 0 4px 15px rgba(11, 19, 15, 0.03);
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 * {
@@ -37,8 +54,8 @@ html, body, #root {
   width: 100%;
   min-height: 100vh;
   font-family: "Poppins", sans-serif;
-  background: var(--bg-root);
-  color: var(--text-main);
+  background: var(--background);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -74,7 +91,7 @@ a {
   min-height: 100vh;
   display: grid;
   grid-template-columns: 280px 1fr;
-  background: var(--bg-root);
+  background: var(--background);
 }
 
 /* --- Sidebar --- */
@@ -93,7 +110,7 @@ a {
   gap: 16px;
 }
 
-.brand-logo {
+.sidebar-brand .brand-logo {
   width: 40px;
   height: 40px;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -107,7 +124,7 @@ a {
 
 .sidebar-brand h2 {
   font-size: 22px;
-  color: var(--text-main);
+  color: var(--text-primary);
   letter-spacing: -0.5px;
 }
 
@@ -128,7 +145,7 @@ a {
 
 .nav-item:hover {
   background: var(--bg-hover);
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
 .nav-item.active {
@@ -153,7 +170,7 @@ a {
 .dash-header h1 {
   font-size: 32px;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--text-primary);
   margin-bottom: 8px;
   letter-spacing: -0.5px;
 }
@@ -218,7 +235,7 @@ a {
 .card-body h2 {
   font-size: 38px;
   font-weight: 800;
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
 .trend-badge {
@@ -311,7 +328,7 @@ a {
 .ticket-info h4 {
   font-size: 16px;
   font-weight: 500;
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
 .status-badge {
@@ -379,7 +396,7 @@ a {
   font-size: 20px;
   font-weight: 800;
   line-height: 1.1;
-  color: var(--text-main);
+  color: var(--text-primary);
 }
 
 .brand-text small {
@@ -416,7 +433,7 @@ a {
   display: none;
   background: transparent;
   border: none;
-  color: var(--text-main);
+  color: var(--text-primary);
   cursor: pointer;
 }
 
@@ -458,7 +475,7 @@ a {
 .footer-links-col h4, .footer-contact-col h4 {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--text-primary);
   margin-bottom: 24px;
 }
 

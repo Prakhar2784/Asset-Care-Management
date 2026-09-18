@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Button, IconButton, Dialog, DialogTitle,
@@ -11,7 +11,7 @@ import {
   UploadFileRounded, OpenInNewRounded, CloseRounded, DownloadRounded,
   AttachMoneyRounded, BusinessRounded, CalendarTodayRounded
 } from '@mui/icons-material';
-import api from '../../api/axios';
+import api, { getFileUrl } from '../../api/axios';
 
 const STATUS_COLORS = {
   Paid:      { color: '#16A34A', bg: '#F0FDF4' },
@@ -135,7 +135,7 @@ export default function InvoiceManagement() {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={openAdd}
-          sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
+          sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
           Add Invoice
         </Button>
       </Box>
@@ -144,9 +144,9 @@ export default function InvoiceManagement() {
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 2, mb: 3 }}>
         {[
           { label: 'Total Invoices', value: invoices.length, color: 'text.primary' },
-          { label: 'Total Value',    value: fmtCurrency(totalAmount), color: '#B4F105' },
-          { label: 'Outstanding',    value: fmtCurrency(unpaidAmount), color: '#B4F105' },
-          { label: 'Paid',           value: invoices.filter(i => i.status === 'Paid').length, color: '#B4F105' },
+          { label: 'Total Value',    value: fmtCurrency(totalAmount), color: '#7777C7' },
+          { label: 'Outstanding',    value: fmtCurrency(unpaidAmount), color: '#7777C7' },
+          { label: 'Paid',           value: invoices.filter(i => i.status === 'Paid').length, color: '#7777C7' },
         ].map(({ label, value, color }) => (
           <Paper key={label} sx={{ p: 2.5, borderRadius: '16px', border: 1, borderColor: 'divider' }}>
             <Typography fontSize={12} fontWeight={700} color="text.secondary" sx={{ mb: 0.5 }}>{label}</Typography>
@@ -213,7 +213,7 @@ export default function InvoiceManagement() {
                       <Stack direction="row" gap={0.5}>
                         {inv.fileUrl && (
                           <Tooltip title="View invoice file">
-                            <IconButton size="small" href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${inv.fileUrl}`} target="_blank" sx={{ borderRadius: '8px', color: '#3B82F6' }}>
+                            <IconButton size="small" href={getFileUrl(inv.fileUrl)} target="_blank" sx={{ borderRadius: '8px', color: '#3B82F6' }}>
                               <OpenInNewRounded fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -297,7 +297,7 @@ export default function InvoiceManagement() {
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={saving}
-                sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                 {saving ? 'Saving…' : editTarget ? 'Save Changes' : 'Add Invoice'}
               </Button>
             </Box>

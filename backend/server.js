@@ -14,19 +14,23 @@ const path = require("path");
 const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 
-// Load environment variables
+// Load environment variables (supports running from root or backend directory)
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 // Apply global multi-tenant query isolation plugin to Mongoose
 const mongoose = require('mongoose');
 const tenantPlugin = require('./middleware/tenantPlugin');
 mongoose.plugin(tenantPlugin);
 
-// Connect to Database, then start background jobs
+// Connect to Database, then start background jobs and init plan configs
 const { startWarrantyScheduler }    = require('./jobs/warrantyScheduler');
 const { startSLAJob }               = require('./jobs/slaEscalationJob');
 const { startRecurringTicketJob }   = require('./jobs/recurringTicketJob');
+const { initPlanConfigs }           = require('./services/planService');
 connectDB().then(() => {
+  initPlanConfigs();
   startWarrantyScheduler();
   startSLAJob();
   startRecurringTicketJob();
@@ -123,14 +127,24 @@ app.get("/download/desktop-app", (req, res) => {
 });
 
 
-// Serve static frontend build files
-const frontendPath = path.join(__dirname, "../frontend/dist");
+// Serve static frontend build files with multi-path fallback
+const fs = require('fs');
+const possibleFrontendPaths = [
+  path.join(__dirname, "../frontend/dist"),
+  path.join(__dirname, "dist"),
+  path.join(__dirname, "../dist"),
+  path.join(__dirname, "public")
+];
+const frontendPath = possibleFrontendPaths.find(p => fs.existsSync(path.join(p, "index.html"))) || path.join(__dirname, "../frontend/dist");
 app.use(express.static(frontendPath));
 
 // Wildcard handler for SPA routing
 app.use((req, res, next) => {
   if (req.method === "GET" && !req.path.startsWith("/api") && !path.extname(req.path)) {
-    return res.sendFile(path.join(frontendPath, "index.html"));
+    const indexPath = path.join(frontendPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      return res.sendFile(indexPath);
+    }
   }
   next();
 });
@@ -153,7 +167,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   
   // Find and display local IP addresses for Intranet access
   const os = require('os');
@@ -171,18 +185,18 @@ app.listen(PORT, () => {
   console.log(`Local Access: http://localhost:${PORT}`);
   if (addresses.length > 0) {
     addresses.forEach(ip => {
-      console.log(`ðŸ‘‰ Intranet Access (For Employees): http://${ip}:${PORT}`);
+      console.log(`👉 Intranet Access (For Employees): http://${ip}:${PORT}`);
     });
   }
   console.log(`======================================================\n`);
 
-  // Automatically open default browser on successful server boot
-  try {
-    const { exec } = require('child_process');
-    const url = `http://localhost:${PORT}`;
-    const startCmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start ""' : 'xdg-open';
-    exec(`${startCmd} ${url}`);
-  } catch (err) {
-    console.error("Could not automatically open browser:", err.message);
+  // Automatically open default browser in local development mode only
+  if (process.env.NODE_ENV !== 'production' && !process.env.HOSTINGER) {
+    try {
+      const { exec } = require('child_process');
+      const url = `http://localhost:${PORT}`;
+      const startCmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start ""' : 'xdg-open';
+      exec(`${startCmd} ${url}`);
+    } catch (err) {}
   }
 });

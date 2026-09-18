@@ -33,18 +33,21 @@ export default function SubscriptionBilling() {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState('');
+  const [livePlans, setLivePlans] = useState([]);
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [tenantRes, invRes] = await Promise.all([
+      const [tenantRes, invRes, plansRes] = await Promise.all([
         api.get('/settings/tenant'),
         api.get('/billing/invoices'),
+        api.get('/billing/plans').catch(() => ({ data: [] }))
       ]);
       setTenant(tenantRes.data);
       setInvoices(invRes.data || []);
+      setLivePlans(plansRes.data || []);
     } catch (err) {
       console.error('Failed to fetch subscription data:', err);
     } finally {
@@ -83,14 +86,15 @@ export default function SubscriptionBilling() {
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
-        <CircularProgress sx={{ color: '#051C12' }} />
+        <CircularProgress sx={{ color: '#7777C7' }} />
       </Box>
     );
   }
 
   const currentPlan = tenant?.plan || 'Home User';
-  const planPrice = PLAN_PRICES[currentPlan] || '₹999 / yr';
-  const assetLimit = PLAN_LIMITS[currentPlan] || `${tenant?.limits?.maxAssets || 20} Assets`;
+  const matchedLivePlan = livePlans.find(p => p.name?.toLowerCase() === currentPlan.toLowerCase() || p.planKey?.toLowerCase() === currentPlan.toLowerCase().replace(/\s+/g, '_'));
+  const planPrice = matchedLivePlan ? `₹${matchedLivePlan.price.toLocaleString('en-IN')} / yr` : (PLAN_PRICES[currentPlan] || '₹999 / yr');
+  const assetLimit = matchedLivePlan?.maxAssets !== undefined ? (matchedLivePlan.maxAssets === -1 || matchedLivePlan.maxAssets === 999999999 ? 'Unlimited Assets' : `${matchedLivePlan.maxAssets} Assets`) : (PLAN_LIMITS[currentPlan] || `${tenant?.limits?.maxAssets || 20} Assets`);
   const subStatus = tenant?.subscriptionStatus || 'Active';
 
   // Calculate remaining days
@@ -122,7 +126,7 @@ export default function SubscriptionBilling() {
         <Box sx={{
           width: 52, height: 52, borderRadius: 2.5,
           display: 'grid', placeItems: 'center',
-          bgcolor: '#051C12', color: '#B4F105', flexShrink: 0
+          bgcolor: 'rgba(119, 119, 199, 0.18)', color: '#7777C7', flexShrink: 0
         }}>
           <ReceiptRounded sx={{ fontSize: 28 }} />
         </Box>
@@ -160,7 +164,7 @@ export default function SubscriptionBilling() {
                   CURRENT SUBSCRIPTION PLAN
                 </Typography>
                 <Box display="flex" alignItems="center" gap={1.5} mt={0.5}>
-                  <Typography variant="h4" fontWeight={900} color="#051C12">
+                  <Typography variant="h4" fontWeight={900} color="#7777C7">
                     {currentPlan}
                   </Typography>
                   <Chip
@@ -174,7 +178,7 @@ export default function SubscriptionBilling() {
                   />
                 </Box>
               </Box>
-              <Typography variant="h5" fontWeight={900} color="#051C12">
+              <Typography variant="h5" fontWeight={900} color="#7777C7">
                 {planPrice}
               </Typography>
             </Box>
@@ -217,12 +221,12 @@ export default function SubscriptionBilling() {
             </Grid>
 
             {/* License Key Section */}
-            <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(5,28,18,0.03)', borderRadius: '12px', border: '1px dashed rgba(5,28,18,0.15)' }}>
+            <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(119, 119, 199, 0.03)', borderRadius: '12px', border: '1px dashed rgba(119, 119, 199, 0.15)' }}>
               <Typography variant="caption" color="text.secondary" fontWeight={800} display="block" mb={0.5}>
                 COMMERCIAL LICENSE KEY
               </Typography>
               <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 800, color: '#051C12', letterSpacing: 0.5 }}>
+                <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 800, color: '#7777C7', letterSpacing: 0.5 }}>
                   {tenant?.licenseKey || 'PENDING-ACTIVATION'}
                 </Typography>
                 <Tooltip title={copied ? 'Copied!' : 'Copy License Key'}>
@@ -257,8 +261,7 @@ export default function SubscriptionBilling() {
               onClick={() => navigate('/admin/checkout')}
               sx={{
                 py: 1.4, fontWeight: 800,
-                bgcolor: '#051C12', color: '#B4F105',
-                '&:hover': { bgcolor: '#0B3B24' },
+                bgcolor: '#7777C7', color: '#FFFFFF', '&:hover': { bgcolor: '#6464B8' },
                 borderRadius: '10px'
               }}
             >
@@ -273,8 +276,7 @@ export default function SubscriptionBilling() {
               onClick={() => navigate('/admin/checkout')}
               sx={{
                 py: 1.4, fontWeight: 800,
-                borderColor: '#051C12', color: '#051C12',
-                '&:hover': { borderColor: '#0B3B24', bgcolor: 'rgba(5,28,18,0.04)' },
+                borderColor: '#7777C7', color: '#7777C7', '&:hover': { borderColor: '#7777C7', bgcolor: 'rgba(119, 119, 199, 0.10)' },
                 borderRadius: '10px'
               }}
             >
@@ -316,7 +318,7 @@ export default function SubscriptionBilling() {
           <tbody>
             {invoices.length === 0 ? (
               <tr>
-                <td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#6C7E75' }}>
+                <td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#94A3B8' }}>
                   No tax invoices recorded yet.
                 </td>
               </tr>

@@ -95,7 +95,7 @@ const baseTemplate = (title, bodyHtml, footerNote = '') => `
               Email: <a href="mailto:iassetcare@icpljpr.com" style="color:#059669;text-decoration:none;font-weight:700;">iassetcare@icpljpr.com</a> &bull; Helpline: <strong style="color:#0f172a;">+91 90270 07508</strong>
             </div>
             <div style="font-size:11px;color:#94a3b8;margin-top:8px;line-height:1.4;">
-              IAssetCare &bull; Tech Park, Block B, Jaipur, Rajasthan, India – 302022
+              IAssetCare &bull; Cloud Asset Care &amp; Licensing Platform
             </div>
           </td>
         </tr>

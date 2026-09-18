@@ -24,9 +24,10 @@
     "pkg": "^5.8.1"
   },
   "scripts": {
-    "build:frontend": "npm run build --prefix ../frontend",
-    "start": "npm run build:frontend && node server.js",
+    "start": "node server.js",
     "dev": "nodemon server.js",
+    "build:frontend": "npm run build --prefix ../frontend",
+    "build": "npm run build:frontend",
     "build:exe": "npm run build:frontend && pkg . --targets node18-win-x64 --out-path ./dist"
   },
   "bin": "server.js",

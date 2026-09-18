@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { 
+  getPublicPlans,
   calculateCheckout, 
   processCheckout, 
   createRazorpayOrder,
@@ -13,7 +14,8 @@ const {
 } = require('../controllers/billingController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-// Public Webhook route (authenticated cryptographically via Razorpay HMAC signature)
+// Public Plan & Webhook routes
+router.get('/plans', getPublicPlans);
 router.post('/webhook', handleRazorpayWebhook);
 
 // Protected Admin Billing Routes

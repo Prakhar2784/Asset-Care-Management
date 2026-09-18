@@ -12,7 +12,7 @@ const fadeUp = {
 
 const stagger = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 
 const SECTIONS = [
@@ -134,9 +134,7 @@ You agree to the exclusive jurisdiction of the courts located in Jaipur, Rajasth
     title: "12. Contact Us",
     content: `If you have any questions, concerns, or requests regarding these Terms and Conditions, please contact us:
 
-IAssetCare
-Tech Park, Block B, Jaipur, Rajasthan, India – 302022
-
+IAssetCare (ICPL)
 Email: iassetcare@icpljpr.com
 Phone: +91 90270 07508
 
@@ -148,85 +146,67 @@ const TermsAndConditions = () => {
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
         .terms-page {
           min-height: 100vh;
-          background:
-            radial-gradient(circle at top left, rgba(17,24,39,0.06), transparent 38%),
-            radial-gradient(circle at top right, rgba(17,17,17,0.03), transparent 38%),
-            #051C12;
+          background-color: #0B0D17;
+          color: #FFFFFF;
+          font-family: 'Poppins', 'Inter', -apple-system, sans-serif;
         }
 
         .terms-hero {
-          background: #072F1F;
-          padding: 130px 24px 60px;
-          position: relative;
-          overflow: hidden;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .terms-hero::before {
-          content: "";
-          position: absolute;
-          top: -100px;
-          right: -100px;
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(180,241,5,0.08), transparent 70%);
-          border-radius: 50%;
-          pointer-events: none;
+          padding: 140px 0 44px;
         }
 
         .terms-hero-container {
           max-width: 1200px;
           margin: 0 auto;
-          position: relative;
-          z-index: 1;
-        }
-
-        .terms-hero-inner {
-          max-width: 860px;
-          margin-bottom: 40px;
+          padding-left: 24px;
+          padding-right: 24px;
         }
 
         .terms-hero-badge {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 18px;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.12);
-          border: 1px solid rgba(255,255,255,0.25);
-          color: #FFFFFF;
-          font-size: 13px;
+          gap: 6px;
+          padding: 6px 16px;
+          border-radius: 9999px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 12px;
+          line-height: 1.4;
           font-weight: 800;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
           text-transform: uppercase;
-          backdrop-filter: blur(12px);
-          margin-bottom: 24px;
+          background-color: #161B2E;
+          color: #7777C7;
+          border: 1px solid rgba(119, 119, 199, 0.35);
+          margin-bottom: 16px;
         }
 
         .terms-hero h1 {
-          font-size: clamp(36px, 5vw, 56px);
-          font-weight: 950;
+          font-family: 'Poppins', sans-serif;
+          font-size: clamp(34px, 4.5vw, 54px);
+          line-height: 1.1;
+          font-weight: 900;
           color: #FFFFFF;
           letter-spacing: -1.5px;
-          line-height: 1.1;
-          margin: 0 0 20px;
+          margin: 0 0 16px;
         }
 
         .terms-hero p {
-          color: #CBD5E1;
-          font-size: 17px;
-          font-weight: 500;
+          font-size: 16.5px;
           line-height: 1.7;
-          margin: 0 0 24px;
-          max-width: 680px;
+          color: #94A3B8;
+          max-width: 760px;
+          margin: 0 0 20px;
+          font-weight: 400;
         }
 
         .terms-hero-meta {
           display: flex;
           align-items: center;
-          gap: 24px;
+          gap: 20px;
           flex-wrap: wrap;
         }
 
@@ -234,154 +214,145 @@ const TermsAndConditions = () => {
           display: flex;
           align-items: center;
           gap: 8px;
-          font-size: 14px;
-          font-weight: 700;
-          color: rgba(255,255,255,0.85);
+          font-size: 13.5px;
+          font-weight: 600;
+          color: #CBD5E1;
         }
 
         .terms-highlights {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 18px;
-          width: 100%;
-          margin-top: 12px;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+          margin-top: 36px;
         }
 
         .terms-highlight-card {
-          background: rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 20px;
-          padding: 24px 20px;
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+          background-color: #1E233D;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 16px;
+          padding: 20px 18px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
           display: flex;
           align-items: flex-start;
-          gap: 16px;
-          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+          gap: 14px;
+          transition: transform 0.2s ease, border-color 0.2s ease;
         }
-
         .terms-highlight-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(180, 241, 5, 0.4);
-          box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+          transform: translateY(-2px);
+          border-color: rgba(119, 119, 199, 0.4);
         }
 
         .terms-hl-icon {
-          width: 46px;
-          height: 46px;
-          border-radius: 14px;
-          background: rgba(180, 241, 5, 0.15);
-          border: 1px solid rgba(180, 241, 5, 0.3);
-          color: #B4F105;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          background-color: #161B2E;
+          color: #7777C7;
           display: grid;
           place-items: center;
           flex-shrink: 0;
         }
 
         .terms-hl-title {
-          font-size: 15px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 14px;
           font-weight: 800;
           color: #FFFFFF;
-          margin-bottom: 5px;
-          letter-spacing: -0.2px;
+          margin-bottom: 4px;
         }
 
         .terms-hl-text {
-          font-size: 13px;
-          font-weight: 500;
+          font-size: 12.5px;
+          font-weight: 400;
           color: #94A3B8;
-          line-height: 1.55;
+          line-height: 1.5;
         }
 
         .terms-body {
           max-width: 1200px;
           margin: 0 auto;
-          padding: 60px 24px 100px;
+          padding: 16px 24px 100px;
           display: grid;
           grid-template-columns: 260px 1fr;
-          gap: 56px;
+          gap: 48px;
           align-items: start;
         }
 
         .terms-toc {
           position: sticky;
           top: 100px;
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
-          border-radius: 24px;
-          padding: 28px 24px;
-          box-shadow: 0 12px 32px rgba(17,17,17,0.06);
+          background-color: #1E233D;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 20px;
+          padding: 24px 20px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
         }
 
         .terms-toc h4 {
-          font-size: 14px;
-          font-weight: 950;
-          color: #FFFFFF;
+          font-family: 'Poppins', sans-serif;
+          font-size: 13px;
+          font-weight: 800;
+          color: #7777C7;
           text-transform: uppercase;
           letter-spacing: 1px;
-          margin: 0 0 18px;
+          margin: 0 0 14px;
         }
 
         .toc-link {
           display: block;
           font-size: 13px;
-          font-weight: 700;
-          color: #9CA3AF;
+          font-weight: 600;
+          color: #94A3B8;
           text-decoration: none;
-          padding: 7px 10px;
-          border-radius: 10px;
-          margin-bottom: 3px;
-          transition: all 0.2s ease;
+          padding: 6px 10px;
+          border-radius: 8px;
+          margin-bottom: 2px;
+          transition: all 0.18s ease;
           line-height: 1.4;
         }
 
         .toc-link:hover {
-          background: rgba(17,17,17,0.05);
+          background-color: #161B2E;
           color: #FFFFFF;
-          transform: translateX(4px);
+          transform: translateX(3px);
         }
 
         .terms-sections {
           display: flex;
           flex-direction: column;
-          gap: 36px;
+          gap: 24px;
         }
 
         .terms-section {
-          background: rgba(20,20,20,0.7);
-          border: 1px solid rgba(17,24,39,0.15);
-          border-radius: 24px;
-          padding: 40px;
-          box-shadow: 0 8px 24px rgba(15,23,42,0.04);
-          transition: box-shadow 0.3s ease;
+          background-color: #1E233D;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 20px;
+          padding: 32px 28px;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+          transition: transform 0.2s ease, border-color 0.2s ease;
         }
-
         .terms-section:hover {
-          box-shadow: 0 16px 40px rgba(15,23,42,0.08);
+          transform: translateY(-2px);
+          border-color: rgba(119, 119, 199, 0.4);
         }
 
         .terms-section h2 {
-          font-size: 22px;
-          font-weight: 950;
+          font-family: 'Poppins', sans-serif;
+          font-size: 20px;
+          font-weight: 800;
           color: #FFFFFF;
-          letter-spacing: -0.5px;
-          margin: 0 0 18px;
-          padding-bottom: 16px;
-          border-bottom: 2px solid rgba(17,24,39,0.25);
+          letter-spacing: -0.3px;
+          margin: 0 0 14px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid rgba(119, 119, 199, 0.15);
         }
 
         .terms-section-body {
-          color: #CBD5E1;
-          font-size: 15px;
-          font-weight: 500;
-          line-height: 1.85;
+          color: #94A3B8;
+          font-size: 14.5px;
+          font-weight: 400;
+          line-height: 1.75;
           white-space: pre-line;
-        }
-
-        .terms-section-body strong {
-          color: #FFFFFF;
-          font-weight: 800;
         }
 
         .terms-footer-note {
@@ -393,14 +364,14 @@ const TermsAndConditions = () => {
 
         .terms-footer-note p {
           color: #64748B;
-          font-size: 15px;
-          font-weight: 600;
+          font-size: 14px;
+          font-weight: 500;
           line-height: 1.7;
         }
 
         .terms-footer-note a {
-          color: #FFFFFF;
-          font-weight: 800;
+          color: #7777C7;
+          font-weight: 700;
           text-decoration: none;
         }
 
@@ -408,20 +379,26 @@ const TermsAndConditions = () => {
           text-decoration: underline;
         }
 
+        @media (max-width: 1024px) {
+          .terms-highlights {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
         @media (max-width: 900px) {
           .terms-body {
             grid-template-columns: 1fr;
-            gap: 32px;
+            gap: 28px;
           }
-
           .terms-toc {
-            position: static;
             display: none;
           }
+        }
 
-          .terms-section {
-            padding: 28px 22px;
-          }
+        @media (max-width: 640px) {
+          .terms-hero { padding-top: 120px; }
+          .terms-highlights { grid-template-columns: 1fr; }
+          .terms-section { padding: 24px 20px; }
         }
       `}</style>
 
@@ -430,13 +407,12 @@ const TermsAndConditions = () => {
         <div className="terms-hero">
           <div className="terms-hero-container">
             <motion.div
-              className="terms-hero-inner"
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="terms-hero-badge">
-                <GavelRoundedIcon fontSize="small" />
+                <GavelRoundedIcon sx={{ fontSize: 16, color: "#7777C7" }} />
                 Legal Agreement
               </div>
               <h1>Terms &amp; Conditions</h1>
@@ -445,11 +421,11 @@ const TermsAndConditions = () => {
               </p>
               <div className="terms-hero-meta">
                 <span className="terms-meta-pill">
-                  <PolicyRoundedIcon fontSize="small" />
+                  <PolicyRoundedIcon sx={{ fontSize: 16, color: "#7777C7" }} />
                   Effective Date: 1 January 2026
                 </span>
                 <span className="terms-meta-pill">
-                  <VerifiedUserRoundedIcon fontSize="small" />
+                  <VerifiedUserRoundedIcon sx={{ fontSize: 16, color: "#7777C7" }} />
                   Last Updated: 24 June 2026
                 </span>
               </div>
@@ -463,10 +439,10 @@ const TermsAndConditions = () => {
               variants={stagger}
             >
               {[
-                { icon: <SecurityRoundedIcon />, title: "Data Security", text: "Your organisational data is encrypted in transit and at rest at all times." },
-                { icon: <VerifiedUserRoundedIcon />, title: "Role-Based Access", text: "Strict admin and employee access controls protect sensitive information." },
-                { icon: <GavelRoundedIcon />, title: "Legal Compliance", text: "Platform usage is governed under Indian law with Jaipur jurisdiction." },
-                { icon: <PolicyRoundedIcon />, title: "Your Data, Your Rights", text: "You own all data entered into the platform. We never sell or share it." },
+                { icon: <SecurityRoundedIcon sx={{ fontSize: 22 }} />, title: "Data Security", text: "Your organisational data is encrypted in transit and at rest at all times." },
+                { icon: <VerifiedUserRoundedIcon sx={{ fontSize: 22 }} />, title: "Role-Based Access", text: "Strict admin and employee access controls protect sensitive information." },
+                { icon: <GavelRoundedIcon sx={{ fontSize: 22 }} />, title: "Legal Compliance", text: "Platform usage is governed under Indian law with Jaipur jurisdiction." },
+                { icon: <PolicyRoundedIcon sx={{ fontSize: 22 }} />, title: "Your Data Rights", text: "You own all data entered into the platform. We never sell or share it." },
               ].map((item, i) => (
                 <motion.div key={i} variants={fadeUp} className="terms-highlight-card">
                   <div className="terms-hl-icon">{item.icon}</div>

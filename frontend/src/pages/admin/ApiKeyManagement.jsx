@@ -105,7 +105,7 @@ export default function ApiKeyManagement() {
           </Box>
         </Box>
         <Button variant="contained" startIcon={<AddRounded />} onClick={() => { setNewKey(null); setAddOpen(true); }}
-          sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
+          sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5 }}>
           Generate Key
         </Button>
       </Box>
@@ -213,7 +213,7 @@ export default function ApiKeyManagement() {
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
                 <Button type="submit" variant="contained" disabled={saving}
-                  sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+                  sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
                   {saving ? 'Generating…' : 'Generate Key'}
                 </Button>
               </Box>
@@ -223,7 +223,7 @@ export default function ApiKeyManagement() {
         {newKey && (
           <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
             <Button variant="contained" onClick={() => { setAddOpen(false); setNewKey(null); }}
-              sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               Done
             </Button>
           </DialogActions>

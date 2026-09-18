@@ -70,8 +70,8 @@ const WebsiteLayout = ({ children }) => (
 );
 
 const RouteFallback = () => (
-  <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-    <CircularProgress sx={{ color: "#051C12" }} />
+  <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#0B0D17" }}>
+    <CircularProgress sx={{ color: "#7777C7" }} />
   </Box>
 );
 

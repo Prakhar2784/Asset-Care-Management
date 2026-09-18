@@ -165,8 +165,8 @@ const TechnicianPortal = () => {
   );
 
   const kpis = [
-    { label: "My Assigned Tasks", value: myAssigned.length,      color: "#B4F105", icon: <ConfirmationNumberRounded /> },
-    { label: "In Progress",       value: inProgressRepairs.length, color: "#B4F105", icon: <BuildCircleRounded /> },
+    { label: "My Assigned Tasks", value: myAssigned.length,      color: "#7777C7", icon: <ConfirmationNumberRounded /> },
+    { label: "In Progress",       value: inProgressRepairs.length, color: "#7777C7", icon: <BuildCircleRounded /> },
     { label: "Resolved by Me",    value: completedRepairs.length, color: "#10B981", icon: <TaskAltRounded /> }
   ];
 
@@ -268,13 +268,13 @@ const TechnicianPortal = () => {
                 startIcon={<AddRounded />}
                 onClick={openAddLog}
                 sx={{
-                  background: "#051C12",
+                  background: "#7777C7",
                   color: "#FFFFFF",
                   fontWeight: 800,
                   borderRadius: "8px",
                   boxShadow: "none",
                   textTransform: "none",
-                  '&:hover': { bgcolor: '#072F1F', boxShadow: 'none' }
+                  '&:hover': { bgcolor: '#6464B8', boxShadow: 'none' }
                 }}
               >
                 Add Log
@@ -452,10 +452,10 @@ const TechnicianPortal = () => {
               onClick={handleSaveLog}
               disabled={submittingLog}
               sx={{
-                background: "#051C12",
+                background: "#7777C7",
                 color: "#FFFFFF", fontWeight: 800, borderRadius: "12px", boxShadow: "none",
                 minWidth: 120,
-                '&:hover': { bgcolor: '#072F1F', boxShadow: 'none' }
+                '&:hover': { bgcolor: '#6464B8', boxShadow: 'none' }
               }}
             >
               {submittingLog ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : editLog ? "Save Changes" : "Record Log"}

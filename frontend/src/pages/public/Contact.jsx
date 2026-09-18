@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import api from "../../api/axios";
 import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
 import PhoneRoundedIcon from "@mui/icons-material/PhoneRounded";
-import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
@@ -11,13 +10,13 @@ import SupportAgentRoundedIcon from "@mui/icons-material/SupportAgentRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.16, 1, 0.3, 1] } },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
 };
 
 const stagger = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
 const Contact = () => {
@@ -35,7 +34,7 @@ const Contact = () => {
       name: form.name.value,
       email: form.email.value,
       phone: form.phone.value,
-message: form.message.value,
+      message: form.message.value,
     };
     try {
       await api.post('/contact', payload);
@@ -52,173 +51,379 @@ message: form.message.value,
   return (
     <>
       <style>{`
-        .contact-page { min-height: 100vh; background: #051C12; }
-        .contact-container { max-width: 1400px; margin: 0 auto; }
-        .contact-hero { padding: 140px 24px 44px; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        .contact-page {
+          min-height: 100vh;
+          background-color: #0B0D17;
+          color: #FFFFFF;
+          font-family: 'Poppins', 'Inter', -apple-system, sans-serif;
+        }
+
+        .contact-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+
+        .contact-hero {
+          padding: 140px 0 44px;
+        }
+
+        .contact-tag-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 16px;
+          border-radius: 9999px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 12px;
+          line-height: 1.4;
+          font-weight: 800;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+          background-color: #161B2E;
+          color: #7777C7;
+          border: 1px solid rgba(119, 119, 199, 0.35);
+          margin-bottom: 16px;
+        }
+
+        .contact-hero-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: clamp(34px, 4.5vw, 54px);
+          line-height: 1.1;
+          font-weight: 900;
+          color: #FFFFFF;
+          letter-spacing: -1.5px;
+          margin: 0 0 16px;
+        }
+
+        .contact-hero-sub {
+          font-size: 16.5px;
+          line-height: 1.7;
+          color: #94A3B8;
+          max-width: 640px;
+          margin: 0;
+          font-weight: 400;
+        }
 
         .contact-highlights {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 14px; margin-top: 32px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin-top: 36px;
         }
 
         .contact-highlight-card {
-          background: rgba(7,47,31,0.7);
-          border: 1px solid rgba(5,28,18,0.15);
-          border-radius: 18px; padding: 18px;
-          display: flex; align-items: center; gap: 14px;
-          box-shadow: 0 4px 16px rgba(5,28,18,0.05);
+          background-color: #1E233D;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 16px;
+          padding: 18px 20px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+          transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .contact-highlight-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(119, 119, 199, 0.4);
         }
 
         .contact-highlight-icon {
-          width: 44px; height: 44px; border-radius: 13px;
-          display: grid; place-items: center;
-          color: #B4F105; background: #051C12; flex-shrink: 0;
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          display: grid;
+          place-items: center;
+          color: #7777C7;
+          background-color: #161B2E;
+          flex-shrink: 0;
         }
 
-        .contact-highlight-title { font-size: 14px; font-weight: 900; color: #FFFFFF; margin-bottom: 3px; }
-        .contact-highlight-text { font-size: 12.5px; font-weight: 600; color: #879A91; }
+        .contact-highlight-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: 14.5px;
+          font-weight: 800;
+          color: #FFFFFF;
+          margin-bottom: 3px;
+        }
+        .contact-highlight-text {
+          font-size: 12.5px;
+          font-weight: 500;
+          color: #94A3B8;
+        }
 
-        .contact-section { background: transparent; padding: 16px 24px 100px; }
+        .contact-section {
+          padding: 16px 0 100px;
+        }
 
         .contact-grid {
-          max-width: 1400px; margin: 0 auto;
-          display: grid; grid-template-columns: 1.45fr 0.95fr;
-          gap: 38px; align-items: start;
+          display: grid;
+          grid-template-columns: 1.35fr 0.95fr;
+          gap: 32px;
+          align-items: start;
         }
 
         .contact-form-wrapper {
-          background: rgba(7,47,31,0.7);
-          border: 1px solid rgba(5,28,18,0.15);
-          border-radius: 28px; padding: 10px;
-          box-shadow: 0 8px 32px rgba(5,28,18,0.07);
+          background-color: #1E233D;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 24px;
+          padding: 38px;
+          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
         }
 
         .contact-form {
-          background: rgba(7,47,31,0.7);
-          border: 1px solid rgba(5,28,18,0.15);
-          border-radius: 22px; padding: 38px;
-          display: flex; flex-direction: column; gap: 22px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
         }
 
-        .form-title h3 { margin: 0 0 8px; color: #FFFFFF; font-size: 26px; font-weight: 950; letter-spacing: -0.8px; }
-        .form-title p { margin: 0; color: #879A91; font-size: 14.5px; font-weight: 500; line-height: 1.6; }
+        .form-title h3 {
+          margin: 0 0 8px;
+          color: #FFFFFF;
+          font-family: 'Poppins', sans-serif;
+          font-size: 26px;
+          font-weight: 900;
+          letter-spacing: -0.8px;
+        }
+        .form-title p {
+          margin: 0 0 8px;
+          color: #94A3B8;
+          font-size: 14.5px;
+          font-weight: 400;
+          line-height: 1.6;
+        }
 
-        .input-group { display: flex; flex-direction: column; gap: 7px; }
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+        }
 
-        .input-label { font-size: 13.5px; font-weight: 900; color: #FFFFFF; }
-        .required-mark { color: #EF4444; margin-left: 3px; }
+        .input-label {
+          font-family: 'Poppins', sans-serif;
+          font-size: 13px;
+          font-weight: 700;
+          color: #FFFFFF;
+        }
+        .required-mark {
+          color: #F87171;
+          margin-left: 3px;
+        }
 
         .contact-input {
-          width: 100%; padding: 14px 16px;
-          font-size: 14.5px; font-weight: 500;
-          background-color: rgba(7,47,31,0.65);
-          border: 1.5px solid rgba(5,28,18,0.2);
-          border-radius: 14px; color: #FFFFFF;
-          outline: none; transition: all 0.25s ease;
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          box-sizing: border-box; appearance: none; -webkit-appearance: none;
+          width: 100%;
+          padding: 14px 16px;
+          font-size: 14.5px;
+          font-weight: 500;
+          background-color: #161B2E;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          border-radius: 12px;
+          color: #FFFFFF;
+          outline: none;
+          transition: all 0.22s ease;
+          font-family: 'Poppins', 'Inter', sans-serif;
+          box-sizing: border-box;
         }
 
-        .contact-input::placeholder { color: #879A91; font-weight: 500; }
-        .contact-input:hover { border-color: rgba(5,28,18,0.24); background: rgba(7,47,31,0.7); }
-        .contact-input:focus { background-color: rgba(7,47,31,0.85); border-color: #B4F105; box-shadow: 0 0 0 3px rgba(180,241,5,0.15); }
-
-        select.contact-input {
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23FFFFFF' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-          background-repeat: no-repeat; background-position: right 14px center;
-          padding-right: 40px; cursor: pointer;
+        .contact-input::placeholder {
+          color: #64748B;
+          font-weight: 400;
+        }
+        .contact-input:hover {
+          border-color: rgba(119, 119, 199, 0.35);
+        }
+        .contact-input:focus {
+          border-color: #7777C7;
+          box-shadow: 0 0 0 3px rgba(119, 119, 199, 0.15);
+          background-color: #1A1E33;
         }
 
         .contact-btn {
-          background: #B4F105; color: #051C12;
-          padding: 16px; border-radius: 14px;
-          font-weight: 900; font-size: 15px;
-          border: none; cursor: pointer;
-          transition: all 0.25s ease; margin-top: 4px;
-          display: flex; align-items: center; justify-content: center; gap: 8px;
-          box-shadow: 0 4px 16px rgba(5,28,18,0.4);
+          background-color: #7777C7;
+          color: #0B0D17;
+          padding: 16px;
+          border-radius: 9999px;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 800;
+          font-size: 15px;
+          border: 1px solid #7777C7;
+          cursor: pointer;
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+          margin-top: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          box-shadow: 0 6px 20px rgba(119, 119, 199, 0.35);
         }
 
-        .contact-btn:hover:not(:disabled) { background: #c1f824; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(180,241,5,0.4); }
-        .contact-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-        .contact-btn.success { background: #16A34A; color: #FFFFFF; }
+        .contact-btn:hover:not(:disabled) {
+          background-color: #6464B8;
+          border-color: #6464B8;
+          color: #FFFFFF;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(119, 119, 199, 0.5);
+        }
+        .contact-btn:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+        .contact-btn.success {
+          background-color: #10B981;
+          border-color: #10B981;
+          color: #FFFFFF;
+        }
 
-        .contact-info { display: flex; flex-direction: column; gap: 18px; }
+        .contact-info {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
 
         .contact-side-card {
-          background: #072F1F; border-radius: 28px; padding: 32px;
-          color: #FFFFFF; position: relative; overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.05);
+          background-color: #1E233D;
+          border-radius: 24px;
+          padding: 32px;
+          color: #FFFFFF;
+          position: relative;
+          overflow: hidden;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
         }
 
         .contact-side-card::before {
           content: "";
-          position: absolute; top: -70px; right: -70px;
-          width: 200px; height: 200px;
-          background: radial-gradient(circle, rgba(180,241,5,0.14), transparent 70%);
-          border-radius: 50%; pointer-events: none;
+          position: absolute;
+          top: -70px;
+          right: -70px;
+          width: 200px;
+          height: 200px;
+          background: radial-gradient(circle, rgba(119, 119, 199, 0.14), transparent 70%);
+          border-radius: 50%;
+          pointer-events: none;
         }
 
-        .contact-side-card h3 {
-          font-size: 28px; font-weight: 950; letter-spacing: -0.9px;
-          margin: 0 0 12px; position: relative; z-index: 1;
+        .side-title {
+          font-family: 'Poppins', sans-serif;
+          font-size: 20px;
+          font-weight: 900;
+          margin-bottom: 8px;
+          letter-spacing: -0.4px;
         }
-
-        .contact-side-card p {
-          color: rgba(255,255,255,0.75); font-size: 15px; line-height: 1.7;
-          font-weight: 500; margin: 0; position: relative; z-index: 1;
+        .side-desc {
+          color: #94A3B8;
+          font-size: 13.5px;
+          line-height: 1.6;
+          margin-bottom: 24px;
+          font-weight: 400;
         }
 
         .side-stats {
-          display: grid; grid-template-columns: 1fr 1fr;
-          gap: 12px; margin-top: 24px; position: relative; z-index: 1;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-bottom: 28px;
         }
 
-        .side-stat {
-          background: rgba(17,24,39,0.08);
-          border: 1px solid rgba(17,24,39,0.16);
-          border-radius: 16px; padding: 14px;
+        .side-stat-item {
+          background-color: #161B2E;
+          border: 1px solid rgba(119, 119, 199, 0.18);
+          border-radius: 14px;
+          padding: 14px;
         }
 
-        .side-stat-value { font-size: 24px; font-weight: 950; color: #FFFFFF; margin-bottom: 3px; letter-spacing: -0.8px; }
-        .side-stat-label { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.6px; }
+        .side-stat-value {
+          font-family: 'Poppins', sans-serif;
+          font-size: 22px;
+          font-weight: 900;
+          color: #7777C7;
+          margin-bottom: 2px;
+          letter-spacing: -0.8px;
+        }
+        .side-stat-label {
+          font-family: 'Poppins', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          color: #94A3B8;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
 
         .info-box {
-          padding: 22px; background: rgba(20,20,20,0.7);
-          border-radius: 20px; border: 1px solid rgba(17,24,39,0.15);
-          box-shadow: 0 4px 16px rgba(17,17,17,0.05);
-          display: flex; align-items: flex-start; gap: 16px;
-          transition: all 0.25s ease;
+          padding: 20px 22px;
+          background-color: #1E233D;
+          border-radius: 18px;
+          border: 1px solid rgba(119, 119, 199, 0.22);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          transition: all 0.22s ease;
         }
 
-        .info-box:hover { transform: translateY(-4px); border-color: rgba(17,24,39,0.18); box-shadow: 0 16px 36px rgba(17,17,17,0.08); }
+        .info-box:hover {
+          transform: translateY(-2px);
+          border-color: rgba(119, 119, 199, 0.4);
+        }
 
         .info-icon {
-          width: 48px; height: 48px; border-radius: 14px;
-          background: #111827; color: #FFFFFF;
-          display: grid; place-items: center; flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(17,24,39,0.35);
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background-color: #161B2E;
+          color: #7777C7;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
         }
 
-        .info-label { font-size: 11px; color: #94A3B8; text-transform: uppercase; letter-spacing: 1px; font-weight: 900; }
-        .info-text { font-size: 15px; color: #FFFFFF; margin-top: 4px; font-weight: 800; line-height: 1.5; }
+        .info-label {
+          font-family: 'Poppins', sans-serif;
+          font-size: 11px;
+          color: #94A3B8;
+          text-transform: uppercase;
+          letter-spacing: 0.8px;
+          font-weight: 800;
+        }
+        .info-text {
+          font-size: 14.5px;
+          color: #FFFFFF;
+          margin-top: 3px;
+          font-weight: 700;
+          line-height: 1.4;
+        }
 
         .support-note {
-          background: rgba(20,20,20,0.7); border: 1.5px dashed rgba(17,24,39,0.25);
-          border-radius: 20px; padding: 22px;
-          color: #CBD5E1; font-size: 14.5px; line-height: 1.7; font-weight: 500;
+          background-color: #1E233D;
+          border: 1px dashed rgba(119, 119, 199, 0.3);
+          border-radius: 18px;
+          padding: 20px 22px;
+          color: #94A3B8;
+          font-size: 14px;
+          line-height: 1.65;
+          font-weight: 400;
         }
 
-        .support-note strong { color: #FFFFFF; }
+        .support-note strong {
+          color: #FFFFFF;
+        }
 
-        @media (max-width: 1000px) {
-          .contact-grid { grid-template-columns: 1fr; gap: 30px; }
-          .contact-form { padding: 28px 22px; }
+        @media (max-width: 1024px) {
+          .contact-grid {
+            grid-template-columns: 1fr;
+            gap: 28px;
+          }
+          .contact-highlights {
+            grid-template-columns: 1fr;
+          }
         }
 
         @media (max-width: 640px) {
           .contact-hero { padding-top: 120px; }
+          .contact-form-wrapper { padding: 26px 20px; }
           .side-stats { grid-template-columns: 1fr; }
         }
       `}</style>
@@ -226,16 +431,16 @@ message: form.message.value,
       <div className="contact-page">
         <div className="contact-hero">
           <div className="contact-container">
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ color: '#FFFFFF', fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 10 }}>Contact Protocol</div>
-              <h1 style={{ color: '#FFFFFF', fontWeight: 950, fontSize: 'clamp(32px,4vw,52px)', letterSpacing: '-1.5px', lineHeight: 1.1, margin: '0 0 16px' }}>Request a system demo</h1>
-              <p style={{ color: '#CBD5E1', fontSize: 17, fontWeight: 500, lineHeight: 1.7, maxWidth: 640, margin: 0 }}>Share your requirements and our technical team will help you provision a complete asset service and warranty management architecture.</p>
+            <div>
+              <span className="contact-tag-badge">Contact Protocol</span>
+              <h1 className="contact-hero-title">Request a system demo</h1>
+              <p className="contact-hero-sub">Share your requirements and our technical team will help you configure a complete asset service and warranty management architecture.</p>
             </div>
             <div className="contact-highlights">
               {[
-                { icon: <BusinessRoundedIcon />, title: "Enterprise Ready", text: "Suitable for offices, factories and IT teams" },
-                { icon: <SupportAgentRoundedIcon />, title: "Guided Demo", text: "Understand modules and workflow clearly" },
-                { icon: <SecurityRoundedIcon />, title: "Secure Workflow", text: "Approval-based asset service process" },
+                { icon: <BusinessRoundedIcon sx={{ fontSize: 22 }} />, title: "Enterprise Ready", text: "Suitable for offices, factories, schools & IT teams" },
+                { icon: <SupportAgentRoundedIcon sx={{ fontSize: 22 }} />, title: "Guided Walkthrough", text: "Understand modules and workflow clearly" },
+                { icon: <SecurityRoundedIcon sx={{ fontSize: 22 }} />, title: "Secure Workflow", text: "Multi-level approval based service process" },
               ].map((h) => (
                 <div key={h.title} className="contact-highlight-card">
                   <div className="contact-highlight-icon">{h.icon}</div>
@@ -250,103 +455,106 @@ message: form.message.value,
         </div>
 
         <section className="contact-section">
-          <motion.div className="contact-grid" initial="hidden" animate="visible" variants={stagger}>
-            <motion.div variants={fadeUp} className="contact-form-wrapper">
-              <form className="contact-form" onSubmit={handleSubmit}>
-                <div className="form-title">
-                  <h3>Get in touch with us</h3>
-                  <p>Fill in your details and we'll get back to you within one business day to schedule a personalised demo.</p>
-                </div>
+          <div className="contact-container">
+            <motion.div className="contact-grid" initial="hidden" animate="visible" variants={stagger}>
+              <motion.div variants={fadeUp} className="contact-form-wrapper">
+                <form className="contact-form" onSubmit={handleSubmit}>
+                  <div className="form-title">
+                    <h3>Get in touch with us</h3>
+                    <p>Fill in your details and we will reach out within one business day to schedule a personalized session.</p>
+                  </div>
 
-                <div className="input-group">
-                  <label className="input-label">Enterprise / Company Name<span className="required-mark">*</span></label>
-                  <input name="company" placeholder="e.g., Acme Corporation" className="contact-input" required />
-                </div>
-
-                <div className="input-group">
-                  <label className="input-label">Your Full Name<span className="required-mark">*</span></label>
-                  <input name="name" placeholder="e.g., Jane Doe" className="contact-input" required />
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20 }}>
                   <div className="input-group">
-                    <label className="input-label">Work Email Address<span className="required-mark">*</span></label>
-                    <input name="email" placeholder="name@company.com" className="contact-input" type="email" required />
+                    <label className="input-label">Enterprise / Company Name<span className="required-mark">*</span></label>
+                    <input name="company" placeholder="e.g., Acme Corporation" className="contact-input" required />
                   </div>
+
                   <div className="input-group">
-                    <label className="input-label">Phone Number<span className="required-mark">*</span></label>
-                    <input name="phone" placeholder="10-digit mobile number" className="contact-input" type="tel" required
-                      maxLength={10} pattern="[0-9]{10}"
-                      onInput={e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); }}
-                      title="Please enter a valid 10-digit phone number" />
+                    <label className="input-label">Your Full Name<span className="required-mark">*</span></label>
+                    <input name="name" placeholder="e.g., Jane Doe" className="contact-input" required />
                   </div>
-                </div>
 
-                <div className="input-group">
-                  <label className="input-label">Your Message<span className="required-mark">*</span></label>
-                  <textarea name="message" placeholder="Tell us about your organisation, the assets you manage, and what you'd like to achieve with IAssetCare..." className="contact-input" style={{ minHeight: 130, resize: "vertical" }} required />
-                </div>
-
-                {submitError && (
-                  <div style={{ background: '#FEF2F2', border: '1.5px solid #FCA5A5', borderRadius: '12px', padding: '12px 16px', color: '#DC2626', fontSize: '14px', fontWeight: 600 }}>
-                    {submitError}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
+                    <div className="input-group">
+                      <label className="input-label">Work Email Address<span className="required-mark">*</span></label>
+                      <input name="email" placeholder="name@company.com" className="contact-input" type="email" required />
+                    </div>
+                    <div className="input-group">
+                      <label className="input-label">Phone Number<span className="required-mark">*</span></label>
+                      <input name="phone" placeholder="10-digit mobile number" className="contact-input" type="tel" required
+                        maxLength={10} pattern="[0-9]{10}"
+                        onInput={e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); }}
+                        title="Please enter a valid 10-digit phone number" />
+                    </div>
                   </div>
-                )}
-                <button type="submit" className={`contact-btn ${isSuccess ? "success" : ""}`} disabled={isSubmitting}>
-                  {isSubmitting ? "Processing Request..." : isSuccess ? (
-                    <><CheckCircleRoundedIcon fontSize="small" />Request Submitted — We'll be in touch!</>
-                  ) : (
-                    <><SendRoundedIcon fontSize="small" />Submit Demo Request</>
+
+                  <div className="input-group">
+                    <label className="input-label">Your Message<span className="required-mark">*</span></label>
+                    <textarea name="message" placeholder="Tell us about the assets you manage and what you'd like to achieve with IAssetCare..." className="contact-input" style={{ minHeight: 120, resize: "vertical" }} required />
+                  </div>
+
+                  {submitError && (
+                    <div style={{ background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', padding: '12px 16px', color: '#F87171', fontSize: '13.5px', fontWeight: 600 }}>
+                      {submitError}
+                    </div>
                   )}
-                </button>
-              </form>
-            </motion.div>
 
-            <motion.div variants={stagger} className="contact-info">
-              <motion.div variants={fadeUp} className="contact-side-card">
-                <h3>IAssetCare</h3>
-                <p>Built for organizations that need proper asset tracking, warranty visibility, complaint management and approval-based service control.</p>
-                <div className="side-stats">
-                  <div className="side-stat">
-                    <div className="side-stat-value">360°</div>
-                    <div className="side-stat-label">Asset Visibility</div>
+                  <button type="submit" className={`contact-btn ${isSuccess ? "success" : ""}`} disabled={isSubmitting}>
+                    {isSubmitting ? "Processing Request..." : isSuccess ? (
+                      <><CheckCircleRoundedIcon fontSize="small" />Request Submitted — We'll be in touch!</>
+                    ) : (
+                      <><SendRoundedIcon fontSize="small" />Submit Demo Request</>
+                    )}
+                  </button>
+                </form>
+              </motion.div>
+
+              <motion.div variants={stagger} className="contact-info">
+                <motion.div variants={fadeUp} className="contact-side-card">
+                  <h3>IAssetCare</h3>
+                  <p>Built for enterprises that require systematic asset tracking, warranty alerts, repair management and approval-based service workflows.</p>
+                  <div className="side-stats">
+                    <div className="side-stat">
+                      <div className="side-stat-value">360°</div>
+                      <div className="side-stat-label">Asset Visibility</div>
+                    </div>
+                    <div className="side-stat">
+                      <div className="side-stat-value">100%</div>
+                      <div className="side-stat-label">Service Tracking</div>
+                    </div>
                   </div>
-                  <div className="side-stat">
-                    <div className="side-stat-value">100%</div>
-                    <div className="side-stat-label">Service Tracking</div>
+                </motion.div>
+
+                <motion.div variants={fadeUp} className="info-box">
+                  <div className="info-icon"><EmailRoundedIcon sx={{ fontSize: 22 }} /></div>
+                  <div>
+                    <div className="info-label">Direct Email</div>
+                    <div className="info-text">iassetcare@icpljpr.com</div>
                   </div>
-                </div>
-              </motion.div>
+                </motion.div>
 
-              <motion.div variants={fadeUp} className="info-box">
-                <div className="info-icon"><EmailRoundedIcon /></div>
-                <div>
-                  <div className="info-label">Direct Email</div>
-                  <div className="info-text">iassetcare@icpljpr.com</div>
-                </div>
-              </motion.div>
+                <motion.div variants={fadeUp} className="info-box">
+                  <div className="info-icon"><PhoneRoundedIcon sx={{ fontSize: 22 }} /></div>
+                  <div>
+                    <div className="info-label">Support Hotline</div>
+                    <div className="info-text">+91 90270 07508</div>
+                  </div>
+                </motion.div>
 
-              <motion.div variants={fadeUp} className="info-box">
-                <div className="info-icon"><PhoneRoundedIcon /></div>
-                <div>
-                  <div className="info-label">Support Hotline</div>
-                  <div className="info-text">+91 90270 07508</div>
-                </div>
-              </motion.div>
+                <motion.div variants={fadeUp} className="info-box">
+                  <div className="info-icon"><SupportAgentRoundedIcon sx={{ fontSize: 22 }} /></div>
+                  <div>
+                    <div className="info-label">Business Hours</div>
+                    <div className="info-text">Monday – Friday · 9:00 AM – 6:00 PM IST</div>
+                  </div>
+                </motion.div>
 
-              <motion.div variants={fadeUp} className="info-box">
-                <div className="info-icon"><LocationOnRoundedIcon /></div>
-                <div>
-                  <div className="info-label">Office Location</div>
-                  <div className="info-text">Tech Park, Block B<br />Jaipur, Rajasthan<br />India 302022</div>
-                </div>
-              </motion.div>
-
-              <motion.div variants={fadeUp} className="support-note">
-                <strong>Response Time:</strong> Our team typically responds within <strong>1 business day</strong>. For urgent support, call our hotline directly at <strong>+91 90270 07508</strong>.
+                <motion.div variants={fadeUp} className="support-note">
+                  <strong>Response Time:</strong> Our team typically responds within <strong>1 business day</strong>. For urgent support, reach out to our hotline directly at <strong>+91 90270 07508</strong>.
+                </motion.div>
               </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
         </section>
       </div>
     </>

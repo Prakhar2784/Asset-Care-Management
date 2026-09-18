@@ -655,6 +655,48 @@ const deleteCoupon = async (req, res) => {
   }
 };
 
+// ─── Plan Management Controllers ───────────────────────────────────────────
+
+// GET /api/super-admin/plans
+const getPlans = async (req, res) => {
+  try {
+    const planService = require('../services/planService');
+    const plans = await planService.getAllPlans();
+    res.json(plans);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PUT /api/super-admin/plans/:planKey
+const updatePlan = async (req, res) => {
+  try {
+    const planService = require('../services/planService');
+    const { planKey } = req.params;
+    const updated = await planService.updatePlan(planKey, req.body);
+    res.json({
+      message: `Plan "${updated.name}" updated successfully.`,
+      plan: updated
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// POST /api/super-admin/plans/reset
+const resetPlans = async (req, res) => {
+  try {
+    const planService = require('../services/planService');
+    const reset = await planService.resetPlansToDefault();
+    res.json({
+      message: 'All subscription plans reset to default prices and specifications.',
+      plans: reset
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getPlatformStats,
   getExpiryMonitoring,
@@ -670,4 +712,8 @@ module.exports = {
   updateCoupon,
   toggleCouponStatus,
   deleteCoupon,
+  getPlans,
+  updatePlan,
+  resetPlans,
 };
+

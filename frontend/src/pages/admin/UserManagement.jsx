@@ -75,7 +75,7 @@ function EditUserDialog({ open, onClose, target, departments, saving, onSave }) 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
             <Button onClick={onClose} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
             <Button type="submit" variant="contained" disabled={saving}
-              sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </Box>
@@ -174,7 +174,7 @@ const SortHead = ({ id, label, sort, onSort, sx = {} }) => (
   <TableCell sortDirection={sort.col === id ? sort.dir : false}
     sx={{ fontWeight: 800, fontSize: 11, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.6px', py: 1.5, borderBottom: 2, borderColor: 'divider', cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', ...sx }}>
     <TableSortLabel active={sort.col === id} direction={sort.col === id ? sort.dir : 'asc'} onClick={() => onSort(id)}
-      sx={{ '& .MuiTableSortLabel-icon': { fontSize: 14 }, color: 'inherit !important', '&.Mui-active': { color: '#051C12 !important' }, '& .MuiTableSortLabel-icon': { color: '#051C12 !important', opacity: sort.col === id ? 1 : 0 } }}>
+      sx={{ '& .MuiTableSortLabel-icon': { fontSize: 14 }, color: 'inherit !important', '&.Mui-active': { color: '#7777C7 !important' }, '& .MuiTableSortLabel-icon': { color: '#7777C7 !important', opacity: sort.col === id ? 1 : 0 } }}>
       {label}
     </TableSortLabel>
   </TableCell>
@@ -610,7 +610,7 @@ export default function UserManagement() {
           </Button>
           <Button variant="contained" startIcon={<PersonAddRounded />}
             onClick={() => { setAddOpen(true); setFormError(''); setForm(defaultForm); setAddMode('invite'); }}
-            sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5, '&:hover': { background: '#072F1F' } }}>
+            sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5, '&:hover': { background: '#6464B8' } }}>
             Add User
           </Button>
         </Stack>
@@ -627,9 +627,9 @@ export default function UserManagement() {
       <Paper sx={{ borderRadius: '16px', border: 1, borderColor: 'divider', mb: 3, overflow: 'hidden' }}>
         <Tabs value={activeTab} onChange={(_, v) => { setActiveTab(v); clearSelection(); setPage(0); }} sx={{
           px: 1,
-          '& .MuiTabs-indicator': { bgcolor: 'text.primary', borderRadius: '2px', height: 3 },
+          '& .MuiTabs-indicator': { bgcolor: '#7777C7', borderRadius: '2px', height: 3 },
           '& .MuiTab-root': { fontWeight: 700, fontSize: 13, textTransform: 'none', minHeight: 48, color: 'text.secondary' },
-          '& .Mui-selected': { color: 'text.primary' },
+          '& .Mui-selected': { color: '#7777C7 !important' },
         }}>
           {[
             { value: 'all', label: 'All Users' },
@@ -640,8 +640,18 @@ export default function UserManagement() {
           ].map(({ value, label }) => (
             <Tab key={value} value={value} label={
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {label}
-                <Box sx={{ px: 1, py: 0.1, borderRadius: '20px', fontSize: 11, fontWeight: 800, bgcolor: activeTab === value ? '#B4F105' : 'action.hover', color: activeTab === value ? '#051C12' : 'text.disabled' }}>
+                <Typography sx={{ fontSize: 13, fontWeight: activeTab === value ? 800 : 700, color: activeTab === value ? '#7777C7' : 'text.secondary' }}>
+                  {label}
+                </Typography>
+                <Box sx={{
+                  px: 1,
+                  py: 0.2,
+                  borderRadius: '20px',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  bgcolor: activeTab === value ? '#EEEEFA' : '#F0F2F1',
+                  color: activeTab === value ? '#5D5DA8' : '#5F6865'
+                }}>
                   {countFor(value)}
                 </Box>
               </Box>
@@ -812,7 +822,7 @@ export default function UserManagement() {
         <DialogActions sx={{ px: 3, py: 2, borderTop: 1, borderColor: 'divider' }}>
           <Button onClick={() => setBulkRoleOpen(false)} sx={{ fontWeight: 700, color: 'text.secondary', borderRadius: '10px' }}>Cancel</Button>
           <Button variant="contained" onClick={bulkChangeRole} disabled={bulkWorking}
-            sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+            sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
             {bulkWorking ? 'Updating…' : 'Apply'}
           </Button>
         </DialogActions>
@@ -875,7 +885,7 @@ export default function UserManagement() {
             <Box sx={{ flex: 1 }} />
             {userPermSaved && <Typography fontSize={13} color="success.main" fontWeight={700}>Saved!</Typography>}
             <Button variant="contained" onClick={saveUserPerm}
-              sx={{ fontWeight: 800, borderRadius: '10px', px: 3, background: '#051C12', color: '#FFFFFF' }}>
+              sx={{ fontWeight: 800, borderRadius: '10px', px: 3, background: '#7777C7', color: '#FFFFFF' }}>
               Save Changes
             </Button>
           </DialogActions>
@@ -958,7 +968,7 @@ export default function UserManagement() {
                 Download Template
               </Button>
               <Button component="label" variant="contained" startIcon={<UploadFileRounded />}
-                sx={{ borderRadius: '10px', fontWeight: 700, background: '#051C12', color: '#FFFFFF', flex: 1 }}>
+                sx={{ borderRadius: '10px', fontWeight: 700, background: '#7777C7', color: '#FFFFFF', flex: 1 }}>
                 Choose CSV File
                 <input ref={csvInputRef} type="file" hidden accept=".csv"
                   onChange={e => { e.target.files[0] && handleCsvFile(e.target.files[0]); if (csvInputRef.current) csvInputRef.current.value = ''; }} />
@@ -1040,7 +1050,7 @@ export default function UserManagement() {
           <Button onClick={() => setCsvOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>{csvResult ? 'Close' : 'Cancel'}</Button>
           {csvRows.length > 0 && !csvResult && (
             <Button variant="contained" onClick={handleCsvImport} disabled={csvImporting}
-              sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
+              sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3 }}>
               {csvImporting ? 'Importing…' : `Import ${csvRows.length} Users`}
             </Button>
           )}
@@ -1293,7 +1303,7 @@ export default function UserManagement() {
               <Button onClick={() => setAddOpen(false)} sx={{ color: 'text.secondary', fontWeight: 700, borderRadius: '10px' }}>Cancel</Button>
               <Button type="submit" variant="contained" disabled={saving}
                 startIcon={addMode === 'invite' ? <EmailRounded /> : <PersonAddRounded />}
-                sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3, '&:hover': { background: '#072F1F' } }}>
+                sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '10px', px: 3, '&:hover': { background: '#6464B8' } }}>
                 {saving ? 'Please wait…' : addMode === 'invite' ? 'Send Invite' : 'Create User'}
               </Button>
             </Box>

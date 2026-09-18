@@ -276,21 +276,18 @@ const OnboardingWizard = () => {
               display: flex;
               align-items: center;
               justify-content: center;
-              background: #0B0D12;
-              background-attachment: fixed;
-              font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              background: #0B0D17;
+              font-family: 'Poppins', 'Inter', -apple-system, sans-serif;
               width: 100%;
             }
 
             .auth-container {
               width: 100%;
-              max-width: 1240px;
-              background: rgba(18, 20, 29, 0.85);
-              backdrop-filter: blur(28px);
-              -webkit-backdrop-filter: blur(28px);
-              border: 1px solid rgba(255, 255, 255, 0.08);
-              border-radius: 32px;
-              box-shadow: 0 35px 80px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+              max-width: 1200px;
+              background: #1E233D;
+              border: 1px solid rgba(119, 119, 199, 0.22);
+              border-radius: 28px;
+              box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
               display: flex;
               overflow: hidden;
               color: #ffffff;
@@ -298,13 +295,13 @@ const OnboardingWizard = () => {
 
             .auth-info {
               flex: 1;
-              background: linear-gradient(160deg, #131722 0%, #090B10 100%);
+              background: #161B2E;
               display: flex;
               flex-direction: column;
               justify-content: space-between;
               padding: 56px 48px;
               position: relative;
-              border-right: 1px solid rgba(255, 255, 255, 0.06);
+              border-right: 1px solid rgba(119, 119, 199, 0.18);
             }
 
             .auth-info::before {
@@ -314,7 +311,7 @@ const OnboardingWizard = () => {
               left: -15%;
               width: 450px;
               height: 450px;
-              background: radial-gradient(circle, rgba(251, 191, 36, 0.08) 0%, rgba(0,0,0,0) 70%);
+              background: radial-gradient(circle, rgba(119, 119, 199, 0.14) 0%, rgba(0,0,0,0) 70%);
               border-radius: 50%;
               pointer-events: none;
             }
@@ -327,15 +324,9 @@ const OnboardingWizard = () => {
             }
 
             .brand-logo {
-              width: 46px;
-              height: 46px;
-              border-radius: 14px;
-              background: linear-gradient(135deg, #1E2433 0%, #111520 100%);
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              display: grid;
-              place-items: center;
-              color: #FBBF24;
-              box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+              display: flex;
+              align-items: center;
+              justify-content: center;
             }
 
             .brand-name {
@@ -357,9 +348,9 @@ const OnboardingWizard = () => {
               display: inline-flex;
               align-items: center;
               gap: 6px;
-              background: rgba(251, 191, 36, 0.12);
-              border: 1px solid rgba(251, 191, 36, 0.25);
-              color: #FBBF24;
+              background: #161B2E;
+              border: 1px solid rgba(119, 119, 199, 0.35);
+              color: #7777C7;
               padding: 6px 14px;
               border-radius: 20px;
               font-size: 12px;
@@ -401,7 +392,7 @@ const OnboardingWizard = () => {
 
             .feature-card:hover {
               background: rgba(255, 255, 255, 0.05);
-              border-color: rgba(251, 191, 36, 0.25);
+              border-color: rgba(119, 119, 199, 0.35);
               transform: translateY(-2px);
             }
 
@@ -409,8 +400,8 @@ const OnboardingWizard = () => {
               width: 40px;
               height: 40px;
               border-radius: 12px;
-              background: rgba(251, 191, 36, 0.1);
-              color: #FBBF24;
+              background: #161B2E;
+              color: #7777C7;
               display: grid;
               place-items: center;
               flex-shrink: 0;
@@ -437,7 +428,7 @@ const OnboardingWizard = () => {
               align-items: center;
               justify-content: flex-start;
               padding: 48px 40px;
-              background: #0D1017;
+              background: #1E233D;
               z-index: 2;
             }
 
@@ -472,8 +463,8 @@ const OnboardingWizard = () => {
               gap: 8px;
               margin-bottom: 28px;
               padding: 10px 14px;
-              background: rgba(255, 255, 255, 0.02);
-              border: 1px solid rgba(255, 255, 255, 0.06);
+              background: #161B2E;
+              border: 1px solid rgba(119, 119, 199, 0.22);
               border-radius: 16px;
             }
 
@@ -485,14 +476,14 @@ const OnboardingWizard = () => {
               border-radius: 10px;
               font-size: 12.5px;
               font-weight: 700;
-              color: #6B7280;
+              color: #94A3B8;
               transition: all 0.2s ease;
             }
 
             .wizard-step-item.active {
-              background: rgba(251, 191, 36, 0.12);
-              color: #FBBF24;
-              border: 1px solid rgba(251, 191, 36, 0.25);
+              background: rgba(119, 119, 199, 0.18);
+              color: #FFFFFF;
+              border: 1px solid #7777C7;
             }
 
             .wizard-step-item.completed {
@@ -507,13 +498,13 @@ const OnboardingWizard = () => {
               place-items: center;
               font-size: 11px;
               font-weight: 800;
-              background: #1F2937;
+              background: #1E233D;
               color: #9CA3AF;
             }
 
             .wizard-step-item.active .step-dot {
-              background: #FBBF24;
-              color: #0B0D12;
+              background: #7777C7;
+              color: #FFFFFF;
             }
 
             .wizard-step-item.completed .step-dot {
@@ -522,8 +513,8 @@ const OnboardingWizard = () => {
             }
 
             .form-section-card {
-              background: rgba(255, 255, 255, 0.02);
-              border: 1px solid rgba(255, 255, 255, 0.06);
+              background: #161B2E;
+              border: 1px solid rgba(119, 119, 199, 0.18);
               border-radius: 20px;
               padding: 24px 22px 16px;
               margin-bottom: 22px;
@@ -540,8 +531,8 @@ const OnboardingWizard = () => {
               width: 32px;
               height: 32px;
               border-radius: 10px;
-              background: #FBBF24;
-              color: #111827;
+              background: #7777C7;
+              color: #FFFFFF;
               display: grid;
               place-items: center;
               font-weight: 900;
@@ -559,7 +550,7 @@ const OnboardingWizard = () => {
             .section-sub {
               font-size: 12px;
               font-weight: 500;
-              color: #717684;
+              color: #94A3B8;
               margin-top: 2px;
             }
 
@@ -573,7 +564,7 @@ const OnboardingWizard = () => {
               left: 14px;
               top: 50%;
               transform: translateY(-50%);
-              color: #6B7280;
+              color: #7777C7;
               display: flex;
               align-items: center;
               pointer-events: none;
@@ -582,8 +573,8 @@ const OnboardingWizard = () => {
 
             .auth-input {
               width: 100%;
-              background: #141721;
-              border: 1px solid #232734;
+              background: #1E233D;
+              border: 1px solid rgba(119, 119, 199, 0.22);
               padding: 13px 14px 13px 44px;
               border-radius: 12px;
               color: #ffffff;
@@ -594,13 +585,13 @@ const OnboardingWizard = () => {
             }
 
             .auth-input:focus {
-              border-color: #FBBF24;
-              background: #171B27;
-              box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+              border-color: #7777C7;
+              background: #232946;
+              box-shadow: 0 0 0 3px rgba(119, 119, 199, 0.15);
             }
 
             .auth-input::placeholder {
-              color: #525866;
+              color: #64748B;
             }
 
             .input-grid-2 {
@@ -614,14 +605,14 @@ const OnboardingWizard = () => {
               right: 14px;
               top: 50%;
               transform: translateY(-50%);
-              color: #6B7280;
+              color: #94A3B8;
               cursor: pointer;
               display: flex;
               align-items: center;
             }
 
             .input-suffix:hover {
-              color: #FBBF24;
+              color: #7777C7;
             }
 
             .error-banner {
@@ -658,7 +649,7 @@ const OnboardingWizard = () => {
             .add-more-btn {
               width: 100%;
               background: rgba(255, 255, 255, 0.03);
-              border: 1px dashed rgba(255, 255, 255, 0.15);
+              border: 1px dashed rgba(119, 119, 199, 0.3);
               color: #E5E7EB;
               padding: 12px;
               border-radius: 12px;
@@ -674,16 +665,16 @@ const OnboardingWizard = () => {
             }
 
             .add-more-btn:hover {
-              background: rgba(251, 191, 36, 0.08);
-              border-color: #FBBF24;
-              color: #FBBF24;
+              background: rgba(119, 119, 199, 0.12);
+              border-color: #7777C7;
+              color: #7777C7;
             }
 
             .asset-hero-card {
               text-align: center;
               padding: 36px 20px;
-              background: rgba(255, 255, 255, 0.02);
-              border: 1px solid rgba(255, 255, 255, 0.06);
+              background: #161B2E;
+              border: 1px solid rgba(119, 119, 199, 0.18);
               border-radius: 20px;
               margin-bottom: 24px;
             }
@@ -692,12 +683,12 @@ const OnboardingWizard = () => {
               width: 68px;
               height: 68px;
               border-radius: 20px;
-              background: rgba(251, 191, 36, 0.12);
-              color: #FBBF24;
+              background: #1E233D;
+              color: #7777C7;
               display: grid;
               place-items: center;
               margin: 0 auto 16px;
-              border: 1px solid rgba(251, 191, 36, 0.25);
+              border: 1px solid rgba(119, 119, 199, 0.35);
             }
 
             .action-bar {
@@ -706,7 +697,7 @@ const OnboardingWizard = () => {
               justify-content: space-between;
               margin-top: 24px;
               padding-top: 20px;
-              border-top: 1px solid rgba(255, 255, 255, 0.06);
+              border-top: 1px solid rgba(119, 119, 199, 0.15);
               gap: 12px;
             }
 
@@ -728,8 +719,8 @@ const OnboardingWizard = () => {
             }
 
             .primary-btn {
-              background: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
-              color: #0B0D12;
+              background: #7777C7;
+              color: #0B0D17;
               border: none;
               padding: 13px 26px;
               border-radius: 12px;
@@ -739,13 +730,15 @@ const OnboardingWizard = () => {
               display: flex;
               align-items: center;
               gap: 8px;
-              box-shadow: 0 8px 24px rgba(251, 191, 36, 0.25);
+              box-shadow: 0 8px 24px rgba(119, 119, 199, 0.35);
               transition: all 0.2s ease;
             }
 
             .primary-btn:hover {
+              background: #6464B8;
+              color: #FFFFFF;
               transform: translateY(-1px);
-              box-shadow: 0 12px 28px rgba(251, 191, 36, 0.35);
+              box-shadow: 0 12px 28px rgba(119, 119, 199, 0.5);
             }
 
             .primary-btn:disabled {
@@ -779,7 +772,7 @@ const OnboardingWizard = () => {
           <div className="auth-info">
             <div className="brand-header">
               <div className="brand-logo">
-                <ShieldRoundedIcon />
+                <img src="/logo_home.png" alt="IAssetCare" style={{ width: 28, height: 28, display: 'block', objectFit: 'contain' }} />
               </div>
               <div className="brand-name">IAssetCare</div>
             </div>

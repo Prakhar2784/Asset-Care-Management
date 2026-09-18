@@ -9,26 +9,25 @@ import InsightsIcon from "@mui/icons-material/Insights";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
-import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
 };
 
 const stagger = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
 
 const Home = () => {
   const features = [
-    { icon: <VerifiedIcon />, title: "Warranty Optimization", text: "Optimize warranty coverage, AMC contracts, renewal schedules, and service provider agreements for your entire inventory." },
-    { icon: <BuildIcon />, title: "Support Ticket System", text: "Register service requests, assign responsibility, and track the repair timeline from open to completion." },
-    { icon: <BusinessIcon />, title: "Vendor Coordination", text: "Maintain detailed OEM contact info, service booking numbers, technician schedules, and vendor performance history." },
-    { icon: <ApprovalIcon />, title: "Departmental Approval", text: "Verify and approve maintenance tasks at the department level before initiating paid services." },
-    { icon: <InsightsIcon />, title: "Live Analytics Dashboard", text: "Monitor active service tickets, upcoming warranty dates, pending approvals, and comprehensive cost summaries." },
-    { icon: <AddTaskIcon />, title: "Complete Service History", text: "Build a permanent digital archive of every test, maintenance visit, component replacement, and final resolution." },
+    { icon: <VerifiedIcon sx={{ fontSize: 24 }} />, title: "Warranty Optimization", text: "Optimize warranty coverage, AMC contracts, renewal schedules, and service provider agreements for your entire inventory." },
+    { icon: <BuildIcon sx={{ fontSize: 24 }} />, title: "Support Ticket System", text: "Register service requests, assign responsibility, and track the repair timeline from open to completion." },
+    { icon: <BusinessIcon sx={{ fontSize: 24 }} />, title: "Vendor Coordination", text: "Maintain detailed OEM contact info, service booking numbers, technician schedules, and vendor performance history." },
+    { icon: <ApprovalIcon sx={{ fontSize: 24 }} />, title: "Departmental Approval", text: "Verify and approve maintenance tasks at the department level before initiating paid services." },
+    { icon: <InsightsIcon sx={{ fontSize: 24 }} />, title: "Live Analytics Dashboard", text: "Monitor active service tickets, upcoming warranty dates, pending approvals, and comprehensive cost summaries." },
+    { icon: <AddTaskIcon sx={{ fontSize: 24 }} />, title: "Complete Service History", text: "Build a permanent digital archive of every test, maintenance visit, component replacement, and final resolution." },
   ];
 
   const stats = [
@@ -39,346 +38,720 @@ const Home = () => {
   ];
 
   return (
-    <div style={{ backgroundColor: "#051C12", overflowX: "hidden" }}>
+    <main className="midnight-home">
       <style>{`
-        .h-container { max-width: 1200px; margin: 0 auto; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-        .h-badge {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 8px 16px; border-radius: 999px;
-          background: rgba(5,28,18,0.15); color: #FFFFFF;
-          border: 1px solid rgba(5,28,18,0.25);
-          font-weight: 800; font-size: 13px; margin-bottom: 22px;
-          letter-spacing: 0.2px;
+        .midnight-home {
+          /* Spacing Scale */
+          --space-8: 8px;
+          --space-12: 12px;
+          --space-16: 16px;
+          --space-20: 20px;
+          --space-24: 24px;
+          --space-32: 32px;
+          --space-48: 48px;
+          --space-64: 64px;
+          --space-96: 96px;
+
+          /* Color Palette: Dark Midnight Navy (#0B0D17) & Deep Slate Card (#1E233D) with #7777C7 Accents */
+          --bg-canvas: #0B0D17;
+          --bg-surface: #1E233D;
+          --bg-surface-subtle: #161B2E;
+          --bg-surface-elevated: #252B49;
+          --border-light: rgba(119, 119, 199, 0.22);
+          --border-subtle: rgba(119, 119, 199, 0.12);
+          --border-medium: rgba(119, 119, 199, 0.38);
+
+          --accent-primary: #7777C7;
+          --accent-primary-hover: #6464B8;
+
+          --text-primary: #FFFFFF;
+          --text-secondary: #94A3B8;
+          --text-muted: #64748B;
+
+          /* Status Accents */
+          --emerald-text: #7777C7;
+          --emerald-tint: rgba(119, 119, 199, 0.14);
+          --emerald-border: rgba(119, 119, 199, 0.35);
+
+          --amber-text: #FBBF24;
+          --amber-tint: rgba(245, 158, 11, 0.14);
+          --amber-border: rgba(245, 158, 11, 0.3);
+
+          --crimson-text: #F87171;
+          --crimson-tint: rgba(239, 68, 68, 0.14);
+          --crimson-border: rgba(239, 68, 68, 0.3);
+
+          /* Rounded Geometry */
+          --radius-sm: 8px;
+          --radius-md: 14px;
+          --radius-lg: 20px;
+          --radius-xl: 28px;
+          --radius-full: 9999px;
+
+          /* Typography Stack — Original Website Font */
+          --font-heading: 'Poppins', sans-serif;
+          --font-body: 'Poppins', 'Inter', -apple-system, sans-serif;
+
+          background-color: var(--bg-canvas);
+          color: var(--text-primary);
+          font-family: var(--font-body);
+          overflow-x: hidden;
+          min-height: 100vh;
         }
 
-        .h-btn-primary {
-          background: #B4F105; color: #051C12;
-          padding: 15px 30px; border-radius: 999px;
-          font-weight: 800; font-size: 15px;
-          text-decoration: none;
-          display: inline-flex; align-items: center; gap: 8px;
-          transition: all 0.22s ease;
-          letter-spacing: -0.2px;
-          box-shadow: 0 6px 20px rgba(5,28,18,0.4);
-        }
-        .h-btn-primary:hover { background: #c1f824; transform: translateY(-3px); box-shadow: 0 14px 32px rgba(180,241,5,0.4); }
-
-        .h-btn-outline {
-          padding: 15px 30px; border-radius: 999px;
-          font-weight: 800; font-size: 15px;
-          color: #FFFFFF; border: 1.5px solid rgba(255,255,255,0.3);
-          text-decoration: none;
-          display: inline-flex; align-items: center; gap: 8px;
-          transition: all 0.22s ease;
-          background: rgba(5,28,18,0.06);
-        }
-        .h-btn-outline:hover { border-color: #FFFFFF; background: rgba(5,28,18,0.12); transform: translateY(-3px); }
-
-        .h-hero-visual {
-          background: rgba(7, 47, 31, 0.85);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(5,28,18,0.2);
-          border-radius: 28px;
-          padding: 28px;
-          position: relative;
-          overflow: hidden;
-          box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(5,28,18,0.1);
+        .midnight-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding-left: var(--space-24);
+          padding-right: var(--space-24);
         }
 
-        .h-hero-visual::before {
-          content: "";
-          position: absolute;
-          top: -60px; right: -60px;
-          width: 220px; height: 220px;
-          background: radial-gradient(circle, rgba(5,28,18,0.18), transparent 70%);
-          border-radius: 50%;
-          pointer-events: none;
-        }
-
-        .h-mini-stat {
-          background: rgba(7,47,31,0.6);
-          border: 1px solid rgba(5,28,18,0.1);
-          border-radius: 16px;
-          padding: 18px;
-        }
-
-        .h-bar-track {
-          height: 8px;
-          background: rgba(255,255,255,0.08);
-          border-radius: 999px;
-          overflow: hidden;
-        }
-
-        .h-feature-card {
-          background: rgba(7,47,31,0.7);
-          border: 1px solid rgba(5,28,18,0.15);
-          padding: 30px 28px;
-          border-radius: 24px;
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-        .h-feature-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 24px 48px rgba(5,28,18,0.10);
-          border-color: rgba(5,28,18,0.16);
-        }
-
-        .h-feature-icon {
-          width: 54px; height: 54px;
-          background: #051C12; color: #FFFFFF;
-          border-radius: 15px;
-          display: grid; place-items: center;
-          margin-bottom: 20px;
-          box-shadow: 0 4px 16px rgba(5,28,18,0.4);
-        }
-
-        .h-check-circle {
-          width: 24px; height: 24px; border-radius: "50%";
-          background: rgba(5,28,18,0.15);
+        /* ─── Typography Utility Classes (Matching Original Site) ─ */
+        .midnight-hero-title {
+          font-family: var(--font-heading);
+          font-size: 56px;
+          line-height: 1.08;
+          font-weight: 900;
           color: #FFFFFF;
-          display: grid; place-items: center;
-          font-weight: 900; font-size: 12px;
-          flex-shrink: 0; border-radius: 50%;
+          letter-spacing: -1.8px;
+          text-transform: uppercase;
+          margin: 0 0 22px;
         }
 
-        .h-check-item {
-          display: flex; align-items: center; gap: 12px;
-          font-size: 15px; font-weight: 700; color: #FFFFFF;
+        .midnight-section-heading {
+          font-family: var(--font-heading);
+          font-size: 40px;
+          line-height: 1.15;
+          font-weight: 900;
+          color: #FFFFFF;
+          letter-spacing: -1.2px;
+          margin: 0 0 var(--space-16);
         }
 
-        .h-info-panel {
-          background: rgba(7,47,31,0.7);
-          border: 1px solid rgba(5,28,18,0.15);
-          border-radius: 28px;
-          padding: 32px;
-          box-shadow: 0 20px 48px rgba(5,28,18,0.06);
+        .midnight-body {
+          font-family: var(--font-body);
+          font-size: 16.5px;
+          line-height: 1.7;
+          font-weight: 400;
+          color: var(--text-secondary);
         }
 
-        .h-asset-row {
-          padding: 16px; border-radius: 16px;
-          background: rgba(7,47,31,0.65); border: 1px solid rgba(5,28,18,0.15);
-          margin-bottom: 12px;
-          display: flex; justify-content: space-between; gap: 12px; align-items: center;
+        .midnight-meta {
+          font-family: var(--font-body);
+          font-size: 13px;
+          line-height: 1.5;
+          font-weight: 500;
+          color: var(--text-muted);
         }
 
-        .h-workflow-card {
-          background: rgba(7,47,31,0.7);
-          border: 1px solid rgba(5,28,18,0.15);
-          border-radius: 20px; padding: 22px;
-          margin-bottom: 12px;
-          box-shadow: 0 4px 16px rgba(5,28,18,0.04);
+        /* ─── Buttons ─────────────────────────────────────────── */
+        .midnight-btn-solid {
+          min-height: 52px;
+          padding: 0 32px;
+          background-color: #7777C7;
+          color: #0B0C1A;
+          border-radius: var(--radius-full);
+          font-family: var(--font-heading);
+          font-weight: 800;
+          font-size: 15px;
+          line-height: 1;
+          letter-spacing: -0.2px;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-8);
+          border: 1px solid #7777C7;
+          box-shadow: 0 6px 20px rgba(119, 119, 199, 0.35);
+          transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .midnight-btn-solid:hover {
+          background-color: #6464B8;
+          border-color: #6464B8;
+          color: #FFFFFF;
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(119, 119, 199, 0.5);
+        }
+        .midnight-btn-solid:focus-visible {
+          outline: 2px solid #7777C7;
+          outline-offset: 2px;
         }
 
-        .h-section-label {
-          color: #FFFFFF; font-weight: 900;
-          text-transform: uppercase; letter-spacing: 1.8px; font-size: 12px;
+        .midnight-btn-outline {
+          min-height: 52px;
+          padding: 0 30px;
+          border-radius: var(--radius-full);
+          font-family: var(--font-heading);
+          font-weight: 800;
+          font-size: 15px;
+          line-height: 1;
+          letter-spacing: -0.2px;
+          color: #FFFFFF;
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          background-color: #10121C;
+          text-decoration: none;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-8);
+          transition: all 0.22s ease;
+        }
+        .midnight-btn-outline:hover {
+          background-color: #1A1D2E;
+          border-color: #7777C7;
+          transform: translateY(-2px);
+        }
+        .midnight-btn-outline:focus-visible {
+          outline: 2px solid #7777C7;
+          outline-offset: 2px;
         }
 
+        /* ─── Cards & Surfaces ────────────────────────────────── */
+        .midnight-card {
+          background-color: #1E233D;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-xl);
+          padding: var(--space-32);
+          box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7);
+        }
+
+        .midnight-stat-card {
+          background-color: #1E233D;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-md);
+          padding: 16px 14px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+          transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .midnight-stat-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(119, 119, 199, 0.4);
+        }
+
+        .midnight-stat-number {
+          font-family: var(--font-heading);
+          font-size: 24px;
+          line-height: 1.1;
+          font-weight: 900;
+          color: #FFFFFF;
+          letter-spacing: -0.8px;
+          margin-bottom: 3px;
+        }
+
+        .midnight-stat-label {
+          font-family: var(--font-heading);
+          font-size: 11px;
+          line-height: 1.3;
+          font-weight: 800;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .midnight-icon-circle {
+          width: 36px;
+          height: 36px;
+          border-radius: var(--radius-sm);
+          background-color: #1E233D;
+          color: #7777C7;
+          display: grid;
+          place-items: center;
+          flex-shrink: 0;
+        }
+
+        .midnight-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 16px;
+          border-radius: var(--radius-full);
+          font-family: var(--font-heading);
+          font-size: 12px;
+          line-height: 1.4;
+          font-weight: 800;
+          letter-spacing: 1px;
+          text-transform: uppercase;
+        }
+
+        .midnight-tag-strip {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-12);
+          font-family: var(--font-heading);
+          font-size: 13px;
+          font-weight: 800;
+          color: #7777C7;
+          letter-spacing: 1.2px;
+          margin-bottom: 26px;
+          text-transform: uppercase;
+          background-color: #111424;
+          border: 1px solid rgba(119, 119, 199, 0.35);
+          border-radius: 6px;
+          padding: 7px 16px;
+        }
+
+        .midnight-bar-track {
+          height: 8px;
+          background-color: #1E233B;
+          border-radius: var(--radius-full);
+          overflow: hidden;
+        }
+
+        /* ─── 7 Capability Pills Grid ─────────────────────────── */
+        .midnight-capabilities-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+        }
+
+        .midnight-capability-pill {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background-color: #1E233D;
+          border: 1px solid var(--border-light);
+          border-radius: 10px;
+          padding: 13px 18px;
+          min-height: 52px;
+          box-sizing: border-box;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .midnight-capability-pill:hover {
+          transform: translateY(-2px);
+          border-color: rgba(119, 119, 199, 0.4);
+        }
+
+        .midnight-capability-icon {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background-color: #161B2E;
+          color: #7777C7;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: 900;
+          flex-shrink: 0;
+        }
+
+        .midnight-capability-text {
+          font-family: var(--font-heading);
+          font-weight: 700;
+          color: #FFFFFF;
+          font-size: 13.5px;
+          letter-spacing: -0.2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* ─── Core Modules Grid ───────────────────────────────── */
+        .midnight-modules-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
+
+        .midnight-feature-card {
+          background-color: #1E233D;
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-lg);
+          padding: 32px 28px;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+          box-sizing: border-box;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .midnight-feature-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(119, 119, 199, 0.4);
+          box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(119, 119, 199, 0.12);
+        }
+
+        .midnight-asset-row {
+          padding: var(--space-16) var(--space-20);
+          border-bottom: 1px solid var(--border-light);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: var(--space-16);
+          transition: background-color 0.15s ease;
+        }
+        .midnight-asset-row:last-child {
+          border-bottom: none;
+        }
+        .midnight-asset-row:hover {
+          background-color: rgba(119, 119, 199, 0.05);
+        }
+
+        .midnight-workflow-item {
+          padding: var(--space-16) var(--space-20);
+          border-bottom: 1px solid var(--border-light);
+          display: flex;
+          gap: var(--space-16);
+          align-items: flex-start;
+          transition: background-color 0.15s ease;
+        }
+        .midnight-workflow-item:last-child {
+          border-bottom: none;
+        }
+        .midnight-workflow-item:hover {
+          background-color: rgba(119, 119, 199, 0.05);
+        }
+
+        .midnight-check-item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-16);
+          font-size: 15.5px;
+          line-height: 1.5;
+          font-weight: 600;
+          color: #E2E8F0;
+        }
+
+        /* ─── Responsive Media Queries ────────────────────────── */
         @media (max-width: 1024px) {
-          .h-hero-grid, .h-split-grid { grid-template-columns: 1fr !important; gap: 48px !important; }
-          .h-hero-title { font-size: 44px !important; }
+          .midnight-hero-grid, .midnight-split-grid {
+            grid-template-columns: 1fr !important;
+            gap: var(--space-48) !important;
+          }
+          .midnight-capabilities-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .midnight-modules-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .midnight-hero-title {
+            font-size: 44px !important;
+          }
+          .midnight-section-heading {
+            font-size: 34px !important;
+          }
         }
+
         @media (max-width: 640px) {
-          .h-hero-title { font-size: 36px !important; }
-          .h-section-title { font-size: 32px !important; }
+          .midnight-container {
+            padding-left: var(--space-16);
+            padding-right: var(--space-16);
+          }
+          .midnight-capabilities-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .midnight-modules-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .midnight-hero-title {
+            font-size: 34px !important;
+          }
+          .midnight-section-heading {
+            font-size: 26px !important;
+          }
+          .midnight-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .midnight-card, .midnight-feature-card {
+            padding: var(--space-20);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
         }
       `}</style>
 
-      {/* HERO */}
-      <section style={{ paddingTop: 160, paddingBottom: 80, paddingLeft: 24, paddingRight: 24 }}>
-        <div className="h-container h-hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
+      {/* ─── 1. HERO & METRICS SECTION ────────────────────────────────────────────── */}
+      <section style={{
+        paddingTop: "140px",
+        paddingBottom: "80px",
+        borderBottom: "1px solid var(--border-light)"
+      }}>
+        <div className="midnight-container midnight-hero-grid" style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: "56px", alignItems: "center" }}>
           <motion.div initial="hidden" animate="visible" variants={stagger}>
-            <motion.h1 variants={fadeUp} className="h-hero-title" style={{ fontSize: 62, fontWeight: 950, color: "#FFFFFF", lineHeight: 1.06, marginBottom: 22, letterSpacing: "-2.2px" }}>
-              MANAGE ASSETS<br/>WARRANTY &amp; SERVICE
+            
+            {/* Page Title (Poppins 900 Uppercase) */}
+            <motion.h1 variants={fadeUp} className="midnight-hero-title">
+              MANAGE ASSETS<br/>WARRANTY &amp;<br/>SERVICE
             </motion.h1>
 
-            <div style={{ display: "inline-flex", gap: "10px", padding: "8px 20px", background: "rgba(180, 241, 5, 0.12)", border: "1.5px solid rgba(180, 241, 5, 0.25)", borderRadius: "8px", color: "#B4F105", fontWeight: "800", fontSize: "13px", marginBottom: "28px", letterSpacing: "1px" }}>
-              <span>REGISTER</span> <span style={{ color: "rgba(255,255,255,0.25)" }}>|</span> <span>TRACK</span> <span style={{ color: "rgba(255,255,255,0.25)" }}>|</span> <span>MANAGE</span> <span style={{ color: "rgba(255,255,255,0.25)" }}>|</span> <span>RENEW</span>
-            </div>
+            {/* Tag Strip */}
+            <motion.div variants={fadeUp} className="midnight-tag-strip">
+              <span>REGISTER</span> <span style={{ color: "rgba(119, 119, 199, 0.4)" }}>|</span>
+              <span>TRACK</span> <span style={{ color: "rgba(119, 119, 199, 0.4)" }}>|</span>
+              <span>MANAGE</span> <span style={{ color: "rgba(119, 119, 199, 0.4)" }}>|</span>
+              <span>RENEW</span>
+            </motion.div>
 
-            <motion.p variants={fadeUp} style={{ fontSize: 18, color: "#9CA3AF", lineHeight: 1.72, marginBottom: 34, maxWidth: 520, fontWeight: 500 }}>
-              Complete solution to manage warranty &amp; service of <span style={{ color: "#B4F105", fontWeight: 800 }}>Movable</span> and <span style={{ color: "#B4F105", fontWeight: 800 }}>Immovable</span> Assets.
+            {/* Paragraph Body */}
+            <motion.p variants={fadeUp} className="midnight-body" style={{ marginBottom: "34px", maxWidth: 520, fontSize: "17.5px" }}>
+              Complete solution to manage warranty &amp; service of <strong style={{ color: "#7777C7", fontWeight: 800 }}>Movable</strong> and <strong style={{ color: "#7777C7", fontWeight: 800 }}>Immovable</strong> Assets.
             </motion.p>
 
-            <motion.div variants={fadeUp} style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <Link to="/login" className="h-btn-primary">
-                Access Dashboard <ArrowForwardRoundedIcon fontSize="small" />
+            {/* Action Buttons */}
+            <motion.div variants={fadeUp} style={{ display: "flex", gap: "16px", flexWrap: "wrap", alignItems: "center", marginBottom: "44px" }}>
+              <Link to="/login" className="midnight-btn-solid">
+                Access Dashboard <ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />
               </Link>
-              <Link to="/modules" className="h-btn-outline">View Modules</Link>
+              <Link to="/modules" className="midnight-btn-outline">
+                View Modules
+              </Link>
             </motion.div>
 
-            <motion.div variants={fadeUp} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginTop: 40, maxWidth: 520 }}>
+            {/* Stat Cards Grid (4 items) */}
+            <motion.div variants={fadeUp} className="midnight-stats-grid" style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "12px",
+              maxWidth: 520
+            }}>
               {stats.map((item) => (
-                <div key={item.label} style={{ background: "rgba(7,47,31,0.75)", border: "1px solid rgba(5,28,18,0.15)", borderRadius: 16, padding: "14px 12px", boxShadow: "0 4px 16px rgba(5,28,18,0.05)" }}>
-                  <div style={{ fontSize: 22, fontWeight: 950, color: "#FFFFFF", marginBottom: 3, letterSpacing: "-0.8px" }}>{item.value}</div>
-                  <div style={{ fontSize: 11, color: "#879A91", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.4px" }}>{item.label}</div>
+                <div key={item.label} className="midnight-stat-card">
+                  <div className="midnight-stat-number">
+                    {item.value}
+                  </div>
+                  <div className="midnight-stat-label">
+                    {item.label}
+                  </div>
                 </div>
               ))}
             </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }} className="h-hero-visual">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 22 }}>
-              <div>
-                <div style={{ fontWeight: 900, color: "#FFFFFF", fontSize: 17, letterSpacing: "-0.4px" }}>IAssetCare Dashboard</div>
-                <div style={{ fontSize: 12, color: "#879A91", fontWeight: 600, marginTop: 2 }}>Live asset health overview</div>
-              </div>
-              <div style={{ padding: "6px 12px", borderRadius: 999, background: "rgba(5,28,18,0.12)", color: "#FFFFFF", fontWeight: 900, fontSize: 11, border: "1px solid rgba(5,28,18,0.22)", letterSpacing: "1px" }}>LIVE</div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-              <div className="h-mini-stat">
-                <Inventory2RoundedIcon sx={{ color: "#FFFFFF", fontSize: 20, mb: 0.8 }} />
-                <div style={{ fontSize: 28, fontWeight: 950, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1 }}>1,248</div>
-                <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 4, fontWeight: 600 }}>Total Assets</div>
-              </div>
-              <div className="h-mini-stat">
-                <BuildIcon sx={{ color: "#FFFFFF", fontSize: 20, mb: 0.8 }} />
-                <div style={{ fontSize: 28, fontWeight: 950, color: "#FFFFFF", letterSpacing: "-1px", lineHeight: 1 }}>24</div>
-                <div style={{ fontSize: 12, color: "#9CA3AF", marginTop: 4, fontWeight: 600 }}>Active Tickets</div>
-              </div>
-            </div>
-
-            {[
-              { name: "IT Assets", val: "82%", width: "82%", color: "#FFFFFF" },
-              { name: "Electrical", val: "58%", width: "58%", color: "#B4F105" },
-              { name: "Under Service", val: "34%", width: "34%", color: "#F97316" },
-            ].map((bar) => (
-              <div key={bar.name} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 800, marginBottom: 7, color: "#FFFFFF" }}>
-                  <span style={{ color: "#879A91" }}>{bar.name}</span>
-                  <span>{bar.val}</span>
+          {/* Right Column: Dashboard Preview Card */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }} style={{ position: "relative" }}>
+            <div className="midnight-card" style={{ padding: "32px", position: "relative", zIndex: 1 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "22px" }}>
+                <div>
+                  <div style={{ fontFamily: "var(--font-heading)", fontWeight: 900, fontSize: 18, color: "#FFFFFF", letterSpacing: "-0.4px" }}>
+                    IAssetCare Dashboard
+                  </div>
+                  <div className="midnight-meta" style={{ marginTop: 2 }}>
+                    Live asset health overview
+                  </div>
                 </div>
-                <div className="h-bar-track">
-                  <motion.div initial={{ width: 0 }} animate={{ width: bar.width }} transition={{ duration: 1.1, delay: 0.8 }} style={{ height: "100%", background: bar.color, borderRadius: 999 }} />
+                <span className="midnight-badge" style={{ border: "1px solid rgba(119, 119, 199, 0.4)", color: "#7777C7", backgroundColor: "rgba(119, 119, 199, 0.1)", padding: "4px 14px", fontSize: 11 }}>
+                  LIVE
+                </span>
+              </div>
+
+              {/* 2 KPI Metrics */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px", marginBottom: "22px" }}>
+                <div style={{
+                  backgroundColor: "var(--bg-surface-elevated)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "18px 20px",
+                  border: "1px solid rgba(119, 119, 199, 0.15)"
+                }}>
+                  <Inventory2RoundedIcon sx={{ color: "#FFFFFF", fontSize: 22, marginBottom: "8px" }} />
+                  <div className="midnight-stat-number" style={{ fontSize: 30, lineHeight: 1, marginBottom: 4 }}>
+                    1,248
+                  </div>
+                  <div className="midnight-stat-label" style={{ fontSize: 12, textTransform: "none", letterSpacing: "normal", fontWeight: 600 }}>
+                    Total Assets
+                  </div>
+                </div>
+
+                <div style={{
+                  backgroundColor: "var(--bg-surface-elevated)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "18px 20px",
+                  border: "1px solid rgba(119, 119, 199, 0.15)"
+                }}>
+                  <BuildIcon sx={{ color: "#FFFFFF", fontSize: 22, marginBottom: "8px" }} />
+                  <div className="midnight-stat-number" style={{ fontSize: 30, lineHeight: 1, marginBottom: 4 }}>
+                    24
+                  </div>
+                  <div className="midnight-stat-label" style={{ fontSize: 12, textTransform: "none", letterSpacing: "normal", fontWeight: 600 }}>
+                    Active Tickets
+                  </div>
                 </div>
               </div>
-            ))}
 
-            <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(5,28,18,0.08)", borderRadius: 14, border: "1px solid rgba(5,28,18,0.16)", display: "flex", gap: 12, alignItems: "center" }}>
-              <WarningAmberRoundedIcon sx={{ color: "#F97316", fontSize: 20, flexShrink: 0 }} />
-              <div>
-                <div style={{ fontWeight: 800, color: "#FFFFFF", fontSize: 13 }}>Warranty Alert</div>
-                <div style={{ fontSize: 12, color: "#879A91", fontWeight: 600 }}>18 assets expiring within 30 days</div>
+              {/* Progress Bars */}
+              {[
+                { name: "IT Assets", val: "82%", width: "82%", color: "#FFFFFF" },
+                { name: "Electrical", val: "58%", width: "58%", color: "#7777C7" },
+                { name: "Under Service", val: "34%", width: "34%", color: "#F97316" },
+              ].map((bar) => (
+                <div key={bar.name} style={{ marginBottom: "14px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <span className="midnight-body" style={{ fontSize: 13.5, fontWeight: 500, color: "#CBD5E1" }}>{bar.name}</span>
+                    <span className="midnight-body" style={{ fontSize: 13.5, fontWeight: 700, color: "#FFFFFF" }}>{bar.val}</span>
+                  </div>
+                  <div className="midnight-bar-track">
+                    <motion.div initial={{ width: 0 }} animate={{ width: bar.width }} transition={{ duration: 0.8, delay: 0.3 }} style={{ height: "100%", backgroundColor: bar.color, borderRadius: "var(--radius-full)" }} />
+                  </div>
+                </div>
+              ))}
+
+              {/* Alert Banner */}
+              <div style={{
+                marginTop: "22px",
+                padding: "16px 20px",
+                backgroundColor: "var(--bg-surface-subtle)",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid rgba(245, 158, 11, 0.25)",
+                display: "flex",
+                gap: "14px",
+                alignItems: "center"
+              }}>
+                <WarningAmberRoundedIcon sx={{ color: "#F59E0B", fontSize: 22, flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, color: "#FFFFFF", fontSize: 14 }}>
+                    Warranty Alert
+                  </div>
+                  <div className="midnight-meta" style={{ marginTop: 2 }}>
+                    18 assets expiring within 30 days
+                  </div>
+                </div>
               </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* TRUST STRIP */}
-      <section style={{ background: "rgba(5,28,18,0.12)", padding: "28px 24px" }}>
-        <div className="h-container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 18 }}>
-          {[
-            "Centralized Asset Registry",
-            "Warranty Tracking",
-            "Service Reminders",
-            "Claim & Ticket Management",
-            "Document Storage",
-            "Reports & Analytics",
-            "Multi-Location Management"
-          ].map((item) => (
-            <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontWeight: 800, color: "#FFFFFF", fontSize: 13.5 }}>
-              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#B4F105", color: "#051C12", display: "grid", placeItems: "center", fontWeight: 950, fontSize: 10, flexShrink: 0 }}>✓</span>
-              {item}
-            </div>
-          ))}
+      {/* ─── 2. TRUST / CAPABILITIES STRIP (7 BOXES) ─────────────────────────────── */}
+      <section style={{ backgroundColor: "#0B0D17", padding: "32px 0", borderBottom: "1px solid var(--border-light)" }}>
+        <div className="midnight-container">
+          <div className="midnight-capabilities-grid">
+            {[
+              "Centralized Asset Registry",
+              "Warranty Tracking",
+              "Service Reminders",
+              "Claim & Ticket Management",
+              "Document Storage",
+              "Reports & Analytics",
+              "Multi-Location Management"
+            ].map((item) => (
+              <div key={item} className="midnight-capability-pill">
+                <div className="midnight-capability-icon">
+                  ✓
+                </div>
+                <span className="midnight-capability-text">{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* SECTION 1 — Asset Control */}
-      <section style={{ padding: "100px 24px" }}>
-        <div className="h-container h-split-grid" style={{ display: "grid", gridTemplateColumns: "0.95fr 1.05fr", gap: 64, alignItems: "center" }}>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={fadeUp}>
-            <span className="h-section-label">Asset Control</span>
-            <h2 className="h-section-title" style={{ fontSize: 44, fontWeight: 950, color: "#FFFFFF", lineHeight: 1.14, letterSpacing: "-1.4px", margin: "14px 0 20px" }}>
+      <section style={{ padding: "80px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
+        <div className="midnight-container midnight-split-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "56px", alignItems: "center" }}>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp}>
+            <span className="midnight-badge" style={{ backgroundColor: "#171B2E", color: "#7777C7", border: "1px solid rgba(119, 119, 199, 0.35)", marginBottom: "16px" }}>
+              Asset Control
+            </span>
+            <h2 className="midnight-section-heading">
               Managing company assets in spreadsheets.
             </h2>
-            <p style={{ fontSize: 17, color: "#9CA3AF", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
+            <p className="midnight-body" style={{ marginBottom: "26px" }}>
               IAssetCare gives your company a complete digital record of IT, electrical, electronic, furniture and other movable or immovable assets.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {["Department-wise asset allocation", "Location and ownership tracking", "Warranty, AMC and purchase details", "Asset-wise complete service history"].map((text) => (
-                <div className="h-check-item" key={text}>
-                  <span className="h-check-circle">✓</span>{text}
+                <div className="midnight-check-item" key={text}>
+                  <div className="midnight-icon-circle" style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: "#1E233D" }}>
+                    <span style={{ fontSize: 11, fontWeight: 900, color: "#7777C7" }}>✓</span>
+                  </div>
+                  <span>{text}</span>
                 </div>
               ))}
             </div>
           </motion.div>
 
-          <motion.div className="h-info-panel" initial={{ opacity: 0, x: 36 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.75 }}>
-            <div style={{ fontWeight: 950, fontSize: 20, color: "#FFFFFF", marginBottom: 22, letterSpacing: "-0.4px" }}>Asset Register Preview</div>
+          <motion.div className="midnight-card" style={{ padding: 0, overflow: "hidden", borderRadius: "var(--radius-lg)" }} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-light)", backgroundColor: "var(--bg-surface-subtle)" }}>
+              <div style={{ fontFamily: "var(--font-heading)", fontWeight: 900, fontSize: 17, color: "#FFFFFF", letterSpacing: "-0.3px" }}>
+                Asset Register Preview
+              </div>
+            </div>
             {[
-              { title: "Dell Latitude Laptop", meta: "IT Department · Jaipur Office", status: "Warranty Active", color: "#4ADE80", bg: "rgba(74,222,128,0.12)" },
-              { title: "Canon Printer", meta: "Admin Department · Floor 2", status: "Service Due", color: "#B4F105", bg: "rgba(180,241,5,0.12)" },
-              { title: "UPS Power Backup", meta: "Electrical Room · Basement", status: "Complaint Open", color: "#EF4444", bg: "rgba(239,68,68,0.12)" },
+              { title: "Dell Latitude Laptop", meta: "IT Department · Jaipur Office", status: "Warranty Active", color: "#7777C7", bg: "rgba(119, 119, 199, 0.14)", border: "rgba(119, 119, 199, 0.35)" },
+              { title: "Canon Printer", meta: "Admin Department · Floor 2", status: "Service Due", color: "var(--amber-text)", bg: "var(--amber-tint)", border: "var(--amber-border)" },
+              { title: "UPS Power Backup", meta: "Electrical Room · Basement", status: "Complaint Open", color: "var(--crimson-text)", bg: "var(--crimson-tint)", border: "var(--crimson-border)" },
             ].map((asset) => (
-              <div key={asset.title} className="h-asset-row">
+              <div key={asset.title} className="midnight-asset-row">
                 <div>
-                  <div style={{ fontWeight: 800, color: "#FFFFFF", fontSize: 14 }}>{asset.title}</div>
-                  <div style={{ fontSize: 12.5, color: "#879A91", fontWeight: 600, marginTop: 3 }}>{asset.meta}</div>
+                  <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, color: "#FFFFFF", fontSize: 14 }}>{asset.title}</div>
+                  <div className="midnight-meta" style={{ marginTop: 2 }}>{asset.meta}</div>
                 </div>
-                <div style={{ padding: "6px 12px", borderRadius: 999, background: asset.bg, color: asset.color, fontWeight: 800, fontSize: 11.5, whiteSpace: "nowrap" }}>
+                <span className="midnight-badge" style={{ backgroundColor: asset.bg, color: asset.color, border: `1px solid ${asset.border}`, whiteSpace: "nowrap", padding: "4px 12px", fontSize: "11px" }}>
                   {asset.status}
-                </div>
+                </span>
               </div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* PEACE OF MIND ACCENT BANNER */}
-      <section style={{ padding: "60px 24px", background: "radial-gradient(circle at center, rgba(180,241,5,0.12) 0%, transparent 70%)" }}>
-        <div className="h-container" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "rgba(180, 241, 5, 0.1)", border: "2px solid #B4F105", display: "grid", placeItems: "center", marginBottom: 24, boxShadow: "0 0 20px rgba(180, 241, 5, 0.3)" }}>
-            <VerifiedIcon sx={{ color: "#B4F105", fontSize: 40 }} />
-          </div>
-          <h2 style={{ fontSize: "36px", fontWeight: "950", color: "#FFFFFF", letterSpacing: "-1px", textTransform: "uppercase", margin: 0 }}>
-            One Platform.<br/><span style={{ color: "#B4F105" }}>Complete Peace of Mind.</span>
-          </h2>
-        </div>
-      </section>
-
-      {/* SECTION 2 — Service Management */}
-      <section style={{ padding: "0 24px 100px" }}>
-        <div className="h-container h-split-grid" style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 64, alignItems: "center" }}>
-          <motion.div className="h-info-panel" initial={{ opacity: 0, x: -36 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.75 }}>
-            <div style={{ fontWeight: 950, fontSize: 20, color: "#FFFFFF", marginBottom: 22, letterSpacing: "-0.4px" }}>Ticket Workflow</div>
+      {/* ─── 4. SECTION 2 — SERVICE MANAGEMENT ───────────────────────────────────── */}
+      <section style={{ padding: "80px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
+        <div className="midnight-container midnight-split-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "56px", alignItems: "center" }}>
+          <motion.div className="midnight-card" style={{ padding: 0, overflow: "hidden", borderRadius: "var(--radius-lg)" }} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border-light)", backgroundColor: "var(--bg-surface-subtle)" }}>
+              <div style={{ fontFamily: "var(--font-heading)", fontWeight: 900, fontSize: 17, color: "#FFFFFF", letterSpacing: "-0.3px" }}>
+                Ticket Workflow
+              </div>
+            </div>
             {[
               { step: "01", title: "Service Request Registered", text: "User creates a ticket with issue details." },
               { step: "02", title: "Departmental Verification", text: "HOD/Admin reviews service eligibility and warranty details." },
               { step: "03", title: "Vendor Coordination Active", text: "OEM contact details and technician visit schedules are saved." },
               { step: "04", title: "Service Completed", text: "Resolution details, costs, and feedback are recorded." },
             ].map((item) => (
-              <div key={item.step} className="h-workflow-card">
-                <div style={{ display: "flex", gap: 14 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(5,28,18,0.12)", color: "#FFFFFF", display: "grid", placeItems: "center", fontWeight: 950, fontSize: 13, flexShrink: 0 }}>
-                    {item.step}
+              <div key={item.step} className="midnight-workflow-item">
+                <div style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "var(--radius-sm)",
+                  backgroundColor: "#1E233D",
+                  color: "#7777C7",
+                  display: "grid",
+                  placeItems: "center",
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 900,
+                  fontSize: 12,
+                  flexShrink: 0
+                }}>
+                  {item.step}
+                </div>
+                <div>
+                  <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, color: "#FFFFFF", fontSize: 14 }}>
+                    {item.title}
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 900, color: "#FFFFFF", marginBottom: 4, fontSize: 14 }}>{item.title}</div>
-                    <div style={{ color: "#879A91", lineHeight: 1.55, fontWeight: 600, fontSize: 13 }}>{item.text}</div>
+                  <div className="midnight-body" style={{ fontSize: 13.5, lineHeight: 1.55, marginTop: 2 }}>
+                    {item.text}
                   </div>
                 </div>
               </div>
             ))}
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={fadeUp}>
-            <span className="h-section-label">Service Management</span>
-            <h2 className="h-section-title" style={{ fontSize: 44, fontWeight: 950, color: "#FFFFFF", lineHeight: 1.14, letterSpacing: "-1.4px", margin: "14px 0 20px" }}>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={fadeUp}>
+            <span className="midnight-badge" style={{ backgroundColor: "#171B2E", color: "#7777C7", border: "1px solid rgba(119, 119, 199, 0.35)", marginBottom: "16px" }}>
+              Service Management
+            </span>
+            <h2 className="midnight-section-heading">
               Track every service ticket end to end.
             </h2>
-            <p style={{ fontSize: 17, color: "#9CA3AF", lineHeight: 1.76, marginBottom: 26, fontWeight: 500 }}>
+            <p className="midnight-body" style={{ marginBottom: "26px" }}>
               Keep every service request, technician contact, pending approval, and repair milestone fully organized in a clear, real-time timeline.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {["Seamless service ticket registration", "Transparent approval workflows", "Detailed vendor coordination logs", "Verification proof and maintenance logs"].map((text) => (
-                <div className="h-check-item" key={text}>
-                  <span className="h-check-circle">✓</span>{text}
+                <div className="midnight-check-item" key={text}>
+                  <div className="midnight-icon-circle" style={{ width: 24, height: 24, borderRadius: "50%", backgroundColor: "#1E233D" }}>
+                    <span style={{ fontSize: 11, fontWeight: 900, color: "#7777C7" }}>✓</span>
+                  </div>
+                  <span>{text}</span>
                 </div>
               ))}
             </div>
@@ -386,40 +759,49 @@ const Home = () => {
         </div>
       </section>
 
-      {/* FEATURES GRID */}
-      <section style={{ padding: "100px 24px", background: "rgba(5,28,18,0.12)" }}>
-        <div className="h-container">
-          <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 60px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 999, background: "rgba(5,28,18,0.10)", border: "1px solid rgba(5,28,18,0.20)", color: "#FFFFFF", fontWeight: 800, fontSize: 12, marginBottom: 18, letterSpacing: "1.2px", textTransform: "uppercase" }}>
+      {/* ─── 5. FEATURES GRID (CORE MODULES) ─────────────────────────────────────── */}
+      <section style={{ padding: "80px 0", backgroundColor: "#0B0D17", borderTop: "1px solid var(--border-light)" }}>
+        <div className="midnight-container">
+          <div style={{ textAlign: "center", maxWidth: 740, margin: "0 auto 54px" }}>
+            <span className="midnight-badge" style={{ backgroundColor: "#171B2E", color: "#7777C7", border: "1px solid rgba(119, 119, 199, 0.35)", marginBottom: "16px" }}>
               Core Modules
-            </div>
-            <h2 style={{ fontSize: 46, fontWeight: 950, color: "#FFFFFF", margin: "0 0 16px", letterSpacing: "-1.6px", lineHeight: 1.1 }}>
+            </span>
+            <h2 className="midnight-section-heading" style={{ fontSize: "44px", marginBottom: "16px" }}>
               Everything your asset team needs.
             </h2>
-            <p style={{ fontSize: 17, color: "#879A91", lineHeight: 1.7, fontWeight: 500 }}>
+            <p className="midnight-body" style={{ margin: 0 }}>
               From asset entry to warranty alerts, approvals, vendor complaint tracking and service closure — all modules work together.
             </p>
           </div>
 
-          <motion.div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}
+          <motion.div className="midnight-modules-grid"
             initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-40px" }} variants={stagger}>
             {features.map((item) => (
-              <motion.div key={item.title} variants={fadeUp} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 22, padding: "28px 24px", transition: "all 0.3s ease", cursor: "default" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(5,28,18,0.06)"; e.currentTarget.style.borderColor = "rgba(5,28,18,0.20)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
-                <div style={{ width: 50, height: 50, background: "#B4F105", color: "#051C12", borderRadius: 14, display: "grid", placeItems: "center", marginBottom: 18 }}>
-                  {item.icon}
+              <motion.div key={item.title} variants={fadeUp} className="midnight-feature-card">
+                <div className="midnight-icon-circle" style={{ width: 48, height: 48, borderRadius: "var(--radius-md)", marginBottom: "18px", backgroundColor: "#1E233D" }}>
+                  <span style={{ color: "#7777C7", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {item.icon}
+                  </span>
                 </div>
-                <h3 style={{ fontSize: 18, fontWeight: 900, color: "#FFFFFF", marginBottom: 10, letterSpacing: "-0.3px" }}>{item.title}</h3>
-                <p style={{ color: "#879A91", lineHeight: 1.65, fontSize: 14.5, fontWeight: 500, margin: 0 }}>{item.text}</p>
+                <h3 style={{ fontFamily: "var(--font-heading)", fontSize: 18, fontWeight: 900, color: "#FFFFFF", marginBottom: "8px", letterSpacing: "-0.3px" }}>
+                  {item.title}
+                </h3>
+                <p className="midnight-body" style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6 }}>
+                  {item.text}
+                </p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-    </div>
+    </main>
   );
 };
 
 export default Home;
+
+
+
+
+

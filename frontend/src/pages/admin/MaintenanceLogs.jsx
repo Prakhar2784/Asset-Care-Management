@@ -45,9 +45,9 @@ const STATUS_COLOR = {
 
 const KPI_DEFS = [
   { key: "total",    label: "Total Services", color: "text.primary", icon: <BuildRounded sx={{ fontSize: 20 }} /> },
-  { key: "cost",     label: "Total Cost",     color: "#B4F105", icon: <RupeeIcon sx={{ fontSize: 20 }} /> },
-  { key: "last",     label: "Last Serviced",  color: "#B4F105", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
-  { key: "next",     label: "Next Due",       color: "#B4F105", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
+  { key: "cost",     label: "Total Cost",     color: "#7777C7", icon: <RupeeIcon sx={{ fontSize: 20 }} /> },
+  { key: "last",     label: "Last Serviced",  color: "#7777C7", icon: <CalendarTodayRounded sx={{ fontSize: 20 }} /> },
+  { key: "next",     label: "Next Due",       color: "#7777C7", icon: <EventRepeatRounded sx={{ fontSize: 20 }} /> },
 ];
 
 const inputSx = { "& .MuiOutlinedInput-root": { borderRadius: "12px" } };
@@ -244,9 +244,9 @@ export default function MaintenanceLogs() {
                           onClick={() => selectAsset(asset)}
                           sx={{
                             px: 2, py: 1.5,
-                            borderLeft: `3px solid ${selected ? "#111827" : "transparent"}`,
-                            bgcolor: selected ? "rgba(17,24,39,0.08)" : "transparent",
-                            "&:hover": { bgcolor: "rgba(17,24,39,0.05)" },
+                            borderLeft: `3px solid ${selected ? "#7777C7" : "transparent"}`,
+                            bgcolor: selected ? "#EEEEFA" : "transparent",
+                            "&:hover": { bgcolor: "#F6F6FD" },
                           }}
                         >
                           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -312,12 +312,12 @@ export default function MaintenanceLogs() {
                     startIcon={<AddRounded sx={{ color: "#FFFFFF" }} />}
                     onClick={openAdd}
                     sx={{
-                      background: "#051C12",
+                      background: "#7777C7",
                       color: "#FFFFFF !important",
                       fontWeight: 800,
                       borderRadius: "12px",
                       boxShadow: "none",
-                      "&:hover": { background: "#0B291C" }
+                      "&:hover": { background: "#6464B8" }
                     }}
                   >
                     Add Log
@@ -697,13 +697,13 @@ export default function MaintenanceLogs() {
             onClick={handleSave}
             disabled={saving}
             sx={{
-              background: "#051C12",
+              background: "#7777C7",
               color: "#FFFFFF !important",
               fontWeight: 800,
               borderRadius: "12px",
               boxShadow: "none",
               minWidth: 120,
-              "&:hover": { background: "#0B291C" }
+              "&:hover": { background: "#6464B8" }
             }}
           >
             {saving ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : editLog ? "Save Changes" : "Add Log"}

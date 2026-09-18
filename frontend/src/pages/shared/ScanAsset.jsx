@@ -73,7 +73,7 @@ export default function ScanAsset() {
 
   if (loading) return (
     <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
-      <CircularProgress sx={{ color: "#051C12" }} />
+      <CircularProgress sx={{ color: "#7777C7" }} />
     </Box>
   );
 
@@ -97,7 +97,7 @@ export default function ScanAsset() {
 
         {/* QR Scan badge */}
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1, mb: 3 }}>
-          <QrCodeScannerRounded sx={{ color: "#051C12", fontSize: 22 }} />
+          <QrCodeScannerRounded sx={{ color: "#7777C7", fontSize: 22 }} />
           <Typography fontSize={13} fontWeight={800} color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: "0.8px" }}>
             Asset Scanned
           </Typography>
@@ -106,13 +106,13 @@ export default function ScanAsset() {
         {/* Asset Card */}
         <Paper sx={{ borderRadius: "24px", border: 1, borderColor: "divider", overflow: "hidden", mb: 3, position: "relative" }}>
           {/* top accent bar */}
-          <Box sx={{ height: 5, background: "linear-gradient(90deg, #051C12, #B4F105)" }} />
+          <Box sx={{ height: 5, background: "linear-gradient(90deg, #7777C7, #7777C7)" }} />
 
           <Box sx={{ p: 3.5 }}>
             {/* Icon + name */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-              <Box sx={{ width: 56, height: 56, borderRadius: "16px", bgcolor: "rgba(180,241,5,0.12)", border: "1.5px solid rgba(5,28,18,0.25)", display: "grid", placeItems: "center", flexShrink: 0 }}>
-                <Inventory2Rounded sx={{ fontSize: 28, color: "#051C12" }} />
+              <Box sx={{ width: 56, height: 56, borderRadius: "16px", bgcolor: "rgba(119, 119, 199, 0.12)", border: "1.5px solid rgba(119, 119, 199, 0.25)", display: "grid", placeItems: "center", flexShrink: 0 }}>
+                <Inventory2Rounded sx={{ fontSize: 28, color: "#7777C7" }} />
               </Box>
               <Box>
                 <Typography fontWeight={900} fontSize={22} sx={{ lineHeight: 1.2, letterSpacing: "-0.5px" }}>
@@ -135,7 +135,7 @@ export default function ScanAsset() {
                 { icon: <Inventory2Rounded sx={{ fontSize: 16 }} />,    label: "Category",      value: asset.category || "—" },
               ].map(row => (
                 <Box key={row.label} sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 1.5, borderRadius: "12px", bgcolor: "action.hover", border: "1px solid", borderColor: "divider" }}>
-                  <Box sx={{ color: "#051C12", flexShrink: 0 }}>{row.icon}</Box>
+                  <Box sx={{ color: "#7777C7", flexShrink: 0 }}>{row.icon}</Box>
                   <Box>
                     <Typography fontSize={10} fontWeight={800} color="text.disabled" sx={{ textTransform: "uppercase", letterSpacing: "0.5px" }}>{row.label}</Typography>
                     <Typography fontSize={14} fontWeight={700}>{row.value}</Typography>
@@ -154,10 +154,10 @@ export default function ScanAsset() {
           startIcon={<AssignmentRounded />}
           onClick={openRaise}
           sx={{
-            bgcolor: "#051C12", color: "#B4F105", fontWeight: 900, fontSize: 16,
-            borderRadius: "16px", py: 2, boxShadow: "0 8px 24px rgba(5,28,18,0.25)",
+            bgcolor: "#7777C7", color: "#7777C7", fontWeight: 900, fontSize: 16,
+            borderRadius: "16px", py: 2, boxShadow: "0 8px 24px rgba(119, 119, 199, 0.25)",
             textTransform: "none", letterSpacing: "-0.3px",
-            "&:hover": { bgcolor: "#072F1F", boxShadow: "0 12px 32px rgba(5,28,18,0.35)" }
+            "&:hover": { bgcolor: "#6464B8", boxShadow: "0 12px 32px rgba(119, 119, 199, 0.35)" }
           }}
         >
           Register a Service Request
@@ -173,8 +173,8 @@ export default function ScanAsset() {
         slotProps={{ paper: { sx: { borderRadius: "20px", border: 1, borderColor: "divider", bgcolor: "background.paper" } } }}>
         <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "#051C12", display: "grid", placeItems: "center" }}>
-              <AssignmentRounded sx={{ color: "#B4F105", fontSize: 22 }} />
+            <Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "#7777C7", display: "grid", placeItems: "center" }}>
+              <AssignmentRounded sx={{ color: "#7777C7", fontSize: 22 }} />
             </Box>
             <Box>
               <Typography fontWeight={900} fontSize={17}>Register Service Request</Typography>
@@ -190,8 +190,8 @@ export default function ScanAsset() {
           <Box component="form" onSubmit={submitTicket} noValidate>
             <Stack spacing={2.5}>
               {/* Pre-filled asset info */}
-              <Paper sx={{ p: 2, borderRadius: "12px", bgcolor: "rgba(180,241,5,0.06)", border: "1px solid rgba(5,28,18,0.2)" }}>
-                <Typography fontSize={10} fontWeight={800} color="#051C12" sx={{ textTransform: "uppercase", letterSpacing: "0.5px", mb: 0.5 }}>Asset</Typography>
+              <Paper sx={{ p: 2, borderRadius: "12px", bgcolor: "rgba(119, 119, 199, 0.06)", border: "1px solid rgba(119, 119, 199, 0.2)" }}>
+                <Typography fontSize={10} fontWeight={800} color="#7777C7" sx={{ textTransform: "uppercase", letterSpacing: "0.5px", mb: 0.5 }}>Asset</Typography>
                 <Typography fontWeight={800} fontSize={15}>{asset.name}</Typography>
                 <Typography fontSize={12} color="text.secondary">{asset.serialNumber} · {asset.department}</Typography>
               </Paper>
@@ -225,7 +225,7 @@ export default function ScanAsset() {
                   sx={{
                     py: 1.5, border: "1px dashed", borderColor: "divider",
                     borderRadius: "12px", textTransform: "none", fontWeight: 700,
-                    color: "text.secondary", "&:hover": { borderColor: "#051C12", color: "text.primary", bgcolor: "rgba(5,28,18,0.04)" }
+                    color: "text.secondary", "&:hover": { borderColor: "#7777C7", color: "text.primary", bgcolor: "rgba(119, 119, 199, 0.04)" }
                   }}
                 >
                   {imageFile ? imageFile.name : "Attach Photo / Screenshot (Optional)"}
@@ -248,7 +248,7 @@ export default function ScanAsset() {
                 <Button
                   type="submit" variant="contained" disabled={submitting} flex={2}
                   startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <CheckCircleRounded />}
-                  sx={{ flex: 2, bgcolor: "#051C12", color: "#B4F105", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3, "&:hover": { bgcolor: "#072F1F" } }}
+                  sx={{ flex: 2, bgcolor: "#7777C7", color: "#7777C7", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3, "&:hover": { bgcolor: "#6464B8" } }}
                 >
                   {submitting ? "Submitting…" : "Submit Request"}
                 </Button>

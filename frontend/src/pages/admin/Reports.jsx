@@ -18,7 +18,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const COLORS = ['#3B82F6', '#60A5FA', '#4ADE80', '#B4F105', '#F87171', '#A78BFA', '#22D3EE'];
+const COLORS = ['#3B82F6', '#60A5FA', '#4ADE80', '#7777C7', '#F87171', '#A78BFA', '#22D3EE'];
 
 export default function Reports() {
   const muiTheme = useTheme();
@@ -194,9 +194,9 @@ export default function Reports() {
 
   const kpiStats = [
     { label: 'Total Assets', value: summary.totals.assets, color: 'text.primary', icon: <InventoryRounded fontSize="small" /> },
-    { label: 'Total Tickets', value: summary.totals.tickets, color: '#B4F105', icon: <ConfirmationNumberRounded fontSize="small" /> },
-    { label: 'Total Users', value: summary.totals.users, color: '#B4F105', icon: <PeopleRounded fontSize="small" /> },
-    { label: 'Warranty Expiring (30d)', value: summary.warrantyExpiring30, color: '#B4F105', icon: <WarningAmberRounded fontSize="small" /> },
+    { label: 'Total Tickets', value: summary.totals.tickets, color: '#7777C7', icon: <ConfirmationNumberRounded fontSize="small" /> },
+    { label: 'Total Users', value: summary.totals.users, color: '#7777C7', icon: <PeopleRounded fontSize="small" /> },
+    { label: 'Warranty Expiring (30d)', value: summary.warrantyExpiring30, color: '#7777C7', icon: <WarningAmberRounded fontSize="small" /> },
   ];
 
   const filteredDepts = summary.assetsByDept.filter(d =>
@@ -247,7 +247,7 @@ export default function Reports() {
             startIcon={<PictureAsPdfRounded />}
             onClick={exportPDF}
             disabled={exporting}
-            sx={{ background: '#051C12', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
+            sx={{ background: '#7777C7', color: '#FFFFFF', fontWeight: 800, borderRadius: '12px', px: 2.5, boxShadow: 'none', textTransform: 'none' }}
           >
             {exporting ? 'Exporting...' : 'Export PDF'}
           </Button>
