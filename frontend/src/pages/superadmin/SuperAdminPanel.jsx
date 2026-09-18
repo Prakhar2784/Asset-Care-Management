@@ -833,15 +833,16 @@ export default function SuperAdminPanel() {
                 width: 38,
                 height: 38,
                 borderRadius: '10px',
-                bgcolor: DARK,
-                color: ACCENT,
+                bgcolor: '#050404',
+                border: '1px solid rgba(119, 119, 199, 0.25)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(119, 119, 199, 0.2)'
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
+                flexShrink: 0
               }}
             >
-              <ShieldRounded sx={{ fontSize: 22 }} />
+              <img src="/logo_home.png" alt="IAssetCare" style={{ width: 24, height: 24, display: 'block', objectFit: 'contain' }} />
             </Box>
             <Typography variant="h5" sx={{ fontWeight: 900, color: '#0F172A', letterSpacing: '-0.5px' }}>
               Super Admin Console
