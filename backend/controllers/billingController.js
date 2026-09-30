@@ -308,11 +308,12 @@ const activateVerifiedPayment = async ({ invoice, paymentId, signature, gateway 
 
   // Activate Tenant upon successful verified payment
   tenant.subscriptionStatus = 'Active';
-  tenant.plan = invoice.planName;
+  const cleanPlanName = (invoice.planName || 'Home User').replace(/\s*\(\+?\d+.*?\)\s*/g, '').trim();
+  tenant.plan = cleanPlanName;
   const { getPlanDefaults } = require('../config/planDefaults');
-  const planDefaults = getPlanDefaults(invoice.planName);
-  const dbPlan = await planService.getPlanByKey(invoice.planName);
-  const isCustomPlan = Boolean(dbPlan?.isCustom || invoice.planName?.toLowerCase().includes('custom'));
+  const planDefaults = getPlanDefaults(cleanPlanName);
+  const dbPlan = await planService.getPlanByKey(cleanPlanName);
+  const isCustomPlan = Boolean(dbPlan?.isCustom || cleanPlanName.toLowerCase().includes('custom'));
 
   tenant.limits = tenant.limits || {};
   const selectedAddons = Number(invoice.addonAssets || 0);
@@ -496,7 +497,7 @@ exports.createRazorpayOrder = async (req, res) => {
 
     if (totalCapacity !== -1 && activeAssetCount > totalCapacity) {
       const excess = activeAssetCount - totalCapacity;
-      const minAddons = Math.ceil((activeAssetCount - breakdown.plan.maxAssets) / 5) * 5;
+      const minAddons = Math.max(0, activeAssetCount - breakdown.plan.maxAssets);
       return res.status(400).json({
         message: `You currently have ${activeAssetCount} active assets. To reduce capacity to ${totalCapacity}, please archive or delete ${excess} unused asset${excess === 1 ? '' : 's'} first, or keep at least +${minAddons} add-ons.`,
         code: 'ACTIVE_ASSETS_EXCEED_CAPACITY',

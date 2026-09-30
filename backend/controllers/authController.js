@@ -218,13 +218,17 @@ const getMe = async (req, res) => {
     const now = new Date();
     const daysRemaining = tenant?.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
 
+    const cleanPlan = (tenant?.plan || 'Home User').replace(/\s*\(\+?\d+.*?\)\s*/g, '').trim();
+
     res.status(200).json({
       ...req.user.toObject(),
-      plan: tenant?.plan || 'Home User',
+      plan: cleanPlan,
       subscriptionStatus: tenant?.subscriptionStatus || 'Active',
       planExpiry: tenant?.planExpiry || null,
       daysRemaining,
       features: tenant?.features || {},
+      addonAssets: tenant?.addonAssets || 0,
+      limits: tenant?.limits || {},
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

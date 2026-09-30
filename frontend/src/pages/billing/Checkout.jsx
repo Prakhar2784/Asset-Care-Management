@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Container,
@@ -278,22 +278,35 @@ export default function Checkout() {
     }
   };
 
+  const addonAssetsRef = useRef(0);
+  addonAssetsRef.current = addonAssets;
+  const selectedPlanRef = useRef(selectedPlan);
+  selectedPlanRef.current = selectedPlan;
+  const appliedCouponRef = useRef(appliedCoupon);
+  appliedCouponRef.current = appliedCoupon;
+  const couponCodeRef = useRef(couponCode);
+  couponCodeRef.current = couponCode;
+  const hasInitializedRef = useRef(false);
+
   // Authoritative Calculation from backend
   const fetchBreakdown = useCallback(async (planKey, coupon, customAddon) => {
     try {
       setLoadingBreakdown(true);
       setError('');
-      const effectiveAddon = customAddon !== undefined ? Number(customAddon) : Number(addonAssets || 0);
+      const targetPlan = planKey || selectedPlanRef.current;
+      const targetCoupon = coupon !== undefined ? coupon : (appliedCouponRef.current || couponCodeRef.current || '');
+      const effectiveAddon = customAddon !== undefined ? Math.max(0, Number(customAddon) || 0) : Math.max(0, Number(addonAssetsRef.current) || 0);
+
       const { data } = await api.post('/billing/checkout/calculate', {
-        planKey: planKey,
-        couponCode: coupon || '',
+        planKey: targetPlan,
+        couponCode: targetCoupon,
         addonAssets: effectiveAddon,
       });
       setBreakdown(data);
-      if (coupon && data.discountAmount > 0) {
-        setAppliedCoupon(coupon);
-        setCouponSuccess(`Coupon "${coupon}" applied successfully! You saved ${formatINR(data.discountAmount)}.`);
-      } else if (coupon && data.discountAmount === 0) {
+      if (targetCoupon && data.discountAmount > 0) {
+        setAppliedCoupon(targetCoupon);
+        setCouponSuccess(`Coupon "${targetCoupon}" applied successfully! You saved ${formatINR(data.discountAmount)}.`);
+      } else if (targetCoupon && data.discountAmount === 0) {
         setAppliedCoupon('');
         setCouponSuccess('');
       }
@@ -306,9 +319,9 @@ export default function Checkout() {
         setCouponSuccess('');
         try {
           const { data: cleanData } = await api.post('/billing/checkout/calculate', {
-            planKey: planKey,
+            planKey: planKey || selectedPlanRef.current,
             couponCode: '',
-            addonAssets: customAddon !== undefined ? Number(customAddon) : Number(addonAssets || 0),
+            addonAssets: customAddon !== undefined ? Math.max(0, Number(customAddon) || 0) : Math.max(0, Number(addonAssetsRef.current) || 0),
           });
           setBreakdown(cleanData);
         } catch {}
@@ -317,23 +330,40 @@ export default function Checkout() {
       setLoadingBreakdown(false);
       setCalculatingCoupon(false);
     }
-  }, [addonAssets]);
+  }, []);
 
   // Stepper handlers for Add-on capacity adjustment
   const handleAddonChange = (delta) => {
-    const newQty = Math.max(0, (Number(addonAssets) || 0) + delta);
+    const currentVal = Number(addonAssets) || 0;
+    const newQty = Math.max(0, currentVal + delta);
     setAddonAssets(newQty);
     fetchBreakdown(selectedPlan, appliedCoupon || couponCode, newQty);
   };
 
-  const handleSetAddon = (qty) => {
-    const newQty = Math.max(0, Number(qty) || 0);
-    setAddonAssets(newQty);
-    fetchBreakdown(selectedPlan, appliedCoupon || couponCode, newQty);
+  const handleCustomAddonInput = (value) => {
+    if (value === '') {
+      setAddonAssets('');
+      return;
+    }
+    const parsed = parseInt(value, 10);
+    if (!isNaN(parsed) && parsed >= 0) {
+      setAddonAssets(parsed);
+      fetchBreakdown(selectedPlan, appliedCoupon || couponCode, parsed);
+    }
+  };
+
+  const handleAddonBlur = () => {
+    if (addonAssets === '' || isNaN(Number(addonAssets))) {
+      setAddonAssets(0);
+      fetchBreakdown(selectedPlan, appliedCoupon || couponCode, 0);
+    }
   };
 
   // 1. AUTO-DETECT CURRENT PLAN & LOAD LIVE DYNAMIC PLAN PRICES
   useEffect(() => {
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
     const detectCurrentPlan = async () => {
       let activePlans = PLANS;
       try {
@@ -427,7 +457,7 @@ export default function Checkout() {
     };
 
     detectCurrentPlan();
-  }, [currentUser, fetchBreakdown]);
+  }, []);
 
   const isPlanDisabled = (planKey) => {
     if (subscriptionStatus !== 'Active') return false;
@@ -1092,65 +1122,73 @@ export default function Checkout() {
                         </Typography>
                       </Box>
                       <Chip
-                        label={`₹${breakdown.unitPrice || 49}/asset/yr`}
+                        label={`₹${breakdown?.unitPrice || 49}/asset/yr`}
                         size="small"
                         sx={{ fontWeight: 800, fontSize: '10.5px', bgcolor: '#EEF2FF', color: DARK }}
                       />
                     </Box>
 
                     <Typography variant="caption" sx={{ color: TEXT_MUTED, display: 'block', mb: 1.5, fontSize: '11.5px' }}>
-                      Adjust your extra asset quota in increments of 5. Set to 0 to renew base quota only.
+                      Specify additional asset capacity beyond base plan quota. Enter 0 for base plan only.
                     </Typography>
 
-                    {/* Stepper Controls */}
+                    {/* Stepper Controls & Direct Input */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: '#FFFFFF', p: 1, borderRadius: '10px', border: '1px solid #CBD5E1' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                         <IconButton
                           size="small"
-                          onClick={() => handleAddonChange(-5)}
-                          disabled={addonAssets <= 0 || paying || loadingBreakdown}
-                          sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, borderRadius: '6px' }}
+                          onClick={() => handleAddonChange(-1)}
+                          disabled={!addonAssets || Number(addonAssets) <= 0 || paying || loadingBreakdown}
+                          sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, borderRadius: '6px', width: 32, height: 32 }}
                         >
                           <RemoveRounded sx={{ fontSize: 16 }} />
                         </IconButton>
-                        <Typography variant="body2" sx={{ fontWeight: 900, color: '#0F172A', minWidth: '70px', textAlign: 'center' }}>
-                          +{addonAssets} Assets
-                        </Typography>
+                        
+                        <TextField
+                          size="small"
+                          type="number"
+                          value={addonAssets}
+                          onChange={(e) => handleCustomAddonInput(e.target.value)}
+                          onBlur={handleAddonBlur}
+                          disabled={paying || loadingBreakdown}
+                          inputProps={{
+                            min: 0,
+                            style: {
+                              textAlign: 'center',
+                              fontWeight: 900,
+                              fontSize: '14px',
+                              width: '55px',
+                              padding: '5px 4px',
+                            },
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '6px',
+                              bgcolor: '#F8FAFC',
+                              '& fieldset': { borderColor: '#E2E8F0' },
+                              '&:hover fieldset': { borderColor: DARK },
+                              '&.Mui-focused fieldset': { borderColor: DARK },
+                            },
+                          }}
+                        />
+
                         <IconButton
                           size="small"
-                          onClick={() => handleAddonChange(5)}
+                          onClick={() => handleAddonChange(1)}
                           disabled={paying || loadingBreakdown}
-                          sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, borderRadius: '6px' }}
+                          sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, borderRadius: '6px', width: 32, height: 32 }}
                         >
                           <AddRounded sx={{ fontSize: 16 }} />
                         </IconButton>
+
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#475569', fontSize: '13px' }}>
+                          Assets
+                        </Typography>
                       </Box>
 
-                      <Typography variant="body2" sx={{ fontWeight: 900, color: DARK }}>
-                        {formatINR(breakdown.addonCost || 0)}
+                      <Typography variant="body2" sx={{ fontWeight: 900, color: DARK, fontSize: '15px' }}>
+                        {formatINR(breakdown?.addonCost || 0)}
                       </Typography>
-                    </Box>
-
-                    {/* Preset Quick Chips */}
-                    <Box sx={{ display: 'flex', gap: 0.75, mt: 1.5, flexWrap: 'wrap' }}>
-                      {[0, 5, 10, 20, 50].map((preset) => (
-                        <Chip
-                          key={preset}
-                          label={preset === 0 ? '0 (Base Only)' : `+${preset}`}
-                          size="small"
-                          onClick={() => handleSetAddon(preset)}
-                          variant={addonAssets === preset ? 'filled' : 'outlined'}
-                          sx={{
-                            fontWeight: 800,
-                            fontSize: '11px',
-                            cursor: 'pointer',
-                            bgcolor: addonAssets === preset ? DARK : '#FFFFFF',
-                            color: addonAssets === preset ? '#FFFFFF' : '#475569',
-                            borderColor: addonAssets === preset ? DARK : '#CBD5E1',
-                            '&:hover': { bgcolor: addonAssets === preset ? '#6464B8' : '#F1F5F9' },
-                          }}
-                        />
-                      ))}
                     </Box>
                   </Box>
                 )}
