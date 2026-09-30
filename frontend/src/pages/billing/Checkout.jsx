@@ -332,7 +332,7 @@ export default function Checkout() {
     }
   }, []);
 
-  // Stepper handlers for Add-on capacity adjustment
+  // Stepper handlers for Add-on capacity adjustment (multiples of 5)
   const handleAddonChange = (delta) => {
     const currentVal = Number(addonAssets) || 0;
     const newQty = Math.max(0, currentVal + delta);
@@ -356,6 +356,13 @@ export default function Checkout() {
     if (addonAssets === '' || isNaN(Number(addonAssets))) {
       setAddonAssets(0);
       fetchBreakdown(selectedPlan, appliedCoupon || couponCode, 0);
+    } else {
+      const parsed = Math.max(0, parseInt(addonAssets, 10) || 0);
+      const rounded = Math.round(parsed / 5) * 5;
+      setAddonAssets(rounded);
+      if (rounded !== parsed) {
+        fetchBreakdown(selectedPlan, appliedCoupon || couponCode, rounded);
+      }
     }
   };
 
@@ -1122,22 +1129,33 @@ export default function Checkout() {
                         </Typography>
                       </Box>
                       <Chip
-                        label={`₹${breakdown?.unitPrice || 49}/asset/yr`}
+                        label={`₹${breakdown?.unitPrice || 50}/asset/yr`}
                         size="small"
                         sx={{ fontWeight: 800, fontSize: '10.5px', bgcolor: '#EEF2FF', color: DARK }}
                       />
                     </Box>
 
                     <Typography variant="caption" sx={{ color: TEXT_MUTED, display: 'block', mb: 1.5, fontSize: '11.5px' }}>
-                      Specify additional asset capacity beyond base plan quota. Enter 0 for base plan only.
+                      Adjust your extra asset quota in increments of 5. Set to 0 to renew base quota only.
                     </Typography>
 
                     {/* Stepper Controls & Direct Input */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', bgcolor: '#FFFFFF', p: 1, borderRadius: '10px', border: '1px solid #CBD5E1' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        bgcolor: '#FFFFFF',
+                        p: 1.2,
+                        borderRadius: '10px',
+                        border: '1px solid #CBD5E1',
+                        gap: 1.5,
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'nowrap' }}>
                         <IconButton
                           size="small"
-                          onClick={() => handleAddonChange(-1)}
+                          onClick={() => handleAddonChange(-5)}
                           disabled={!addonAssets || Number(addonAssets) <= 0 || paying || loadingBreakdown}
                           sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, borderRadius: '6px', width: 32, height: 32 }}
                         >
@@ -1153,12 +1171,13 @@ export default function Checkout() {
                           disabled={paying || loadingBreakdown}
                           inputProps={{
                             min: 0,
+                            step: 5,
                             style: {
                               textAlign: 'center',
                               fontWeight: 900,
                               fontSize: '14px',
-                              width: '55px',
-                              padding: '5px 4px',
+                              width: '52px',
+                              padding: '5px 2px',
                             },
                           }}
                           sx={{
@@ -1174,19 +1193,29 @@ export default function Checkout() {
 
                         <IconButton
                           size="small"
-                          onClick={() => handleAddonChange(1)}
+                          onClick={() => handleAddonChange(5)}
                           disabled={paying || loadingBreakdown}
                           sx={{ bgcolor: '#F1F5F9', '&:hover': { bgcolor: '#E2E8F0' }, borderRadius: '6px', width: 32, height: 32 }}
                         >
                           <AddRounded sx={{ fontSize: 16 }} />
                         </IconButton>
 
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#475569', fontSize: '13px' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 800, color: '#475569', fontSize: '12.5px', ml: 0.25, whiteSpace: 'nowrap' }}>
                           Assets
                         </Typography>
                       </Box>
 
-                      <Typography variant="body2" sx={{ fontWeight: 900, color: DARK, fontSize: '15px' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 900,
+                          color: DARK,
+                          fontSize: '15px',
+                          whiteSpace: 'nowrap',
+                          flexShrink: 0,
+                          textAlign: 'right',
+                        }}
+                      >
                         {formatINR(breakdown?.addonCost || 0)}
                       </Typography>
                     </Box>

@@ -50,13 +50,12 @@ const computeBilling = async (planKey, couponCode, customerState, tenant = null,
   let baseAmount = plan.price;
 
   // Add-On Assets calculation if specified
+  const GlobalSetting = require('../models/GlobalSetting');
+  const globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' }).catch(() => null);
+  const unitPrice = Number(globalSetting?.addonAssetPrice || tenant?.addonAssetPrice || 50);
   const numAddons = Math.max(0, Number(addonAssets || 0));
   let addonCost = 0;
-  let unitPrice = 49;
   if (numAddons > 0) {
-    const GlobalSetting = require('../models/GlobalSetting');
-    const globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' }).catch(() => null);
-    unitPrice = Number(globalSetting?.addonAssetPrice || tenant?.addonAssetPrice || 49);
     addonCost = r2(numAddons * unitPrice);
     baseAmount = r2(baseAmount + addonCost);
   }
@@ -989,7 +988,7 @@ exports.createAddonOrder = async (req, res) => {
     const GlobalSetting = require('../models/GlobalSetting');
     let globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' });
     if (!globalSetting) {
-      globalSetting = { allowAddonAssets: true, addonAssetPrice: 49 };
+      globalSetting = { allowAddonAssets: true, addonAssetPrice: 50 };
     }
 
     if (globalSetting.allowAddonAssets === false) {
@@ -1000,7 +999,7 @@ exports.createAddonOrder = async (req, res) => {
       return res.status(403).json({ message: 'Add-on asset purchase is currently disabled for this organization.' });
     }
 
-    const unitPrice = Number(globalSetting.addonAssetPrice) || Number(tenant.addonAssetPrice) || 49;
+    const unitPrice = Number(globalSetting.addonAssetPrice) || Number(tenant.addonAssetPrice) || 50;
     const r2 = (n) => Math.round(n * 100) / 100;
 
     // Co-Terminus & Pro-Rata Calculation based on remaining days of active subscription

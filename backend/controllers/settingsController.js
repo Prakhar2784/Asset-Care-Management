@@ -172,7 +172,7 @@ const getTenantSettings = async (req, res) => {
     // Universal platform settings enforcement
     let globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' });
     if (!globalSetting) {
-      globalSetting = await GlobalSetting.create({ key: 'platform_settings', allowAddonAssets: true, addonAssetPrice: 49 });
+      globalSetting = await GlobalSetting.create({ key: 'platform_settings', allowAddonAssets: true, addonAssetPrice: 50 });
     }
 
     if (globalSetting.allowAddonAssets === false) {
@@ -180,7 +180,7 @@ const getTenantSettings = async (req, res) => {
     } else {
       tenantObj.allowAddonAssets = true;
     }
-    tenantObj.addonAssetPrice = globalSetting.addonAssetPrice || 49;
+    tenantObj.addonAssetPrice = globalSetting.addonAssetPrice || 50;
 
     const now = new Date();
     if (tenant.customQuoteExpiry && new Date(tenant.customQuoteExpiry) > now) {
