@@ -234,7 +234,37 @@ const getMe = async (req, res) => {
 // PATCH /api/auth/complete-onboarding
 const completeOnboarding = async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.user._id, { onboardingDone: true });
+    const { getTenantConnection } = require('../config/tenantDb');
+    
+    // 1. Update on req.user's own model connection
+    if (req.user && req.user.constructor) {
+      await req.user.constructor.findByIdAndUpdate(
+        req.user._id, 
+        { onboardingDone: true }, 
+        { bypassTenantFilter: true }
+      );
+    }
+    
+    // 2. Update on control plane master User model
+    const MainUserModel = mongoose.connection.model('User');
+    await MainUserModel.findByIdAndUpdate(
+      req.user._id, 
+      { onboardingDone: true }, 
+      { bypassTenantFilter: true }
+    ).catch(() => {});
+
+    // 3. Update on tenant-specific connection if tenantId exists
+    if (req.user && req.user.tenantId && req.user.tenantId !== 'default') {
+      try {
+        const tenantConn = getTenantConnection(req.user.tenantId);
+        await tenantConn.model('User').findByIdAndUpdate(
+          req.user._id, 
+          { onboardingDone: true }, 
+          { bypassTenantFilter: true }
+        );
+      } catch (err) {}
+    }
+
     res.status(200).json({ onboardingDone: true });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -373,12 +403,160 @@ const verifyResetToken = async (req, res) => {
   }
 };
 
+// POST /api/auth/send-registration-otp
+const sendRegistrationOtp = async (req, res) => {
+  try {
+    const { email, companyName, adminName } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      return res.status(400).json({ message: 'A valid email address is required.' });
+    }
+
+    // Check if user already exists
+    const userExists = await findUserAcrossTenants({ email: cleanEmail });
+    if (userExists) {
+      return res.status(400).json({ message: 'An account with this email address is already registered. Please log in.' });
+    }
+
+    const RegistrationOtp = require('../models/RegistrationOtp');
+    const { sendRegistrationOtpEmail } = require('../services/emailService');
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+
+    await RegistrationOtp.findOneAndUpdate(
+      { email: cleanEmail },
+      {
+        email: cleanEmail,
+        otpHash,
+        verified: false,
+        verificationToken: null,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
+      },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    console.log(`\n======================================================\n[REGISTRATION OTP] Verification code for ${cleanEmail}: ${otp}\n======================================================\n`);
+
+    // Send email asynchronously
+    sendRegistrationOtpEmail({
+      email: cleanEmail,
+      otp,
+      companyName,
+      adminName
+    }).catch(err => console.error('[Auth] Send registration OTP email failed:', err.message));
+
+    res.status(200).json({
+      success: true,
+      message: `A 6-digit verification code has been sent to ${cleanEmail}.`
+    });
+  } catch (error) {
+    console.error('[Auth] sendRegistrationOtp error:', error);
+    res.status(500).json({ message: 'Failed to send verification code. Please try again.' });
+  }
+};
+
+// POST /api/auth/verify-registration-otp
+const verifyRegistrationOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanOtp = (otp || '').toString().trim();
+
+    if (!cleanEmail || !cleanOtp) {
+      return res.status(400).json({ message: 'Email and 6-digit OTP code are required.' });
+    }
+
+    const RegistrationOtp = require('../models/RegistrationOtp');
+    const otpHash = crypto.createHash('sha256').update(cleanOtp).digest('hex');
+
+    const record = await RegistrationOtp.findOne({
+      email: cleanEmail,
+      otpHash,
+      expiresAt: { $gt: new Date() }
+    });
+
+    if (!record) {
+      return res.status(400).json({ message: 'Invalid or expired OTP verification code. Please check the code or request a new one.' });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    record.verified = true;
+    record.verificationToken = hashedToken;
+    record.expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 mins window to complete form
+    await record.save();
+
+    res.status(200).json({
+      success: true,
+      verified: true,
+      verificationToken: rawToken,
+      message: 'Email address verified successfully!'
+    });
+  } catch (error) {
+    console.error('[Auth] verifyRegistrationOtp error:', error);
+    res.status(500).json({ message: 'Verification failed. Please try again.' });
+  }
+};
+
 // POST /api/auth/register-company
 const registerCompany = async (req, res) => {
   try {
-    const { companyName, slug, adminName, adminEmail, adminPassword, adminPhone, customerType, address, state, city, pinCode, gstNumber, acceptedTerms, licenseKey } = req.body;
+    const {
+      companyName,
+      slug,
+      adminName,
+      adminEmail,
+      adminPassword,
+      adminPhone,
+      customerType,
+      address,
+      state,
+      city,
+      pinCode,
+      gstNumber,
+      acceptedTerms,
+      licenseKey,
+      verificationToken,
+      otp
+    } = req.body;
     
     if (!acceptedTerms) return res.status(400).json({ message: 'Terms and Conditions must be accepted.' });
+
+    const cleanEmail = (adminEmail || '').toLowerCase().trim();
+    if (!cleanEmail) return res.status(400).json({ message: 'Admin email address is required.' });
+
+    // Enforce OTP email verification
+    const RegistrationOtp = require('../models/RegistrationOtp');
+    let isEmailVerified = false;
+
+    if (verificationToken) {
+      const hashedToken = crypto.createHash('sha256').update(verificationToken).digest('hex');
+      const verifiedRecord = await RegistrationOtp.findOne({
+        email: cleanEmail,
+        verificationToken: hashedToken,
+        verified: true,
+        expiresAt: { $gt: new Date() }
+      });
+      if (verifiedRecord) isEmailVerified = true;
+    } else if (otp) {
+      const otpHash = crypto.createHash('sha256').update(otp.toString().trim()).digest('hex');
+      const verifiedRecord = await RegistrationOtp.findOne({
+        email: cleanEmail,
+        otpHash,
+        expiresAt: { $gt: new Date() }
+      });
+      if (verifiedRecord) isEmailVerified = true;
+    }
+
+    if (!isEmailVerified) {
+      return res.status(400).json({
+        message: 'Please verify your email address with the 6-digit OTP sent to your inbox before proceeding.',
+        requireOtp: true
+      });
+    }
 
     const Tenant = require('../models/Tenant');
     const Department = require('../models/Department');
@@ -394,7 +572,7 @@ const registerCompany = async (req, res) => {
     }
 
     // Check if user already exists globally
-    const userExists = await findUserAcrossTenants({ email: adminEmail });
+    const userExists = await findUserAcrossTenants({ email: cleanEmail });
     if (userExists) {
       return res.status(400).json({ message: 'Admin email already registered.' });
     }
@@ -560,6 +738,8 @@ module.exports = {
   verifyOtp, 
   resetPassword, 
   verifyResetToken,
+  sendRegistrationOtp,
+  verifyRegistrationOtp,
   registerCompany,
   getTenantBranding,
   completeOnboarding

@@ -1,8 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { loginUser, getMe, forgotPassword, verifyOtp, resetPassword, verifyResetToken, registerCompany, getTenantBranding, completeOnboarding } = require('../controllers/authController');
+const { 
+  loginUser, 
+  getMe, 
+  forgotPassword, 
+  verifyOtp, 
+  resetPassword, 
+  verifyResetToken, 
+  sendRegistrationOtp,
+  verifyRegistrationOtp,
+  registerCompany, 
+  getTenantBranding, 
+  completeOnboarding 
+} = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
-const { validate, loginSchema, registerCompanySchema, forgotPasswordSchema, verifyOtpSchema, resetPasswordSchema } = require('../validation/authSchemas');
+const { 
+  validate, 
+  loginSchema, 
+  registerCompanySchema, 
+  sendRegistrationOtpSchema,
+  verifyRegistrationOtpSchema,
+  forgotPasswordSchema, 
+  verifyOtpSchema, 
+  resetPasswordSchema 
+} = require('../validation/authSchemas');
 const { loginLimiter, forgotLimiter, registerLimiter } = require('../middleware/authRateLimiters');
 
 router.get('/setup-status', async (req, res) => {
@@ -15,6 +36,8 @@ router.get('/setup-status', async (req, res) => {
   }
 });
 
+router.post('/send-registration-otp', registerLimiter, validate(sendRegistrationOtpSchema), sendRegistrationOtp);
+router.post('/verify-registration-otp', registerLimiter, validate(verifyRegistrationOtpSchema), verifyRegistrationOtp);
 router.post('/register-company', registerLimiter, validate(registerCompanySchema), registerCompany);
 router.post('/login', loginLimiter, validate(loginSchema), loginUser);
 router.get('/tenant-branding', getTenantBranding);

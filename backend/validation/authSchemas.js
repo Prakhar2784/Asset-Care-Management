@@ -27,7 +27,20 @@ const registerCompanySchema = z.object({
   gstNumber: z.string().trim().optional().nullable().or(z.literal('')),
   licenseKey: z.string().trim().optional().nullable().or(z.literal('')),
   plan: z.string().trim().optional().nullable().or(z.literal('')),
+  verificationToken: z.string().trim().optional().nullable().or(z.literal('')),
+  otp: z.string().trim().optional().nullable().or(z.literal('')),
   acceptedTerms: z.boolean().refine(val => val === true, 'You must accept the terms.')
+});
+
+const sendRegistrationOtpSchema = z.object({
+  email,
+  companyName: z.string().trim().optional().nullable().or(z.literal('')),
+  adminName: z.string().trim().optional().nullable().or(z.literal(''))
+});
+
+const verifyRegistrationOtpSchema = z.object({
+  email,
+  otp: z.string().trim().regex(/^\d{6}$/, 'OTP must be a 6-digit code.')
 });
 
 const forgotPasswordSchema = z.object({ email });
@@ -55,6 +68,8 @@ module.exports = {
   validate,
   loginSchema,
   registerCompanySchema,
+  sendRegistrationOtpSchema,
+  verifyRegistrationOtpSchema,
   forgotPasswordSchema,
   verifyOtpSchema,
   resetPasswordSchema,

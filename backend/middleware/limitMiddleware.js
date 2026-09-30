@@ -1,28 +1,33 @@
 const Tenant = require('../models/Tenant');
 const Asset = require('../models/Asset');
 const User = require('../models/User');
+const { getPlanByKey } = require('../services/planService');
+const { getPlanDefaults } = require('../config/planDefaults');
 
 const checkAssetLimit = async (req, res, next) => {
   try {
     const tenant = await Tenant.findOne({ slug: req.tenantId });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
 
+    let maxAssets = tenant.limits?.maxAssets;
+    if (maxAssets === undefined || maxAssets === null) {
+      const livePlan = await getPlanByKey(tenant.plan);
+      maxAssets = livePlan?.maxAssets ?? getPlanDefaults(tenant.plan).maxAssets;
+    }
+
     // -1 or large value means unlimited — skip the check entirely
-    if (!tenant.limits || tenant.limits.maxAssets === -1 || tenant.limits.maxAssets >= 999999) {
+    if (maxAssets === -1 || maxAssets >= 999999) {
       return next();
     }
 
-    // Enforce limits (Note: Asset.countDocuments automatically filters by current tenant context)
-    const assetCount = await Asset.countDocuments({ isDeleted: { $ne: true } });
+    // Enforce limits with accurate tenant scoping
+    const AssetModel = (req.db && req.db.models && req.db.models['Asset']) ? req.db.models['Asset'] : Asset;
+    const assetsInTenant = await AssetModel.find({ tenantId: req.tenantId, isDeleted: { $ne: true } }).setOptions({ bypassTenantFilter: true }).lean();
+    const assetCount = assetsInTenant.length;
 
-    if (assetCount >= tenant.limits.maxAssets) {
-      const upgradeMsg = tenant.plan === 'Home User'
-        ? 'Your Home User plan allows up to 20 assets. Upgrade to MSME to add more assets.'
-        : tenant.plan === 'MSME'
-        ? 'Your MSME plan allows up to 50 assets. Upgrade to Large Scale to add more assets.'
-        : `Your current plan allows up to ${tenant.limits.maxAssets} assets. Please upgrade your subscription.`;
+    if (assetCount >= maxAssets) {
       return res.status(403).json({ 
-        message: upgradeMsg,
+        message: `Your current plan allows up to ${maxAssets} assets. Please upgrade your plan or request additional capacity.`,
         code: 'PLAN_LIMIT_REACHED'
       });
     }
@@ -34,23 +39,27 @@ const checkAssetLimit = async (req, res, next) => {
 
 const checkUserLimit = async (req, res, next) => {
   try {
-    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
 
+    let maxUsers = tenant.limits?.maxUsers;
+    if (maxUsers === undefined || maxUsers === null) {
+      const livePlan = await getPlanByKey(tenant.plan);
+      maxUsers = livePlan?.maxUsers ?? getPlanDefaults(tenant.plan).maxUsers;
+    }
+
     // -1 or large value means unlimited — skip the check entirely
-    if (!tenant.limits || tenant.limits.maxUsers === -1 || tenant.limits.maxUsers >= 999999) {
+    if (maxUsers === -1 || maxUsers >= 999999) {
       return next();
     }
 
-    // Enforce limits (Note: User.countDocuments automatically filters by current tenant context)
-    const userCount = await User.countDocuments();
+    const UserModel = (req.db && req.db.models && req.db.models['User']) ? req.db.models['User'] : User;
+    const usersInTenant = await UserModel.find({ tenantId: req.tenantId }).setOptions({ bypassTenantFilter: true }).lean();
+    const userCount = usersInTenant.length;
 
-    if (userCount >= tenant.limits.maxUsers) {
-      const upgradeMsg = tenant.plan === 'Home User'
-        ? 'Your Home User plan includes Single Admin management. Upgrade to MSME for multi-user access.'
-        : `Plan limit reached. Your current plan allows up to ${tenant.limits.maxUsers} users. Please upgrade your subscription.`;
+    if (userCount >= maxUsers) {
       return res.status(403).json({ 
-        message: upgradeMsg,
+        message: `Your current plan allows up to ${maxUsers} user accounts. Please upgrade your plan or request additional capacity.`,
         code: 'PLAN_LIMIT_REACHED'
       });
     }
@@ -62,15 +71,23 @@ const checkUserLimit = async (req, res, next) => {
 
 const checkDepartmentLimit = async (req, res, next) => {
   try {
-    const tenant = await Tenant.findOne({ slug: req.tenantId });
+    const tenant = await Tenant.findOne({ slug: req.tenantId }).setOptions({ bypassTenantFilter: true });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
 
-    if (tenant.plan === 'Home User') {
+    let maxDepts = tenant.limits?.maxDepartments;
+    if (maxDepts === undefined || maxDepts === null) {
+      const livePlan = await getPlanByKey(tenant.plan);
+      maxDepts = livePlan?.maxDepartments ?? getPlanDefaults(tenant.plan).maxDepartments ?? 2;
+    }
+
+    if (maxDepts !== -1 && maxDepts < 999999) {
       const Department = require('../models/Department');
-      const deptCount = await Department.countDocuments();
-      if (deptCount >= 1) {
+      const DeptModel = (req.db && req.db.models && req.db.models['Department']) ? req.db.models['Department'] : Department;
+      const deptsInTenant = await DeptModel.find({ tenantId: req.tenantId }).setOptions({ bypassTenantFilter: true }).lean();
+      const deptCount = deptsInTenant.length;
+      if (deptCount >= maxDepts) {
         return res.status(403).json({
-          message: 'Your Home User plan includes Single Department Management. Upgrade to MSME for Multi-Department support.',
+          message: `Your current plan allows up to ${maxDepts} departments. Please upgrade your plan or request additional capacity.`,
           code: 'PLAN_LIMIT_REACHED'
         });
       }
@@ -87,11 +104,24 @@ const checkFeatureAccess = (featureName, upgradeMsg) => {
       const tenant = await Tenant.findOne({ slug: req.tenantId });
       if (!tenant) return res.status(404).json({ message: 'Tenant not found' });
 
-      const { getPlanDefaults } = require('../config/planDefaults');
-      const planDefaults = getPlanDefaults(tenant.plan);
-      const isAllowed = tenant.features?.[featureName] ?? planDefaults.features?.[featureName] ?? false;
+      let isAllowed = false;
+      if (tenant.features && tenant.features[featureName] !== undefined) {
+        isAllowed = tenant.features[featureName];
+      } else {
+        const livePlan = await getPlanByKey(tenant.plan);
+        if (livePlan && livePlan.featureFlags && livePlan.featureFlags[featureName] !== undefined) {
+          isAllowed = livePlan.featureFlags[featureName];
+        } else {
+          const planDefaults = getPlanDefaults(tenant.plan);
+          isAllowed = planDefaults.features?.[featureName] ?? false;
+        }
+      }
 
-      if (!isAllowed) {
+      const isPermitted = featureName === 'ticketing'
+        ? (isAllowed && isAllowed !== 'none' && isAllowed !== false)
+        : Boolean(isAllowed);
+
+      if (!isPermitted) {
         return res.status(403).json({
           message: upgradeMsg || `This feature is not included in your current plan (${tenant.plan || 'Home User'}). Please upgrade to access it.`,
           code: 'FEATURE_NOT_ENTITLED'

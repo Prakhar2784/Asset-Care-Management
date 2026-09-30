@@ -99,12 +99,39 @@ const purgeOldAuditLogs = async () => {
   }
 };
 
+// Purge custom quotes that have exceeded their 7-day validity without payment
+const purgeExpiredCustomQuotes = async () => {
+  try {
+    const Tenant = require('../models/Tenant');
+    const now = new Date();
+    const expiredTenants = await Tenant.find({
+      customQuoteExpiry: { $ne: null, $lt: now },
+      subscriptionStatus: { $ne: 'Active' }
+    }).setOptions({ bypassTenantFilter: true });
+
+    for (const t of expiredTenants) {
+      t.customPrice = null;
+      t.customQuoteExpiry = null;
+      t.customQuotePlan = null;
+      t.customQuoteQuotas = null;
+      t.customQuoteFeatures = null;
+      await t.save();
+      console.log(`[QuoteExpiry] 7-day custom quote expired and purged for company: ${t.slug} (${t.name})`);
+    }
+  } catch (err) {
+    console.error('[QuoteExpiry] Error checking expired quotes:', err.message);
+  }
+};
+
 const startWarrantyScheduler = () => {
   // Run daily at 8:00 AM IST
   cron.schedule('0 8 * * *', checkWarrantyExpiry, { timezone: 'Asia/Kolkata' });
   // Purge old audit logs on the 1st of every month at 2:00 AM IST
   cron.schedule('0 2 1 * *', purgeOldAuditLogs, { timezone: 'Asia/Kolkata' });
-  console.log('[Scheduler] Multi-tenant warranty checker + Audit retention started.');
+  // Check and purge expired 7-day custom quotes every hour
+  cron.schedule('0 * * * *', purgeExpiredCustomQuotes, { timezone: 'Asia/Kolkata' });
+  purgeExpiredCustomQuotes().catch(() => {});
+  console.log('[Scheduler] Multi-tenant warranty checker + Audit retention + 7-Day Quote Expiry engine started.');
 };
 
-module.exports = { startWarrantyScheduler, checkWarrantyExpiry };
+module.exports = { startWarrantyScheduler, checkWarrantyExpiry, purgeExpiredCustomQuotes };

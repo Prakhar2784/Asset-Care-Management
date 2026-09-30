@@ -22,13 +22,30 @@ import {
   AccountBalanceWalletRounded, MonetizationOnRounded, CalendarMonthRounded,
   LocationOnRounded, AssignmentRounded, SearchRounded,
   CreditCardRounded, ContentCopyRounded, FilterListRounded,
-  CheckRounded, ArrowForwardRounded, AccountTreeRounded, VpnKeyRounded, KeyRounded
+  CheckRounded, ArrowForwardRounded, AccountTreeRounded, VpnKeyRounded, KeyRounded,
+  QrCodeScannerRounded, AssessmentRounded, UploadFileRounded, AccessTimeFilledRounded,
+  BrandingWatermarkRounded, FactCheckRounded, SupportAgentRounded, TuneRounded, ControlPointRounded,
+  RemoveRounded, SaveRounded, BoltRounded
 } from '@mui/icons-material';
 import api from '../../api/axios';
 
 const ACCENT = '#7777C7';
 const DARK = '#7777C7';
 const TEXT_MUTED = '#64748B';
+
+// Authoritative Feature Definitions matching project feature matrix
+const FEATURE_DEFINITIONS = [
+  { key: 'coreInventory', label: 'Core inventory and QR tagging', desc: 'Asset registry, QR label generator & barcode mobile scan' },
+  { key: 'ticketing', label: 'Ticketing (breakdown requests)', desc: 'Maintenance breakdown ticketing (Basic or Full workflows)', isTicketing: true },
+  { key: 'standardReports', label: 'Standard reports', desc: 'Asset valuation, depreciation & assignment CSV/PDF reports' },
+  { key: 'advancedAnalytics', label: 'Advanced analytics', desc: 'Deep lifecycle analytics, breakdown radar & MTTR charts' },
+  { key: 'warrantyTracking', label: 'Warranty tracking', desc: 'Automated expiration alerts, AMC contract radar & claim logs' },
+  { key: 'bulkCsvImport', label: 'Bulk CSV import', desc: 'Mass batch asset and user onboarding via CSV spreadsheets' },
+  { key: 'slaEscalation', label: 'SLA escalation', desc: 'Automated breach timer escalations & priority alerts' },
+  { key: 'customBranding', label: 'Custom branding (company logo)', desc: 'Custom company logo, whitelabel UI and brand identity' },
+  { key: 'auditTrail', label: 'Full audit trail', desc: 'Immutable audit logs tracking every event, edit and approval' },
+  { key: 'dedicatedSupport', label: 'Dedicated support', desc: '24/7 dedicated support SLA & customer success manager' },
+];
 
 // Currency formatter for Indian numbering system
 const formatINR = (val) => {
@@ -41,15 +58,38 @@ const formatINR = (val) => {
   }).format(val);
 };
 
+// Formatter to display only the client's actual message/requirements text
+const formatLeadMessage = (msg) => {
+  if (!msg) return '—';
+  if (msg.includes('Custom Enterprise Plan Request:')) {
+    const match = msg.match(/Specific Requirements:\s*([\s\S]*)$/i);
+    if (match && match[1] && match[1].trim() && !match[1].trim().toLowerCase().includes('none specified')) {
+      return match[1].trim();
+    }
+    return 'Custom Enterprise Plan Inquiry';
+  }
+  return msg;
+};
+
 const PLAN_BADGE_STYLES = {
   'Home User': { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
   'MSME': { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
+  'SME': { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
   'Large Scale': { bg: '#ECFDF5', text: '#059669', border: '#A7F3D0' },
+  'Custom Enterprise Plan': { bg: '#FDF2F8', text: '#DB2777', border: '#FBCFE8' },
+  'Custom Plan': { bg: '#FDF2F8', text: '#DB2777', border: '#FBCFE8' },
   'None': { bg: '#F1F5F9', text: '#64748B', border: '#CBD5E1' }
 };
 
 function PlanBadge({ plan }) {
-  const style = PLAN_BADGE_STYLES[plan] || PLAN_BADGE_STYLES['None'];
+  let style = PLAN_BADGE_STYLES[plan];
+  if (!style && plan?.toLowerCase().includes('custom')) {
+    style = { bg: '#FDF2F8', text: '#DB2777', border: '#FBCFE8' };
+  }
+  if (!style && (plan?.toLowerCase().includes('sme') || plan?.toLowerCase().includes('pro'))) {
+    style = { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' };
+  }
+  style = style || PLAN_BADGE_STYLES['None'];
   return (
     <Box
       component="span"
@@ -288,17 +328,31 @@ export default function SuperAdminPanel() {
   // Plans & Pricing tab
   const [plans, setPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(false);
-  const [planEditModal, setPlanEditModal] = useState({ open: false, data: null });
+  const [planEditModal, setPlanEditModal] = useState({ open: false, isCreate: false, isCustom: false, data: null });
   const [planEditForm, setPlanEditForm] = useState({
     planKey: '',
     name: '',
     price: '',
     maxAssets: '',
     maxUsers: '',
+    maxDepartments: '',
     description: '',
     badge: '',
     featuresText: '',
-    isActive: true
+    featureFlags: {
+      coreInventory: true,
+      ticketing: 'basic',
+      standardReports: true,
+      advancedAnalytics: false,
+      warrantyTracking: false,
+      bulkCsvImport: false,
+      slaEscalation: false,
+      customBranding: false,
+      auditTrail: false,
+      dedicatedSupport: false,
+    },
+    isActive: true,
+    isCustom: false
   });
 
   // Dialogs
@@ -332,7 +386,11 @@ export default function SuperAdminPanel() {
     maxAssets: '', maxUsers: '', address: '', city: '', state: 'Maharashtra', pinCode: '', gstNumber: ''
   });
   const [planForm, setPlanForm] = useState({
-    plan: 'MSME', expiryDate: '', status: 'Active', notes: ''
+    plan: 'MSME', expiryDate: '', status: 'Active', notes: '',
+    maxAssets: '', maxUsers: '', maxDepartments: '',
+    allowAddonAssets: false,
+    addonAssetPrice: 49,
+    features: {}
   });
   const [saving, setSaving] = useState(false);
 
@@ -346,6 +404,69 @@ export default function SuperAdminPanel() {
 
   const showSnack = (message, severity = 'success') => setSnackbar({ open: true, message, severity });
 
+  // Universal Platform Settings (Global Add-on Controls)
+  const [globalSettings, setGlobalSettings] = useState({
+    allowAddonAssets: true,
+    addonAssetPrice: 49
+  });
+  const [globalSettingsLoading, setGlobalSettingsLoading] = useState(false);
+  const [globalSettingsSaving, setGlobalSettingsSaving] = useState(false);
+
+  const fetchGlobalSettings = useCallback(async () => {
+    setGlobalSettingsLoading(true);
+    try {
+      const { data: res } = await api.get('/super-admin/global-settings');
+      if (res) {
+        setGlobalSettings({
+          allowAddonAssets: res.allowAddonAssets !== false,
+          addonAssetPrice: res.addonAssetPrice || 49
+        });
+      }
+    } catch {
+      // ignore
+    } finally {
+      setGlobalSettingsLoading(false);
+    }
+  }, []);
+
+  const handleToggleGlobalAddon = async (newVal) => {
+    setGlobalSettings(prev => ({ ...prev, allowAddonAssets: newVal }));
+    setGlobalSettingsSaving(true);
+    try {
+      const { data: res } = await api.put('/super-admin/global-settings', {
+        allowAddonAssets: newVal,
+        addonAssetPrice: Number(globalSettings.addonAssetPrice || 49),
+        applyToAllCompanies: true
+      });
+      showSnack(`"Purchase More Assets" tab is now ${newVal ? 'ENABLED' : 'DISABLED'} globally for all companies!`);
+      fetchGlobalSettings();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Failed to update universal setting.', 'error');
+    } finally {
+      setGlobalSettingsSaving(false);
+    }
+  };
+
+  const handleSaveGlobalSettings = async (overridePrice) => {
+    setGlobalSettingsSaving(true);
+    try {
+      const priceToSave = overridePrice !== undefined ? overridePrice : globalSettings.addonAssetPrice;
+      const { data: res } = await api.put('/super-admin/global-settings', {
+        allowAddonAssets: globalSettings.allowAddonAssets,
+        addonAssetPrice: Number(priceToSave || 49),
+        applyToAllCompanies: true
+      });
+      showSnack(res.message || 'Universal settings saved and applied to all companies!');
+      fetchGlobalSettings();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Failed to save universal platform settings.', 'error');
+    } finally {
+      setGlobalSettingsSaving(false);
+    }
+  };
+
   const fetchPlans = useCallback(async () => {
     setPlansLoading(true);
     try {
@@ -358,6 +479,38 @@ export default function SuperAdminPanel() {
     }
   }, []);
 
+  const openCreatePlanModal = (isCustom = false) => {
+    const timestamp = Date.now().toString().slice(-4);
+    setPlanEditForm({
+      planKey: isCustom ? `CUSTOM_PLAN_${timestamp}` : `PLAN_${timestamp}`,
+      name: isCustom ? 'Custom Enterprise Plan' : 'New Plan Tier',
+      price: isCustom ? 4999 : 1999,
+      maxAssets: isCustom ? 'unlimited' : 35,
+      maxUsers: isCustom ? 'unlimited' : 8,
+      maxDepartments: isCustom ? 'unlimited' : 3,
+      description: isCustom ? 'Custom tailored plan configured with bespoke quotas and enabled capabilities' : 'Standard tier subscription',
+      badge: isCustom ? 'Custom Tailored' : 'New Tier',
+      featuresText: isCustom
+        ? 'As per requirement Users\nAs per requirement Departments\nAs per requirement Assets\nCore inventory and QR tagging\nCustom ticketing & approval workflows\nSLA escalation engine\nCustom branding & white-labeling\nFull audit trail logs\nDedicated priority support & Account Manager'
+        : 'Core inventory and QR tagging\nTicketing workflows\nStandard reports',
+      featureFlags: {
+        coreInventory: true,
+        ticketing: isCustom ? 'full' : 'basic',
+        standardReports: true,
+        advancedAnalytics: Boolean(isCustom),
+        warrantyTracking: Boolean(isCustom),
+        bulkCsvImport: Boolean(isCustom),
+        slaEscalation: Boolean(isCustom),
+        customBranding: Boolean(isCustom),
+        auditTrail: Boolean(isCustom),
+        dedicatedSupport: Boolean(isCustom),
+      },
+      isActive: true,
+      isCustom: Boolean(isCustom)
+    });
+    setPlanEditModal({ open: true, isCreate: true, isCustom, data: null });
+  };
+
   const openEditPlanModal = (p) => {
     setPlanEditForm({
       planKey: p.planKey,
@@ -365,12 +518,26 @@ export default function SuperAdminPanel() {
       price: p.price,
       maxAssets: p.maxAssets === -1 || p.maxAssets === 999999999 ? 'unlimited' : p.maxAssets,
       maxUsers: p.maxUsers === -1 || p.maxUsers === 999999999 ? 'unlimited' : p.maxUsers,
+      maxDepartments: p.maxDepartments === -1 || p.maxDepartments === 999999999 ? 'unlimited' : (p.maxDepartments ?? 2),
       description: p.description || '',
       badge: p.badge || '',
       featuresText: (p.features || []).join('\n'),
-      isActive: p.isActive !== false
+      featureFlags: {
+        coreInventory: p.featureFlags?.coreInventory !== false,
+        ticketing: p.featureFlags?.ticketing || 'basic',
+        standardReports: p.featureFlags?.standardReports !== false,
+        advancedAnalytics: Boolean(p.featureFlags?.advancedAnalytics),
+        warrantyTracking: Boolean(p.featureFlags?.warrantyTracking),
+        bulkCsvImport: Boolean(p.featureFlags?.bulkCsvImport),
+        slaEscalation: Boolean(p.featureFlags?.slaEscalation),
+        customBranding: Boolean(p.featureFlags?.customBranding),
+        auditTrail: Boolean(p.featureFlags?.auditTrail),
+        dedicatedSupport: Boolean(p.featureFlags?.dedicatedSupport),
+      },
+      isActive: p.isActive !== false,
+      isCustom: Boolean(p.isCustom)
     });
-    setPlanEditModal({ open: true, data: p });
+    setPlanEditModal({ open: true, isCreate: false, isCustom: Boolean(p.isCustom), data: p });
   };
 
   const handleSavePlan = async (e) => {
@@ -382,25 +549,59 @@ export default function SuperAdminPanel() {
         : [];
 
       const payload = {
+        planKey: planEditForm.planKey,
         price: Number(planEditForm.price),
         name: planEditForm.name,
         description: planEditForm.description,
         badge: planEditForm.badge,
         maxAssets: planEditForm.maxAssets === 'unlimited' || planEditForm.maxAssets === -1 || planEditForm.maxAssets === '-1' ? -1 : Number(planEditForm.maxAssets),
         maxUsers: planEditForm.maxUsers === 'unlimited' || planEditForm.maxUsers === -1 || planEditForm.maxUsers === '-1' ? -1 : Number(planEditForm.maxUsers),
+        maxDepartments: planEditForm.maxDepartments === 'unlimited' || planEditForm.maxDepartments === -1 || planEditForm.maxDepartments === '-1' ? -1 : Number(planEditForm.maxDepartments),
         features,
-        isActive: planEditForm.isActive
+        featureFlags: planEditForm.featureFlags,
+        isActive: planEditForm.isActive,
+        isCustom: planEditForm.isCustom
       };
 
-      const { data: res } = await api.put(`/super-admin/plans/${planEditForm.planKey}`, payload);
-      showSnack(res.message || 'Plan updated successfully!');
-      setPlanEditModal({ open: false, data: null });
+      if (planEditModal.isCreate) {
+        const { data: res } = await api.post('/super-admin/plans', payload);
+        showSnack(res.message || 'Plan created successfully!');
+      } else {
+        const originalKey = planEditModal.data?.planKey || planEditForm.planKey;
+        const { data: res } = await api.put(`/super-admin/plans/${originalKey}`, payload);
+        showSnack(res.message || 'Plan updated successfully!');
+      }
+
+      setPlanEditModal({ open: false, isCreate: false, isCustom: false, data: null });
       fetchPlans();
       fetchData();
     } catch (err) {
-      showSnack(err.response?.data?.message || 'Failed to update plan.', 'error');
+      showSnack(err.response?.data?.message || 'Failed to save plan.', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTogglePlan = async (p) => {
+    try {
+      const { data: res } = await api.patch(`/super-admin/plans/${p.planKey}/toggle`);
+      showSnack(res.message || `Plan "${p.name}" updated.`);
+      fetchPlans();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Failed to toggle plan.', 'error');
+    }
+  };
+
+  const handleDeletePlan = async (p) => {
+    if (!window.confirm(`Are you sure you want to permanently delete plan "${p.name}"?`)) return;
+    try {
+      const { data: res } = await api.delete(`/super-admin/plans/${p.planKey}`);
+      showSnack(res.message || `Plan "${p.name}" deleted.`);
+      fetchPlans();
+      fetchData();
+    } catch (err) {
+      showSnack(err.response?.data?.message || 'Failed to delete plan.', 'error');
     }
   };
 
@@ -496,15 +697,16 @@ export default function SuperAdminPanel() {
   useEffect(() => {
     fetchData();
     fetchPlans();
-  }, [fetchData, fetchPlans]);
+    fetchGlobalSettings();
+  }, [fetchData, fetchPlans, fetchGlobalSettings]);
 
   useEffect(() => {
-    if (mainTab === 0) fetchPlans();
+    if (mainTab === 0) { fetchPlans(); fetchGlobalSettings(); }
     if (mainTab === 2) fetchExpiryMonitoring();
     if (mainTab === 4) fetchCoupons();
     if (mainTab === 5) fetchLeads();
-    if (mainTab === 6) fetchPlans();
-  }, [mainTab, fetchExpiryMonitoring, fetchCoupons, fetchLeads, fetchPlans]);
+    if (mainTab === 6) { fetchPlans(); fetchGlobalSettings(); }
+  }, [mainTab, fetchExpiryMonitoring, fetchCoupons, fetchLeads, fetchPlans, fetchGlobalSettings]);
 
   const handleOpenDetails = async (tenantId) => {
     setSelectedTenantId(tenantId);
@@ -534,6 +736,46 @@ export default function SuperAdminPanel() {
     } finally {
       setDetailLoading(false);
     }
+  };
+
+  const handleOpenPlanModal = (tenant) => {
+    const t = tenant || selectedTenantDetails?.tenant || selectedTenant;
+    if (!t) return;
+    setSelectedTenant(t);
+    setSelectedTenantId(t._id);
+
+    const foundMatch = plans.find(p => p.name?.toLowerCase() === t.plan?.toLowerCase() || p.planKey?.toLowerCase() === t.plan?.toLowerCase());
+    const planName = foundMatch ? foundMatch.name : (t.plan || 'MSME');
+    const isCustomPlan = Boolean(foundMatch?.isCustom || foundMatch?.planKey?.includes('CUSTOM') || planName.toLowerCase().includes('custom'));
+    const activeLimits = t.limits || {};
+    const activeFeatures = t.features || {};
+
+    setPlanForm({
+      plan: planName,
+      customPrice: isCustomPlan && t.customPrice !== undefined && t.customPrice !== null ? t.customPrice : '',
+      expiryDate: t.planExpiry ? new Date(t.planExpiry).toISOString().split('T')[0] : '',
+      status: t.subscriptionStatus || 'Active',
+      notes: '',
+      maxAssets: activeLimits.maxAssets === -1 || activeLimits.maxAssets === 999999999 ? 'unlimited' : (activeLimits.maxAssets ?? ''),
+      maxUsers: activeLimits.maxUsers === -1 || activeLimits.maxUsers === 999999999 ? 'unlimited' : (activeLimits.maxUsers ?? ''),
+      maxDepartments: activeLimits.maxDepartments === -1 || activeLimits.maxDepartments === 999999999 ? 'unlimited' : (activeLimits.maxDepartments ?? ''),
+      allowAddonAssets: Boolean(t.allowAddonAssets),
+      addonAssetPrice: t.addonAssetPrice || 49,
+      features: {
+        coreInventory: activeFeatures.coreInventory !== false,
+        ticketing: activeFeatures.ticketing || 'basic',
+        standardReports: activeFeatures.standardReports !== false,
+        advancedAnalytics: Boolean(activeFeatures.advancedAnalytics),
+        warrantyTracking: Boolean(activeFeatures.warrantyTracking),
+        bulkCsvImport: Boolean(activeFeatures.bulkCsvImport),
+        slaEscalation: Boolean(activeFeatures.slaEscalation),
+        customBranding: Boolean(activeFeatures.customBranding),
+        auditTrail: Boolean(activeFeatures.auditTrail),
+        dedicatedSupport: Boolean(activeFeatures.dedicatedSupport)
+      }
+    });
+    setDetailOpen(false);
+    setPlanOpen(true);
   };
 
   const handleToggleTenant = async (tenantId) => {
@@ -591,9 +833,16 @@ export default function SuperAdminPanel() {
         plan: planForm.plan,
         newExpiryDate: planForm.expiryDate,
         status: planForm.status,
-        notes: planForm.notes
+        notes: planForm.notes,
+        maxAssets: planForm.maxAssets === '' ? undefined : (planForm.maxAssets === 'unlimited' || planForm.maxAssets === -1 || planForm.maxAssets === '-1' ? -1 : Number(planForm.maxAssets)),
+        maxUsers: planForm.maxUsers === '' ? undefined : (planForm.maxUsers === 'unlimited' || planForm.maxUsers === -1 || planForm.maxUsers === '-1' ? -1 : Number(planForm.maxUsers)),
+        maxDepartments: planForm.maxDepartments === '' ? undefined : (planForm.maxDepartments === 'unlimited' || planForm.maxDepartments === -1 || planForm.maxDepartments === '-1' ? -1 : Number(planForm.maxDepartments)),
+        features: planForm.features,
+        customPrice: planForm.customPrice === '' || planForm.customPrice === null ? null : Number(planForm.customPrice),
+        allowAddonAssets: Boolean(planForm.allowAddonAssets),
+        addonAssetPrice: planForm.addonAssetPrice !== '' && planForm.addonAssetPrice !== undefined ? Number(planForm.addonAssetPrice) : 49
       });
-      showSnack('Subscription updated successfully!');
+      showSnack('Subscription and capacity allocations updated successfully!');
       setPlanOpen(false);
       handleOpenDetails(targetTenantId);
       fetchData();
@@ -1116,23 +1365,27 @@ export default function SuperAdminPanel() {
 
                   <Grid item xs={12} sm={6} md={4} lg={3}>
                     <MetricCard
-                      title="Expired Subscriptions"
-                      value={platform.expiredSubscriptions ?? 'N/A'}
-                      subtext="In grace period or expired"
-                      icon={<CancelRounded sx={{ fontSize: 22 }} />}
-                      iconBg="#F8FAFC"
-                      iconColor="#64748B"
+                      title="Purchased Add-On Assets"
+                      value={`+${platform.totalAddonAssets || 0}`}
+                      subtext="Extra capacity active across all tenants"
+                      icon={<BoltRounded sx={{ fontSize: 22 }} />}
+                      iconBg="rgba(119, 119, 199, 0.12)"
+                      iconColor="#7777C7"
+                      badgeText="Pro-Rata Addons"
+                      badgeColor="#7777C7"
                     />
                   </Grid>
 
                   <Grid item xs={12} sm={6} md={4} lg={3}>
                     <MetricCard
-                      title="Cancelled Subscriptions"
-                      value={platform.cancelledSubscriptions ?? 'N/A'}
-                      subtext="Deactivated tenant accounts"
-                      icon={<PowerSettingsNewRounded sx={{ fontSize: 22 }} />}
-                      iconBg="#F8FAFC"
-                      iconColor="#64748B"
+                      title="Expired Subscriptions"
+                      value={platform.expiredSubscriptions ?? 'N/A'}
+                      subtext="In grace period or expired"
+                      icon={<CancelRounded sx={{ fontSize: 22 }} />}
+                      iconBg="#FEF2F2"
+                      iconColor="#DC2626"
+                      badgeText={platform.expiredSubscriptions > 0 ? 'Action Req.' : 'Clean'}
+                      badgeColor={platform.expiredSubscriptions > 0 ? '#DC2626' : '#10B981'}
                     />
                   </Grid>
                 </Grid>
@@ -1543,7 +1796,45 @@ export default function SuperAdminPanel() {
                         ) : '—'}
                       </TableCell>
                       <TableCell sx={{ color: TEXT_MUTED, fontSize: '12px' }}>
-                        {`${t.limits?.maxAssets || 0} assets / ${t.limits?.maxUsers || 0} users`}
+                        <Box>
+                          <Typography variant="body2" sx={{ fontSize: '12px', fontWeight: 700, color: '#0F172A' }}>
+                            {t.limits?.maxAssets === -1 || t.limits?.maxAssets === 999999999 ? 'Unlimited Assets' : `${t.limits?.maxAssets ?? '—'} Assets`}
+                          </Typography>
+                          {t.addonAssets > 0 ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.3 }}>
+                              <Chip
+                                label={`+${t.addonAssets} Add-on`}
+                                size="small"
+                                sx={{
+                                  height: 18,
+                                  fontSize: '9.5px',
+                                  fontWeight: 800,
+                                  bgcolor: 'rgba(119, 119, 199, 0.12)',
+                                  color: '#7777C7',
+                                  border: '1px solid rgba(119, 119, 199, 0.3)'
+                                }}
+                              />
+                              <Typography variant="caption" sx={{ fontSize: '10px', color: '#64748B' }}>
+                                (Base: {Math.max(0, (t.limits?.maxAssets || 0) - t.addonAssets)})
+                              </Typography>
+                            </Box>
+                          ) : null}
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, display: 'block', mt: 0.2 }}>
+                            {t.limits?.maxUsers === -1 || t.limits?.maxUsers === 999999999 ? 'Unlimited' : (t.limits?.maxUsers ?? '—')} Users • {t.limits?.maxDepartments === -1 || t.limits?.maxDepartments === 999999999 ? 'Unlimited' : (t.limits?.maxDepartments ?? '—')} Depts
+                          </Typography>
+                          {t.customPrice ? (
+                            <Box sx={{ mt: 0.3 }}>
+                              <Typography variant="caption" sx={{ color: '#059669', fontWeight: 800, fontSize: '11px', display: 'block' }}>
+                                Quote: ₹{Number(t.customPrice).toLocaleString('en-IN')}/yr
+                              </Typography>
+                              {t.customQuoteDaysRemaining !== null && t.customQuoteDaysRemaining !== undefined ? (
+                                <Typography variant="caption" sx={{ color: t.customQuoteDaysRemaining <= 2 ? '#DC2626' : '#D97706', fontWeight: 700, fontSize: '10.5px', display: 'block' }}>
+                                  ({t.customQuoteDaysRemaining} days validity left)
+                                </Typography>
+                              ) : null}
+                            </Box>
+                          ) : null}
+                        </Box>
                       </TableCell>
                       <TableCell>
                         <Switch
@@ -2131,8 +2422,8 @@ export default function SuperAdminPanel() {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell sx={{ color: '#475569', fontSize: '12.5px', maxWidth: 300, wordBreak: 'break-word' }}>
-                        {lead.message || '—'}
+                      <TableCell sx={{ color: '#334155', fontSize: '12.5px', maxWidth: 320, wordBreak: 'break-word', fontWeight: 500 }}>
+                        {formatLeadMessage(lead.message)}
                       </TableCell>
                       <TableCell sx={{ py: 1 }}>
                         <Select
@@ -2199,6 +2490,7 @@ export default function SuperAdminPanel() {
       {mainTab === 6 && (
         <Box>
           {/* Header Banner */}
+          {/* Header Banner */}
           <Paper
             elevation={0}
             sx={{
@@ -2208,19 +2500,19 @@ export default function SuperAdminPanel() {
               bgcolor: '#FFFFFF',
               mb: 3.5,
               display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
+              flexDirection: { xs: 'column', lg: 'row' },
               justifyContent: 'space-between',
-              alignItems: { xs: 'flex-start', sm: 'center' },
-              gap: 2
+              alignItems: { xs: 'flex-start', lg: 'center' },
+              gap: 2.5
             }}
           >
             <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5, flexWrap: 'wrap' }}>
                 <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A' }}>
-                  Subscription Plans, Pricing & Quotas
+                  Subscription Plans, Dynamic Quotas & Feature Toggles
                 </Typography>
                 <Chip
-                  label="Authoritative Rates"
+                  label="Authoritative Real-Time Engine"
                   size="small"
                   sx={{
                     bgcolor: '#ECFDF5',
@@ -2230,27 +2522,165 @@ export default function SuperAdminPanel() {
                     border: '1px solid #A7F3D0'
                   }}
                 />
+                <Chip
+                  label="Dynamic Feature Toggles"
+                  size="small"
+                  sx={{
+                    bgcolor: '#F5F3FF',
+                    color: '#7C3AED',
+                    fontWeight: 800,
+                    fontSize: '11px',
+                    border: '1px solid #DDD6FE'
+                  }}
+                />
               </Box>
-              <Typography variant="body2" sx={{ color: TEXT_MUTED, maxWidth: 750 }}>
-                Configure live subscription rates, asset capacities, and quotas across the platform. All price changes reflect immediately in checkouts, renewals, public registration, and automated invoice calculations.
+              <Typography variant="body2" sx={{ color: TEXT_MUTED, maxWidth: 850 }}>
+                Configure live subscription rates, asset/user/department capacity limits, and turn on/off any of the 10 core features per plan. Changes reflect instantly across public registration, dynamic checkouts, and customer access control.
               </Typography>
             </Box>
 
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleResetPlans}
-              disabled={saving || plansLoading}
-              sx={{
-                borderRadius: '10px',
-                textTransform: 'none',
-                fontWeight: 700,
-                fontSize: '12.5px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              Reset to Factory Defaults
-            </Button>
+            <Stack direction="row" spacing={1.5} flexWrap="wrap">
+              <Button
+                variant="outlined"
+                startIcon={<ControlPointRounded />}
+                onClick={() => openCreatePlanModal(true)}
+                sx={{
+                  borderRadius: '10px',
+                  borderColor: '#7C3AED',
+                  color: '#7C3AED',
+                  bgcolor: '#F5F3FF',
+                  fontWeight: 800,
+                  fontSize: '12.5px',
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  '&:hover': { bgcolor: '#EDE9FE', borderColor: '#6D28D9' }
+                }}
+              >
+                + Create Custom Plan
+              </Button>
+
+              <Button
+                variant="contained"
+                startIcon={<AddRounded />}
+                onClick={() => openCreatePlanModal(false)}
+                sx={{
+                  borderRadius: '10px',
+                  bgcolor: DARK,
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: '12.5px',
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                  '&:hover': { bgcolor: '#6464B8' }
+                }}
+              >
+                + Create New Plan
+              </Button>
+
+              <Button
+                variant="outlined"
+                color="error"
+                onClick={handleResetPlans}
+                disabled={saving || plansLoading}
+                sx={{
+                  borderRadius: '10px',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  fontSize: '12.5px',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                Reset to Defaults
+              </Button>
+            </Stack>
+          </Paper>
+
+          {/* Universal Add-on Asset Control Banner */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2.75,
+              borderRadius: '16px',
+              border: '1.5px solid #7777C7',
+              bgcolor: '#F8FAFC',
+              mb: 3.5,
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              justifyContent: 'space-between',
+              alignItems: { xs: 'flex-start', md: 'center' },
+              gap: 2.5,
+              boxShadow: '0 4px 15px rgba(119, 119, 199, 0.08)'
+            }}
+          >
+            <Box sx={{ maxWidth: 700 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5, flexWrap: 'wrap' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 900, color: '#0F172A' }}>
+                  Universal "Purchase More Assets" Controls (All Companies)
+                </Typography>
+                <Chip
+                  label={globalSettings.allowAddonAssets ? 'ENABLED GLOBALLY' : 'DISABLED GLOBALLY'}
+                  size="small"
+                  sx={{
+                    fontWeight: 900,
+                    fontSize: '11px',
+                    bgcolor: globalSettings.allowAddonAssets ? '#ECFDF5' : '#FEF2F2',
+                    color: globalSettings.allowAddonAssets ? '#059669' : '#DC2626',
+                    border: `1px solid ${globalSettings.allowAddonAssets ? '#A7F3D0' : '#FECACA'}`
+                  }}
+                />
+              </Box>
+              <Typography variant="body2" sx={{ color: TEXT_MUTED }}>
+                Turn ON or OFF the middle "Purchase More Assets" tab across <strong>all companies universally</strong> and configure the platform-wide unit price. When saved, all client company portals update immediately.
+              </Typography>
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#FFFFFF', px: 1.5, py: 0.6, borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155' }}>
+                  Global Tab:
+                </Typography>
+                <Switch
+                  size="small"
+                  checked={Boolean(globalSettings.allowAddonAssets)}
+                  onChange={(e) => handleToggleGlobalAddon(e.target.checked)}
+                  color="primary"
+                />
+              </Box>
+
+              <TextField
+                size="small"
+                type="number"
+                label="Price (₹/asset)"
+                value={globalSettings.addonAssetPrice ?? 49}
+                onChange={(e) => setGlobalSettings({ ...globalSettings, addonAssetPrice: e.target.value })}
+                sx={{
+                  width: 140,
+                  bgcolor: '#FFFFFF',
+                  '& .MuiOutlinedInput-root': { borderRadius: '10px' }
+                }}
+              />
+
+              <Button
+                variant="contained"
+                disabled={globalSettingsSaving || globalSettingsLoading}
+                onClick={() => handleSaveGlobalSettings()}
+                startIcon={globalSettingsSaving ? <CircularProgress size={16} color="inherit" /> : <SaveRounded />}
+                sx={{
+                  bgcolor: '#7777C7',
+                  color: '#FFFFFF',
+                  fontWeight: 800,
+                  fontSize: '12.5px',
+                  borderRadius: '10px',
+                  py: 0.9,
+                  px: 2,
+                  whiteSpace: 'nowrap',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: '#6464B8' }
+                }}
+              >
+                {globalSettingsSaving ? 'Applying...' : 'Save & Apply Universally'}
+              </Button>
+            </Box>
           </Paper>
 
           {plansLoading && plans.length === 0 ? (
@@ -2263,19 +2693,23 @@ export default function SuperAdminPanel() {
           ) : (
             <Grid container spacing={3}>
               {(plans.length > 0 ? plans : [
-                { planKey: 'HOME_USER', name: 'Home User', price: 999, maxAssets: 20, maxUsers: 1, badge: 'Popular for Personal', description: 'Up to 20 assets for personal or small office equipment tracking' },
-                { planKey: 'MSME', name: 'MSME', price: 2999, maxAssets: 50, maxUsers: 10, badge: 'Most Popular', description: 'Up to 50 assets with multi-department support and warranty radar' },
-                { planKey: 'LARGE_SCALE', name: 'Large Scale', price: 8999, maxAssets: -1, maxUsers: -1, badge: 'Enterprise', description: 'Unlimited assets with developer REST API and priority 24/7 SLA support' }
+                { planKey: 'HOME_USER', name: 'Home User', price: 999, maxAssets: 20, maxUsers: 3, maxDepartments: 2, badge: 'Popular for Personal', description: 'Up to 20 assets for personal or small office equipment tracking' },
+                { planKey: 'MSME', name: 'MSME', price: 2999, maxAssets: 50, maxUsers: 15, maxDepartments: 5, badge: 'Most Popular', description: 'Up to 50 assets with multi-department support and warranty radar' },
+                { planKey: 'LARGE_SCALE', name: 'Large Scale', price: 8999, maxAssets: -1, maxUsers: -1, maxDepartments: -1, badge: 'Enterprise', description: 'Unlimited assets with developer REST API and priority 24/7 SLA support' }
               ]).map((p) => {
                 const isMsme = p.planKey === 'MSME' || p.name === 'MSME';
                 const isLarge = p.planKey === 'LARGE_SCALE' || p.name === 'Large Scale';
+                const isCustom = Boolean(p.isCustom);
 
-                const themeColor = isMsme ? '#7C3AED' : isLarge ? '#059669' : '#2563EB';
-                const themeBg = isMsme ? '#F5F3FF' : isLarge ? '#ECFDF5' : '#EFF6FF';
-                const themeBorder = isMsme ? '#DDD6FE' : isLarge ? '#A7F3D0' : '#BFDBFE';
+                const themeColor = isCustom ? '#D97706' : isMsme ? '#7C3AED' : isLarge ? '#059669' : '#2563EB';
+                const themeBg = isCustom ? '#FFFBEB' : isMsme ? '#F5F3FF' : isLarge ? '#ECFDF5' : '#EFF6FF';
+                const themeBorder = isCustom ? '#FDE68A' : isMsme ? '#DDD6FE' : isLarge ? '#A7F3D0' : '#BFDBFE';
+
+                const flags = p.featureFlags || {};
+                const isSystemPlan = p.planKey === 'HOME_USER';
 
                 return (
-                  <Grid item xs={12} md={4} key={p.planKey || p.name}>
+                  <Grid item xs={12} md={6} lg={4} key={p.planKey || p.name}>
                     <Paper
                       elevation={0}
                       sx={{
@@ -2297,8 +2731,22 @@ export default function SuperAdminPanel() {
                     >
                       {/* Top Plan Tag */}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                           <PlanBadge plan={p.name} />
+                          {isCustom && (
+                            <Chip
+                              label="Custom Plan"
+                              size="small"
+                              sx={{
+                                height: 22,
+                                fontSize: '10.5px',
+                                fontWeight: 800,
+                                bgcolor: '#FEF3C7',
+                                color: '#D97706',
+                                border: '1px solid #FDE68A'
+                              }}
+                            />
+                          )}
                           {p.badge && (
                             <Chip
                               label={p.badge}
@@ -2315,17 +2763,33 @@ export default function SuperAdminPanel() {
                           )}
                         </Box>
 
-                        <Chip
-                          label={p.isActive !== false ? 'Active' : 'Disabled'}
-                          size="small"
-                          sx={{
-                            height: 22,
-                            fontSize: '10.5px',
-                            fontWeight: 800,
-                            bgcolor: p.isActive !== false ? '#ECFDF5' : '#FEF2F2',
-                            color: p.isActive !== false ? '#059669' : '#DC2626'
-                          }}
-                        />
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Chip
+                            label={p.isActive !== false ? 'Active' : 'Disabled'}
+                            size="small"
+                            onClick={() => handleTogglePlan(p)}
+                            sx={{
+                              height: 22,
+                              fontSize: '10.5px',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                              bgcolor: p.isActive !== false ? '#ECFDF5' : '#FEF2F2',
+                              color: p.isActive !== false ? '#059669' : '#DC2626',
+                              '&:hover': { opacity: 0.8 }
+                            }}
+                          />
+                          {!isSystemPlan && (
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeletePlan(p)}
+                              title="Delete Plan"
+                              sx={{ p: 0.5 }}
+                            >
+                              <DeleteRounded sx={{ fontSize: 16 }} />
+                            </IconButton>
+                          )}
+                        </Stack>
                       </Box>
 
                       {/* Plan Heading */}
@@ -2355,12 +2819,20 @@ export default function SuperAdminPanel() {
                             Annual Base Price
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5, mt: 0.2 }}>
-                            <Typography variant="h4" sx={{ fontWeight: 950, color: '#0F172A', letterSpacing: '-0.5px' }}>
-                              {formatINR(p.price)}
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
-                              / year
-                            </Typography>
+                            {isCustom ? (
+                              <Typography variant="h5" sx={{ fontWeight: 950, color: '#0F172A', letterSpacing: '-0.3px' }}>
+                                Contact Sales
+                              </Typography>
+                            ) : (
+                              <>
+                                <Typography variant="h4" sx={{ fontWeight: 950, color: '#0F172A', letterSpacing: '-0.5px' }}>
+                                  {formatINR(p.price)}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 700 }}>
+                                  / year
+                                </Typography>
+                              </>
+                            )}
                           </Box>
                         </Box>
                         <IconButton
@@ -2372,7 +2844,7 @@ export default function SuperAdminPanel() {
                             color: '#0F172A',
                             '&:hover': { bgcolor: themeBg, color: themeColor }
                           }}
-                          title="Edit Price & Limits"
+                          title="Edit Price, Limits & Feature Switches"
                         >
                           <EditRounded sx={{ fontSize: 16 }} />
                         </IconButton>
@@ -2383,45 +2855,77 @@ export default function SuperAdminPanel() {
                         <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', mb: 1 }}>
                           Capacity Quotas
                         </Typography>
-                        <Stack spacing={1}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5, borderBottom: '1px solid #F1F5F9' }}>
-                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>Asset Registry Limit</Typography>
+                        <Stack spacing={0.75}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.4, borderBottom: '1px solid #F1F5F9' }}>
+                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>Asset Limit</Typography>
                             <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
-                              {p.maxAssets === -1 || p.maxAssets === 999999999 ? 'Unlimited Assets' : `Up to ${p.maxAssets} Assets`}
+                              {isCustom ? 'As per requirement Assets' : (p.maxAssets === -1 || p.maxAssets === 999999999 ? 'Unlimited Assets' : `${p.maxAssets} Assets`)}
                             </Typography>
                           </Box>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5, borderBottom: '1px solid #F1F5F9' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.4, borderBottom: '1px solid #F1F5F9' }}>
                             <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>User Accounts</Typography>
                             <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
-                              {p.maxUsers === -1 || p.maxUsers === 999999999 ? 'Unlimited Users' : `Up to ${p.maxUsers} Users`}
+                              {isCustom ? 'As per requirement Users' : (p.maxUsers === -1 || p.maxUsers === 999999999 ? 'Unlimited Users' : `${p.maxUsers} Users`)}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.4, borderBottom: '1px solid #F1F5F9' }}>
+                            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontSize: '12.5px' }}>Departments</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                              {isCustom ? 'As per requirement Departments' : (p.maxDepartments === -1 || p.maxDepartments === 999999999 ? 'Unlimited Depts' : `${p.maxDepartments ?? 2} Departments`)}
                             </Typography>
                           </Box>
                         </Stack>
                       </Box>
 
-                      {/* Feature Bullet Points */}
-                      {p.features && p.features.length > 0 && (
-                        <Box sx={{ mb: 3 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', mb: 1 }}>
-                            Features Included ({p.features.length})
-                          </Typography>
-                          <Stack spacing={0.75}>
-                            {p.features.slice(0, 5).map((feat, idx) => (
-                              <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <CheckRounded sx={{ fontSize: 15, color: '#16A34A' }} />
-                                <Typography variant="body2" sx={{ fontSize: '12.5px', color: '#475569', fontWeight: 600 }}>
-                                  {feat}
-                                </Typography>
+                      {/* Dynamic 10-Feature Matrix Checklist */}
+                      <Box sx={{ mb: 3 }}>
+                        <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', mb: 1 }}>
+                          Feature Matrix & Capabilities (10 Points)
+                        </Typography>
+                        <Stack spacing={0.65}>
+                          {FEATURE_DEFINITIONS.map((feat) => {
+                            const val = flags[feat.key];
+                            const isEnabled = feat.key === 'ticketing' ? val && val !== 'none' && val !== false : Boolean(val);
+                            const ticketingLabel = val === 'full' ? 'Full Workflows' : val === 'basic' ? 'Basic' : 'Disabled';
+
+                            return (
+                              <Box key={feat.key} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.25 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  {isEnabled ? (
+                                    <CheckRounded sx={{ fontSize: 16, color: '#16A34A' }} />
+                                  ) : (
+                                    <RemoveRounded sx={{ fontSize: 16, color: '#CBD5E1' }} />
+                                  )}
+                                  <Typography
+                                    variant="body2"
+                                    sx={{
+                                      fontSize: '12.5px',
+                                      color: isEnabled ? '#1E293B' : '#94A3B8',
+                                      fontWeight: isEnabled ? 600 : 400
+                                    }}
+                                  >
+                                    {feat.label}
+                                  </Typography>
+                                </Box>
+
+                                {feat.key === 'ticketing' && (
+                                  <Chip
+                                    size="small"
+                                    label={ticketingLabel}
+                                    sx={{
+                                      height: 20,
+                                      fontSize: '10px',
+                                      fontWeight: 800,
+                                      bgcolor: val === 'full' ? '#ECFDF5' : val === 'basic' ? '#EFF6FF' : '#F1F5F9',
+                                      color: val === 'full' ? '#059669' : val === 'basic' ? '#2563EB' : '#94A3B8'
+                                    }}
+                                  />
+                                )}
                               </Box>
-                            ))}
-                            {p.features.length > 5 && (
-                              <Typography variant="caption" sx={{ color: TEXT_MUTED, pl: 3, fontWeight: 700 }}>
-                                + {p.features.length - 5} more features
-                              </Typography>
-                            )}
-                          </Stack>
-                        </Box>
-                      )}
+                            );
+                          })}
+                        </Stack>
+                      </Box>
 
                       {/* Action Button */}
                       <Button
@@ -2440,7 +2944,7 @@ export default function SuperAdminPanel() {
                           '&:hover': { bgcolor: '#6464B8' }
                         }}
                       >
-                        Edit Price & Specifications
+                        Edit Plan, Quotas & Features
                       </Button>
                     </Paper>
                   </Grid>
@@ -2473,16 +2977,7 @@ export default function SuperAdminPanel() {
             startIcon={<UpgradeRounded />}
             onClick={() => {
               const currentTenant = selectedTenantDetails?.tenant || selectedTenant;
-              const currentExpiry = currentTenant?.planExpiry
-                ? new Date(currentTenant.planExpiry).toISOString().split('T')[0]
-                : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-              setPlanForm({
-                plan: currentTenant?.plan || 'MSME',
-                expiryDate: currentExpiry,
-                status: currentTenant?.subscriptionStatus || 'Active',
-                notes: ''
-              });
-              setPlanOpen(true);
+              handleOpenPlanModal(currentTenant);
             }}
             sx={{
               borderRadius: '10px',
@@ -2553,7 +3048,47 @@ export default function SuperAdminPanel() {
                         <PlanBadge plan={selectedTenantDetails?.tenant?.plan} />
                         <StatusBadge status={selectedTenantDetails?.tenant?.subscriptionStatus} />
                       </Box>
-                      <Typography variant="body2" sx={{ color: '#475569', mt: 1.5 }}>
+                      {selectedTenantDetails?.tenant?.customPrice ? (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="body2" sx={{ color: '#059669', fontWeight: 800 }}>
+                            Custom Quoted Rate: ₹{Number(selectedTenantDetails.tenant.customPrice).toLocaleString('en-IN')}/year
+                          </Typography>
+                          {selectedTenantDetails?.tenant?.customQuoteDaysRemaining !== undefined && selectedTenantDetails?.tenant?.customQuoteDaysRemaining !== null ? (
+                            <Typography variant="caption" sx={{ color: selectedTenantDetails.tenant.customQuoteDaysRemaining <= 2 ? '#DC2626' : '#D97706', fontWeight: 700, display: 'block' }}>
+                              ⏳ Quote Validity: {selectedTenantDetails.tenant.customQuoteDaysRemaining} day{selectedTenantDetails.tenant.customQuoteDaysRemaining === 1 ? '' : 's'} remaining (Auto-expires if unpaid)
+                            </Typography>
+                          ) : null}
+                        </Box>
+                      ) : null}
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 1 }}>
+                        <strong>Allocated Limits:</strong>{' '}
+                        {selectedTenantDetails?.tenant?.limits?.maxAssets === -1 || selectedTenantDetails?.tenant?.limits?.maxAssets === 999999999 ? 'Unlimited' : (selectedTenantDetails?.tenant?.limits?.maxAssets ?? '—')} Assets •{' '}
+                        {selectedTenantDetails?.tenant?.limits?.maxUsers === -1 || selectedTenantDetails?.tenant?.limits?.maxUsers === 999999999 ? 'Unlimited' : (selectedTenantDetails?.tenant?.limits?.maxUsers ?? '—')} Users •{' '}
+                        {selectedTenantDetails?.tenant?.limits?.maxDepartments === -1 || selectedTenantDetails?.tenant?.limits?.maxDepartments === 999999999 ? 'Unlimited' : (selectedTenantDetails?.tenant?.limits?.maxDepartments ?? '—')} Depts
+                      </Typography>
+
+                      {/* Add-on Capacity Breakdown Box */}
+                      {selectedTenantDetails?.tenant?.addonAssets > 0 ? (
+                        <Box sx={{ mt: 1, p: 1.2, bgcolor: 'rgba(119, 119, 199, 0.06)', borderRadius: '8px', border: '1px solid rgba(119, 119, 199, 0.25)' }}>
+                          <Box display="flex" alignItems="center" justifyContent="space-between">
+                            <Typography variant="caption" sx={{ fontWeight: 800, color: '#7777C7' }}>
+                              ADD-ON CAPACITY BREAKDOWN
+                            </Typography>
+                            <Chip
+                              label={`+${selectedTenantDetails.tenant.addonAssets} Add-on Assets`}
+                              size="small"
+                              sx={{ height: 18, fontSize: '9.5px', fontWeight: 800, bgcolor: '#7777C7', color: '#FFFFFF' }}
+                            />
+                          </Box>
+                          <Typography variant="caption" sx={{ color: '#334155', display: 'block', mt: 0.5 }}>
+                            • Base Plan Allocation: <strong>{Math.max(0, (selectedTenantDetails.tenant.limits?.maxAssets || 0) - selectedTenantDetails.tenant.addonAssets)} Assets</strong><br />
+                            • Active Add-On Capacity: <strong>+{selectedTenantDetails.tenant.addonAssets} Assets</strong> (Co-Terminus Pro-Rata)<br />
+                            • Total Active Limit: <strong>{selectedTenantDetails.tenant.limits?.maxAssets} Assets</strong>
+                          </Typography>
+                        </Box>
+                      ) : null}
+
+                      <Typography variant="body2" sx={{ color: '#475569', mt: 1 }}>
                         <strong>Plan Expiry:</strong>{' '}
                         {selectedTenantDetails?.tenant?.planExpiry
                           ? new Date(selectedTenantDetails.tenant.planExpiry).toLocaleDateString('en-IN')
@@ -2726,83 +3261,286 @@ export default function SuperAdminPanel() {
         </DialogActions>
       </Dialog>
 
-      {/* ─── MODAL: MANAGE / OVERRIDE SUBSCRIPTION ───────────────────────────────── */}
+      {/* ─── MODAL: MANAGE / OVERRIDE SUBSCRIPTION & QUOTAS ──────────────────────── */}
       <Dialog
         open={planOpen}
         onClose={() => setPlanOpen(false)}
-        maxWidth="xs"
+        maxWidth="md"
         fullWidth
         PaperProps={{
           component: 'form',
           onSubmit: handleSubscriptionAction,
-          sx: { borderRadius: '18px', p: 1 }
+          sx: { borderRadius: '20px', p: 1 }
         }}
       >
-        <DialogTitle sx={{ fontWeight: 900, color: '#0F172A' }}>
-          Override Company Subscription
-          {(selectedTenantDetails?.tenant?.name || selectedTenant?.name) && (
-            <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 600, mt: 0.3 }}>
-              {selectedTenantDetails?.tenant?.name || selectedTenant?.name} (/{selectedTenantDetails?.tenant?.slug || selectedTenant?.slug || ''})
+        <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A' }}>
+              Override Company Subscription & Quotas
             </Typography>
-          )}
+            {(selectedTenantDetails?.tenant?.name || selectedTenant?.name) && (
+              <Typography variant="body2" sx={{ color: TEXT_MUTED, fontWeight: 600, mt: 0.3 }}>
+                Target: {selectedTenantDetails?.tenant?.name || selectedTenant?.name} (/{selectedTenantDetails?.tenant?.slug || selectedTenant?.slug || ''})
+              </Typography>
+            )}
+          </Box>
+          <PlanBadge plan={planForm.plan} />
         </DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Subscription Plan</InputLabel>
-              <Select
-                value={planForm.plan}
-                label="Subscription Plan"
-                onChange={(e) => setPlanForm({ ...planForm, plan: e.target.value })}
-                sx={{ borderRadius: '10px' }}
-              >
-                <MenuItem value="Home User">Home User (₹999 / 20 Assets)</MenuItem>
-                <MenuItem value="MSME">MSME (₹2,999 / 50 Assets)</MenuItem>
-                <MenuItem value="Large Scale">Large Scale (₹8,999 / Unlimited)</MenuItem>
-              </Select>
-            </FormControl>
 
+        <DialogContent dividers sx={{ py: 2.5 }}>
+          <Stack spacing={3}>
+            {/* Top Row: Plan, Expiry & Status */}
+            {(() => {
+              const isSelectedCustom = Boolean(
+                planForm.plan?.toLowerCase().includes('custom') ||
+                plans.find(p => p.name === planForm.plan || p.planKey === planForm.plan)?.isCustom
+              );
+
+              return (
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={isSelectedCustom ? 6 : 4} md={isSelectedCustom ? 3 : 4}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', mb: 0.6, display: 'block', fontSize: '11.5px' }}>
+                      Subscription Tier
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={planForm.plan}
+                        onChange={(e) => {
+                          const selectedPlanKeyOrName = e.target.value;
+                          const foundPlan = plans.find(p => p.name === selectedPlanKeyOrName || p.planKey === selectedPlanKeyOrName);
+                          if (foundPlan) {
+                            const isCustom = Boolean(foundPlan.isCustom || foundPlan.planKey?.includes('CUSTOM') || foundPlan.name?.toLowerCase().includes('custom'));
+                            setPlanForm({
+                              ...planForm,
+                              plan: foundPlan.name,
+                              customPrice: isCustom ? (planForm.customPrice || '') : '',
+                              maxAssets: isCustom ? 'unlimited' : (foundPlan.maxAssets === -1 || foundPlan.maxAssets === 999999999 ? 'unlimited' : foundPlan.maxAssets),
+                              maxUsers: isCustom ? 'unlimited' : (foundPlan.maxUsers === -1 || foundPlan.maxUsers === 999999999 ? 'unlimited' : foundPlan.maxUsers),
+                              maxDepartments: isCustom ? 'unlimited' : (foundPlan.maxDepartments === -1 || foundPlan.maxDepartments === 999999999 ? 'unlimited' : (foundPlan.maxDepartments ?? 2)),
+                              features: {
+                                ...(foundPlan.featureFlags || {})
+                              }
+                            });
+                          } else {
+                            const isCustom = Boolean(selectedPlanKeyOrName.toLowerCase().includes('custom'));
+                            setPlanForm({
+                              ...planForm,
+                              plan: selectedPlanKeyOrName,
+                              customPrice: isCustom ? planForm.customPrice : ''
+                            });
+                          }
+                        }}
+                        sx={{ borderRadius: '10px', bgcolor: '#FFFFFF' }}
+                      >
+                        {plans.map((p) => {
+                          const isCustom = Boolean(p.isCustom || p.planKey?.includes('CUSTOM') || p.name?.toLowerCase().includes('custom'));
+                          return (
+                            <MenuItem key={p.planKey || p.name} value={p.name}>
+                              {isCustom ? p.name : `${p.name} (${formatINR(p.price)}/yr)`}
+                            </MenuItem>
+                          );
+                        })}
+                        {planForm.plan && !plans.some(p => p.name === planForm.plan) && (
+                          <MenuItem value={planForm.plan}>
+                            {planForm.plan}
+                          </MenuItem>
+                        )}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {isSelectedCustom && (
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', mb: 0.6, display: 'block', fontSize: '11.5px' }}>
+                        Custom Quoted Price (₹/yr)
+                      </Typography>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        type="number"
+                        placeholder="e.g. 50000"
+                        value={planForm.customPrice ?? ''}
+                        onChange={(e) => setPlanForm({ ...planForm, customPrice: e.target.value })}
+                        helperText="Bespoke yearly quote for this company"
+                        sx={{ bgcolor: '#FFFFFF', '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                      />
+                    </Grid>
+                  )}
+
+                  <Grid item xs={12} sm={isSelectedCustom ? 6 : 4} md={isSelectedCustom ? 3 : 4}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', mb: 0.6, display: 'block', fontSize: '11.5px' }}>
+                      Subscription Expiry Date
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="date"
+                      value={planForm.expiryDate || ''}
+                      onChange={(e) => setPlanForm({ ...planForm, expiryDate: e.target.value })}
+                      sx={{
+                        bgcolor: '#FFFFFF',
+                        '& .MuiOutlinedInput-root': { borderRadius: '10px' },
+                        '& input': { py: '8.5px' }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={isSelectedCustom ? 6 : 4} md={isSelectedCustom ? 3 : 4}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#334155', mb: 0.6, display: 'block', fontSize: '11.5px' }}>
+                      Subscription Status
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={planForm.status}
+                        onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
+                        sx={{ borderRadius: '10px', bgcolor: '#FFFFFF' }}
+                      >
+                        <MenuItem value="Active">Active</MenuItem>
+                        <MenuItem value="Pending Checkout">Pending Checkout</MenuItem>
+                        <MenuItem value="Suspended">Suspended</MenuItem>
+                        <MenuItem value="Expired">Expired</MenuItem>
+                        <MenuItem value="Cancelled">Cancelled</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              );
+            })()}
+
+            {/* Quota Override Section */}
+            <Paper elevation={0} sx={{ p: 2, borderRadius: '14px', bgcolor: '#F8FAFC', border: '1.5px solid #E2E8F0' }}>
+              <Box sx={{ mb: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                  Company Capacity Quota Overrides (Add Extra Capacity)
+                </Typography>
+                <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                  Override default plan quotas for this specific tenant (e.g., allow 35 assets or 5 users on Home User plan). Enter a specific number or 'unlimited' (-1).
+                </Typography>
+              </Box>
+
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Asset Limit (Max Assets)"
+                    value={planForm.maxAssets}
+                    onChange={(e) => setPlanForm({ ...planForm, maxAssets: e.target.value })}
+                    placeholder="e.g. 35 or unlimited"
+                    sx={{ bgcolor: '#FFFFFF', '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="User Limit (Max Users)"
+                    value={planForm.maxUsers}
+                    onChange={(e) => setPlanForm({ ...planForm, maxUsers: e.target.value })}
+                    placeholder="e.g. 5 or unlimited"
+                    sx={{ bgcolor: '#FFFFFF', '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Department Limit (Max Depts)"
+                    value={planForm.maxDepartments}
+                    onChange={(e) => setPlanForm({ ...planForm, maxDepartments: e.target.value })}
+                    placeholder="e.g. 3 or unlimited"
+                    sx={{ bgcolor: '#FFFFFF', '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
+                  />
+                </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Feature Flags Section */}
+            <Paper elevation={0} sx={{ p: 2, borderRadius: '14px', bgcolor: '#F8FAFC', border: '1.5px solid #E2E8F0' }}>
+              <Box sx={{ mb: 1.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                  Company Feature Access Switches (10 Points)
+                </Typography>
+                <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                  Grant or revoke individual feature permissions for this specific enterprise account.
+                </Typography>
+              </Box>
+
+              <Grid container spacing={1.5}>
+                {FEATURE_DEFINITIONS.map((feat) => {
+                  if (feat.key === 'ticketing') {
+                    const currentTicketing = planForm.features?.ticketing || 'basic';
+                    return (
+                      <Grid item xs={12} sm={6} key={feat.key}>
+                        <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', height: '100%' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#0F172A', mb: 0.5 }}>
+                            {feat.label}
+                          </Typography>
+                          <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+                            <Select
+                              value={currentTicketing}
+                              onChange={(e) => setPlanForm({
+                                ...planForm,
+                                features: { ...planForm.features, ticketing: e.target.value }
+                              })}
+                              sx={{ borderRadius: '8px' }}
+                            >
+                              <MenuItem value="full">Full Ticketing Workflows</MenuItem>
+                              <MenuItem value="basic">Basic Breakdown Requests</MenuItem>
+                              <MenuItem value="none">Disabled</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                      </Grid>
+                    );
+                  }
+
+                  const isChecked = Boolean(planForm.features?.[feat.key]);
+                  return (
+                    <Grid item xs={12} sm={6} key={feat.key}>
+                      <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
+                        <Box sx={{ pr: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#0F172A' }}>
+                            {feat.label}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, display: 'block', fontSize: '11px' }}>
+                            {feat.desc}
+                          </Typography>
+                        </Box>
+                        <Switch
+                          size="small"
+                          checked={isChecked}
+                          onChange={(e) => setPlanForm({
+                            ...planForm,
+                            features: { ...planForm.features, [feat.key]: e.target.checked }
+                          })}
+                          color="primary"
+                        />
+                      </Box>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Paper>
+
+            {/* Audit Notes */}
             <TextField
               fullWidth
               size="small"
-              type="date"
-              label="Subscription Expiry Date"
-              InputLabelProps={{ shrink: true }}
-              value={planForm.expiryDate || ''}
-              onChange={(e) => setPlanForm({ ...planForm, expiryDate: e.target.value })}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
-            />
-
-            <FormControl fullWidth size="small">
-              <InputLabel>Subscription Status</InputLabel>
-              <Select
-                value={planForm.status}
-                label="Subscription Status"
-                onChange={(e) => setPlanForm({ ...planForm, status: e.target.value })}
-                sx={{ borderRadius: '10px' }}
-              >
-                <MenuItem value="Active">Active</MenuItem>
-                <MenuItem value="Pending Checkout">Pending Checkout</MenuItem>
-                <MenuItem value="Suspended">Suspended</MenuItem>
-                <MenuItem value="Expired">Expired</MenuItem>
-                <MenuItem value="Cancelled">Cancelled</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              fullWidth
-              size="small"
-              label="Audit Notes"
+              label="Audit Log & Override Reason"
               multiline
               rows={2}
               value={planForm.notes}
               onChange={(e) => setPlanForm({ ...planForm, notes: e.target.value })}
-              placeholder="Reason for override..."
+              placeholder="e.g., Client purchased 15 additional assets and Warranty Radar add-on..."
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
             />
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+
+        <DialogActions sx={{ p: 2, gap: 1 }}>
           <Button onClick={() => setPlanOpen(false)} sx={{ textTransform: 'none', fontWeight: 700, color: '#334155' }}>
             Cancel
           </Button>
@@ -2817,10 +3555,11 @@ export default function SuperAdminPanel() {
               color: '#FFFFFF',
               fontWeight: 800,
               textTransform: 'none',
+              px: 3,
               '&:hover': { bgcolor: '#6464B8' }
             }}
           >
-            {saving ? 'Updating...' : 'Save Changes'}
+            {saving ? 'Updating...' : 'Apply Subscription Overrides'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -2987,6 +3726,7 @@ export default function SuperAdminPanel() {
                     type="number"
                     label={couponForm.discountType === 'percentage' ? 'Discount Percentage (%)' : 'Discount Value (₹)'}
                     value={couponForm.discountValue}
+                    inputProps={couponForm.discountType === 'percentage' ? { min: 1, max: 100 } : { min: 0 }}
                     onChange={(e) => setCouponForm({ ...couponForm, discountValue: e.target.value })}
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
                   />
@@ -3013,7 +3753,7 @@ export default function SuperAdminPanel() {
                     label="Max Discount Cap (₹)"
                     value={couponForm.maxDiscount}
                     onChange={(e) => setCouponForm({ ...couponForm, maxDiscount: e.target.value })}
-                    helperText="Optional cap for % discounts"
+                    helperText="Max discount limit in ₹ (for both % and flat)"
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px' } }}
                   />
                 </Grid>
@@ -3027,7 +3767,17 @@ export default function SuperAdminPanel() {
                   value={couponForm.applicablePlans || ['ALL']}
                   label="Applicable Plans"
                   onChange={(e) => {
-                    const val = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                    const rawVal = typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value;
+                    let val = rawVal;
+                    if (rawVal.includes('ALL') && rawVal.length > 1) {
+                      // If user had ALL and selected a specific plan, keep only specific plans
+                      if (couponForm.applicablePlans?.includes('ALL')) {
+                        val = rawVal.filter(v => v !== 'ALL');
+                      } else {
+                        // User explicitly clicked ALL
+                        val = ['ALL'];
+                      }
+                    }
                     setCouponForm({ ...couponForm, applicablePlans: val.length === 0 ? ['ALL'] : val });
                   }}
                   renderValue={(selected) => (
@@ -3042,7 +3792,8 @@ export default function SuperAdminPanel() {
                   <MenuItem value="ALL">ALL (All Plans)</MenuItem>
                   <MenuItem value="Home User">Home User</MenuItem>
                   <MenuItem value="MSME">MSME</MenuItem>
-                  <MenuItem value="Large Scale">Large Scale</MenuItem>
+                  <MenuItem value="SME">SME</MenuItem>
+                  <MenuItem value="Custom Enterprise Plan">Custom Enterprise Plan</MenuItem>
                 </Select>
               </FormControl>
 
@@ -3327,11 +4078,11 @@ License Key     : ${generatedKey}`}
         </DialogActions>
       </Dialog>
 
-      {/* ─── MODAL: EDIT PLAN PRICING & SPECIFICATIONS ───────────────────────── */}
+      {/* ─── MODAL: EDIT / CREATE PLAN PRICING & SPECIFICATIONS ─────────────── */}
       <Dialog
         open={planEditModal.open}
-        onClose={() => setPlanEditModal({ open: false, data: null })}
-        maxWidth="sm"
+        onClose={() => setPlanEditModal({ open: false, isCreate: false, isCustom: false, data: null })}
+        maxWidth="md"
         fullWidth
         PaperProps={{ sx: { borderRadius: '20px', p: 1 } }}
       >
@@ -3339,22 +4090,50 @@ License Key     : ${generatedKey}`}
           <DialogTitle sx={{ pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 900, color: '#0F172A' }}>
-                Edit Plan: {planEditForm.name || planEditForm.planKey}
+                {planEditModal.isCreate
+                  ? (planEditModal.isCustom ? 'Create Custom Bespoke Plan' : 'Create New Subscription Plan')
+                  : `Edit Plan: ${planEditForm.name || planEditForm.planKey}`}
               </Typography>
               <Typography variant="caption" sx={{ color: TEXT_MUTED, fontFamily: 'monospace' }}>
-                Key: {planEditForm.planKey}
+                Key: {planEditForm.planKey || 'AUTO_GENERATED'} {planEditForm.isCustom ? '• Custom Enterprise' : ''}
               </Typography>
             </Box>
-            <PlanBadge plan={planEditForm.name} />
+            <PlanBadge plan={planEditForm.name || (planEditModal.isCustom ? 'Custom Plan' : 'New Tier')} />
           </DialogTitle>
 
           <DialogContent dividers sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, py: 3 }}>
             <Alert severity="info" sx={{ borderRadius: '12px', fontSize: '12.5px' }}>
-              Updating this price updates all public registration cards, checkout pricing, renewal amounts, and prorated upgrades across the entire platform in real time.
+              All configuration changes immediately propagate to checkout, dynamic public registration, contract renewals, and feature gatekeeper middleware.
             </Alert>
 
+            {/* Basic Info */}
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Plan Identifier (Unique Key)"
+                  value={planEditForm.planKey}
+                  onChange={(e) => setPlanEditForm({
+                    ...planEditForm,
+                    planKey: e.target.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_')
+                  })}
+                  helperText="e.g. HOME_USER, MSME, ENTERPRISE_PRO, CUSTOM_PLAN"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  required
+                  label="Display Plan Name"
+                  value={planEditForm.name}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, name: e.target.value })}
+                  placeholder="e.g. Home User, Custom Enterprise"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   required
@@ -3369,17 +4148,8 @@ License Key     : ${generatedKey}`}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Display Plan Name"
-                  value={planEditForm.name}
-                  onChange={(e) => setPlanEditForm({ ...planEditForm, name: e.target.value })}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
+              {/* Quotas */}
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   label="Max Assets Limit"
@@ -3390,68 +4160,163 @@ License Key     : ${generatedKey}`}
                 />
               </Grid>
 
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   label="Max Users Limit"
                   value={planEditForm.maxUsers}
                   onChange={(e) => setPlanEditForm({ ...planEditForm, maxUsers: e.target.value })}
-                  placeholder="e.g. 1, 10, or unlimited"
+                  placeholder="e.g. 3, 15, or unlimited"
                   helperText="Enter a number or 'unlimited' (-1)"
                 />
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="Max Departments Limit"
+                  value={planEditForm.maxDepartments}
+                  onChange={(e) => setPlanEditForm({ ...planEditForm, maxDepartments: e.target.value })}
+                  placeholder="e.g. 2, 5, or unlimited"
+                  helperText="Enter a number or 'unlimited' (-1)"
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Badge / Tag (Optional)"
                   value={planEditForm.badge}
                   onChange={(e) => setPlanEditForm({ ...planEditForm, badge: e.target.value })}
-                  placeholder="e.g. Most Popular, Enterprise, Recommended"
+                  placeholder="e.g. Most Popular, Custom Tailored, Enterprise"
                 />
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  multiline
-                  rows={2}
                   label="Plan Subtitle / Description"
                   value={planEditForm.description}
                   onChange={(e) => setPlanEditForm({ ...planEditForm, description: e.target.value })}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={5}
-                  label="Features List (One feature per line)"
-                  value={planEditForm.featuresText}
-                  onChange={(e) => setPlanEditForm({ ...planEditForm, featuresText: e.target.value })}
-                  helperText="Enter each feature description on a new line"
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={planEditForm.isActive}
-                      onChange={(e) => setPlanEditForm({ ...planEditForm, isActive: e.target.checked })}
-                      color="primary"
-                    />
-                  }
-                  label="Plan Active & Selectable in Checkout"
+                  placeholder="Short summary of this subscription tier"
                 />
               </Grid>
             </Grid>
+
+            {/* 10-Feature Matrix Switches */}
+            <Paper elevation={0} sx={{ p: 2.5, borderRadius: '14px', bgcolor: '#F8FAFC', border: '1.5px solid #E2E8F0' }}>
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0F172A' }}>
+                    Feature Capabilities Matrix (10 Core Features)
+                  </Typography>
+                  <Chip label="Turn ON / OFF" size="small" sx={{ bgcolor: '#ECFDF5', color: '#059669', fontWeight: 800, fontSize: '10.5px' }} />
+                </Box>
+                <Typography variant="caption" sx={{ color: TEXT_MUTED }}>
+                  Toggle each feature on or off. Access control middleware will restrict or allow features in real time based on these switches.
+                </Typography>
+              </Box>
+
+              <Grid container spacing={1.5}>
+                {FEATURE_DEFINITIONS.map((feat) => {
+                  if (feat.key === 'ticketing') {
+                    const currentTicketing = planEditForm.featureFlags?.ticketing || 'basic';
+                    return (
+                      <Grid item xs={12} sm={6} key={feat.key}>
+                        <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', height: '100%' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#0F172A' }}>
+                            {feat.label}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, display: 'block', fontSize: '11px', mb: 1 }}>
+                            {feat.desc}
+                          </Typography>
+                          <FormControl fullWidth size="small">
+                            <Select
+                              value={currentTicketing}
+                              onChange={(e) => setPlanEditForm({
+                                ...planEditForm,
+                                featureFlags: { ...planEditForm.featureFlags, ticketing: e.target.value }
+                              })}
+                              sx={{ borderRadius: '8px' }}
+                            >
+                              <MenuItem value="full">Full Ticketing Workflows</MenuItem>
+                              <MenuItem value="basic">Basic Breakdown Requests</MenuItem>
+                              <MenuItem value="none">Disabled</MenuItem>
+                            </Select>
+                          </FormControl>
+                        </Box>
+                      </Grid>
+                    );
+                  }
+
+                  const isChecked = Boolean(planEditForm.featureFlags?.[feat.key]);
+                  return (
+                    <Grid item xs={12} sm={6} key={feat.key}>
+                      <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#FFFFFF', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '100%' }}>
+                        <Box sx={{ pr: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: '#0F172A' }}>
+                            {feat.label}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: TEXT_MUTED, display: 'block', fontSize: '11px' }}>
+                            {feat.desc}
+                          </Typography>
+                        </Box>
+                        <Switch
+                          size="small"
+                          checked={isChecked}
+                          onChange={(e) => setPlanEditForm({
+                            ...planEditForm,
+                            featureFlags: { ...planEditForm.featureFlags, [feat.key]: e.target.checked }
+                          })}
+                          color="primary"
+                        />
+                      </Box>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Paper>
+
+            {/* Features Marketing Bullets */}
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Plan Marketing Bullets (One feature per line)"
+              value={planEditForm.featuresText}
+              onChange={(e) => setPlanEditForm({ ...planEditForm, featuresText: e.target.value })}
+              helperText="Additional bullet points displayed on pricing cards"
+            />
+
+            {/* Plan Flags */}
+            <Stack direction="row" spacing={3} flexWrap="wrap">
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={planEditForm.isActive}
+                    onChange={(e) => setPlanEditForm({ ...planEditForm, isActive: e.target.checked })}
+                    color="primary"
+                  />
+                }
+                label="Plan Active & Selectable in Checkout"
+              />
+
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={planEditForm.isCustom}
+                    onChange={(e) => setPlanEditForm({ ...planEditForm, isCustom: e.target.checked })}
+                    color="secondary"
+                  />
+                }
+                label="Mark as Bespoke Custom Enterprise Plan"
+              />
+            </Stack>
           </DialogContent>
 
           <DialogActions sx={{ p: 2.5, gap: 1 }}>
             <Button
-              onClick={() => setPlanEditModal({ open: false, data: null })}
+              onClick={() => setPlanEditModal({ open: false, isCreate: false, isCustom: false, data: null })}
               disabled={saving}
               sx={{ textTransform: 'none', fontWeight: 700, color: TEXT_MUTED }}
             >
@@ -3471,7 +4336,7 @@ License Key     : ${generatedKey}`}
                 '&:hover': { bgcolor: '#6464B8' }
               }}
             >
-              {saving ? 'Saving...' : 'Save Plan Changes'}
+              {saving ? 'Saving...' : (planEditModal.isCreate ? 'Create Plan' : 'Save Plan Changes')}
             </Button>
           </DialogActions>
         </form>

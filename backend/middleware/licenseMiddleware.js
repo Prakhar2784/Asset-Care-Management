@@ -3,7 +3,8 @@ const Tenant = require('../models/Tenant');
 const checkLicenseExpiry = async (req, res, next) => {
   try {
     // Skip checking for super admins
-    if (req.user && req.user.role === 'super_admin') {
+    const role = req.user?.role?.toLowerCase();
+    if (req.user && (role === 'super_admin' || role === 'superadmin')) {
       return next();
     }
     

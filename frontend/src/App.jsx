@@ -14,6 +14,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Public Pages
 const Home = lazy(() => import("./pages/public/Home"));
@@ -78,10 +79,11 @@ const RouteFallback = () => (
 function App() {
   return (
     <AuthProvider>
-    <ThemeProvider>
-      <ScrollToTop />
-      <Suspense fallback={<RouteFallback />}>
-      <Routes>
+      <ThemeProvider>
+        <ScrollToTop />
+        <ErrorBoundary>
+          <Suspense fallback={<RouteFallback />}>
+            <Routes>
         {/* PUBLIC ROUTES - Anyone can access */}
         <Route path="/" element={<WebsiteLayout><Home /></WebsiteLayout>} />
         <Route path="/features" element={<WebsiteLayout><Features /></WebsiteLayout>} />
@@ -136,9 +138,18 @@ function App() {
 
             </Route>
 
-            {/* SUPER ADMIN ONLY - Platform console */}
+            {/* SUPER ADMIN ONLY - Platform console (supports hyphen, underscore, space and camel paths) */}
             <Route element={<SuperAdminRoute />}>
               <Route path="/super-admin/console" element={<SuperAdminPanel />} />
+              <Route path="/super_admin/console" element={<SuperAdminPanel />} />
+              <Route path="/super admin/console" element={<SuperAdminPanel />} />
+              <Route path="/super%20admin/console" element={<SuperAdminPanel />} />
+              <Route path="/superadmin/console" element={<SuperAdminPanel />} />
+              <Route path="/super-admin" element={<SuperAdminPanel />} />
+              <Route path="/super_admin" element={<SuperAdminPanel />} />
+              <Route path="/super admin" element={<SuperAdminPanel />} />
+              <Route path="/super%20admin" element={<SuperAdminPanel />} />
+              <Route path="/superadmin" element={<SuperAdminPanel />} />
             </Route>
 
           </Route>
@@ -148,6 +159,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       </Suspense>
+      </ErrorBoundary>
     </ThemeProvider>
     </AuthProvider>
   );

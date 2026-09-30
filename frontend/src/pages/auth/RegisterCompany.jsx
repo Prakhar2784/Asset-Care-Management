@@ -10,6 +10,7 @@ import LanguageRoundedIcon from "@mui/icons-material/LanguageRounded";
 import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlineRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import LocationOnRoundedIcon from "@mui/icons-material/LocationOnRounded";
 import LocationCityRoundedIcon from "@mui/icons-material/LocationCityRounded";
 import PinDropRoundedIcon from "@mui/icons-material/PinDropRounded";
@@ -17,6 +18,7 @@ import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import KeyRoundedIcon from "@mui/icons-material/KeyRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import MarkEmailReadRoundedIcon from "@mui/icons-material/MarkEmailReadRounded";
 
 const RegisterCompany = () => {
   const navigate = useNavigate();
@@ -40,6 +42,16 @@ const RegisterCompany = () => {
     acceptedTerms: true
   });
 
+  // OTP Verification State
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [verificationToken, setVerificationToken] = useState("");
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [otpMessage, setOtpMessage] = useState({ type: '', text: '' });
+
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -50,6 +62,17 @@ const RegisterCompany = () => {
     { name: 'MSME', price: 2999, maxAssets: 50 },
     { name: 'Large Scale', price: 8999, maxAssets: -1 }
   ]);
+
+  // Resend OTP countdown timer
+  useEffect(() => {
+    let timer;
+    if (resendCountdown > 0) {
+      timer = setInterval(() => {
+        setResendCountdown(prev => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCountdown]);
 
   // Check if first-run setup is required & load live plans
   useEffect(() => {
@@ -91,6 +114,15 @@ const RegisterCompany = () => {
     if (name === "adminPhone") {
       value = value.replace(/[^0-9]/g, '').slice(0, 10);
     }
+    if (name === "adminEmail") {
+      if (otpVerified || otpSent) {
+        setOtpVerified(false);
+        setOtpSent(false);
+        setOtpCode("");
+        setVerificationToken("");
+        setOtpMessage({ type: '', text: '' });
+      }
+    }
     if (name === "pinCode") {
       value = value.replace(/[^0-9]/g, '').slice(0, 6);
     }
@@ -99,6 +131,56 @@ const RegisterCompany = () => {
     }
     setFormData({ ...formData, [name]: value });
     setError("");
+  };
+
+  const handleSendOtp = async (isResend = false) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.adminEmail || !emailRegex.test(formData.adminEmail)) {
+      setOtpMessage({ type: 'error', text: 'Please enter a valid admin email address first.' });
+      return;
+    }
+    setOtpSending(true);
+    setOtpMessage({ type: '', text: '' });
+    setError('');
+    try {
+      const res = await api.post('/auth/send-registration-otp', {
+        email: formData.adminEmail,
+        companyName: formData.companyName,
+        adminName: formData.adminName
+      });
+      setOtpSent(true);
+      setResendCountdown(60);
+      setOtpMessage({ type: 'success', text: res.data?.message || 'Verification code sent to your email.' });
+    } catch (err) {
+      setOtpMessage({ type: 'error', text: err.response?.data?.message || 'Failed to send OTP. Please try again.' });
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode || otpCode.trim().length !== 6) {
+      setOtpMessage({ type: 'error', text: 'Please enter the 6-digit OTP received in your email.' });
+      return;
+    }
+    setOtpVerifying(true);
+    setOtpMessage({ type: '', text: '' });
+    setError('');
+    try {
+      const res = await api.post('/auth/verify-registration-otp', {
+        email: formData.adminEmail,
+        otp: otpCode.trim()
+      });
+      if (res.data?.verified) {
+        setOtpVerified(true);
+        setVerificationToken(res.data.verificationToken || '');
+        setOtpMessage({ type: 'success', text: 'Email address verified successfully!' });
+      }
+    } catch (err) {
+      setOtpMessage({ type: 'error', text: err.response?.data?.message || 'Invalid or expired OTP code.' });
+    } finally {
+      setOtpVerifying(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -110,6 +192,14 @@ const RegisterCompany = () => {
       return;
     }
 
+    if (!otpVerified) {
+      setError("Please verify your Admin Email address with the 6-digit OTP sent to your inbox before proceeding.");
+      if (!otpSent) {
+        handleSendOtp();
+      }
+      return;
+    }
+
     if (!pwRules.every(r => r.pass)) {
       setError("Password must be 8+ chars with uppercase, lowercase, number, and symbol.");
       return;
@@ -118,7 +208,11 @@ const RegisterCompany = () => {
     setLoading(true);
 
     try {
-      const response = await api.post("/auth/register-company", formData);
+      const response = await api.post("/auth/register-company", {
+        ...formData,
+        verificationToken,
+        otp: otpCode
+      });
       setSuccess(true);
       setLoading(false);
       
@@ -904,18 +998,191 @@ const RegisterCompany = () => {
                     />
                   </div>
 
-                  <div className="input-group">
+                  <div className="input-group" style={{ marginBottom: otpSent && !otpVerified ? '10px' : '14px' }}>
                     <span className="input-icon"><EmailRoundedIcon sx={{ fontSize: 20 }} /></span>
                     <input
                       type="email"
                       name="adminEmail"
                       placeholder="Admin Email Address"
                       className="auth-input"
+                      style={{
+                        paddingRight: otpVerified ? '135px' : (otpSending ? '115px' : '105px'),
+                        borderColor: otpVerified ? '#10B981' : undefined
+                      }}
                       value={formData.adminEmail}
                       onChange={handleInputChange}
+                      readOnly={otpVerified}
                       required
                     />
+                    <div style={{
+                      position: 'absolute',
+                      right: '8px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      {otpVerified ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span style={{
+                            background: 'rgba(16, 185, 129, 0.15)',
+                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                            color: '#34D399',
+                            padding: '4px 10px',
+                            borderRadius: '999px',
+                            fontSize: '11px',
+                            fontWeight: '800',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <CheckCircleRoundedIcon sx={{ fontSize: 14 }} /> Verified
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOtpVerified(false);
+                              setOtpSent(false);
+                              setOtpCode('');
+                              setVerificationToken('');
+                              setOtpMessage({ type: '', text: '' });
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#94A3B8',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              textDecoration: 'underline',
+                              padding: '2px 4px'
+                            }}
+                          >
+                            Change
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleSendOtp(false)}
+                          disabled={otpSending || !formData.adminEmail}
+                          style={{
+                            background: '#7777C7',
+                            color: '#0B0C1A',
+                            border: 'none',
+                            borderRadius: '8px',
+                            padding: '6px 12px',
+                            fontSize: '11.5px',
+                            fontWeight: '800',
+                            cursor: otpSending || !formData.adminEmail ? 'not-allowed' : 'pointer',
+                            opacity: otpSending || !formData.adminEmail ? 0.6 : 1,
+                            transition: 'all 0.18s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          {otpSending ? 'Sending...' : (otpSent ? 'Resend' : 'Send OTP')}
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Inline OTP Input Box */}
+                  {otpSent && !otpVerified && (
+                    <div style={{
+                      backgroundColor: '#121626',
+                      border: '1px solid rgba(119, 119, 199, 0.35)',
+                      borderRadius: '12px',
+                      padding: '14px',
+                      marginBottom: '14px',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: '700', color: '#E2E8F0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <MarkEmailReadRoundedIcon sx={{ fontSize: 16, color: '#7777C7' }} />
+                          Enter 6-Digit Email Verification Code
+                        </div>
+                        {resendCountdown > 0 ? (
+                          <span style={{ fontSize: '11px', color: '#94A3B8', fontVariantNumeric: 'tabular-nums' }}>Resend in {resendCountdown}s</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleSendOtp(true)}
+                            disabled={otpSending}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#7777C7',
+                              fontSize: '11.5px',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              padding: 0,
+                              textDecoration: 'underline'
+                            }}
+                          >
+                            {otpSending ? 'Sending...' : 'Resend Code'}
+                          </button>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input
+                          type="text"
+                          placeholder="Enter 6-digit OTP"
+                          className="auth-input"
+                          style={{
+                            padding: '10px 14px',
+                            fontSize: '14px',
+                            letterSpacing: '3px',
+                            fontWeight: '700',
+                            textAlign: 'center'
+                          }}
+                          value={otpCode}
+                          maxLength={6}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleVerifyOtp();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyOtp}
+                          disabled={otpVerifying || otpCode.trim().length !== 6}
+                          style={{
+                            backgroundColor: otpCode.trim().length === 6 ? '#7777C7' : 'rgba(119, 119, 199, 0.25)',
+                            color: otpCode.trim().length === 6 ? '#0B0C1A' : '#64748B',
+                            border: 'none',
+                            borderRadius: '10px',
+                            padding: '0 18px',
+                            fontSize: '12.5px',
+                            fontWeight: '800',
+                            cursor: otpCode.trim().length === 6 && !otpVerifying ? 'pointer' : 'not-allowed',
+                            whiteSpace: 'nowrap',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          {otpVerifying ? 'Verifying...' : 'Verify OTP'}
+                        </button>
+                      </div>
+
+                      {otpMessage.text && (
+                        <div style={{
+                          marginTop: '8px',
+                          fontSize: '11.5px',
+                          color: otpMessage.type === 'error' ? '#F87171' : '#34D399',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}>
+                          {otpMessage.type === 'error' ? '⚠️' : '✓'} {otpMessage.text}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="input-group">
                     <span className="input-icon"><PhoneRoundedIcon sx={{ fontSize: 20 }} /></span>

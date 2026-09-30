@@ -98,14 +98,27 @@ const OnboardingWizard = () => {
   ];
 
   const finish = async () => {
+    setSaving(true);
     try {
       await api.patch("/auth/complete-onboarding");
-      await refreshUser();
-      localStorage.removeItem(STORAGE_KEY);
-      navigate("/admin/dashboard");
-    } catch {
-      navigate("/admin/dashboard");
+    } catch (e) {
+      console.error("complete-onboarding patch error:", e);
     }
+    
+    // Update local storage user immediately
+    const stored = localStorage.getItem("assetcare_user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        parsed.onboardingDone = true;
+        localStorage.setItem("assetcare_user", JSON.stringify(parsed));
+      } catch {}
+    }
+    
+    localStorage.removeItem(STORAGE_KEY);
+    await refreshUser();
+    setSaving(false);
+    window.location.href = "/admin/dashboard";
   };
 
   const handlePincodeChange = async (val) => {
@@ -260,8 +273,23 @@ const OnboardingWizard = () => {
     }
   };
 
-  const goAddAsset = () => {
-    navigate("/admin/assets/add?onboarding=1");
+  const goAddAsset = async () => {
+    try {
+      await api.patch("/auth/complete-onboarding");
+    } catch (e) {}
+
+    const stored = localStorage.getItem("assetcare_user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        parsed.onboardingDone = true;
+        localStorage.setItem("assetcare_user", JSON.stringify(parsed));
+      } catch {}
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    await refreshUser();
+    window.location.href = "/admin/assets/add";
   };
 
   return (

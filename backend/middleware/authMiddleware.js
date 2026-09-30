@@ -2,6 +2,7 @@ const jwt      = require('jsonwebtoken');
 const crypto   = require('crypto');
 const mongoose = require('mongoose');
 const User     = require('../models/User');
+const { setTenantId } = require('./tenantContext');
 
 // ─── API Key path ────────────────────────────────────────────────────────────
 const protectWithApiKey = async (rawKey, req, res, next) => {
@@ -57,8 +58,8 @@ const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      const { setTenantId } = require('./tenantContext');
-      const tenantId = decoded.role === 'super_admin' ? 'default' : (decoded.tenantId || 'default');
+      const isSuper = decoded.role?.toLowerCase() === 'super_admin' || decoded.role?.toLowerCase() === 'superadmin';
+      const tenantId = isSuper ? 'default' : (decoded.tenantId || 'default');
 
       setTenantId(tenantId, async () => {
         req.tenantId = tenantId;
@@ -83,7 +84,9 @@ const protect = async (req, res, next) => {
         }
 
         // --- Tenant Activation & License Expiry Check ---
-        if (req.user.role !== 'super_admin' && tenantId !== 'default') {
+        const userRole = (req.user.role || '').toLowerCase();
+        const isSuperUser = userRole === 'super_admin' || userRole === 'superadmin';
+        if (!isSuperUser && tenantId !== 'default') {
           const TenantModel = mongoose.model('Tenant');
           const tenant = await TenantModel.findOne({ slug: tenantId }).setOptions({ bypassTenantFilter: true });
           if (tenant) {
@@ -95,11 +98,38 @@ const protect = async (req, res, next) => {
             }
             if (tenant.planExpiry) {
               const now = new Date();
-              if (now > new Date(tenant.planExpiry)) {
-                return res.status(403).json({
-                  message: 'Your license has expired. Please renew your subscription to continue using IAssetCare.',
-                  code: 'LICENSE_EXPIRED'
-                });
+              const planExp = new Date(tenant.planExpiry);
+              if (now > planExp) {
+                // Calculate 7-day grace period deadline
+                const gracePeriodEnd = new Date(planExp.getTime() + 7 * 24 * 60 * 60 * 1000);
+                const isWithinGracePeriod = now <= gracePeriodEnd;
+                const path = req.originalUrl || req.path || '';
+                const isBillingOrAuth = path.includes('/billing') || path.includes('/auth') || path.includes('/settings');
+                const isAssetCleanup = (req.method === 'DELETE' || req.method === 'PATCH' || req.method === 'GET') && path.includes('/assets');
+                const isReadOperation = req.method === 'GET';
+
+                if (isWithinGracePeriod) {
+                  // Inside 7-Day Grace Period:
+                  // Allow GET reads, asset cleanup (DELETE/PATCH), and billing checkout.
+                  // Block creation of NEW assets/tickets/users with a clear grace period notice.
+                  if (req.method === 'POST' && (path.includes('/assets') || path.includes('/tickets') || path.includes('/users')) && !isBillingOrAuth) {
+                    const daysLeft = Math.max(1, Math.ceil((gracePeriodEnd - now) / (1000 * 60 * 60 * 24)));
+                    return res.status(403).json({
+                      message: `Your subscription expired on ${planExp.toLocaleDateString('en-IN')}. Your account is in a 7-day grace period (${daysLeft} day${daysLeft === 1 ? '' : 's'} remaining). Please delete excess assets or renew your plan to create new records.`,
+                      code: 'GRACE_PERIOD_ACTIVE',
+                      gracePeriodDaysLeft: daysLeft
+                    });
+                  }
+                  // Let request pass through (maintenance / billing / reads)
+                } else {
+                  // After 7-Day Grace Period: Fully lock account except billing / auth
+                  if (!isBillingOrAuth && path !== '/api/auth/me') {
+                    return res.status(403).json({
+                      message: 'Your 7-day subscription grace period has expired. Please renew your subscription to reactivate your organization.',
+                      code: 'LICENSE_EXPIRED'
+                    });
+                  }
+                }
               }
             }
           }
@@ -121,12 +151,13 @@ const ADMIN_TIER_ROLES = ['admin', 'super_admin', 'hod', 'manager'];
 // ─── Role authorization ───────────────────────────────────────────────────────
 const authorize = (...roles) => {
   return (req, res, next) => {
-    const userRole = req.user.role;
-    const expanded = roles.includes('admin')
-      ? [...new Set([...roles, ...ADMIN_TIER_ROLES])]
-      : roles;
+    const userRole = (req.user?.role || '').toLowerCase();
+    const normalizedRoles = roles.map(r => r.toLowerCase());
+    const expanded = normalizedRoles.includes('admin')
+      ? [...new Set([...normalizedRoles, ...ADMIN_TIER_ROLES.map(r => r.toLowerCase())])]
+      : normalizedRoles;
     if (expanded.includes(userRole)) return next();
-    return res.status(403).json({ message: `User role '${userRole}' is not authorized to access this route` });
+    return res.status(403).json({ message: `User role '${req.user?.role}' is not authorized to access this route` });
   };
 };
 

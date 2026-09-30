@@ -11,7 +11,8 @@ const globalSearch = async (req, res) => {
       return res.json({ assets: [], tickets: [], users: [] });
     }
 
-    const regex = new RegExp(q.trim(), 'i');
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapeRegex(q.trim()), 'i');
     const isAdmin = ['admin', 'super_admin'].includes(req.user.role);
     const isHod = req.user.role === 'hod' && !!req.user.department;
 

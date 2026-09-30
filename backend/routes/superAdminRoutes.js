@@ -18,15 +18,21 @@ const {
   toggleCouponStatus,
   deleteCoupon,
   getPlans,
+  createPlan,
   updatePlan,
+  togglePlanStatus,
+  deletePlan,
   resetPlans,
+  getGlobalSettings,
+  updateGlobalSettings,
 } = require('../controllers/superAdminController');
 const { generateLicenseKey } = require('../services/licenseService');
 const ContactLead = require('../models/ContactLead');
 
 // Super Admin guard - must be logged in and have role 'super_admin'
 const superAdminGuard = (req, res, next) => {
-  if (!req.user || req.user.role !== 'super_admin') {
+  const role = req.user?.role?.toLowerCase();
+  if (!req.user || (role !== 'super_admin' && role !== 'superadmin')) {
     return res.status(403).json({ message: 'Access denied: Super Admin only.' });
   }
   next();
@@ -61,7 +67,10 @@ router.get('/tenants/:id/users', getTenantUsers);
 
 // ─── Plan & Pricing Management ─────────────────────────────────────────────
 router.get('/plans', getPlans);
+router.post('/plans', createPlan);
 router.put('/plans/:planKey', updatePlan);
+router.patch('/plans/:planKey/toggle', togglePlanStatus);
+router.delete('/plans/:planKey', deletePlan);
 router.post('/plans/reset', resetPlans);
 
 // ─── Coupon Management ─────────────────────────────────────────────────────
@@ -104,5 +113,9 @@ router.delete('/leads/:id', async (req, res) => {
     res.status(500).json({ message: e.message });
   }
 });
+
+// ─── Universal Platform Settings ───────────────────────────────────────────
+router.get('/global-settings', getGlobalSettings);
+router.put('/global-settings', updateGlobalSettings);
 
 module.exports = router;

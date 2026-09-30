@@ -28,9 +28,23 @@ const checkSLABreaches = async () => {
 
     const tenants = await Tenant.find({ isActive: true });
 
+    const { getPlanByKey } = require('../services/planService');
+    const { getPlanDefaults } = require('../config/planDefaults');
+
     for (const tenant of tenants) {
-      // SLA escalation engine is enabled for MSME and Large Scale plans
-      if (tenant.plan !== 'MSME' && tenant.plan !== 'Large Scale') continue;
+      let hasSLA = false;
+      if (tenant.features && tenant.features.slaEscalation !== undefined) {
+        hasSLA = Boolean(tenant.features.slaEscalation);
+      } else {
+        const livePlan = await getPlanByKey(tenant.plan);
+        if (livePlan && livePlan.featureFlags && livePlan.featureFlags.slaEscalation !== undefined) {
+          hasSLA = Boolean(livePlan.featureFlags.slaEscalation);
+        } else {
+          hasSLA = Boolean(getPlanDefaults(tenant.plan).features?.slaEscalation);
+        }
+      }
+
+      if (!hasSLA) continue;
 
       await setTenantId(tenant.slug, async () => {
         const now = new Date();

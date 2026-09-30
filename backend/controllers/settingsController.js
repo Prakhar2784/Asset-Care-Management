@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Ticket = require('../models/Ticket');
@@ -12,10 +13,24 @@ const updateProfile = async (req, res) => {
     if (name && name.trim()) updates.name = name.trim();
     if (phone !== undefined) updates.phone = phone.trim();
 
-    const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true })
-      .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    let user = null;
+    if (req.user && req.user.constructor) {
+      user = await req.user.constructor.findByIdAndUpdate(req.user._id, updates, { new: true, bypassTenantFilter: true })
+        .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    }
+    if (!user) {
+      user = await mongoose.connection.model('User').findByIdAndUpdate(req.user._id, updates, { new: true, bypassTenantFilter: true })
+        .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    }
+    if (req.tenantId && req.tenantId !== 'default') {
+      try {
+        const { getTenantConnection } = require('../config/tenantDb');
+        const tenantConn = getTenantConnection(req.tenantId);
+        await tenantConn.model('User').findByIdAndUpdate(req.user._id, updates, { bypassTenantFilter: true }).catch(() => {});
+      } catch {}
+    }
 
-    res.json(user);
+    res.json(user || req.user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -33,7 +48,26 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'New password must be at least 6 characters.' });
     }
 
-    const user = await User.findById(req.user._id);
+    // Lookup user with password across tenant DB and control plane
+    let user = null;
+    if (req.user && req.user.constructor) {
+      user = await req.user.constructor.findById(req.user._id).setOptions({ bypassTenantFilter: true });
+    }
+    if (!user) {
+      user = await mongoose.connection.model('User').findById(req.user._id).setOptions({ bypassTenantFilter: true });
+    }
+    if (!user && req.tenantId && req.tenantId !== 'default') {
+      try {
+        const { getTenantConnection } = require('../config/tenantDb');
+        const tenantConn = getTenantConnection(req.tenantId);
+        user = await tenantConn.model('User').findById(req.user._id).setOptions({ bypassTenantFilter: true });
+      } catch {}
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: 'User account not found.' });
+    }
+
     const isMatch = await user.matchPassword(currentPassword);
     if (!isMatch) {
       return res.status(400).json({ message: 'Current password is incorrect.' });
@@ -41,6 +75,25 @@ const changePassword = async (req, res) => {
 
     user.password = newPassword;
     await user.save({ validateBeforeSave: false });
+
+    // Sync hashed password to master User model & tenant DB
+    try {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      await mongoose.connection.model('User').findByIdAndUpdate(req.user._id, { password: hashedPassword }, { bypassTenantFilter: true }).catch(() => {});
+      
+      if (req.tenantId && req.tenantId !== 'default') {
+        const { getTenantConnection } = require('../config/tenantDb');
+        const tenantConn = getTenantConnection(req.tenantId);
+        await tenantConn.model('User').findByIdAndUpdate(req.user._id, { password: hashedPassword }, { bypassTenantFilter: true }).catch(() => {});
+      }
+    } catch {}
+
+    // Send security notification email
+    try {
+      const { sendPasswordChangedEmail } = require('../services/emailService');
+      sendPasswordChangedEmail(user).catch(() => {});
+    } catch {}
 
     res.json({ message: 'Password changed successfully.' });
   } catch (error) {
@@ -109,11 +162,35 @@ const getSystemStats = async (req, res) => {
 const getTenantSettings = async (req, res) => {
   try {
     const Tenant = require('../models/Tenant');
+    const GlobalSetting = require('../models/GlobalSetting');
     const tenant = await Tenant.findOne({ slug: req.tenantId });
     if (!tenant) {
       return res.status(404).json({ message: 'Tenant settings not found.' });
     }
-    res.json(tenant);
+    const tenantObj = tenant.toObject();
+
+    // Universal platform settings enforcement
+    let globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' });
+    if (!globalSetting) {
+      globalSetting = await GlobalSetting.create({ key: 'platform_settings', allowAddonAssets: true, addonAssetPrice: 49 });
+    }
+
+    if (globalSetting.allowAddonAssets === false) {
+      tenantObj.allowAddonAssets = false;
+    } else {
+      tenantObj.allowAddonAssets = true;
+    }
+    tenantObj.addonAssetPrice = globalSetting.addonAssetPrice || 49;
+
+    const now = new Date();
+    if (tenant.customQuoteExpiry && new Date(tenant.customQuoteExpiry) > now) {
+      tenantObj.customQuoteDaysRemaining = Math.max(1, Math.ceil((new Date(tenant.customQuoteExpiry) - now) / (1000 * 60 * 60 * 24)));
+    } else if (tenant.customQuoteExpiry && new Date(tenant.customQuoteExpiry) <= now) {
+      tenantObj.customPrice = null;
+      tenantObj.customQuoteExpiry = null;
+      tenantObj.customQuoteDaysRemaining = null;
+    }
+    res.json(tenantObj);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

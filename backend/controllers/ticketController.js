@@ -17,7 +17,8 @@ const { audit } = require('../services/auditService');
 // @access  Private (any logged-in user)
 const createTicket = async (req, res) => {
   try {
-    const { issue, priority, assetId, itemLabel } = req.body;
+    const { issue, priority, itemLabel } = req.body;
+    const assetId = req.body.assetId || req.body.asset || req.body.selectedItem;
 
     if (!assetId) {
       return res.status(400).json({ message: 'An asset must be selected.' });

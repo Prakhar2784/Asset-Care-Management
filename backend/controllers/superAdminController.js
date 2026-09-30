@@ -70,6 +70,11 @@ const getPlatformStats = async (req, res) => {
 
     const tenantStats = nonDefaultTenants.map((tenant) => {
       const daysRemaining = tenant.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
+      const isQuoteExpired = Boolean(tenant.customQuoteExpiry && new Date(tenant.customQuoteExpiry) <= now);
+      const customQuoteDaysRemaining = tenant.customQuoteExpiry && !isQuoteExpired
+        ? Math.max(1, Math.ceil((new Date(tenant.customQuoteExpiry) - now) / (1000 * 60 * 60 * 24)))
+        : null;
+
       return {
         _id: tenant._id,
         name: tenant.name,
@@ -84,6 +89,13 @@ const getPlatformStats = async (req, res) => {
         planExpiry: tenant.planExpiry,
         daysRemaining,
         licenseKey: tenant.licenseKey,
+        customPrice: isQuoteExpired ? null : tenant.customPrice,
+        customQuoteExpiry: tenant.customQuoteExpiry,
+        customQuoteDaysRemaining,
+        customQuotePlan: tenant.customQuotePlan,
+        allowAddonAssets: tenant.allowAddonAssets ?? false,
+        addonAssetPrice: tenant.addonAssetPrice ?? 49,
+        addonAssets: tenant.addonAssets || 0,
         gstNumber: tenant.gstNumber,
         address: tenant.address,
         contactEmail: tenant.contactEmail,
@@ -104,6 +116,7 @@ const getPlatformStats = async (req, res) => {
 
     const totalAssets = tenantStats.reduce((a, t) => a + (typeof t.usage.assets === 'number' ? t.usage.assets : 0), 0);
     const totalUsers = tenantStats.reduce((a, t) => a + (typeof t.usage.users === 'number' ? t.usage.users : 0), 0);
+    const totalAddonAssets = tenantStats.reduce((a, t) => a + (Number(t.addonAssets) || 0), 0);
 
     res.json({
       platform: {
@@ -126,6 +139,7 @@ const getPlatformStats = async (req, res) => {
         totalCouponUsage,
         totalUsers,
         totalAssets,
+        totalAddonAssets,
         planBreakdown,
       },
       tenants: tenantStats,
@@ -258,8 +272,19 @@ const getTenantDetails = async (req, res) => {
         planExpiry: tenant.planExpiry,
         daysRemaining,
         licenseKey: tenant.licenseKey,
+        customPrice: tenant.customPrice,
+        customQuoteExpiry: tenant.customQuoteExpiry,
+        customQuoteDaysRemaining: tenant.customQuoteExpiry && new Date(tenant.customQuoteExpiry) > now
+          ? Math.max(1, Math.ceil((new Date(tenant.customQuoteExpiry) - now) / (1000 * 60 * 60 * 24)))
+          : null,
+        customQuotePlan: tenant.customQuotePlan,
+        customQuoteQuotas: tenant.customQuoteQuotas,
+        customQuoteFeatures: tenant.customQuoteFeatures,
         limits: tenant.limits,
         features: tenant.features,
+        allowAddonAssets: Boolean(tenant.allowAddonAssets),
+        addonAssetPrice: tenant.addonAssetPrice || 49,
+        addonAssets: tenant.addonAssets || 0,
         address: tenant.address,
         gstNumber: tenant.gstNumber,
         panNumber: tenant.panNumber,
@@ -285,25 +310,96 @@ const getTenantDetails = async (req, res) => {
 // ─── POST /api/super-admin/tenants/:id/subscription-action ───────────────────
 const manageTenantSubscription = async (req, res) => {
   try {
-    const { action, plan, additionalDays, newExpiryDate, status, notes } = req.body;
+    const {
+      action,
+      plan,
+      additionalDays,
+      newExpiryDate,
+      status,
+      notes,
+      maxAssets,
+      maxUsers,
+      maxDepartments,
+      limits,
+      features,
+      customPrice,
+      allowAddonAssets,
+      addonAssetPrice
+    } = req.body;
+
     const tenant = await Tenant.findById(req.params.id).setOptions({ bypassTenantFilter: true });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found.' });
 
     const prevPlan = tenant.plan;
     let historyAction = action || 'Admin Override';
 
-    if (plan) {
-      tenant.plan = plan;
-      const { getPlanDefaults } = require('../config/planDefaults');
-      const planDefaults = getPlanDefaults(plan);
-      tenant.limits = tenant.limits || {};
-      tenant.limits.maxAssets = planDefaults.maxAssets;
-      tenant.limits.maxUsers = planDefaults.maxUsers;
-      tenant.features = { ...(tenant.features || {}), ...(planDefaults.features || {}) };
-    }
+    const isCustom = Boolean(plan && (plan.toLowerCase().includes('custom') || plan.includes('CUSTOM')));
+    const hasCustomQuote = customPrice !== undefined && customPrice !== null && customPrice !== '' && Number(customPrice) > 0;
 
-    if (status) {
-      tenant.subscriptionStatus = status;
+    if (isCustom || hasCustomQuote) {
+      // 1. Assign bespoke custom quote with strict 7-day payment validity window
+      tenant.customPrice = Number(customPrice || 0);
+      tenant.customQuoteExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      tenant.customQuoteCreatedAt = new Date();
+      tenant.customQuotePlan = plan || 'Custom Enterprise Plan';
+      tenant.customQuoteQuotas = {
+        maxAssets: maxAssets === 'unlimited' || maxAssets === -1 || maxAssets === '-1' ? -1 : (maxAssets !== '' && maxAssets !== undefined ? Number(maxAssets) : -1),
+        maxUsers: maxUsers === 'unlimited' || maxUsers === -1 || maxUsers === '-1' ? -1 : (maxUsers !== '' && maxUsers !== undefined ? Number(maxUsers) : -1),
+        maxDepartments: maxDepartments === 'unlimited' || maxDepartments === -1 || maxDepartments === '-1' ? -1 : (maxDepartments !== '' && maxDepartments !== undefined ? Number(maxDepartments) : -1),
+      };
+      tenant.customQuoteFeatures = features || {};
+
+      // Do NOT switch tenant.plan to custom plan yet if payment has not been collected
+      if (status) {
+        tenant.subscriptionStatus = status;
+      }
+    } else {
+      // Standard plan override
+      tenant.customPrice = null;
+      tenant.customQuoteExpiry = null;
+      tenant.customQuotePlan = null;
+      tenant.customQuoteQuotas = null;
+      tenant.customQuoteFeatures = null;
+
+      if (plan) {
+        tenant.plan = plan;
+        const planService = require('../services/planService');
+        const dbPlan = await planService.getPlanByKey(plan);
+        const { getPlanDefaults } = require('../config/planDefaults');
+        const planDefaults = getPlanDefaults(plan);
+
+        tenant.limits = tenant.limits || {};
+        tenant.limits.maxAssets = dbPlan?.maxAssets !== undefined ? dbPlan.maxAssets : planDefaults.maxAssets;
+        tenant.limits.maxUsers = dbPlan?.maxUsers !== undefined ? dbPlan.maxUsers : planDefaults.maxUsers;
+        tenant.limits.maxDepartments = dbPlan?.maxDepartments !== undefined ? dbPlan.maxDepartments : (planDefaults.maxDepartments || 2);
+        tenant.features = {
+          ...(tenant.features || {}),
+          ...(dbPlan?.featureFlags || planDefaults.features || {})
+        };
+      }
+
+      if (limits && typeof limits === 'object') {
+        tenant.limits = { ...(tenant.limits || {}), ...limits };
+      }
+      if (maxAssets !== undefined && maxAssets !== '') {
+        tenant.limits = tenant.limits || {};
+        tenant.limits.maxAssets = maxAssets === 'unlimited' || maxAssets === -1 || maxAssets === '-1' ? -1 : Number(maxAssets);
+      }
+      if (maxUsers !== undefined && maxUsers !== '') {
+        tenant.limits = tenant.limits || {};
+        tenant.limits.maxUsers = maxUsers === 'unlimited' || maxUsers === -1 || maxUsers === '-1' ? -1 : Number(maxUsers);
+      }
+      if (maxDepartments !== undefined && maxDepartments !== '') {
+        tenant.limits = tenant.limits || {};
+        tenant.limits.maxDepartments = maxDepartments === 'unlimited' || maxDepartments === -1 || maxDepartments === '-1' ? -1 : Number(maxDepartments);
+      }
+      if (features && typeof features === 'object') {
+        tenant.features = { ...(tenant.features || {}), ...features };
+      }
+
+      if (status) {
+        tenant.subscriptionStatus = status;
+      }
     }
 
     if (newExpiryDate) {
@@ -318,6 +414,15 @@ const manageTenantSubscription = async (req, res) => {
       tenant.licenseKey = generateLicenseKey(tenant.slug);
     }
 
+    if (allowAddonAssets !== undefined) {
+      tenant.allowAddonAssets = Boolean(allowAddonAssets);
+    }
+    if (addonAssetPrice !== undefined && !isNaN(Number(addonAssetPrice))) {
+      tenant.addonAssetPrice = Number(addonAssetPrice);
+    }
+
+    tenant.markModified('limits');
+    tenant.markModified('features');
     await tenant.save();
 
     // Record subscription history
@@ -459,7 +564,7 @@ const toggleTenantStatus = async (req, res) => {
 // ─── PATCH /api/super-admin/tenants/:id/plan ───────────────────────────────
 const updateTenantPlan = async (req, res) => {
   try {
-    const { plan, maxAssets, maxUsers, features, planExpiry } = req.body;
+    const { plan, maxAssets, maxUsers, features, planExpiry, allowAddonAssets, addonAssetPrice } = req.body;
     const tenant = await Tenant.findById(req.params.id).setOptions({ bypassTenantFilter: true });
     if (!tenant) return res.status(404).json({ message: 'Tenant not found.' });
 
@@ -474,9 +579,11 @@ const updateTenantPlan = async (req, res) => {
     if (maxUsers !== undefined) tenant.limits.maxUsers = maxUsers;
     if (features) tenant.features = { ...tenant.features, ...features };
     if (planExpiry !== undefined) tenant.planExpiry = planExpiry ? new Date(planExpiry) : null;
+    if (allowAddonAssets !== undefined) tenant.allowAddonAssets = Boolean(allowAddonAssets);
+    if (addonAssetPrice !== undefined && !isNaN(Number(addonAssetPrice))) tenant.addonAssetPrice = Number(addonAssetPrice);
 
     await tenant.save();
-    res.json({ message: `Plan updated for "${tenant.name}".`, tenant });
+    res.json({ message: `Plan and settings updated for "${tenant.name}".`, tenant });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -657,14 +764,28 @@ const deleteCoupon = async (req, res) => {
 
 // ─── Plan Management Controllers ───────────────────────────────────────────
 
-// GET /api/super-admin/plans
+// GET /api/super-admin/plans (returns all active and custom/inactive plans)
 const getPlans = async (req, res) => {
   try {
     const planService = require('../services/planService');
-    const plans = await planService.getAllPlans();
+    const plans = await planService.getAllPlans(true);
     res.json(plans);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// POST /api/super-admin/plans (create new plan or custom bespoke plan)
+const createPlan = async (req, res) => {
+  try {
+    const planService = require('../services/planService');
+    const plan = await planService.createPlan(req.body);
+    res.status(201).json({
+      message: `Plan "${plan.name}" created successfully.`,
+      plan
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -683,6 +804,36 @@ const updatePlan = async (req, res) => {
   }
 };
 
+// PATCH /api/super-admin/plans/:planKey/toggle
+const togglePlanStatus = async (req, res) => {
+  try {
+    const planService = require('../services/planService');
+    const { planKey } = req.params;
+    const plan = await planService.togglePlanStatus(planKey);
+    res.json({
+      message: `Plan "${plan.name}" is now ${plan.isActive ? 'Active' : 'Disabled'}.`,
+      plan
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// DELETE /api/super-admin/plans/:planKey
+const deletePlan = async (req, res) => {
+  try {
+    const planService = require('../services/planService');
+    const { planKey } = req.params;
+    const deleted = await planService.deletePlan(planKey);
+    res.json({
+      message: `Plan "${deleted.name}" has been deleted.`,
+      plan: deleted
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 // POST /api/super-admin/plans/reset
 const resetPlans = async (req, res) => {
   try {
@@ -691,6 +842,62 @@ const resetPlans = async (req, res) => {
     res.json({
       message: 'All subscription plans reset to default prices and specifications.',
       plans: reset
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── Universal Platform Settings (Add-on Assets & Universal Controls) ────────
+const GlobalSetting = require('../models/GlobalSetting');
+
+// GET /api/super-admin/global-settings
+const getGlobalSettings = async (req, res) => {
+  try {
+    let setting = await GlobalSetting.findOne({ key: 'platform_settings' });
+    if (!setting) {
+      setting = await GlobalSetting.create({
+        key: 'platform_settings',
+        allowAddonAssets: true,
+        addonAssetPrice: 49,
+      });
+    }
+    res.json(setting);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PUT /api/super-admin/global-settings
+const updateGlobalSettings = async (req, res) => {
+  try {
+    const { allowAddonAssets, addonAssetPrice, applyToAllCompanies } = req.body;
+    let setting = await GlobalSetting.findOne({ key: 'platform_settings' });
+    if (!setting) {
+      setting = new GlobalSetting({ key: 'platform_settings' });
+    }
+
+    if (allowAddonAssets !== undefined) {
+      setting.allowAddonAssets = Boolean(allowAddonAssets);
+    }
+    if (addonAssetPrice !== undefined && !isNaN(Number(addonAssetPrice))) {
+      setting.addonAssetPrice = Number(addonAssetPrice);
+    }
+
+    await setting.save();
+
+    // If applyToAllCompanies is true (or universally applied)
+    if (applyToAllCompanies !== false) {
+      const updateData = {};
+      if (allowAddonAssets !== undefined) updateData.allowAddonAssets = Boolean(allowAddonAssets);
+      if (addonAssetPrice !== undefined && !isNaN(Number(addonAssetPrice))) updateData.addonAssetPrice = Number(addonAssetPrice);
+      
+      await Tenant.updateMany({}, { $set: updateData }).setOptions({ bypassTenantFilter: true });
+    }
+
+    res.json({
+      message: 'Universal platform settings saved and applied across all companies successfully.',
+      setting,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -713,7 +920,13 @@ module.exports = {
   toggleCouponStatus,
   deleteCoupon,
   getPlans,
+  createPlan,
   updatePlan,
+  togglePlanStatus,
+  deletePlan,
   resetPlans,
+  getGlobalSettings,
+  updateGlobalSettings,
 };
+
 

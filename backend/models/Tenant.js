@@ -19,8 +19,8 @@ const tenantSchema = new mongoose.Schema({
   },
   plan: { 
     type: String, 
-    enum: ['Home User', 'MSME', 'Large Scale'], 
-    default: 'Home User' 
+    default: 'Home User',
+    trim: true
   },
   branding: {
     logoUrl: { type: String, default: null },
@@ -35,15 +35,24 @@ const tenantSchema = new mongoose.Schema({
     fromEmail: { type: String, default: null }
   },
   limits: {
-    maxAssets: { type: Number, default: 50 },
-    maxUsers: { type: Number, default: 10 }
+    maxAssets: { type: Number, default: 20 },
+    maxUsers: { type: Number, default: 3 },
+    maxDepartments: { type: Number, default: 2 }
   },
   features: {
-    procurement: { type: Boolean, default: false },
-    vendorPortal: { type: Boolean, default: false },
-    enterpriseHub: { type: Boolean, default: false },
-    customBranding: { type: Boolean, default: false },
-    advancedReports: { type: Boolean, default: false },
+    type: mongoose.Schema.Types.Mixed,
+    default: () => ({
+      coreInventory: true,
+      ticketing: 'basic',
+      standardReports: true,
+      advancedAnalytics: false,
+      warrantyTracking: false,
+      bulkCsvImport: false,
+      slaEscalation: false,
+      customBranding: false,
+      auditTrail: false,
+      dedicatedSupport: false,
+    })
   },
 
   // Organisation profile
@@ -79,7 +88,20 @@ const tenantSchema = new mongoose.Schema({
   },
 
   customerType: { type: String, enum: ['Individual', 'Business'], default: 'Business' },
-  licenseKey:  { type: String, default: null }
+  licenseKey:  { type: String, default: null },
+  customPrice: { type: Number, default: null },
+  customQuoteExpiry: { type: Date, default: null },
+  customQuoteCreatedAt: { type: Date, default: null },
+  customQuotePlan: { type: String, default: null },
+  customQuoteQuotas: {
+    maxAssets: { type: Number, default: null },
+    maxUsers: { type: Number, default: null },
+    maxDepartments: { type: Number, default: null }
+  },
+  customQuoteFeatures: { type: mongoose.Schema.Types.Mixed, default: null },
+  allowAddonAssets: { type: Boolean, default: false },
+  addonAssetPrice: { type: Number, default: 49 },
+  addonAssets: { type: Number, default: 0 }
 }, {
   timestamps: true 
 });

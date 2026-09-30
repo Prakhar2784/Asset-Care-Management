@@ -1,4 +1,4 @@
-﻿// backend/models/PlanConfig.js
+// backend/models/PlanConfig.js
 const mongoose = require('mongoose');
 
 const planConfigSchema = new mongoose.Schema({
@@ -8,12 +8,12 @@ const planConfigSchema = new mongoose.Schema({
     unique: true,
     uppercase: true,
     trim: true,
-  }, // e.g. 'HOME_USER', 'MSME', 'LARGE_SCALE'
+  }, // e.g. 'HOME_USER', 'MSME', 'LARGE_SCALE', 'CUSTOM_PLAN'
   name: {
     type: String,
     required: true,
     trim: true,
-  }, // e.g. 'Home User', 'MSME', 'Large Scale'
+  }, // e.g. 'Home User', 'MSME', 'Large Scale', 'Custom Plan'
   price: {
     type: Number,
     required: true,
@@ -29,11 +29,11 @@ const planConfigSchema = new mongoose.Schema({
   },
   maxUsers: {
     type: Number,
-    default: 1,
+    default: 3, // -1 for unlimited
   },
   maxDepartments: {
     type: Number,
-    default: 1,
+    default: 2, // -1 for unlimited
   },
   description: {
     type: String,
@@ -44,6 +44,19 @@ const planConfigSchema = new mongoose.Schema({
     type: String,
     trim: true,
   }],
+  // Comprehensive Feature Switches (from project comparison matrix)
+  featureFlags: {
+    coreInventory:     { type: Boolean, default: true },  // Core inventory & QR tagging
+    ticketing:         { type: String,  default: 'basic' }, // 'basic' | 'full' | 'off'
+    standardReports:   { type: Boolean, default: true },  // Standard reports
+    advancedAnalytics: { type: Boolean, default: false }, // Advanced analytics
+    warrantyTracking:  { type: Boolean, default: false }, // Warranty tracking & Radar
+    bulkCsvImport:     { type: Boolean, default: false }, // Bulk CSV import
+    slaEscalation:     { type: Boolean, default: false }, // SLA escalation engine
+    customBranding:    { type: Boolean, default: false }, // Custom branding & company logo
+    auditTrail:        { type: Boolean, default: false }, // Full audit trail
+    dedicatedSupport:  { type: Boolean, default: false }, // Dedicated priority support
+  },
   badge: {
     type: String,
     default: '',
@@ -51,6 +64,10 @@ const planConfigSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true,
+  },
+  isCustom: {
+    type: Boolean,
+    default: false,
   },
   order: {
     type: Number,

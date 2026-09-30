@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Asset = require('../models/Asset');
 const Ticket = require('../models/Ticket');
 const MaintenanceLog = require('../models/MaintenanceLog');
@@ -178,6 +179,9 @@ const getAssets = async (req, res) => {
 // @access  Admin / HOD
 const getAssetById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Asset not found' });
+    }
     const asset = await Asset.findById(req.params.id).populate('assignedTo', 'name email department');
     if (!asset) return res.status(404).json({ message: 'Asset not found' });
 

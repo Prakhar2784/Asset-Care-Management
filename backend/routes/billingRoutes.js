@@ -11,6 +11,7 @@ const {
   cancelSubscription, 
   getSubscriptionHistory, 
   getInvoiceById,
+  createAddonOrder,
 } = require('../controllers/billingController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -22,6 +23,7 @@ router.post('/webhook', handleRazorpayWebhook);
 router.use(protect);
 router.use(authorize('admin', 'super_admin'));
 
+router.post('/addon/create-order', createAddonOrder);
 router.post('/checkout/calculate', calculateCheckout);
 router.post('/checkout/create-order', createRazorpayOrder);
 router.post('/checkout/verify', verifyRazorpayPayment);
