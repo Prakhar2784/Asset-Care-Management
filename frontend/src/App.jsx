@@ -15,6 +15,7 @@ import Footer from "./components/Footer";
 import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Preloader from "./components/Preloader";
 
 // Public Pages
 const Home = lazy(() => import("./pages/public/Home"));
@@ -70,11 +71,7 @@ const WebsiteLayout = ({ children }) => (
   </>
 );
 
-const RouteFallback = () => (
-  <Box sx={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#0B0D17" }}>
-    <CircularProgress sx={{ color: "#7777C7" }} />
-  </Box>
-);
+const RouteFallback = () => <Preloader message="Loading workspace..." fullScreen={true} />;
 
 function App() {
   return (

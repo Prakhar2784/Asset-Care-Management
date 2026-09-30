@@ -13,8 +13,35 @@
     <meta name="theme-color" content="#000000" />
     <title>IAssetCare — IT Asset Management</title>
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin:0;padding:0;background-color:#0B0C1A;">
+    <div id="root">
+      <div style="min-height:100vh;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0B0C1A;background:radial-gradient(circle at 50% 45%, rgba(119, 119, 199, 0.16) 0%, #0B0C1A 75%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#ffffff;user-select:none;">
+        <div style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+          <div style="width:64px;height:64px;border-radius:16px;background:rgba(22, 27, 46, 0.85);border:1px solid rgba(119, 119, 199, 0.4);display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 8px 32px rgba(0,0,0,0.4),0 0 20px rgba(119,119,199,0.25);">
+            <img src="/logo_home.png" alt="IAssetCare" style="width:38px;height:38px;object-fit:contain;" />
+          </div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px;color:#ffffff;">
+            IAsset<span style="color:#7777C7;">Care</span>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:#64748B;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:24px;">
+            Enterprise Asset Intelligence
+          </div>
+          <div style="width:160px;height:3.5px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;position:relative;margin-bottom:14px;">
+            <div style="position:absolute;top:0;bottom:0;width:50%;border-radius:4px;background:linear-gradient(90deg, #5D5DA8, #7777C7, #A5A5F2);box-shadow:0 0 10px rgba(119, 119, 199, 0.6);animation:initProgress 1.4s ease-in-out infinite;"></div>
+          </div>
+          <div style="font-size:12px;font-weight:500;color:#94A3B8;letter-spacing:0.2px;">
+            Loading workspace...
+          </div>
+        </div>
+      </div>
+      <style>
+        @keyframes initProgress {
+          0% { left: -50%; }
+          50% { left: 25%; width: 60%; }
+          100% { left: 105%; width: 50%; }
+        }
+      </style>
+    </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
