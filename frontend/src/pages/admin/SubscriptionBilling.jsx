@@ -9,7 +9,7 @@ import {
   ContentCopyRounded, ArrowForwardRounded, CloudDownloadRounded,
   SecurityRounded, ScheduleRounded, DiamondRounded, AddCircleOutlineRounded,
   BoltRounded, AddRounded, RemoveRounded, CheckRounded, LocalOfferRounded,
-  HelpOutlineRounded, InfoOutlined, VerifiedUserRounded
+  HelpOutlineRounded, InfoOutlined, VerifiedUserRounded, EventBusyRounded
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
@@ -870,6 +870,70 @@ export default function SubscriptionBilling() {
             }}
           >
             I Understand
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <Dialog
+        open={cancelOpen}
+        onClose={() => !cancelLoading && setCancelOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: 'visible',
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center', pt: 4, px: 4 }}>
+          <Box sx={{
+            width: 64, height: 64, borderRadius: '50%',
+            bgcolor: 'rgba(239,68,68,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            mx: 'auto', mb: 2.5
+          }}>
+            <EventBusyRounded sx={{ fontSize: 32, color: '#dc2626' }} />
+          </Box>
+          <Typography fontWeight={800} fontSize={20} color="text.primary" mb={1}>
+            Cancel Subscription?
+          </Typography>
+          <Typography fontSize={14} color="text.secondary" sx={{ maxWidth: 400, mx: 'auto', lineHeight: 1.7 }}>
+            Are you sure you want to cancel your <strong>{plan}</strong> subscription?
+            You will continue to have access to all features until your plan expires on{' '}
+            <strong>{expiryDateFormatted || '—'}</strong>, but it will not auto-renew.
+          </Typography>
+        </Box>
+        <DialogActions sx={{ px: 4, pb: 3.5, pt: 3, gap: 1.5, justifyContent: 'center' }}>
+          <Button
+            onClick={() => setCancelOpen(false)}
+            disabled={cancelLoading}
+            variant="outlined"
+            sx={{
+              px: 4, py: 1.2, fontWeight: 700, borderRadius: 2,
+              borderColor: 'divider', color: 'text.primary',
+              textTransform: 'none', fontSize: 14, minWidth: 160,
+              '&:hover': { borderColor: 'text.secondary', bgcolor: 'rgba(0,0,0,0.04)' },
+            }}
+          >
+            Keep Subscription
+          </Button>
+          <Button
+            onClick={handleCancelSubscription}
+            disabled={cancelLoading}
+            variant="contained"
+            sx={{
+              px: 4, py: 1.2, fontWeight: 700, borderRadius: 2,
+              bgcolor: '#dc2626', color: '#fff',
+              textTransform: 'none', fontSize: 14, minWidth: 160,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#b91c1c', boxShadow: 'none' },
+              '&.Mui-disabled': { bgcolor: 'rgba(220,38,38,0.4)', color: 'rgba(255,255,255,0.7)' },
+            }}
+            startIcon={cancelLoading ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : null}
+          >
+            {cancelLoading ? 'Cancelling...' : 'Yes, Cancel'}
           </Button>
         </DialogActions>
       </Dialog>

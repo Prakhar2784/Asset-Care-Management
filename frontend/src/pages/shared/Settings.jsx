@@ -217,9 +217,6 @@ function CompanySettingsTab({ isAdmin = true }) {
   const [tenant, setTenant] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
-  const [cancelResult, setCancelResult] = useState({ open: false, success: false, message: '' });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [msg, setMsg] = useState('');
@@ -950,6 +947,9 @@ function BillingTab() {
   const [tenant, setTenant] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelResult, setCancelResult] = useState({ open: false, success: false, message: '' });
 
   useEffect(() => {
     fetchData();
