@@ -435,7 +435,7 @@ export default function SuperAdminPanel() {
     try {
       const { data: res } = await api.put('/super-admin/global-settings', {
         allowAddonAssets: newVal,
-        addonAssetPrice: Number(globalSettings.addonAssetPrice || 49),
+        addonAssetPrice: Number(globalSettings.addonAssetPrice || 50),
         applyToAllCompanies: true
       });
       showSnack(`"Purchase More Assets" tab is now ${newVal ? 'ENABLED' : 'DISABLED'} globally for all companies!`);
@@ -454,7 +454,7 @@ export default function SuperAdminPanel() {
       const priceToSave = overridePrice !== undefined ? overridePrice : globalSettings.addonAssetPrice;
       const { data: res } = await api.put('/super-admin/global-settings', {
         allowAddonAssets: globalSettings.allowAddonAssets,
-        addonAssetPrice: Number(priceToSave || 49),
+        addonAssetPrice: Number(priceToSave || 50),
         applyToAllCompanies: true
       });
       showSnack(res.message || 'Universal settings saved and applied to all companies!');
