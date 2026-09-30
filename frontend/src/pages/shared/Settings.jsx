@@ -758,21 +758,6 @@ function DataTab({ currentUser }) {
     } finally { setExporting(false); }
   };
 
-  const [shuttingDown, setShuttingDown] = useState(false);
-  const handleShutdown = async () => {
-    if (!window.confirm("Are you sure you want to stop the local application server? This will stop the background service and you will need to restart the app from your desktop shortcut.")) return;
-    setShuttingDown(true);
-    try {
-      const { data } = await api.post('/settings/system/shutdown');
-      setToast(data.message || 'Server is shutting down...');
-      setTimeout(() => {
-        window.location.href = "about:blank";
-      }, 1500);
-    } catch (e) {
-      setToast('Failed to shut down server.');
-      setShuttingDown(false);
-    }
-  };
 
   return (
     <Grid container spacing={4}>
@@ -796,26 +781,6 @@ function DataTab({ currentUser }) {
         </Paper>
       </Grid>
 
-      {(currentUser?.role === 'admin' || currentUser?.role === 'super_admin') && (
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <Box>
-              <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Local Server Control</Typography>
-              <Typography fontSize={14} color="text.secondary" mb={3}>
-                Shut down the application background server process running on this computer. 
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              disabled={shuttingDown}
-              onClick={handleShutdown}
-              sx={{ fontWeight: 800, borderRadius: 2, bgcolor: '#dc2626', color: '#ffffff', '&:hover': { bgcolor: '#b91c1c' }, alignSelf: 'flex-start' }}
-            >
-              {shuttingDown ? 'Stopping Server...' : 'Stop Local Server'}
-            </Button>
-          </Paper>
-        </Grid>
-      )}
 
       <Grid size={{ xs: 12, md: 6 }}>
         <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
