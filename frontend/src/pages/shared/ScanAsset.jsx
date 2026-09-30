@@ -167,11 +167,11 @@ export default function ScanAsset() {
           fullWidth
           variant="contained"
           size="large"
-          startIcon={currentUser ? <AssignmentRounded sx={{ color: "#FFFFFF" }} /> : <LoginRounded sx={{ color: "#FFFFFF" }} />}
+          startIcon={currentUser ? <AssignmentRounded sx={{ color: "#FFFFFF !important" }} /> : <LoginRounded sx={{ color: "#FFFFFF !important" }} />}
           onClick={handleActionClick}
           sx={{
-            bgcolor: "#7777C7",
-            color: "#FFFFFF",
+            bgcolor: "#7777C7 !important",
+            color: "#FFFFFF !important",
             fontWeight: 800,
             fontSize: 16,
             borderRadius: "16px",
@@ -179,13 +179,16 @@ export default function ScanAsset() {
             boxShadow: "0 8px 24px rgba(119, 119, 199, 0.35)",
             textTransform: "none",
             letterSpacing: "-0.2px",
+            "& .MuiButton-startIcon": { color: "#FFFFFF !important" },
             "&:hover": {
-              bgcolor: "#6464B8",
+              bgcolor: "#6464B8 !important",
               boxShadow: "0 12px 32px rgba(119, 119, 199, 0.45)"
             }
           }}
         >
-          {currentUser ? "Register a Service Request" : "Log In to Register Request"}
+          <span style={{ color: "#FFFFFF", fontWeight: 800, fontSize: "16px", letterSpacing: "-0.2px" }}>
+            {currentUser ? "Register a Service Request" : "Log In to Register Request"}
+          </span>
         </Button>
 
         <Typography textAlign="center" fontSize={12} color="#64748B" fontWeight={600} mt={1.8}>
@@ -291,21 +294,24 @@ export default function ScanAsset() {
                   type="submit"
                   variant="contained"
                   disabled={submitting}
-                  startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : <CheckCircleRounded />}
+                  startIcon={submitting ? <CircularProgress size={16} sx={{ color: "#FFFFFF" }} /> : <CheckCircleRounded sx={{ color: "#FFFFFF !important" }} />}
                   sx={{
                     flex: 2,
-                    bgcolor: "#7777C7",
-                    color: "#FFFFFF",
+                    bgcolor: "#7777C7 !important",
+                    color: "#FFFFFF !important",
                     fontWeight: 800,
                     borderRadius: "12px",
                     boxShadow: "none",
                     textTransform: "none",
                     py: 1.3,
-                    "&:hover": { bgcolor: "#6464B8" },
-                    "&:disabled": { bgcolor: "#A5A5D8", color: "#FFFFFF" }
+                    "& .MuiButton-startIcon": { color: "#FFFFFF !important" },
+                    "&:hover": { bgcolor: "#6464B8 !important" },
+                    "&:disabled": { bgcolor: "#A5A5D8 !important", color: "#FFFFFF !important" }
                   }}
                 >
-                  {submitting ? "Submitting…" : "Submit Request"}
+                  <span style={{ color: "#FFFFFF", fontWeight: 800 }}>
+                    {submitting ? "Submitting…" : "Submit Request"}
+                  </span>
                 </Button>
               </Box>
             </Stack>
