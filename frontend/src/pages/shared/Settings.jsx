@@ -12,7 +12,8 @@ import {
   SaveRounded, LockRounded, PictureAsPdfRounded, RefreshRounded, BusinessRounded,
   DeleteOutlineRounded, LocationOnRounded, PhoneRounded, EmailRounded,
   BadgeRounded, WorkRounded, PeopleRounded, LanguageRounded, ReceiptRounded,
-  VerifiedRounded, StarRounded, CameraAltRounded, DomainRounded
+  VerifiedRounded, StarRounded, CameraAltRounded, DomainRounded,
+  StorageRounded, ShieldRounded, AccountCircleRounded
 } from '@mui/icons-material';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -760,70 +761,184 @@ function DataTab({ currentUser }) {
 
 
   return (
-    <Grid container spacing={4}>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+    <Box>
+      {/* Section Header */}
+      <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+          <StorageRounded sx={{ color: '#7777C7', fontSize: 28 }} />
+          <Typography fontWeight={800} fontSize={22} color="text.primary">
+            My Data & Privacy
+          </Typography>
+        </Box>
+        <Typography fontSize={14} color="text.secondary" sx={{ maxWidth: 600 }}>
+          Manage your personal data, view account details, and understand how your information is stored and retained.
+        </Typography>
+      </Box>
+
+      {/* Account Information — Full Width */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 3, md: 4 },
+          borderRadius: 3,
+          border: '1px solid',
+          borderColor: 'divider',
+          mb: 3,
+          background: 'linear-gradient(135deg, rgba(119,119,199,0.06) 0%, rgba(119,119,199,0.02) 100%)',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+          <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'rgba(119,119,199,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <AccountCircleRounded sx={{ color: '#7777C7', fontSize: 22 }} />
+          </Box>
           <Box>
-            <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Export My Data</Typography>
-            <Typography fontSize={14} color="text.secondary" mb={3}>
+            <Typography fontWeight={700} fontSize={16} color="text.primary">Account Information</Typography>
+            <Typography fontSize={12} color="text.secondary">Your profile details on the platform</Typography>
+          </Box>
+        </Box>
+        <Grid container spacing={{ xs: 2, md: 3 }}>
+          {[
+            ['Name', currentUser?.name, PersonRounded],
+            ['Email', currentUser?.email, EmailRounded],
+            ['Role', currentUser?.role, BadgeRounded],
+            ['Department', currentUser?.department, WorkRounded],
+            ['Status', currentUser?.isActive ? 'Active' : 'Inactive', VerifiedRounded],
+          ].map(([label, val, Icon]) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={label}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, p: 2, borderRadius: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
+                <Icon sx={{ color: '#7777C7', fontSize: 20, mt: 0.3, flexShrink: 0 }} />
+                <Box>
+                  <Typography fontSize={11} fontWeight={600} color="text.secondary" textTransform="uppercase" letterSpacing={0.5}>
+                    {label}
+                  </Typography>
+                  <Typography fontSize={14} fontWeight={700} color="text.primary" sx={{ mt: 0.3, wordBreak: 'break-word' }}>
+                    {val || '—'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Paper>
+
+      {/* Export + Retention — Side by Side */}
+      <Grid container spacing={3}>
+        {/* Export My Data */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, md: 4 },
+              borderRadius: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'rgba(119,119,199,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PictureAsPdfRounded sx={{ color: '#7777C7', fontSize: 22 }} />
+              </Box>
+              <Typography fontWeight={700} fontSize={16} color="text.primary">Export My Data</Typography>
+            </Box>
+            <Typography fontSize={13} color="text.secondary" sx={{ mb: 3, lineHeight: 1.6, flex: 1 }}>
               Download a complete copy of all your data — profile, tickets, device requests, notifications, and assigned assets — as a PDF file.
             </Typography>
-          </Box>
-          <Button
-            variant="outlined"
-            startIcon={exporting ? <CircularProgress size={16} /> : <PictureAsPdfRounded />}
-            onClick={handleExport}
-            disabled={exporting}
-            sx={{ fontWeight: 700, borderRadius: 2, borderColor: '#dc2626', color: '#dc2626', '&:hover': { bgcolor: 'rgba(220,38,38,0.12)', borderColor: '#dc2626' }, alignSelf: 'flex-start' }}
+            <Button
+              variant="contained"
+              startIcon={exporting ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <DownloadRounded />}
+              onClick={handleExport}
+              disabled={exporting}
+              sx={{
+                fontWeight: 700,
+                borderRadius: 2,
+                bgcolor: '#7777C7',
+                color: '#fff',
+                px: 3,
+                py: 1.2,
+                textTransform: 'none',
+                fontSize: 14,
+                alignSelf: 'flex-start',
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#6464B8', boxShadow: 'none' },
+                '&.Mui-disabled': { bgcolor: 'rgba(119,119,199,0.4)', color: 'rgba(255,255,255,0.7)' },
+              }}
+            >
+              {exporting ? 'Generating PDF...' : 'Export as PDF'}
+            </Button>
+          </Paper>
+        </Grid>
+
+        {/* Data Retention Policy */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, md: 4 },
+              borderRadius: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
-            {exporting ? 'Generating PDF...' : 'Export My Data (PDF)'}
-          </Button>
-        </Paper>
-      </Grid>
-
-
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={800} fontSize={17} mb={1} color="text.primary">Data Retention Policy</Typography>
-          <Typography fontSize={14} color="text.secondary" mb={2.5}>
-            Your data is managed according to these retention rules:
-          </Typography>
-          {[
-            ['Audit Logs', 'Auto-purged after 1 year (monthly job)'],
-            ['Notifications', 'Retained indefinitely (manually deletable)'],
-            ['Tickets', 'Retained indefinitely'],
-            ['Assets', 'Soft-deleted (recoverable from trash)'],
-          ].map(([label, desc]) => (
-            <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography fontSize={13} fontWeight={600} color="text.secondary">{label}</Typography>
-              <Typography fontSize={13} color="text.primary" sx={{ textAlign: "right", maxWidth: 220 }}>{desc}</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: 'rgba(119,119,199,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldRounded sx={{ color: '#7777C7', fontSize: 22 }} />
+              </Box>
+              <Typography fontWeight={700} fontSize={16} color="text.primary">Data Retention Policy</Typography>
             </Box>
-          ))}
-        </Paper>
-      </Grid>
-
-      <Grid size={{ xs: 12, md: 6 }}>
-        <Paper sx={{ p: 4, borderRadius: 3, border: 1, borderColor: 'divider' }}>
-          <Typography fontWeight={800} fontSize={17} mb={2.5} color="text.primary">Account Information</Typography>
-          {[
-            ['Name', currentUser?.name],
-            ['Email', currentUser?.email],
-            ['Role', currentUser?.role],
-            ['Department', currentUser?.department],
-            ['Account Status', currentUser?.isActive ? 'Active' : 'Inactive'],
-          ].map(([label, val]) => (
-            <Box key={label} sx={{ display: 'flex', justifyContent: 'space-between', py: 1.2, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography fontSize={13} fontWeight={600} color="text.secondary">{label}</Typography>
-              <Typography fontSize={13} fontWeight={700}>{val || '—'}</Typography>
+            <Typography fontSize={13} color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
+              Your data is managed according to these retention rules:
+            </Typography>
+            <Box sx={{ flex: 1 }}>
+              {[
+                ['Audit Logs', 'Auto-purged after 1 year'],
+                ['Notifications', 'Retained indefinitely'],
+                ['Tickets', 'Retained indefinitely'],
+                ['Assets', 'Soft-deleted (recoverable)'],
+              ].map(([label, desc], i, arr) => (
+                <Box
+                  key={label}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    py: 1.4,
+                    borderBottom: i < arr.length - 1 ? '1px solid' : 'none',
+                    borderColor: 'divider',
+                  }}
+                >
+                  <Typography fontSize={13} fontWeight={600} color="text.primary">{label}</Typography>
+                  <Chip
+                    label={desc}
+                    size="small"
+                    sx={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      bgcolor: label === 'Audit Logs' ? 'rgba(245,158,11,0.1)' : 'rgba(119,119,199,0.1)',
+                      color: label === 'Audit Logs' ? '#d97706' : '#7777C7',
+                      border: 'none',
+                    }}
+                  />
+                </Box>
+              ))}
             </Box>
-          ))}
-        </Paper>
+          </Paper>
+        </Grid>
       </Grid>
 
-      <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}><Alert severity="info" variant="filled" sx={{ borderRadius: '12px', fontWeight: 700 }} onClose={() => setToast('')}>{toast}</Alert></Snackbar>
-    </Grid>
+      <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Alert severity="info" variant="filled" sx={{ borderRadius: '12px', fontWeight: 700 }} onClose={() => setToast('')}>{toast}</Alert>
+      </Snackbar>
+    </Box>
   );
 }
+
+
 
 // --- Main Settings Page ---
 
