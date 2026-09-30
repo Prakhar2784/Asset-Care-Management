@@ -900,7 +900,7 @@ export default function SubscriptionBilling() {
             Cancel Subscription?
           </Typography>
           <Typography fontSize={14} color="text.secondary" sx={{ maxWidth: 400, mx: 'auto', lineHeight: 1.7 }}>
-            Are you sure you want to cancel your <strong>{plan}</strong> subscription?
+            Are you sure you want to cancel your <strong>{currentPlan}</strong> subscription?
             You will continue to have access to all features until your plan expires on{' '}
             <strong>{expiryDateFormatted || '—'}</strong>, but it will not auto-renew.
           </Typography>
