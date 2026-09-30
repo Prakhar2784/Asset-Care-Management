@@ -52,8 +52,9 @@ const computeBilling = async (planKey, couponCode, customerState, tenant = null,
   // Add-On Assets calculation if specified
   const GlobalSetting = require('../models/GlobalSetting');
   const globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' }).catch(() => null);
+  const allowAddonAssets = globalSetting?.allowAddonAssets === false ? false : Boolean(tenant?.allowAddonAssets !== false);
   const unitPrice = Number(globalSetting?.addonAssetPrice || tenant?.addonAssetPrice || 50);
-  const numAddons = Math.max(0, Number(addonAssets || 0));
+  const numAddons = allowAddonAssets ? Math.max(0, Number(addonAssets || 0)) : 0;
   let addonCost = 0;
   if (numAddons > 0) {
     addonCost = r2(numAddons * unitPrice);
@@ -212,7 +213,8 @@ const computeBilling = async (planKey, couponCode, customerState, tenant = null,
     appliedCoupon,
     addonAssets: numAddons,
     addonCost,
-    unitPrice
+    unitPrice,
+    allowAddonAssets
   };
 };
 
@@ -452,6 +454,7 @@ exports.calculateCheckout = async (req, res) => {
       addonAssets: breakdown.addonAssets,
       addonCost: breakdown.addonCost,
       unitPrice: breakdown.unitPrice,
+      allowAddonAssets: breakdown.allowAddonAssets,
       activeAssetCount,
       totalCapacity,
       exceedsActiveAssets,

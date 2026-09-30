@@ -218,7 +218,9 @@ const getMe = async (req, res) => {
     const now = new Date();
     const daysRemaining = tenant?.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
 
-    const cleanPlan = (tenant?.plan || 'Home User').replace(/\s*\(\+?\d+.*?\)\s*/g, '').trim();
+    const GlobalSetting = require('../models/GlobalSetting');
+    const globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' }).catch(() => null);
+    const allowAddonAssets = globalSetting?.allowAddonAssets === false ? false : Boolean(tenant?.allowAddonAssets !== false);
 
     res.status(200).json({
       ...req.user.toObject(),
@@ -229,6 +231,8 @@ const getMe = async (req, res) => {
       features: tenant?.features || {},
       addonAssets: tenant?.addonAssets || 0,
       limits: tenant?.limits || {},
+      allowAddonAssets,
+      addonAssetPrice: globalSetting?.addonAssetPrice || tenant?.addonAssetPrice || 50,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

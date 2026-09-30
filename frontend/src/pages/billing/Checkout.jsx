@@ -205,6 +205,7 @@ export default function Checkout() {
 
   const [selectedPlan, setSelectedPlan] = useState('HOME_USER');
   const [addonAssets, setAddonAssets] = useState(0);
+  const [allowAddonAssets, setAllowAddonAssets] = useState(true);
   const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState('');
   const [breakdown, setBreakdown] = useState(null);
@@ -303,6 +304,12 @@ export default function Checkout() {
         addonAssets: effectiveAddon,
       });
       setBreakdown(data);
+      if (data.allowAddonAssets !== undefined) {
+        setAllowAddonAssets(Boolean(data.allowAddonAssets));
+        if (!data.allowAddonAssets) {
+          setAddonAssets(0);
+        }
+      }
       if (targetCoupon && data.discountAmount > 0) {
         setAppliedCoupon(targetCoupon);
         setCouponSuccess(`Coupon "${targetCoupon}" applied successfully! You saved ${formatINR(data.discountAmount)}.`);
@@ -430,11 +437,22 @@ export default function Checkout() {
       } catch {}
 
       try {
-        const { data } = await api.get('/auth/me');
+        const [authRes, tenantRes] = await Promise.all([
+          api.get('/auth/me'),
+          api.get('/settings/tenant').catch(() => null)
+        ]);
+        const data = authRes.data;
+        const tenantData = tenantRes?.data;
+        const allowAddons = tenantData?.allowAddonAssets !== undefined
+          ? Boolean(tenantData.allowAddonAssets)
+          : (data?.allowAddonAssets !== undefined ? Boolean(data.allowAddonAssets) : true);
+
+        setAllowAddonAssets(allowAddons);
+
         const rawPlan = data.plan || currentUser?.plan || 'Home User';
         const detectedKey = normalizePlanKey(rawPlan, activePlans);
         const matchedPlanObj = activePlans.find((p) => p.key === detectedKey) || activePlans[0];
-        const existingAddon = Number(data.addonAssets !== undefined ? data.addonAssets : (currentUser?.addonAssets || 0));
+        const existingAddon = allowAddons ? Number(data.addonAssets !== undefined ? data.addonAssets : (currentUser?.addonAssets || 0)) : 0;
 
         setAddonAssets(existingAddon);
         setCurrentPlanKey(detectedKey);
@@ -1119,7 +1137,7 @@ export default function Checkout() {
                 </Box>
 
                 {/* Add-on Asset Capacity Selector & Stepper */}
-                {!selectedPlanObj.isCustom && (
+                {!selectedPlanObj.isCustom && allowAddonAssets && breakdown?.allowAddonAssets !== false && (
                   <Box sx={{ my: 2, p: 2, bgcolor: '#F8FAFC', borderRadius: '14px', border: '1.5px solid #E2E8F0' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -1223,7 +1241,7 @@ export default function Checkout() {
                 )}
 
                 {/* Add-on Asset Breakdown Line */}
-                {breakdown.addonAssets > 0 && (
+                {breakdown.addonAssets > 0 && allowAddonAssets && breakdown?.allowAddonAssets !== false && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5, alignItems: 'center' }}>
                     <Box>
                       <Typography variant="body2" sx={{ color: '#0F172A', fontWeight: 700 }}>
@@ -1451,49 +1469,51 @@ export default function Checkout() {
                     {/* TWO-PATH CHOICE BOX */}
                     <Stack spacing={1.5}>
                       {/* Path 1: Instant Full Renewal */}
-                      <Paper
-                        elevation={0}
-                        sx={{
-                          p: 1.5,
-                          borderRadius: '10px',
-                          bgcolor: '#FFFFFF',
-                          border: '1.5px solid #86EFAC',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 1,
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="caption" sx={{ fontWeight: 800, color: '#15803D', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                            Option 1: Instant Full Renewal (No Deletion Needed)
-                          </Typography>
-                          <Chip
-                            label={`+${Math.ceil(breakdown.minRequiredAddons / 5) * 5} Add-ons`}
-                            size="small"
-                            sx={{ fontWeight: 800, fontSize: '10px', bgcolor: '#DCFCE7', color: '#15803D' }}
-                          />
-                        </Box>
-                        <Typography variant="caption" sx={{ color: '#334155', fontSize: '11.5px' }}>
-                          Keep all {breakdown.activeAssetCount} active equipment and renew immediately by adding required capacity.
-                        </Typography>
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={() => handleSetAddon(Math.ceil(breakdown.minRequiredAddons / 5) * 5)}
+                      {allowAddonAssets && breakdown?.allowAddonAssets !== false && (
+                        <Paper
+                          elevation={0}
                           sx={{
-                            borderRadius: '8px',
-                            bgcolor: '#16A34A',
-                            color: '#FFFFFF',
-                            fontWeight: 800,
-                            fontSize: '11.5px',
-                            py: 0.75,
-                            textTransform: 'none',
-                            '&:hover': { bgcolor: '#15803D' },
+                            p: 1.5,
+                            borderRadius: '10px',
+                            bgcolor: '#FFFFFF',
+                            border: '1.5px solid #86EFAC',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1,
                           }}
                         >
-                          Select +{Math.ceil(breakdown.minRequiredAddons / 5) * 5} Add-ons & Enable Payment
-                        </Button>
-                      </Paper>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="caption" sx={{ fontWeight: 800, color: '#15803D', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                              Option 1: Instant Full Renewal (No Deletion Needed)
+                            </Typography>
+                            <Chip
+                              label={`+${Math.ceil(breakdown.minRequiredAddons / 5) * 5} Add-ons`}
+                              size="small"
+                              sx={{ fontWeight: 800, fontSize: '10px', bgcolor: '#DCFCE7', color: '#15803D' }}
+                            />
+                          </Box>
+                          <Typography variant="caption" sx={{ color: '#334155', fontSize: '11.5px' }}>
+                            Keep all {breakdown.activeAssetCount} active equipment and renew immediately by adding required capacity.
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => handleSetAddon(Math.ceil(breakdown.minRequiredAddons / 5) * 5)}
+                            sx={{
+                              borderRadius: '8px',
+                              bgcolor: '#16A34A',
+                              color: '#FFFFFF',
+                              fontWeight: 800,
+                              fontSize: '11.5px',
+                              py: 0.75,
+                              textTransform: 'none',
+                              '&:hover': { bgcolor: '#15803D' },
+                            }}
+                          >
+                            Select +{Math.ceil(breakdown.minRequiredAddons / 5) * 5} Add-ons & Enable Payment
+                          </Button>
+                        </Paper>
+                      )}
 
                       {/* Path 2: Clean Up for Reduced Price */}
                       <Paper
