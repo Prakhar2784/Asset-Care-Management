@@ -20,8 +20,8 @@ const { protect, authorize, requirePermission } = require('../middleware/authMid
 const { assetDocUpload } = require('../middleware/upload');
 const { checkAssetLimit } = require('../middleware/limitMiddleware');
 
-// QR scan — auth only, no permission gate
-router.get('/scan/:id', protect, getScanAsset);
+// QR scan — publicly readable via physical QR code
+router.get('/scan/:id', getScanAsset);
 
 // Must be before /:id to avoid route conflict
 router.get('/next-tag', protect, async (req, res) => {

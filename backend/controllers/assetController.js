@@ -553,12 +553,13 @@ const deleteAssetDocument = async (req, res) => {
   }
 };
 
-// @desc  Light endpoint for QR scan — returns basic asset info, no permission gate beyond auth
+// @desc  Light endpoint for QR scan — returns basic asset info
 // @route GET /api/assets/scan/:id
 const getScanAsset = async (req, res) => {
   try {
     const asset = await Asset.findById(req.params.id)
-      .select('name serialNumber department location category vendor status');
+      .setOptions({ bypassTenantFilter: true })
+      .select('name serialNumber department location category vendor status tenantId');
     if (!asset) return res.status(404).json({ message: 'Asset not found.' });
     res.json(asset);
   } catch {

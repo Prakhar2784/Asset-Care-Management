@@ -1173,7 +1173,7 @@ const Assets = () => {
                 <Typography fontSize={12} color="text.secondary" fontWeight={600} mt={0.3}>
                   {qrAsset?.department || "—"}  ·  {qrAsset?.location || "No location"}
                 </Typography>
-                <Typography fontSize={11} color="text.disabled" fontWeight={700} mt={0.3} sx={{ fontFamily: "monospace" }}>
+                <Typography fontSize={11} color="#475569" fontWeight={700} mt={0.3} sx={{ fontFamily: "monospace" }}>
                   {qrAsset?.serialNumber}
                 </Typography>
               </Box>
@@ -1228,11 +1228,11 @@ const Assets = () => {
                   };
                   img.src = qrDataUrl;
                 }}
-                sx={{ bgcolor: "#7777C7", color: "#7777C7", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3 }}
+                sx={{ bgcolor: "#7777C7", color: "#FFFFFF", fontWeight: 900, borderRadius: "12px", boxShadow: "none", textTransform: "none", py: 1.3, "&:hover": { bgcolor: "#6464B8" } }}
               >
                 Download QR Code
               </Button>
-              <Typography fontSize={11} color="text.disabled" textAlign="center">
+              <Typography fontSize={11} color="#64748B" textAlign="center" fontWeight={600}>
                 Print and stick this on the physical asset. Scanning will let anyone log in and raise a ticket directly.
               </Typography>
             </>
