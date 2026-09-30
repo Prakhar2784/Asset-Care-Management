@@ -4,7 +4,7 @@ import {
   Box, Typography, Paper, Tabs, Tab, TextField, Button, Alert, Switch, Stack,
   FormControlLabel, CircularProgress, Divider, Chip, Grid, MenuItem, Select,
   FormControl, InputLabel, InputAdornment, IconButton, Snackbar, LinearProgress,
-  Avatar
+  Avatar, Dialog, DialogActions
 } from '@mui/material';
 import {
   PersonRounded, PaletteRounded, SecurityRounded,
@@ -13,7 +13,7 @@ import {
   DeleteOutlineRounded, LocationOnRounded, PhoneRounded, EmailRounded,
   BadgeRounded, WorkRounded, PeopleRounded, LanguageRounded, ReceiptRounded,
   VerifiedRounded, StarRounded, CameraAltRounded, DomainRounded,
-  StorageRounded, ShieldRounded, AccountCircleRounded
+  StorageRounded, ShieldRounded, AccountCircleRounded, EventBusyRounded
 } from '@mui/icons-material';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -217,6 +217,9 @@ function CompanySettingsTab({ isAdmin = true }) {
   const [tenant, setTenant] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelResult, setCancelResult] = useState({ open: false, success: false, message: '' });
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [msg, setMsg] = useState('');
@@ -967,15 +970,22 @@ function BillingTab() {
     }
   };
 
-  const handleCancel = async () => {
-    if (window.confirm("Are you sure you want to cancel your subscription? You will be able to use it until it expires, but it will not auto-renew.")) {
-      try {
-        await api.post('/billing/cancel');
-        alert("Subscription cancelled.");
-        fetchData();
-      } catch (err) {
-        alert(err.response?.data?.message || "Failed to cancel");
-      }
+  const handleCancelClick = () => {
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancelConfirm = async () => {
+    setCancelling(true);
+    try {
+      await api.post('/billing/cancel');
+      setCancelDialogOpen(false);
+      setCancelResult({ open: true, success: true, message: 'Your subscription has been cancelled. You can continue using all features until your plan expires.' });
+      fetchData();
+    } catch (err) {
+      setCancelDialogOpen(false);
+      setCancelResult({ open: true, success: false, message: err.response?.data?.message || 'Failed to cancel subscription. Please try again.' });
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -1085,7 +1095,7 @@ function BillingTab() {
                 variant="text" 
                 color="error" 
                 fullWidth 
-                onClick={handleCancel}
+                onClick={handleCancelClick}
                 sx={{ py: 1, fontWeight: 700, borderRadius: '10px' }}
               >
                 Cancel Subscription
@@ -1132,6 +1142,89 @@ function BillingTab() {
           </tbody>
         </table>
       </Paper>
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <Dialog
+        open={cancelDialogOpen}
+        onClose={() => !cancelling && setCancelDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: 'visible',
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center', pt: 4, px: 4 }}>
+          <Box sx={{
+            width: 64, height: 64, borderRadius: '50%',
+            bgcolor: 'rgba(239,68,68,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            mx: 'auto', mb: 2.5
+          }}>
+            <EventBusyRounded sx={{ fontSize: 32, color: '#dc2626' }} />
+          </Box>
+          <Typography fontWeight={800} fontSize={20} color="text.primary" mb={1}>
+            Cancel Subscription?
+          </Typography>
+          <Typography fontSize={14} color="text.secondary" sx={{ maxWidth: 400, mx: 'auto', lineHeight: 1.7 }}>
+            Are you sure you want to cancel your <strong>{tenant?.plan}</strong> subscription?
+            You will continue to have access to all features until your plan expires on{' '}
+            <strong>{expiry ? expiry.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</strong>,
+            but it will not auto-renew.
+          </Typography>
+        </Box>
+        <DialogActions sx={{ px: 4, pb: 3.5, pt: 3, gap: 1.5, justifyContent: 'center' }}>
+          <Button
+            onClick={() => setCancelDialogOpen(false)}
+            disabled={cancelling}
+            variant="outlined"
+            sx={{
+              px: 4, py: 1.2, fontWeight: 700, borderRadius: 2,
+              borderColor: 'divider', color: 'text.primary',
+              textTransform: 'none', fontSize: 14, minWidth: 160,
+              '&:hover': { borderColor: 'text.secondary', bgcolor: 'rgba(0,0,0,0.04)' },
+            }}
+          >
+            Keep Subscription
+          </Button>
+          <Button
+            onClick={handleCancelConfirm}
+            disabled={cancelling}
+            variant="contained"
+            sx={{
+              px: 4, py: 1.2, fontWeight: 700, borderRadius: 2,
+              bgcolor: '#dc2626', color: '#fff',
+              textTransform: 'none', fontSize: 14, minWidth: 160,
+              boxShadow: 'none',
+              '&:hover': { bgcolor: '#b91c1c', boxShadow: 'none' },
+              '&.Mui-disabled': { bgcolor: 'rgba(220,38,38,0.4)', color: 'rgba(255,255,255,0.7)' },
+            }}
+            startIcon={cancelling ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : null}
+          >
+            {cancelling ? 'Cancelling...' : 'Yes, Cancel'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Cancel Result Snackbar */}
+      <Snackbar
+        open={cancelResult.open}
+        autoHideDuration={6000}
+        onClose={() => setCancelResult(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          severity={cancelResult.success ? 'success' : 'error'}
+          variant="filled"
+          sx={{ borderRadius: '12px', fontWeight: 700 }}
+          onClose={() => setCancelResult(prev => ({ ...prev, open: false }))}
+        >
+          {cancelResult.message}
+        </Alert>
+      </Snackbar>
+
     </Box>
   );
 }
