@@ -1,9 +1,10 @@
-const express = require('express');
-const router  = express.Router();
-const crypto  = require('crypto');
-const path    = require('path');
-const User    = require('../models/User');
-const bcrypt  = require('bcryptjs');
+const express  = require('express');
+const router   = express.Router();
+const crypto   = require('crypto');
+const path     = require('path');
+const mongoose = require('mongoose');
+const User     = require('../models/User');
+const bcrypt   = require('bcryptjs');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const { sendWelcomeEmail, sendInviteEmail, sendDeactivationEmail } = require('../services/emailService');
 const AssetAssignment = require('../models/AssetAssignment');
@@ -12,6 +13,48 @@ const Ticket          = require('../models/Ticket');
 const AuditLog        = require('../models/AuditLog');
 const { avatarUpload } = require('../middleware/upload');
 const { checkUserLimit } = require('../middleware/limitMiddleware');
+
+const findUserByIdAcrossDbs = async (userId) => {
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return null;
+  let user = null;
+  try {
+    user = await mongoose.connection.model('User').findById(userId).setOptions({ bypassTenantFilter: true });
+  } catch (e) {}
+  if (!user) {
+    try {
+      user = await User.findById(userId).setOptions({ bypassTenantFilter: true });
+    } catch (e) {}
+  }
+  return user;
+};
+
+const updateUserByIdAcrossDbs = async (userId, updates, options = {}) => {
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return null;
+  let user = null;
+  try {
+    user = await mongoose.connection.model('User').findByIdAndUpdate(userId, updates, { new: true, bypassTenantFilter: true, ...options })
+      .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+  } catch (e) {}
+  try {
+    const tUser = await User.findByIdAndUpdate(userId, updates, { new: true, bypassTenantFilter: true, ...options })
+      .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    if (!user) user = tUser;
+  } catch (e) {}
+  return user;
+};
+
+const deleteUserByIdAcrossDbs = async (userId) => {
+  if (!userId || !mongoose.Types.ObjectId.isValid(userId)) return null;
+  let user = null;
+  try {
+    user = await mongoose.connection.model('User').findByIdAndDelete(userId);
+  } catch (e) {}
+  try {
+    const tUser = await User.findByIdAndDelete(userId);
+    if (!user) user = tUser;
+  } catch (e) {}
+  return user;
+};
 
 // GET /api/users/employees — lightweight list for assignment dropdown
 // Optional ?role=technician to filter by role
@@ -83,11 +126,10 @@ router.put('/:id', protect, authorize('admin', 'super_admin'), async (req, res) 
 
     // Capture current state before update to detect active→deactivated transition
     const existing = isActive === false
-      ? await User.findById(req.params.id).select('isActive name email department')
+      ? await findUserByIdAcrossDbs(req.params.id)
       : null;
 
-    const user = await User.findByIdAndUpdate(req.params.id, update, { new: true })
-      .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    const user = await updateUserByIdAcrossDbs(req.params.id, update);
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     // Send deactivation email only when flipping active → inactive
@@ -117,11 +159,7 @@ router.put('/:id', protect, authorize('admin', 'super_admin'), async (req, res) 
 router.put('/:id/permissions', protect, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const { permissions } = req.body; // [{ feature, allowed }]
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { customPermissions: permissions },
-      { new: true }
-    ).select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    const user = await updateUserByIdAcrossDbs(req.params.id, { customPermissions: permissions });
     if (!user) return res.status(404).json({ message: 'User not found.' });
     res.json(user);
   } catch (err) {
@@ -132,7 +170,7 @@ router.put('/:id/permissions', protect, authorize('admin', 'super_admin'), async
 // DELETE /api/users/:id — permanently delete user
 router.delete('/:id', protect, authorize('admin', 'super_admin'), async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await deleteUserByIdAcrossDbs(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
     res.json({ message: 'User permanently deleted.' });
   } catch (err) {
@@ -143,8 +181,7 @@ router.delete('/:id', protect, authorize('admin', 'super_admin'), async (req, re
 // GET /api/users/:id/profile — full user profile with assets, tickets, device requests
 router.get('/:id/profile', protect, authorize('admin', 'super_admin'), async (req, res) => {
   try {
-    const user = await User.findById(req.params.id)
-      .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+    const user = await findUserByIdAcrossDbs(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     const [assignments, tickets] = await Promise.all([
@@ -316,16 +353,20 @@ router.post('/invite', protect, authorize('admin', 'super_admin'), checkUserLimi
 router.post('/:id/avatar', protect, avatarUpload, async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded.' });
-    const isSelf = req.user._id.toString() === req.params.id;
+    const targetId = (req.params.id === 'me' || !req.params.id || req.params.id === 'undefined')
+      ? req.user._id.toString()
+      : req.params.id;
+
+    const isSelf = req.user._id.toString() === targetId;
     const isPrivileged = ['admin', 'super_admin'].includes(req.user.role);
     if (!isSelf && !isPrivileged) {
       return res.status(403).json({ message: 'Not authorized to update this avatar.' });
     }
     const avatarUrl = (req.file.path && req.file.path.startsWith('http'))
       ? req.file.path
-      : `/uploads/avatars/${req.file.filename}`;
-    const user = await User.findByIdAndUpdate(req.params.id, { avatar: avatarUrl }, { new: true })
-      .select('-password -passwordResetToken -passwordResetExpiry -otpHash -otpExpiry');
+      : (req.file.url || `/uploads/avatars/${req.file.filename}`);
+
+    const user = await updateUserByIdAcrossDbs(targetId, { avatar: avatarUrl });
     if (!user) return res.status(404).json({ message: 'User not found.' });
     res.json({ avatar: user.avatar, user });
   } catch (err) {
@@ -336,7 +377,7 @@ router.post('/:id/avatar', protect, avatarUpload, async (req, res) => {
 // POST /api/users/:id/offboard — revoke all assets + close open tickets
 router.post('/:id/offboard', protect, authorize('admin', 'super_admin'), async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await findUserByIdAcrossDbs(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found.' });
 
     // Revoke all active asset assignments linked to this user

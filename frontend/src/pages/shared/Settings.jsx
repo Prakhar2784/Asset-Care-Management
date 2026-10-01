@@ -44,11 +44,12 @@ function ProfileTab() {
     try {
       const fd = new FormData();
       fd.append('avatar', file);
-      const { data } = await api.post(`/users/${currentUser._id}/avatar`, fd, {
+      const userId = currentUser?._id || currentUser?.id || 'me';
+      const { data } = await api.post(`/users/${userId}/avatar`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       await refreshUser();
-      setMsg('Profile photo updated successfully.');
+      setMsg('✓ Profile photo updated successfully.');
     } catch (err) {
       setMsg(err.response?.data?.message || 'Failed to upload photo.');
     } finally {
