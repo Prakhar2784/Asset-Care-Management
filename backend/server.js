@@ -140,8 +140,11 @@ app.get("/download/desktop-app", (req, res) => {
 const fs = require('fs');
 const possibleFrontendPaths = [
   path.join(__dirname, "../frontend/dist"),
+  path.join(__dirname, "frontend/dist"),
+  path.join(process.cwd(), "frontend/dist"),
   path.join(__dirname, "dist"),
   path.join(__dirname, "../dist"),
+  path.join(process.cwd(), "dist"),
   path.join(__dirname, "public")
 ];
 const frontendPath = possibleFrontendPaths.find(p => fs.existsSync(path.join(p, "index.html"))) || path.join(__dirname, "../frontend/dist");
@@ -149,7 +152,7 @@ app.use(express.static(frontendPath));
 
 // Wildcard handler for SPA routing
 app.use((req, res, next) => {
-  if (req.method === "GET" && !req.path.startsWith("/api") && !path.extname(req.path)) {
+  if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
     const indexPath = path.join(frontendPath, "index.html");
     if (fs.existsSync(indexPath)) {
       return res.sendFile(indexPath);
