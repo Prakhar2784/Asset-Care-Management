@@ -90,7 +90,7 @@ export default function Reports() {
 
       doc.save(`AssetCare_Report_${Date.now()}.pdf`);
     } catch {
-      alert('Failed to export PDF. Please try again.');
+      setError('Failed to export PDF. Please try again.');
     } finally {
       setExporting(false);
     }
@@ -127,7 +127,7 @@ export default function Reports() {
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Ticket Lifecycle');
       XLSX.writeFile(wb, `AssetCare_Lifecycle_${Date.now()}.xlsx`);
     } catch {
-      alert('Failed to export lifecycle report.');
+      setError('Failed to export lifecycle report. Please try again.');
     } finally {
       setExporting(false);
     }
@@ -173,7 +173,7 @@ export default function Reports() {
       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ticketRows), 'Tickets');
       XLSX.writeFile(wb, `AssetCare_Report_${Date.now()}.xlsx`);
     } catch {
-      alert('Failed to export Excel. Please try again.');
+      setError('Failed to export Excel. Please try again.');
     } finally {
       setExporting(false);
     }

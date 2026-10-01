@@ -172,7 +172,7 @@ export default function Analytics() {
 
       XLSX.writeFile(wb, `AssetCare_Analytics_${Date.now()}.xlsx`);
     } catch {
-      alert('Export failed.');
+      setError('Export failed. Please try again.');
     } finally {
       setExporting(false);
     }

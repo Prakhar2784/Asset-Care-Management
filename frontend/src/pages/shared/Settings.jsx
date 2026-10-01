@@ -478,6 +478,8 @@ function CustomFieldsTab() {
   const [optionsStr, setOptionsStr] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
+  const [deleteFieldId, setDeleteFieldId] = useState(null);
+  const [deletingField, setDeletingField] = useState(false);
 
   const fetchFields = async (cat) => {
     setLoading(true);
@@ -523,14 +525,22 @@ function CustomFieldsTab() {
     }
   };
 
-  const handleDeleteField = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this custom field? This does not delete values on existing assets, but it will no longer show in forms.')) return;
+  const handleDeleteField = (id) => {
+    setDeleteFieldId(id);
+  };
+
+  const confirmDeleteField = async () => {
+    if (!deleteFieldId) return;
+    setDeletingField(true);
     try {
-      await api.delete(`/custom-fields/${id}`);
+      await api.delete(`/custom-fields/${deleteFieldId}`);
       setToast('Custom field deleted.');
+      setDeleteFieldId(null);
       fetchFields(category);
     } catch {
       setToast('Failed to delete custom field.');
+    } finally {
+      setDeletingField(false);
     }
   };
 
@@ -645,6 +655,51 @@ function CustomFieldsTab() {
         </Paper>
       </Grid>
       <Snackbar open={!!toast} autoHideDuration={4000} onClose={() => setToast('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}><Alert severity="info" variant="filled" sx={{ borderRadius: '12px', fontWeight: 700 }} onClose={() => setToast('')}>{toast}</Alert></Snackbar>
+      {/* Delete Custom Field Confirmation Dialog */}
+      <Dialog
+        open={Boolean(deleteFieldId)}
+        onClose={() => !deletingField && setDeleteFieldId(null)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+      >
+        <Box sx={{ textAlign: 'center', pt: 3, px: 3 }}>
+          <Box sx={{
+            width: 52, height: 52, borderRadius: '50%',
+            bgcolor: 'rgba(239,68,68,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            mx: 'auto', mb: 2
+          }}>
+            <DeleteOutlineRounded sx={{ fontSize: 28, color: '#dc2626' }} />
+          </Box>
+          <Typography fontWeight={800} fontSize={18} color="text.primary" mb={1}>
+            Delete Custom Field?
+          </Typography>
+          <Typography fontSize={13} color="text.secondary" sx={{ lineHeight: 1.6 }}>
+            Are you sure you want to delete this custom field? Existing asset data will be preserved, but it will no longer show in new asset forms.
+          </Typography>
+        </Box>
+        <DialogActions sx={{ px: 3, pb: 2.5, pt: 2, gap: 1, justifyContent: 'center' }}>
+          <Button
+            onClick={() => setDeleteFieldId(null)}
+            disabled={deletingField}
+            variant="outlined"
+            size="small"
+            sx={{ px: 2.5, py: 0.8, fontWeight: 700, borderRadius: 2, textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={confirmDeleteField}
+            disabled={deletingField}
+            variant="contained"
+            size="small"
+            sx={{ px: 2.5, py: 0.8, fontWeight: 700, borderRadius: 2, bgcolor: '#dc2626', color: '#fff', textTransform: 'none', '&:hover': { bgcolor: '#b91c1c' } }}
+          >
+            {deletingField ? 'Deleting...' : 'Yes, Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }
