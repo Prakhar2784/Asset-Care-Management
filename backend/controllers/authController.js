@@ -218,6 +218,7 @@ const getMe = async (req, res) => {
     }
     const now = new Date();
     const daysRemaining = tenant?.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
+    const cleanPlan = tenant?.plan || 'Home User';
 
     const GlobalSetting = require('../models/GlobalSetting');
     const globalSetting = await GlobalSetting.findOne({ key: 'platform_settings' }).catch(() => null);

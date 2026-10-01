@@ -19,6 +19,7 @@ const PLAN_TIER_RANK = {
   'pro': 2,
   'large scale': 3,
   'large_scale': 3,
+  'sme': 3,
   'enterprise': 3,
 };
 
@@ -26,7 +27,7 @@ const getPlanRank = (planName) => {
   if (!planName) return 0;
   const stripped = planName.toString().replace(/\s*\(\+?\d+.*?\)\s*/g, '').trim().toLowerCase();
   if (PLAN_TIER_RANK[stripped]) return PLAN_TIER_RANK[stripped];
-  if (stripped.includes('large') || stripped.includes('enterprise')) return 3;
+  if (stripped.includes('large') || stripped.includes('enterprise') || stripped === 'sme') return 3;
   if (stripped.includes('msme') || stripped.includes('pro')) return 2;
   if (stripped.includes('home') || stripped.includes('basic')) return 1;
   return 0;
@@ -400,8 +401,8 @@ const resolveCheckoutTenant = async (req) => {
 exports.calculateCheckout = async (req, res) => {
   try {
     console.log('[CALCULATE CHECKOUT REQ]', { body: req.body, tenantId: req.tenantId, userTenant: req.user?.tenantId });
-    const { planKey, plan, couponCode, addonAssets } = req.body;
-    const selectedPlan = planKey || plan;
+    const { planKey, plan, planName, couponCode, addonAssets } = req.body;
+    const selectedPlan = planKey || plan || planName;
     let tenant = await resolveCheckoutTenant(req);
     
     // If still no tenant found, use default virtual tenant context for rate preview
