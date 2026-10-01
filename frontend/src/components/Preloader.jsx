@@ -11,7 +11,6 @@ export default function Preloader({ message = "Loading workspace...", fullScreen
         alignItems: "center",
         justifyContent: "center",
         bgcolor: "#0B0C1A",
-        background: "radial-gradient(circle at 50% 45%, rgba(119, 119, 199, 0.16) 0%, #0B0C1A 75%)",
         position: fullScreen ? "fixed" : "relative",
         top: 0,
         left: 0,
@@ -22,23 +21,6 @@ export default function Preloader({ message = "Loading workspace...", fullScreen
         overflow: "hidden",
       }}
     >
-      {/* Ambient background glow ring */}
-      <Box
-        sx={{
-          position: "absolute",
-          width: 280,
-          height: 280,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(119, 119, 199, 0.18) 0%, rgba(119, 119, 199, 0) 70%)",
-          filter: "blur(24px)",
-          pointerEvents: "none",
-          animation: "pulseGlow 2.8s ease-in-out infinite alternate",
-          "@keyframes pulseGlow": {
-            "0%": { transform: "scale(0.85)", opacity: 0.4 },
-            "100%": { transform: "scale(1.2)", opacity: 0.9 },
-          },
-        }}
-      />
 
       {/* Main card */}
       <Box
