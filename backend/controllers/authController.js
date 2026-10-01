@@ -181,6 +181,7 @@ const loginUser = async (req, res) => {
 
     const now = new Date();
     const daysRemaining = tenant?.planExpiry ? Math.ceil((new Date(tenant.planExpiry) - now) / (1000 * 60 * 60 * 24)) : null;
+    const cleanPlan = tenant?.plan || 'Home User';
 
     res.json({
       _id: user._id, name: user.name, email: user.email,

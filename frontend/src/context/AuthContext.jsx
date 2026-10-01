@@ -30,10 +30,12 @@ export const AuthProvider = ({ children }) => {
           setCurrentUser(fresh);
           localStorage.setItem("assetcare_user", JSON.stringify(fresh));
         })
-        .catch(() => {
-          // Token expired or invalid — log out
-          setCurrentUser(null);
-          localStorage.removeItem("assetcare_user");
+        .catch((err) => {
+          // Only log out if token is expired or unauthorized (401 / 403)
+          if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+            setCurrentUser(null);
+            localStorage.removeItem("assetcare_user");
+          }
         })
         .finally(() => setLoading(false));
     } else {
